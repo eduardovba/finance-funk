@@ -1,0 +1,452 @@
+[
+  {
+    "date": "Jan/2022",
+    "actualBRL": 1202330,
+    "actualGBP": 159538,
+    "contribution": 20981,
+    "interest": 136257,
+    "contributionGBP": 2784,
+    "interestGBP": 18080
+  },
+  {
+    "date": "Feb/2022",
+    "actualBRL": 1357901,
+    "actualGBP": 188200,
+    "contribution": 25859,
+    "interest": 91546,
+    "contributionGBP": 3584,
+    "interestGBP": 12688
+  },
+  {
+    "date": "Mar/2022",
+    "actualBRL": 1387801,
+    "actualGBP": 209187,
+    "contribution": 23671,
+    "interest": 0,
+    "contributionGBP": 3568,
+    "interestGBP": 0
+  },
+  {
+    "date": "Apr/2022",
+    "actualBRL": 1423337,
+    "actualGBP": 227032,
+    "contribution": 26588,
+    "interest": 0,
+    "contributionGBP": 4241,
+    "interestGBP": 0
+  },
+  {
+    "date": "May/2022",
+    "actualBRL": 1296824,
+    "actualGBP": 211179,
+    "contribution": 23286,
+    "interest": 0,
+    "contributionGBP": 3792,
+    "interestGBP": 0
+  },
+  {
+    "date": "Jun/2022",
+    "actualBRL": 1322752,
+    "actualGBP": 205935,
+    "contribution": 24434,
+    "interest": 0,
+    "contributionGBP": 3804,
+    "interestGBP": 0
+  },
+  {
+    "date": "Jul/2022",
+    "actualBRL": 1323032,
+    "actualGBP": 211935,
+    "contribution": 22960,
+    "interest": 0,
+    "contributionGBP": 3678,
+    "interestGBP": 0
+  },
+  {
+    "date": "Aug/2022",
+    "actualBRL": 1332001,
+    "actualGBP": 222127,
+    "contribution": 17414,
+    "interest": 0,
+    "contributionGBP": 2904,
+    "interestGBP": 0
+  },
+  {
+    "date": "Sep/2022",
+    "actualBRL": 1349708,
+    "actualGBP": 223264,
+    "contribution": 17072,
+    "interest": 0,
+    "contributionGBP": 2824,
+    "interestGBP": 0
+  },
+  {
+    "date": "Oct/2022",
+    "actualBRL": 1360402,
+    "actualGBP": 226762,
+    "contribution": 15616,
+    "interest": 0,
+    "contributionGBP": 2603,
+    "interestGBP": 0
+  },
+  {
+    "date": "Nov/2022",
+    "actualBRL": 1389174,
+    "actualGBP": 214764,
+    "contribution": 23454,
+    "interest": 0,
+    "contributionGBP": 3626,
+    "interestGBP": 0
+  },
+  {
+    "date": "Dec/2022",
+    "actualBRL": 1434757,
+    "actualGBP": 222144,
+    "contribution": 20313,
+    "interest": 0,
+    "contributionGBP": 3145,
+    "interestGBP": 0
+  },
+  {
+    "date": "Jan/2023",
+    "actualBRL": 1376061,
+    "actualGBP": 220336,
+    "contribution": 22308,
+    "interest": 731,
+    "contributionGBP": 3572,
+    "interestGBP": 117
+  },
+  {
+    "date": "Feb/2023",
+    "actualBRL": 1402290,
+    "actualGBP": 222693,
+    "contribution": 26101,
+    "interest": 7739,
+    "contributionGBP": 4145,
+    "interestGBP": 1229
+  },
+  {
+    "date": "Mar/2023",
+    "actualBRL": 1414469,
+    "actualGBP": 225622,
+    "contribution": 11736,
+    "interest": 8482,
+    "contributionGBP": 1872,
+    "interestGBP": 1353
+  },
+  {
+    "date": "Apr/2023",
+    "actualBRL": 1441815,
+    "actualGBP": 230715,
+    "contribution": 23635,
+    "interest": 17648,
+    "contributionGBP": 3782,
+    "interestGBP": 2824
+  },
+  {
+    "date": "May/2023",
+    "actualBRL": 1469394,
+    "actualGBP": 233052,
+    "contribution": 21437,
+    "interest": 5315,
+    "contributionGBP": 3400,
+    "interestGBP": 843
+  },
+  {
+    "date": "Jun/2023",
+    "actualBRL": 1491460,
+    "actualGBP": 243129,
+    "contribution": 21716,
+    "interest": 13214,
+    "contributionGBP": 3540,
+    "interestGBP": 2154
+  },
+  {
+    "date": "Jul/2023",
+    "actualBRL": 1513897,
+    "actualGBP": 248761,
+    "contribution": 19231,
+    "interest": 7820,
+    "contributionGBP": 3160,
+    "interestGBP": 1285
+  },
+  {
+    "date": "Aug/2023",
+    "actualBRL": 1531018,
+    "actualGBP": 247005,
+    "contribution": 14957,
+    "interest": 6750,
+    "contributionGBP": 2413,
+    "interestGBP": 1089
+  },
+  {
+    "date": "Sep/2023",
+    "actualBRL": 1545484,
+    "actualGBP": 250535,
+    "contribution": 16316,
+    "interest": 3923,
+    "contributionGBP": 2645,
+    "interestGBP": 636
+  },
+  {
+    "date": "Oct/2023",
+    "actualBRL": 1562065,
+    "actualGBP": 253697,
+    "contribution": 16286,
+    "interest": 3910,
+    "contributionGBP": 2645,
+    "interestGBP": 635
+  },
+  {
+    "date": "Nov/2023",
+    "actualBRL": 1593184,
+    "actualGBP": 255712,
+    "contribution": 17725,
+    "interest": 3670,
+    "contributionGBP": 2845,
+    "interestGBP": 589
+  },
+  {
+    "date": "Dec/2023",
+    "actualBRL": 1615901,
+    "actualGBP": 261187,
+    "contribution": 10177,
+    "interest": 3038,
+    "contributionGBP": 1645,
+    "interestGBP": 491
+  },
+  {
+    "date": "Jan/2024",
+    "actualBRL": 1636262,
+    "actualGBP": 259812,
+    "contribution": 10448,
+    "interest": 9277,
+    "contributionGBP": 1659,
+    "interestGBP": 1473
+  },
+  {
+    "date": "Feb/2024",
+    "actualBRL": 1664317,
+    "actualGBP": 265061,
+    "contribution": 0,
+    "interest": 13399,
+    "contributionGBP": 0,
+    "interestGBP": 2134
+  },
+  {
+    "date": "Mar/2024",
+    "actualBRL": 1744785,
+    "actualGBP": 277123,
+    "contribution": 13360,
+    "interest": 10911,
+    "contributionGBP": 2122,
+    "interestGBP": 1733
+  },
+  {
+    "date": "Apr/2024",
+    "actualBRL": 1785526,
+    "actualGBP": 275342,
+    "contribution": 32560,
+    "interest": 8417,
+    "contributionGBP": 5021,
+    "interestGBP": 1298
+  },
+  {
+    "date": "May/2024",
+    "actualBRL": 1834414,
+    "actualGBP": 275217,
+    "contribution": 4666,
+    "interest": 7279,
+    "contributionGBP": 700,
+    "interestGBP": 1092
+  },
+  {
+    "date": "Jun/2024",
+    "actualBRL": 1885855,
+    "actualGBP": 271025,
+    "contribution": 10667,
+    "interest": 3437,
+    "contributionGBP": 1533,
+    "interestGBP": 494
+  },
+  {
+    "date": "Jul/2024",
+    "actualBRL": 1930281,
+    "actualGBP": 267195,
+    "contribution": 18061,
+    "interest": 4956,
+    "contributionGBP": 2500,
+    "interestGBP": 686
+  },
+  {
+    "date": "Aug/2024",
+    "actualBRL": 1946792,
+    "actualGBP": 262274,
+    "contribution": 8907,
+    "interest": 9560,
+    "contributionGBP": 1200,
+    "interestGBP": 1288
+  },
+  {
+    "date": "Sep/2024",
+    "actualBRL": 1955076,
+    "actualGBP": 271191,
+    "contribution": 10814,
+    "interest": 4722,
+    "contributionGBP": 1500,
+    "interestGBP": 655
+  },
+  {
+    "date": "Oct/2024",
+    "actualBRL": 2112909,
+    "actualGBP": 282511,
+    "contribution": 56841,
+    "interest": 21487,
+    "contributionGBP": 7600,
+    "interestGBP": 2873
+  },
+  {
+    "date": "Nov/2024",
+    "actualBRL": 2255170,
+    "actualGBP": 294315,
+    "contribution": 11494,
+    "interest": 5609,
+    "contributionGBP": 1500,
+    "interestGBP": 732
+  },
+  {
+    "date": "Dec/2024",
+    "actualBRL": 2240219,
+    "actualGBP": 293979,
+    "contribution": 11431,
+    "interest": 5647,
+    "contributionGBP": 1500,
+    "interestGBP": 741
+  },
+  {
+    "date": "Jan/2025",
+    "actualBRL": 2259892,
+    "actualGBP": 312165,
+    "contribution": 39817,
+    "interest": 7833,
+    "contributionGBP": 5500,
+    "interestGBP": 1082
+  },
+  {
+    "date": "Feb/2025",
+    "actualBRL": 2266769,
+    "actualGBP": 303768,
+    "contribution": 27610,
+    "interest": 11745,
+    "contributionGBP": 3700,
+    "interestGBP": 1574
+  },
+  {
+    "date": "Mar/2025",
+    "actualBRL": 2240632,
+    "actualGBP": 304747,
+    "contribution": 17646,
+    "interest": 12058,
+    "contributionGBP": 2400,
+    "interestGBP": 1640
+  },
+  {
+    "date": "Apr/2025",
+    "actualBRL": 2316398,
+    "actualGBP": 307457,
+    "contribution": 18835,
+    "interest": 22979,
+    "contributionGBP": 2500,
+    "interestGBP": 3050
+  },
+  {
+    "date": "May/2025",
+    "actualBRL": 2394293,
+    "actualGBP": 313543,
+    "contribution": 7636,
+    "interest": 15395,
+    "contributionGBP": 1000,
+    "interestGBP": 2016
+  },
+  {
+    "date": "Jun/2025",
+    "actualBRL": 2389552,
+    "actualGBP": 319534,
+    "contribution": 29913,
+    "interest": 11165,
+    "contributionGBP": 4000,
+    "interestGBP": 1493
+  },
+  {
+    "date": "Jul/2025",
+    "actualBRL": 2395605,
+    "actualGBP": 325215,
+    "contribution": 0,
+    "interest": 8184,
+    "contributionGBP": 0,
+    "interestGBP": 1111
+  },
+  {
+    "date": "Aug/2025",
+    "actualBRL": 2422602,
+    "actualGBP": 332262,
+    "contribution": 27707,
+    "interest": 12286,
+    "contributionGBP": 3800,
+    "interestGBP": 1685
+  },
+  {
+    "date": "Sep/2025",
+    "actualBRL": 2442270,
+    "actualGBP": 340802,
+    "contribution": 3583,
+    "interest": 4809,
+    "contributionGBP": 500,
+    "interestGBP": 671
+  },
+  {
+    "date": "Oct/2025",
+    "actualBRL": 2485434,
+    "actualGBP": 353958,
+    "contribution": 25279,
+    "interest": 28958,
+    "contributionGBP": 3600,
+    "interestGBP": 4124
+  },
+  {
+    "date": "Nov/2025",
+    "actualBRL": 2517079,
+    "actualGBP": 353323,
+    "contribution": 0,
+    "interest": 12097,
+    "contributionGBP": 0,
+    "interestGBP": 1698
+  },
+  {
+    "date": "Dec/2025",
+    "actualBRL": 2611836,
+    "actualGBP": 357090,
+    "contribution": 19792,
+    "interest": 10664,
+    "contributionGBP": 2706,
+    "interestGBP": 1458
+  },
+  {
+    "date": "Jan/2026",
+    "actualBRL": 2600646,
+    "actualGBP": 363711,
+    "contribution": 10725,
+    "interest": 10025,
+    "contributionGBP": 1500,
+    "interestGBP": 1402
+  },
+  {
+    "date": "Feb/2026",
+    "actualBRL": 2565972,
+    "actualGBP": 360135,
+    "contribution": 0,
+    "interest": 7517,
+    "contributionGBP": 0,
+    "interestGBP": 1055
+  }
+]

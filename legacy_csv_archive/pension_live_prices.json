@@ -1,0 +1,82 @@
+{
+  "L&G PMC 2045 - 2050 Target Date Pn 3": {
+    "price": 18.321199999999997,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-18T20:44:02.003Z"
+  },
+  "OAB": {
+    "price": 1.4906514,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-18T20:44:02.004Z"
+  },
+  "Ishares US Bonds 20+ Years": {
+    "price": 2.457,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-18T20:44:02.538Z"
+  },
+  "Fidelity Funds - Global Technology": {
+    "price": 10.23,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-18T20:44:02.537Z"
+  },
+  "Ishares Global Bonds": {
+    "price": 1.19903,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-18T20:44:02.622Z"
+  },
+  "PLC Russell 2000": {
+    "price": 57.5,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-18T20:44:02.994Z"
+  },
+  "Fidelity Ishares Physical Silver ETC": {
+    "price": 54.66,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-18T20:44:04.770Z"
+  },
+  "Fidelity Index Europe ex UK Fund P-Accumulation": {
+    "price": 2.8722000000000003,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-18T20:44:03.092Z"
+  },
+  "Aviva Pensions BlackRock US Equity Index Tracker S6": {
+    "price": 10.64,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-18T20:44:03.085Z"
+  },
+  "Fidelity Index US Fund P-Acc": {
+    "price": 5.4348,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-18T20:44:03.087Z"
+  },
+  "Aviva Pensions International Index Tracking S2": {
+    "price": 10.54,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-18T20:44:03.092Z"
+  },
+  "BlackRock Consensus 85 I Acc": {
+    "price": 0.0378,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-18T20:44:03.308Z"
+  },
+  "HL Ishares Physical Silver ETC": {
+    "price": 54.66,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-18T20:44:04.758Z"
+  },
+  "HSBC FTSE All-World Index": {
+    "price": 3.7487,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-18T20:44:04.531Z"
+  },
+  "HL Growth Fund": {
+    "price": 1.334,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-18T20:44:04.280Z"
+  },
+  "Ishares Physical Gold": {
+    "price": 71.59,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-18T20:44:02.432Z"
+  }
+}

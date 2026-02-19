@@ -1,0 +1,42 @@
+[
+  {
+    "id": "debt_1",
+    "date": "22/05/2025",
+    "lender": "Dad",
+    "value_brl": 30000,
+    "value_gbp": 3939.33,
+    "obs": "Ink Court Purchase"
+  },
+  {
+    "id": "debt_2",
+    "date": "23/05/2025",
+    "lender": "Dad",
+    "value_brl": 30000,
+    "value_gbp": 3905,
+    "obs": "Ink Court Purchase"
+  },
+  {
+    "id": "debt_3",
+    "date": "26/05/2025",
+    "lender": "Dad",
+    "value_brl": 30000,
+    "value_gbp": 3882,
+    "obs": "Ink Court Purchase"
+  },
+  {
+    "id": "debt_4",
+    "date": "28/05/2025",
+    "lender": "Dad",
+    "value_brl": 30000,
+    "value_gbp": 3898.39,
+    "obs": "Ink Court Purchase"
+  },
+  {
+    "id": "debt_5",
+    "date": "28/05/2025",
+    "lender": "Dad",
+    "value_brl": 30000,
+    "value_gbp": 3898.18,
+    "obs": "Ink Court Purchase"
+  }
+]

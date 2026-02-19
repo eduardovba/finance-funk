@@ -1,0 +1,17 @@
+[
+  {
+    "ticker": "BTC-USD",
+    "name": "Bitcoin USD",
+    "type": "Crypto"
+  },
+  {
+    "ticker": "ETH-USD",
+    "name": "Ethereum USD",
+    "type": "Crypto"
+  },
+  {
+    "ticker": "AMZN",
+    "name": "Amazon.com, Inc.",
+    "type": "Stock (US)"
+  }
+]

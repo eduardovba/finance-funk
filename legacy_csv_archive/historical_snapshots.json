@@ -1,0 +1,990 @@
+[
+  {
+    "month": "2021-10",
+    "roi": 4.2,
+    "categories": {
+      "FixedIncome": 0,
+      "Equity": 20803.72,
+      "RealEstate": 902000,
+      "Crypto": 1970.7984688133301,
+      "Pensions": 132999.1,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.040Z",
+    "totalminuspensionsBRL": 1025907.9,
+    "totalminuspensionsGBP": 131864.7686375321,
+    "totalminuspensionsUSD": 175683.61962724934,
+    "networthBRL": 1158907,
+    "networthGBP": 157202
+  },
+  {
+    "month": "2021-11",
+    "roi": 4.3,
+    "categories": {
+      "FixedIncome": 0,
+      "Equity": 20696.760000000002,
+      "RealEstate": 918000,
+      "Crypto": 1663.9490422306042,
+      "Pensions": 134954.64,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.040Z",
+    "totalminuspensionsBRL": 1040367.36,
+    "totalminuspensionsGBP": 134414.3875968992,
+    "totalminuspensionsUSD": 181741.80527131783,
+    "networthBRL": 1175322,
+    "networthGBP": 157341
+  },
+  {
+    "month": "2021-12",
+    "roi": 4.6,
+    "categories": {
+      "FixedIncome": 0,
+      "Equity": 20827.84,
+      "RealEstate": 964755,
+      "Crypto": 109189.40801728633,
+      "Pensions": 137949.52,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.040Z",
+    "totalminuspensionsBRL": 1172145.48,
+    "totalminuspensionsGBP": 151049.67525773196,
+    "totalminuspensionsUSD": 202723.85909793817,
+    "networthBRL": 1310095,
+    "networthGBP": 179655
+  },
+  {
+    "month": "2022-01",
+    "roi": 7.6,
+    "categories": {
+      "FixedIncome": 0,
+      "Equity": 108245.24,
+      "RealEstate": 984755,
+      "Crypto": 217090.17443249704,
+      "Pensions": 131174.32,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.040Z",
+    "totalminuspensionsBRL": 1298127.68,
+    "totalminuspensionsGBP": 179299.40331491714,
+    "totalminuspensionsUSD": 240117.82011049727,
+    "networthBRL": 1429302,
+    "networthGBP": 203514
+  },
+  {
+    "month": "2022-02",
+    "roi": 5.6,
+    "categories": {
+      "FixedIncome": 0,
+      "Equity": 72294.95999999999,
+      "RealEstate": 984755,
+      "Crypto": 175396.1434238633,
+      "Pensions": 125651.31,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.040Z",
+    "totalminuspensionsBRL": 1262149.69,
+    "totalminuspensionsGBP": 185337.69309838474,
+    "totalminuspensionsUSD": 242940.7077826726,
+    "networthBRL": 1387801,
+    "networthGBP": 209187
+  },
+  {
+    "month": "2022-03",
+    "roi": 8.9,
+    "categories": {
+      "FixedIncome": 0,
+      "Equity": 67305.44,
+      "RealEstate": 1025549,
+      "Crypto": 205538.75831344473,
+      "Pensions": 119014.48,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.040Z",
+    "totalminuspensionsBRL": 1302251.52,
+    "totalminuspensionsGBP": 205402.44794952683,
+    "totalminuspensionsUSD": 258190.97223974764,
+    "networthBRL": 1421266,
+    "networthGBP": 233538
+  },
+  {
+    "month": "2022-04",
+    "roi": 6.9,
+    "categories": {
+      "FixedIncome": 0,
+      "Equity": 67517.76000000001,
+      "RealEstate": 1025549,
+      "Crypto": 186129.63861150737,
+      "Pensions": 122245.56000000001,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.040Z",
+    "totalminuspensionsBRL": 1301091.44,
+    "totalminuspensionsGBP": 204574.1257861635,
+    "totalminuspensionsUSD": 258131.94141509436,
+    "networthBRL": 1423337,
+    "networthGBP": 227032
+  },
+  {
+    "month": "2022-05",
+    "roi": 5,
+    "categories": {
+      "FixedIncome": 0,
+      "Equity": 67730.08,
+      "RealEstate": 1045549,
+      "Crypto": 44720.65193460938,
+      "Pensions": 126087.94,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.040Z",
+    "totalminuspensionsBRL": 1170736.06,
+    "totalminuspensionsGBP": 183500.9498432602,
+    "totalminuspensionsUSD": 223375.69479623827,
+    "networthBRL": 1296824,
+    "networthGBP": 211179
+  },
+  {
+    "month": "2022-06",
+    "roi": 0.1,
+    "categories": {
+      "FixedIncome": 0,
+      "Equity": 67836.23999999999,
+      "RealEstate": 1067294,
+      "Crypto": 35318.79829172142,
+      "Pensions": 129755.34,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.040Z",
+    "totalminuspensionsBRL": 1192996.66,
+    "totalminuspensionsGBP": 186697.44287949923,
+    "totalminuspensionsUSD": 227323.44287949923,
+    "networthBRL": 1322752,
+    "networthGBP": 205935
+  },
+  {
+    "month": "2022-07",
+    "roi": 1.3,
+    "categories": {
+      "FixedIncome": 17196,
+      "Equity": 67411.59999999999,
+      "RealEstate": 1087294,
+      "Crypto": 37939.78291052451,
+      "Pensions": 132384.8,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.040Z",
+    "totalminuspensionsBRL": 1190647.2,
+    "totalminuspensionsGBP": 187503.49606299214,
+    "totalminuspensionsUSD": 218779.04245669293,
+    "networthBRL": 1323032,
+    "networthGBP": 211935
+  },
+  {
+    "month": "2022-08",
+    "roi": 13,
+    "categories": {
+      "FixedIncome": 21396,
+      "Equity": 63802.159999999996,
+      "RealEstate": 1087294,
+      "Crypto": 28954.393980112873,
+      "Pensions": 128559.90999999999,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.040Z",
+    "totalminuspensionsBRL": 1203441.09,
+    "totalminuspensionsGBP": 200239.78202995012,
+    "totalminuspensionsUSD": 223528.2091846922,
+    "networthBRL": 1332001,
+    "networthGBP": 222127
+  },
+  {
+    "month": "2022-09",
+    "roi": 10.7,
+    "categories": {
+      "FixedIncome": 8982,
+      "Equity": 64120.64,
+      "RealEstate": 1127294,
+      "Crypto": 11463.127863750326,
+      "Pensions": 132475.32,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.040Z",
+    "totalminuspensionsBRL": 1217232.68,
+    "totalminuspensionsGBP": 201528.58940397348,
+    "totalminuspensionsUSD": 233108.1806456954,
+    "networthBRL": 1349708,
+    "networthGBP": 223264
+  },
+  {
+    "month": "2022-10",
+    "roi": 11.4,
+    "categories": {
+      "FixedIncome": 7674,
+      "Equity": 63059.04,
+      "RealEstate": 1140415,
+      "Crypto": 12032.664188351922,
+      "Pensions": 133501.5,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.040Z",
+    "totalminuspensionsBRL": 1226900.5,
+    "totalminuspensionsGBP": 206548.90572390571,
+    "totalminuspensionsUSD": 250026.94090909086,
+    "networthBRL": 1360402,
+    "networthGBP": 226762
+  },
+  {
+    "month": "2022-11",
+    "roi": 3.2,
+    "categories": {
+      "FixedIncome": 17595,
+      "Equity": 66456.16,
+      "RealEstate": 1148967,
+      "Crypto": 9299.42018682318,
+      "Pensions": 144092.68,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.040Z",
+    "totalminuspensionsBRL": 1245081.32,
+    "totalminuspensionsGBP": 198894.77955271568,
+    "totalminuspensionsUSD": 240603.14623003197,
+    "networthBRL": 1389174,
+    "networthGBP": 214764
+  },
+  {
+    "month": "2022-12",
+    "roi": 2,
+    "categories": {
+      "FixedIncome": 8752,
+      "Equity": 81373.2,
+      "RealEstate": 1183276,
+      "Crypto": 8830.17398347643,
+      "Pensions": 151962,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1282795,
+    "totalminuspensionsGBP": 198882.9457364341,
+    "totalminuspensionsUSD": 245540.3105736434,
+    "networthBRL": 1434757,
+    "networthGBP": 222144
+  },
+  {
+    "month": "2023-01",
+    "roi": 20,
+    "categories": {
+      "FixedIncome": 895920,
+      "Equity": 107253.12000000001,
+      "RealEstate": 209000,
+      "Crypto": 13179.197122182484,
+      "Pensions": 150402.72,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1225658.28,
+    "totalminuspensionsGBP": 196419.59615384616,
+    "totalminuspensionsUSD": 236148.4828365385,
+    "networthBRL": 1376061,
+    "networthGBP": 220336
+  },
+  {
+    "month": "2023-02",
+    "roi": 20.3,
+    "categories": {
+      "FixedIncome": 884727,
+      "Equity": 127184.4,
+      "RealEstate": 218000,
+      "Crypto": 13888.475308641973,
+      "Pensions": 155263.5,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1247026.5,
+    "totalminuspensionsGBP": 197940.7142857143,
+    "totalminuspensionsUSD": 243726.7885714286,
+    "networthBRL": 1402290,
+    "networthGBP": 222693
+  },
+  {
+    "month": "2023-03",
+    "roi": 20.8,
+    "categories": {
+      "FixedIncome": 883648,
+      "Equity": 134140.38,
+      "RealEstate": 227000,
+      "Crypto": 11174.813114754099,
+      "Pensions": 157928.75999999998,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1256540.24,
+    "totalminuspensionsGBP": 200405.14194577353,
+    "totalminuspensionsUSD": 250618.9475279107,
+    "networthBRL": 1414469,
+    "networthGBP": 225622
+  },
+  {
+    "month": "2023-04",
+    "roi": 20.6,
+    "categories": {
+      "FixedIncome": 862033,
+      "Equity": 171937.5,
+      "RealEstate": 236000,
+      "Crypto": 10417.596899224807,
+      "Pensions": 160812.5,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1281002.5,
+    "totalminuspensionsGBP": 204960.4,
+    "totalminuspensionsUSD": 253838.909952,
+    "networthBRL": 1441815,
+    "networthGBP": 230715
+  },
+  {
+    "month": "2023-05",
+    "roi": 20,
+    "categories": {
+      "FixedIncome": 838657,
+      "Equity": 179638.19999999998,
+      "RealEstate": 275029,
+      "Crypto": 8729.71390353293,
+      "Pensions": 165979.8,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1303414.2,
+    "totalminuspensionsGBP": 206891.14285714287,
+    "totalminuspensionsUSD": 262915.1176031746,
+    "networthBRL": 1469394,
+    "networthGBP": 233052
+  },
+  {
+    "month": "2023-06",
+    "roi": 23.4,
+    "categories": {
+      "FixedIncome": 840164,
+      "Equity": 185548.97,
+      "RealEstate": 292180,
+      "Crypto": 7635.165369043912,
+      "Pensions": 165277.06,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1326182.94,
+    "totalminuspensionsGBP": 216343.05709624797,
+    "totalminuspensionsUSD": 277857.2063295269,
+    "networthBRL": 1491460,
+    "networthGBP": 243129
+  },
+  {
+    "month": "2023-07",
+    "roi": 24.8,
+    "categories": {
+      "FixedIncome": 829887,
+      "Equity": 189185.28,
+      "RealEstate": 319346,
+      "Crypto": 7533.352371198991,
+      "Pensions": 167674.24,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1346222.76,
+    "totalminuspensionsGBP": 221418.21710526315,
+    "totalminuspensionsUSD": 281049.9620065789,
+    "networthBRL": 1513897,
+    "networthGBP": 248761
+  },
+  {
+    "month": "2023-08",
+    "roi": 22.6,
+    "categories": {
+      "FixedIncome": 639440,
+      "Equity": 186925.62000000002,
+      "RealEstate": 520187,
+      "Crypto": 8977.20425706099,
+      "Pensions": 174520.86000000002,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1356497.14,
+    "totalminuspensionsGBP": 219143.31825525037,
+    "totalminuspensionsUSD": 267664.39418416796,
+    "networthBRL": 1531018,
+    "networthGBP": 247005
+  },
+  {
+    "month": "2023-09",
+    "roi": 24,
+    "categories": {
+      "FixedIncome": 459252,
+      "Equity": 186068.69,
+      "RealEstate": 704247,
+      "Crypto": 10533.888183915622,
+      "Pensions": 177757.7,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1367726.3,
+    "totalminuspensionsGBP": 221673.6304700162,
+    "totalminuspensionsUSD": 269038.20434359804,
+    "networthBRL": 1545484,
+    "networthGBP": 250535
+  },
+  {
+    "month": "2023-10",
+    "roi": 23.6,
+    "categories": {
+      "FixedIncome": 438380,
+      "Equity": 190424.08000000002,
+      "RealEstate": 727504,
+      "Crypto": 13881.156435643565,
+      "Pensions": 181264.16,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1380800.84,
+    "totalminuspensionsGBP": 224155.98051948054,
+    "totalminuspensionsUSD": 283024.4216720779,
+    "networthBRL": 1562065,
+    "networthGBP": 253697
+  },
+  {
+    "month": "2023-11",
+    "roi": 23.2,
+    "categories": {
+      "FixedIncome": 421786,
+      "Equity": 206599.26,
+      "RealEstate": 749076,
+      "Crypto": 16801.41001884422,
+      "Pensions": 187161.66,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1406022.34,
+    "totalminuspensionsGBP": 225685.76886035313,
+    "totalminuspensionsUSD": 287434.3478651685,
+    "networthBRL": 1593184,
+    "networthGBP": 255712
+  },
+  {
+    "month": "2023-12",
+    "roi": 25.8,
+    "categories": {
+      "FixedIncome": 419809,
+      "Equity": 212592,
+      "RealEstate": 757412,
+      "Crypto": 24456.075195081583,
+      "Pensions": 189466.44,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1426434.56,
+    "totalminuspensionsGBP": 230814.65372168287,
+    "totalminuspensionsUSD": 292819.2446601942,
+    "networthBRL": 1615901,
+    "networthGBP": 261187
+  },
+  {
+    "month": "2024-01",
+    "roi": 21.3,
+    "categories": {
+      "FixedIncome": 415995,
+      "Equity": 242846.1,
+      "RealEstate": 762800,
+      "Crypto": 25487.780505186478,
+      "Pensions": 189283.5,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1446978.5,
+    "totalminuspensionsGBP": 229679.12698412698,
+    "totalminuspensionsUSD": 290064.6761428571,
+    "networthBRL": 1636262,
+    "networthGBP": 259568
+  },
+  {
+    "month": "2024-02",
+    "roi": 22.7,
+    "categories": {
+      "FixedIncome": 420871,
+      "Equity": 250226.6,
+      "RealEstate": 765102,
+      "Crypto": 36974.105346534656,
+      "Pensions": 191948.2,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1472368.8,
+    "totalminuspensionsGBP": 234453.6305732484,
+    "totalminuspensionsUSD": 296018.8574840764,
+    "networthBRL": 1664317,
+    "networthGBP": 265009
+  },
+  {
+    "month": "2024-03",
+    "roi": 27.2,
+    "categories": {
+      "FixedIncome": 398579,
+      "Equity": 168704.09,
+      "RealEstate": 766408,
+      "Crypto": 46733.808306709274,
+      "Pensions": 352334.35,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1392450.65,
+    "totalminuspensionsGBP": 221375.30206677265,
+    "totalminuspensionsUSD": 277128.11001589824,
+    "networthBRL": 1744785,
+    "networthGBP": 277123
+  },
+  {
+    "month": "2024-04",
+    "roi": 23.4,
+    "categories": {
+      "FixedIncome": 397337,
+      "Equity": 177001.2,
+      "RealEstate": 767737,
+      "Crypto": 41811.3851962558,
+      "Pensions": 368323.2,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1417202.8,
+    "totalminuspensionsGBP": 218704.13580246913,
+    "totalminuspensionsUSD": 277997.0151697531,
+    "networthBRL": 1785526,
+    "networthGBP": 275342
+  },
+  {
+    "month": "2024-05",
+    "roi": 21.9,
+    "categories": {
+      "FixedIncome": 401376,
+      "Equity": 163576.26,
+      "RealEstate": 777967,
+      "Crypto": 78589.62781509284,
+      "Pensions": 410735.52,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1423678.48,
+    "totalminuspensionsGBP": 213765.53753753754,
+    "totalminuspensionsUSD": 270493.40442942944,
+    "networthBRL": 1834414,
+    "networthGBP": 275217
+  },
+  {
+    "month": "2024-06",
+    "roi": 22.6,
+    "categories": {
+      "FixedIncome": 428431,
+      "Equity": 171898.08,
+      "RealEstate": 778137,
+      "Crypto": 52261.8052849014,
+      "Pensions": 445711.44,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1440246.56,
+    "totalminuspensionsGBP": 206931.97701149425,
+    "totalminuspensionsUSD": 265495.6020258621,
+    "networthBRL": 1885958,
+    "networthGBP": 270888
+  },
+  {
+    "month": "2024-07",
+    "roi": 21.2,
+    "categories": {
+      "FixedIncome": 430009,
+      "Equity": 175236.62,
+      "RealEstate": 779627,
+      "Crypto": 78964.41176470589,
+      "Pensions": 463776.7,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1466504.3,
+    "totalminuspensionsGBP": 203116.93905817176,
+    "totalminuspensionsUSD": 265858.8065096953,
+    "networthBRL": 1930281,
+    "networthGBP": 267195
+  },
+  {
+    "month": "2024-08",
+    "roi": 23.5,
+    "categories": {
+      "FixedIncome": 433558,
+      "Equity": 156228.1,
+      "RealEstate": 780915,
+      "Crypto": 96272.65269595048,
+      "Pensions": 476779.52,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1470012.48,
+    "totalminuspensionsGBP": 198114.88948787062,
+    "totalminuspensionsUSD": 265650,
+    "networthBRL": 1946792,
+    "networthGBP": 262274
+  },
+  {
+    "month": "2024-09",
+    "roi": 26.8,
+    "categories": {
+      "FixedIncome": 433950,
+      "Equity": 118741.49,
+      "RealEstate": 779462,
+      "Crypto": 142590.03035964502,
+      "Pensions": 476919.87,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1477904.13,
+    "totalminuspensionsGBP": 204979.7683772538,
+    "totalminuspensionsUSD": 263351.0176144244,
+    "networthBRL": 1954824,
+    "networthGBP": 271171
+  },
+  {
+    "month": "2024-10",
+    "roi": 25.6,
+    "categories": {
+      "FixedIncome": 450838,
+      "Equity": 157416.6,
+      "RealEstate": 777472,
+      "Crypto": 169210.08882949452,
+      "Pensions": 522074.08,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1590931.92,
+    "totalminuspensionsGBP": 212691.4331550802,
+    "totalminuspensionsUSD": 270569.5475935829,
+    "networthBRL": 2113006,
+    "networthGBP": 282506
+  },
+  {
+    "month": "2024-11",
+    "roi": 30,
+    "categories": {
+      "FixedIncome": 439095,
+      "Equity": 207624.30000000002,
+      "RealEstate": 776485,
+      "Crypto": 243958.0599280863,
+      "Pensions": 570800.22,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1684369.78,
+    "totalminuspensionsGBP": 219891.61618798954,
+    "totalminuspensionsUSD": 275173.80757180153,
+    "networthBRL": 2255170,
+    "networthGBP": 294315
+  },
+  {
+    "month": "2024-12",
+    "roi": 29,
+    "categories": {
+      "FixedIncome": 475643,
+      "Equity": 305943,
+      "RealEstate": 776084,
+      "Crypto": 116729.6256354953,
+      "Pensions": 562310.28,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1677908.72,
+    "totalminuspensionsGBP": 220197.99475065616,
+    "totalminuspensionsUSD": 285885.2766666667,
+    "networthBRL": 2240219,
+    "networthGBP": 293979
+  },
+  {
+    "month": "2025-01",
+    "roi": 33.7,
+    "categories": {
+      "FixedIncome": 475818,
+      "Equity": 338122.48,
+      "RealEstate": 774842,
+      "Crypto": 120848.14229249013,
+      "Pensions": 557733.4,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1702177.6,
+    "totalminuspensionsGBP": 235107.40331491714,
+    "totalminuspensionsUSD": 297451.82044198894,
+    "networthBRL": 2259911,
+    "networthGBP": 312167
+  },
+  {
+    "month": "2025-02",
+    "roi": 28.1,
+    "categories": {
+      "FixedIncome": 499418,
+      "Equity": 326389.92,
+      "RealEstate": 775140,
+      "Crypto": 104610.96961392762,
+      "Pensions": 569369.58,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1697399.42,
+    "totalminuspensionsGBP": 227533.43431635387,
+    "totalminuspensionsUSD": 282284.6959919571,
+    "networthBRL": 2266769,
+    "networthGBP": 303768
+  },
+  {
+    "month": "2025-03",
+    "roi": 27.2,
+    "categories": {
+      "FixedIncome": 521605,
+      "Equity": 312066.3,
+      "RealEstate": 777118,
+      "Crypto": 81343.97212208604,
+      "Pensions": 550169.5499999999,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1690462.4500000002,
+    "totalminuspensionsGBP": 229994.89115646266,
+    "totalminuspensionsUSD": 287080.80710204085,
+    "networthBRL": 2240632,
+    "networthGBP": 304747
+  },
+  {
+    "month": "2025-04",
+    "roi": 29.7,
+    "categories": {
+      "FixedIncome": 547931,
+      "Equity": 341364.52,
+      "RealEstate": 773481,
+      "Crypto": 105624.75208250694,
+      "Pensions": 567451.92,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1764375.08,
+    "totalminuspensionsGBP": 237786.3989218329,
+    "totalminuspensionsUSD": 299673.17264150945,
+    "networthBRL": 2331827,
+    "networthGBP": 313959
+  },
+  {
+    "month": "2025-05",
+    "roi": 29,
+    "categories": {
+      "FixedIncome": 870143,
+      "Equity": 302117.48,
+      "RealEstate": 777979,
+      "Crypto": 0,
+      "Pensions": 592828.11,
+      "Debt": 0
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1801519.8900000001,
+    "totalminuspensionsGBP": 236110.0773263434,
+    "totalminuspensionsUSD": 323546.95947575365,
+    "networthBRL": 2394348,
+    "networthGBP": 313536
+  },
+  {
+    "month": "2025-06",
+    "roi": 31.5,
+    "categories": {
+      "FixedIncome": 471280,
+      "Equity": 97943.12000000001,
+      "RealEstate": 1375891,
+      "Crypto": 0,
+      "Pensions": 593799.8,
+      "Debt": 150011.4
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1795490.2,
+    "totalminuspensionsGBP": 240038.79679144383,
+    "totalminuspensionsUSD": 329387.7106417112,
+    "networthBRL": 2389290,
+    "networthGBP": 319534
+  },
+  {
+    "month": "2025-07",
+    "roi": 32.1,
+    "categories": {
+      "FixedIncome": 446469,
+      "Equity": 115516.92,
+      "RealEstate": 1373738,
+      "Crypto": 0,
+      "Pensions": 601345.3200000001,
+      "Debt": 150316.2
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1794259.68,
+    "totalminuspensionsGBP": 245117.4426229508,
+    "totalminuspensionsUSD": 341417.6513114754,
+    "networthBRL": 2395605,
+    "networthGBP": 325215
+  },
+  {
+    "month": "2025-08",
+    "roi": 32.5,
+    "categories": {
+      "FixedIncome": 454739,
+      "Equity": 145224.09,
+      "RealEstate": 1367344,
+      "Crypto": 0,
+      "Pensions": 605405.34,
+      "Debt": 149918.85
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1817327.6600000001,
+    "totalminuspensionsGBP": 249290.4883401921,
+    "totalminuspensionsUSD": 356143.04000000004,
+    "networthBRL": 2422733,
+    "networthGBP": 332253
+  },
+  {
+    "month": "2025-09",
+    "roi": 35.6,
+    "categories": {
+      "FixedIncome": 456164,
+      "Equity": 151333.76,
+      "RealEstate": 1363131,
+      "Crypto": 0,
+      "Pensions": 621144.3200000001,
+      "Debt": 149823
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1821125.68,
+    "totalminuspensionsGBP": 254347.16201117318,
+    "totalminuspensionsUSD": 362634.8826815642,
+    "networthBRL": 2442270,
+    "networthGBP": 340802
+  },
+  {
+    "month": "2025-10",
+    "roi": 38.9,
+    "categories": {
+      "FixedIncome": 454140,
+      "Equity": 197212.86,
+      "RealEstate": 1354522,
+      "Crypto": 0,
+      "Pensions": 629392.14,
+      "Debt": 149947.19999999998
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1856041.8599999999,
+    "totalminuspensionsGBP": 264393.4273504274,
+    "totalminuspensionsUSD": 377298.8453561254,
+    "networthBRL": 2485434,
+    "networthGBP": 353958
+  },
+  {
+    "month": "2025-11",
+    "roi": 38.2,
+    "categories": {
+      "FixedIncome": 496599,
+      "Equity": 160876.4,
+      "RealEstate": 1367710,
+      "Crypto": 0,
+      "Pensions": 642402,
+      "Debt": 149840.4
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1874677,
+    "totalminuspensionsGBP": 263297.3314606741,
+    "totalminuspensionsUSD": 382519.29393258423,
+    "networthBRL": 2517079,
+    "networthGBP": 353323
+  },
+  {
+    "month": "2025-12",
+    "roi": 38.6,
+    "categories": {
+      "FixedIncome": 514257,
+      "Equity": 174687.06999999998,
+      "RealEstate": 1387619,
+      "Crypto": 0,
+      "Pensions": 684866.59,
+      "Debt": 149891.55
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1926969.4100000001,
+    "totalminuspensionsGBP": 263607.3064295486,
+    "totalminuspensionsUSD": 388969.30374829,
+    "networthBRL": 2611836,
+    "networthGBP": 357090
+  },
+  {
+    "month": "2026-01",
+    "categories": {
+      "FixedIncome": 510228,
+      "Equity": 176719.40000000002,
+      "RealEstate": 1378374,
+      "Crypto": 0,
+      "Pensions": 685534.85,
+      "Debt": 149935.5
+    },
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "roi": 40.4,
+    "source": "DB.CSV",
+    "totalminuspensionsBRL": 1915111.15,
+    "totalminuspensionsGBP": 267847.7132867133,
+    "totalminuspensionsUSD": 393620.754979021,
+    "networthBRL": 2600646,
+    "networthGBP": 363711
+  }
+]

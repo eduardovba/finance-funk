@@ -1,0 +1,82 @@
+{
+  "L&G PMC 2045 - 2050 Target Date Pn 3": {
+    "price": 18.321199999999997,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-19T23:29:50.229Z"
+  },
+  "OAB": {
+    "price": 1.4906514,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-19T23:29:50.229Z"
+  },
+  "Fidelity Funds - Global Technology": {
+    "price": 10.33,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-19T23:29:51.225Z"
+  },
+  "HSBC FTSE All-World Index": {
+    "price": 3.7879,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-19T23:29:51.745Z"
+  },
+  "Aviva Pensions International Index Tracking S2": {
+    "price": 10.67,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-19T23:29:51.203Z"
+  },
+  "Fidelity Index US Fund P-Acc": {
+    "price": 5.5077,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-19T23:29:51.341Z"
+  },
+  "Aviva Pensions BlackRock US Equity Index Tracker S6": {
+    "price": 10.78,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-19T23:29:51.186Z"
+  },
+  "Fidelity Index Europe ex UK Fund P-Accumulation": {
+    "price": 2.8764999999999996,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-19T23:29:51.244Z"
+  },
+  "BlackRock Consensus 85 I Acc": {
+    "price": 0.038,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-19T23:29:51.714Z"
+  },
+  "Ishares US Bonds 20+ Years": {
+    "price": 2.4665,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-19T23:29:50.966Z"
+  },
+  "Ishares Physical Gold": {
+    "price": 72.13,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-19T23:29:51.026Z"
+  },
+  "HL Growth Fund": {
+    "price": 1.3462,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-19T23:29:50.394Z"
+  },
+  "HL Ishares Physical Silver ETC": {
+    "price": 55.26,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-19T23:29:51.093Z"
+  },
+  "Fidelity Ishares Physical Silver ETC": {
+    "price": 55.26,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-19T23:29:51.082Z"
+  },
+  "PLC Russell 2000": {
+    "price": 57.4,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-19T23:29:50.969Z"
+  },
+  "Ishares Global Bonds": {
+    "price": 1.2051699999999999,
+    "currency": "GBP",
+    "lastUpdated": "2026-02-19T23:29:50.822Z"
+  }
+}

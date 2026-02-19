@@ -1,0 +1,195 @@
+:root {
+  /* Material You / Material Design 3 Inspired Palette */
+  /* Primary Key Color: Emerald/Teal based */
+  --md-sys-color-primary: #80d8ff;
+  /* Light Blue 200 equivalent for dark mode pop */
+  --md-sys-color-on-primary: #00334a;
+  --md-sys-color-primary-container: #004a75;
+  --md-sys-color-on-primary-container: #c3e7ff;
+
+  --md-sys-color-secondary: #b3cad5;
+  --md-sys-color-on-secondary: #1e333c;
+  --md-sys-color-secondary-container: #354a53;
+  --md-sys-color-on-secondary-container: #cfe6f1;
+
+  --md-sys-color-tertiary: #c4c3ea;
+  --md-sys-color-on-tertiary: #2d2d4d;
+  --md-sys-color-tertiary-container: #434465;
+  --md-sys-color-on-tertiary-container: #e0e0ff;
+
+  --md-sys-color-error: #ffb4ab;
+  --md-sys-color-on-error: #690005;
+  --md-sys-color-error-container: #93000a;
+  --md-sys-color-on-error-container: #ffdad6;
+
+  --md-sys-color-background: #0f172a;
+  /* Keeping the dark slate base but slightly tweaked */
+  --md-sys-color-on-background: #e2e2e6;
+  --md-sys-color-surface: #1e293b;
+  --md-sys-color-on-surface: #e2e2e6;
+
+  /* Surface Variants for Cards */
+  --md-sys-color-surface-variant: #40484c;
+  --md-sys-color-on-surface-variant: #c0c8cc;
+  --md-sys-color-outline: #8d9199;
+
+  /* Mappings to existing variables for compatibility */
+  --bg-primary: var(--md-sys-color-background);
+  --bg-secondary: var(--md-sys-color-surface);
+  --fg-primary: var(--md-sys-color-on-background);
+  --fg-secondary: var(--md-sys-color-on-surface-variant);
+  --accent-color: #10b981;
+  /* Keeping the Emerald for positive numbers */
+  --error: var(--md-sys-color-error);
+
+  /* Glassmorphism Refined */
+  --glass-bg: rgba(30, 41, 59, 0.6);
+  /* surface + opacity */
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: blur(16px);
+
+  /* Typography */
+  --font-main: var(--font-geist-sans), 'Roboto', Inter, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+
+  /* Spacing & Borders */
+  --radius-lg: 24px;
+  /* Material 3 uses larger radii */
+  --radius-md: 12px;
+  --spacing-unit: 8px;
+
+  --background: var(--bg-primary);
+  --foreground: var(--fg-primary);
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--fg-primary);
+  font-family: var(--font-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(at 10% 10%, rgba(16, 185, 129, 0.08) 0, transparent 40%),
+    radial-gradient(at 90% 10%, rgba(59, 130, 246, 0.08) 0, transparent 40%),
+    radial-gradient(at 50% 90%, rgba(139, 92, 246, 0.05) 0, transparent 50%);
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 500;
+  /* Material 3 is often lighter/more geometric */
+  letter-spacing: -0.01em;
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: calc(var(--spacing-unit) * 3);
+  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+  background: rgba(45, 55, 75, 0.7);
+  /* Slightly lighter on hover */
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--fg-primary) 30%, var(--accent-color) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 100px;
+  /* Pillow shape for buttons */
+  padding: 10px 24px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-family: var(--font-main);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3730a3 0%, #5b21b6 100%);
+  /* Executive Indigo to Deep Violet */
+  color: #ffffff;
+  border: 1px solid rgba(196, 181, 253, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  padding: 10px 24px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 6px 20px rgba(91, 33, 182, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: calc(var(--spacing-unit) * 4);
+}
+
+/* Standardized Table Action Buttons */
+.btn-icon {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0;
+  transform: scale(0.95);
+  font-weight: 500;
+}
+
+.btn-edit {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--fg-secondary);
+}
+
+.btn-edit:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: white;
+  transform: scale(1);
+}
+
+.btn-delete {
+  background: #ef4444;
+  /* Vibrant Red */
+  border: 1px solid #ef4444;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+  /* Darker Red on hover */
+  border-color: #dc2626;
+  transform: scale(1);
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+}
+
+/* Reveal buttons on row hover */
+tr:hover .btn-icon {
+  opacity: 1;
+  transform: scale(1);
+}

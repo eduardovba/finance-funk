@@ -1,0 +1,684 @@
+{
+  "summary": {
+    "totalInvestment": 2328536,
+    "totalTaxes": 244307,
+    "totalSales": 1692920,
+    "incomeTax": 133353,
+    "salesTax": 76417
+  },
+  "properties": [
+    {
+      "id": "andyara-1",
+      "name": "Andyara 1",
+      "subtitle": "Pedro Leopoldo",
+      "address": "Rua Montes Claros 828 - Apto 402",
+      "status": "Sold",
+      "currentValue": 0,
+      "investment": 237000,
+      "taxes": 27074,
+      "salePrice": 360000,
+      "currency": "BRL",
+      "ledger": [
+        {
+          "id": "p0-01",
+          "date": "Dec-20",
+          "amount": 45000,
+          "type": "Investment"
+        },
+        {
+          "date": "Jan-21",
+          "amount": 16000,
+          "type": "Investment"
+        },
+        {
+          "date": "Feb-21",
+          "amount": 16000,
+          "type": "Investment"
+        },
+        {
+          "date": "Mar-21",
+          "amount": 16000,
+          "type": "Investment"
+        },
+        {
+          "date": "Apr-21",
+          "amount": 16000,
+          "type": "Investment"
+        },
+        {
+          "date": "May-21",
+          "amount": 16000,
+          "type": "Investment"
+        },
+        {
+          "date": "Jun-21",
+          "amount": 16000,
+          "type": "Investment"
+        },
+        {
+          "date": "Jul-21",
+          "amount": 16000,
+          "type": "Investment"
+        },
+        {
+          "date": "Aug-21",
+          "amount": 16000,
+          "type": "Investment"
+        },
+        {
+          "date": "Sep-21",
+          "amount": 16000,
+          "type": "Investment"
+        },
+        {
+          "date": "Oct-21",
+          "amount": 16000,
+          "type": "Investment"
+        },
+        {
+          "date": "Nov-21",
+          "amount": 16000,
+          "type": "Investment"
+        },
+        {
+          "date": "Dec-21",
+          "amount": 16000,
+          "type": "Investment"
+        }
+      ]
+    },
+    {
+      "id": "montes-claros",
+      "name": "Rua Montes Claros",
+      "subtitle": "Rua Montes Claros 828, Apto 402, Belo Horizonte",
+      "address": "Rua Montes Claros 828, Apto 402, Belo Horizonte",
+      "status": "Sold",
+      "currentValue": 0,
+      "investment": 681000,
+      "taxes": 62665,
+      "salePrice": 822920,
+      "currency": "BRL",
+      "ledger": [
+        {
+          "date": "Jan-21",
+          "amount": 681000,
+          "type": "Investment"
+        }
+      ]
+    },
+    {
+      "id": "andyara-2",
+      "name": "Andyara 2",
+      "subtitle": "Pedro Leopoldo",
+      "address": "",
+      "status": "Owned",
+      "currentValue": 500000,
+      "investment": 290000,
+      "taxes": 9536,
+      "currency": "BRL",
+      "ledger": [
+        {
+          "date": "Jan-22",
+          "amount": 20000,
+          "type": "Investment"
+        },
+        {
+          "date": "Feb-22",
+          "amount": 20000,
+          "type": "Investment"
+        },
+        {
+          "date": "Mar-22",
+          "amount": 20000,
+          "type": "Investment"
+        },
+        {
+          "date": "Apr-22",
+          "amount": 20000,
+          "type": "Investment"
+        },
+        {
+          "date": "May-22",
+          "amount": 20000,
+          "type": "Investment"
+        },
+        {
+          "date": "Jun-22",
+          "amount": 20000,
+          "type": "Investment"
+        },
+        {
+          "date": "Jul-22",
+          "amount": 20000,
+          "type": "Investment"
+        },
+        {
+          "date": "Sep-22",
+          "amount": 40000,
+          "type": "Investment"
+        },
+        {
+          "date": "Oct-22",
+          "amount": 5000,
+          "type": "Investment"
+        },
+        {
+          "date": "Nov-22",
+          "amount": 8000,
+          "type": "Investment"
+        },
+        {
+          "date": "Dec-22",
+          "amount": 8000,
+          "type": "Investment"
+        },
+        {
+          "date": "Jan-23",
+          "amount": 8000,
+          "type": "Investment"
+        },
+        {
+          "date": "Feb-23",
+          "amount": 9000,
+          "type": "Investment"
+        },
+        {
+          "date": "Mar-23",
+          "amount": 9000,
+          "type": "Investment"
+        },
+        {
+          "date": "Apr-23",
+          "amount": 9000,
+          "type": "Investment"
+        },
+        {
+          "date": "May-23",
+          "amount": 9000,
+          "type": "Investment"
+        },
+        {
+          "date": "Jun-23",
+          "amount": 9000,
+          "type": "Investment"
+        },
+        {
+          "date": "Jul-23",
+          "amount": 9000,
+          "type": "Investment"
+        },
+        {
+          "date": "Aug-23",
+          "amount": 5400,
+          "type": "Investment"
+        },
+        {
+          "date": "Sep-23",
+          "amount": 5400,
+          "type": "Investment"
+        },
+        {
+          "date": "Oct-23",
+          "amount": 5400,
+          "type": "Investment"
+        },
+        {
+          "date": "Nov-23",
+          "amount": 5400,
+          "type": "Investment"
+        },
+        {
+          "date": "Dec-23",
+          "amount": 5400,
+          "type": "Investment"
+        }
+      ]
+    },
+    {
+      "id": "zara",
+      "name": "Edifício Zara",
+      "address": "",
+      "status": "Owned",
+      "isAirBnb": true,
+      "currentValue": 444204,
+      "investment": 444204,
+      "taxes": 26029,
+      "currency": "BRL",
+      "ledger": [
+        {
+          "date": "Jan-23",
+          "amount": 360000,
+          "type": "Purchase"
+        },
+        {
+          "date": "Feb-23",
+          "amount": 58175,
+          "type": "Refurbishment"
+        }
+      ]
+    },
+    {
+      "id": "ink-court",
+      "name": "Ink Court",
+      "subtitle": "419 Wick Lane, London",
+      "status": "Owned",
+      "currency": "GBP",
+      "dynamic": true,
+      "investment": 0,
+      "currentValue": 0,
+      "taxes": 0,
+      "ledger": []
+    }
+  ],
+  "funds": {
+    "transactions": [
+      {
+        "id": "fund-01",
+        "date": "2023-04-03",
+        "fund": "XP - PVBI11",
+        "investment": 4838.9,
+        "quantity": 55,
+        "costPerShare": 87.98
+      },
+      {
+        "id": "fund-02",
+        "date": "2023-04-03",
+        "fund": "XP - PORD11",
+        "investment": 5159.7,
+        "quantity": 630,
+        "costPerShare": 8.19
+      },
+      {
+        "id": "fund-03",
+        "date": "2023-05-18",
+        "fund": "XP - ALZR11",
+        "investment": 5611.5,
+        "quantity": 500,
+        "costPerShare": 11.22
+      },
+      {
+        "id": "fund-04",
+        "date": "2023-05-18",
+        "fund": "XP - HGLG11",
+        "investment": 5379,
+        "quantity": 33,
+        "costPerShare": 163
+      },
+      {
+        "id": "fund-05",
+        "date": "2023-05-18",
+        "fund": "XP - CPTS11",
+        "investment": 5600,
+        "quantity": 700,
+        "costPerShare": 8
+      },
+      {
+        "id": "fund-06",
+        "date": "2023-05-18",
+        "fund": "XP - BTHF11",
+        "investment": 5350,
+        "quantity": 522,
+        "costPerShare": 10.25
+      },
+      {
+        "id": "fund-07",
+        "date": "2023-05-24",
+        "fund": "XP - HGLG11",
+        "investment": -2071.42,
+        "quantity": -13,
+        "costPerShare": 159.34
+      },
+      {
+        "id": "fund-08",
+        "date": "2023-06-02",
+        "fund": "XP - HGLG11",
+        "investment": 2024.1,
+        "quantity": 13,
+        "costPerShare": 155.7
+      },
+      {
+        "id": "fund-09",
+        "date": "2023-06-16",
+        "fund": "XP - HGLG11",
+        "investment": 4359.6,
+        "quantity": 29,
+        "costPerShare": 150.33
+      },
+      {
+        "id": "fund-10",
+        "date": "2024-05-03",
+        "fund": "XP - XPML11",
+        "investment": 5104,
+        "quantity": 44,
+        "costPerShare": 116
+      },
+      {
+        "id": "fund-11",
+        "date": "2024-05-03",
+        "fund": "XP - KCRE11",
+        "investment": 5070,
+        "quantity": 520,
+        "costPerShare": 9.75
+      }
+    ],
+    "holdings": [
+      {
+        "ticker": "ALZR11",
+        "name": "FDO INV IMOB ALIANZA TRUST RENDA IMOB CF",
+        "quantity": 500,
+        "purchasePrice": 11.22,
+        "currentPrice": 10.83
+      },
+      {
+        "ticker": "HGLG11",
+        "name": "FDO INV IMOB CSHG LOGISTICA CF",
+        "quantity": 62,
+        "purchasePrice": 156.31,
+        "currentPrice": 157.09
+      },
+      {
+        "ticker": "CPTS11",
+        "name": "CAPITANIA SECURITIES II FII CF",
+        "quantity": 700,
+        "purchasePrice": 8,
+        "currentPrice": 8.03
+      },
+      {
+        "ticker": "BTHF11",
+        "name": "BTG Pactual Hedge Fund FII",
+        "quantity": 653,
+        "purchasePrice": 8.6,
+        "currentPrice": 7.35
+      },
+      {
+        "ticker": "PVBI11",
+        "name": "FII VBI PRIME PROPERTIES CF",
+        "quantity": 55,
+        "purchasePrice": 87.98,
+        "currentPrice": 78.63
+      },
+      {
+        "ticker": "PORD11",
+        "name": "POLO FDO INV IMOB RECEBIVEIS ETF",
+        "quantity": 63,
+        "purchasePrice": 81.9,
+        "currentPrice": 81
+      },
+      {
+        "ticker": "XPML11",
+        "name": "XP MALLS FDO INV IMOB FII ETF",
+        "quantity": 44,
+        "purchasePrice": 116,
+        "currentPrice": 110.79
+      },
+      {
+        "ticker": "KCRE11",
+        "name": "KINEA CREDITAS FII CF",
+        "quantity": 52,
+        "purchasePrice": 97.5,
+        "currentPrice": 89.8
+      }
+    ]
+  },
+  "airbnb": {
+    "propertyId": "zara",
+    "ledger": [
+      {
+        "month": "Aug-23",
+        "costs": 524.43,
+        "revenue": 0
+      },
+      {
+        "month": "Sep-23",
+        "costs": 553.1,
+        "revenue": 0
+      },
+      {
+        "month": "Oct-23",
+        "costs": 524.43,
+        "revenue": 0
+      },
+      {
+        "month": "Nov-23",
+        "costs": 588.7,
+        "revenue": 0
+      },
+      {
+        "month": "Dec-23",
+        "costs": 603,
+        "revenue": 0
+      },
+      {
+        "month": "Jan-24",
+        "costs": 2695.22,
+        "revenue": 6134.92
+      },
+      {
+        "month": "Feb-24",
+        "costs": 570,
+        "revenue": 10602.11
+      },
+      {
+        "month": "Mar-24",
+        "costs": 2616.14,
+        "revenue": 7056.9
+      },
+      {
+        "month": "Apr-24",
+        "costs": 1218.06,
+        "revenue": 5463.41
+      },
+      {
+        "month": "May-24",
+        "costs": 1419.03,
+        "revenue": 4399.68
+      },
+      {
+        "month": "Jun-24",
+        "costs": 651.85,
+        "revenue": 875
+      },
+      {
+        "month": "Jul-24",
+        "costs": 2817.71,
+        "revenue": 4820.56
+      },
+      {
+        "month": "Aug-24",
+        "costs": 1855.48,
+        "revenue": 4978.81
+      },
+      {
+        "month": "Sep-24",
+        "costs": 1809.75,
+        "revenue": 2619.5
+      },
+      {
+        "month": "Oct-24",
+        "costs": 1468.1,
+        "revenue": 5862.49
+      },
+      {
+        "month": "Nov-24",
+        "costs": 1193.12,
+        "revenue": 3639.18
+      },
+      {
+        "month": "Dec-24",
+        "costs": 1510.22,
+        "revenue": 4168.91
+      },
+      {
+        "month": "Jan-25",
+        "costs": 3247.26,
+        "revenue": 7798.48
+      },
+      {
+        "month": "Feb-25",
+        "costs": 1284.19,
+        "revenue": 9305.36
+      },
+      {
+        "month": "Mar-25",
+        "costs": 1781.93,
+        "revenue": 7981.86
+      },
+      {
+        "month": "Apr-25",
+        "costs": 1303.5,
+        "revenue": 5695.43
+      },
+      {
+        "month": "May-25",
+        "costs": 1683.47,
+        "revenue": 6528.87
+      },
+      {
+        "month": "Jun-25",
+        "costs": 1088.28,
+        "revenue": 4865.28
+      },
+      {
+        "month": "Jul-25",
+        "costs": 1769.59,
+        "revenue": 4757.44
+      },
+      {
+        "month": "Aug-25",
+        "costs": 2114.47,
+        "revenue": 3045.11
+      },
+      {
+        "month": "Sep-25",
+        "costs": 1002.01,
+        "revenue": 5740
+      },
+      {
+        "month": "Oct-25",
+        "costs": 1060.15,
+        "revenue": 5740
+      },
+      {
+        "month": "Nov-25",
+        "costs": 1059.93,
+        "revenue": 5740
+      },
+      {
+        "month": "Dec-25",
+        "costs": 873.67,
+        "revenue": 5630.01
+      },
+      {
+        "month": "Jan-26",
+        "costs": 3421.7,
+        "revenue": 6740
+      },
+      {
+        "month": "Feb-26",
+        "costs": 1108.25,
+        "revenue": 7518
+      }
+    ]
+  },
+  "inkCourt": {
+    "propertyValue": 600000,
+    "marketValue": 600000,
+    "lastValuationUpdate": "2026-02-13",
+    "deposit": 60000,
+    "mortgageAmount": 540999,
+    "durationMonths": 408,
+    "currency": "GBP",
+    "ledger": [
+      {
+        "id": "ic-00b",
+        "month": "May-25",
+        "costs": 499,
+        "principal": 0,
+        "interest": 0,
+        "source": "L&G Home Survey"
+      },
+      {
+        "id": "ic-01",
+        "month": "Jun-25",
+        "costs": 60000,
+        "principal": 0,
+        "interest": 0,
+        "source": "Deposit"
+      },
+      {
+        "id": "ic-02",
+        "month": "Jun-25",
+        "costs": 20000,
+        "principal": 0,
+        "interest": 0,
+        "source": "Stamp Duty"
+      },
+      {
+        "id": "ic-03",
+        "month": "Jun-25",
+        "costs": 3007.34,
+        "principal": 0,
+        "interest": 0,
+        "source": "Tinsdills + Management Fees"
+      },
+      {
+        "id": "ic-04",
+        "month": "Jul-25",
+        "costs": 2930.26,
+        "principal": 523.78,
+        "interest": 2406.48,
+        "source": "Mortgage"
+      },
+      {
+        "id": "ic-05",
+        "month": "Aug-25",
+        "costs": 2596.03,
+        "principal": 525.79,
+        "interest": 2070.24,
+        "source": "Mortgage"
+      },
+      {
+        "id": "ic-06",
+        "month": "Sep-25",
+        "costs": 2596.03,
+        "principal": 594.52,
+        "interest": 2001.51,
+        "source": "Mortgage"
+      },
+      {
+        "id": "ic-07",
+        "month": "Oct-25",
+        "costs": 2596.03,
+        "principal": 530.08,
+        "interest": 2065.95,
+        "source": "Mortgage"
+      },
+      {
+        "id": "ic-08",
+        "month": "Nov-25",
+        "costs": 2596.03,
+        "principal": 598.56,
+        "interest": 1997.47,
+        "source": "Mortgage"
+      },
+      {
+        "id": "1771023840448rah6szjy6",
+        "month": "Dec-25",
+        "costs": 2596.03,
+        "principal": 534.4000000000001,
+        "interest": 2061.63,
+        "source": "Mortgage",
+        "notes": "Mortgage"
+      },
+      {
+        "id": "1771023873685x78azepw7",
+        "month": "Jan-26",
+        "costs": 2596.03,
+        "principal": 536.3800000000001,
+        "interest": 2059.65,
+        "source": "Mortgage",
+        "notes": "Mortgage"
+      }
+    ]
+  }
+}

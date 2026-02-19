@@ -1,0 +1,1316 @@
+[
+  {
+    "id": "init-0",
+    "date": "05/07/2022",
+    "account": "NuBank",
+    "investment": 19300,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-1",
+    "date": "15/07/2022",
+    "account": "NuBank",
+    "investment": -2104,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-2",
+    "date": "24/07/2022",
+    "account": "NuBank",
+    "investment": 4000,
+    "interest": 200,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-3",
+    "date": "24/07/2022",
+    "account": "NuBank",
+    "investment": -20000,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-4",
+    "date": "14/09/2022",
+    "account": "Nubank",
+    "investment": 20000,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-5",
+    "date": "15/09/2022",
+    "account": "NuBank",
+    "investment": 10605,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-6",
+    "date": "26/09/2022",
+    "account": "NuBank",
+    "investment": -23200,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-7",
+    "date": "28/09/2022",
+    "account": "NuBank",
+    "investment": 16845.5,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-8",
+    "date": "30/09/2022",
+    "account": "NuBank",
+    "investment": -16800,
+    "interest": 85,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-9",
+    "date": "01/10/2022",
+    "account": "XP",
+    "investment": 100,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-10",
+    "date": "18/10/2022",
+    "account": "NuBank",
+    "investment": -4703,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-11",
+    "date": "24/10/2022",
+    "account": "NuBank",
+    "investment": 3579.5,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-12",
+    "date": "24/10/2022",
+    "account": "NuBank",
+    "investment": -5000,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-13",
+    "date": "24/10/2022",
+    "account": "NuBank",
+    "investment": 0,
+    "interest": 7,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-14",
+    "date": "26/10/2022",
+    "account": "NuBank",
+    "investment": 6600,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-15",
+    "date": "27/10/2022",
+    "account": "NuBank",
+    "investment": -1841.5,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-16",
+    "date": "08/11/2022",
+    "account": "NuBank",
+    "investment": 2500,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-17",
+    "date": "08/11/2022",
+    "account": "NuBank",
+    "investment": -755,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-18",
+    "date": "21/11/2022",
+    "account": "NuBank",
+    "investment": -8106.5,
+    "interest": 31,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-19",
+    "date": "25/11/2022",
+    "account": "NuBank",
+    "investment": 16251.5,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-20",
+    "date": "05/12/2022",
+    "account": "NuBank",
+    "investment": -368.19,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-21",
+    "date": "05/12/2022",
+    "account": "NuBank",
+    "investment": -8475,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-22",
+    "date": "03/01/2022",
+    "account": "NuBank",
+    "investment": 23460.87,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-23",
+    "date": "03/01/2022",
+    "account": "XP",
+    "investment": 83000,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-24",
+    "date": "27/01/2023",
+    "account": "NuBank",
+    "investment": -22024.83,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-25",
+    "date": "27/01/2023",
+    "account": "XP",
+    "investment": 170000,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-26",
+    "date": "27/01/2023",
+    "account": "XP",
+    "investment": 0,
+    "interest": 239.31,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-27",
+    "date": "01/02/2023",
+    "account": "XP",
+    "investment": 382000,
+    "interest": 492.76,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-28",
+    "date": "01/02/2023",
+    "account": "Inter",
+    "investment": 250000,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-29",
+    "date": "15/02/2023",
+    "account": "NuBank",
+    "investment": -9570,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-30",
+    "date": "15/02/2023",
+    "account": "NuBank",
+    "investment": -518,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-31",
+    "date": "01/03/2023",
+    "account": "XP",
+    "investment": 0,
+    "interest": 5888,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-32",
+    "date": "01/03/2023",
+    "account": "Inter",
+    "investment": 0,
+    "interest": 2007,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-33",
+    "date": "06/03/2023",
+    "account": "XP",
+    "investment": -9543.57,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-34",
+    "date": "15/03/2023",
+    "account": "XP",
+    "investment": -9000,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-35",
+    "date": "01/04/2023",
+    "account": "XP",
+    "investment": 0,
+    "interest": 5875.6,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-36",
+    "date": "01/04/2023",
+    "account": "Inter",
+    "investment": 0,
+    "interest": 2588.75,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-37",
+    "date": "03/04/2023",
+    "account": "XP",
+    "investment": -20000,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-38",
+    "date": "21/04/2023",
+    "account": "XP",
+    "investment": -9000,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-39",
+    "date": "01/05/2023",
+    "account": "XP",
+    "investment": 0,
+    "interest": 5341.18,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-40",
+    "date": "01/05/2023",
+    "account": "Inter",
+    "investment": 0,
+    "interest": 2044,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-41",
+    "date": "15/05/2023",
+    "account": "XP",
+    "investment": -9000,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-42",
+    "date": "18/05/2023",
+    "account": "XP",
+    "investment": -21764,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-43",
+    "date": "01/06/2023",
+    "account": "XP",
+    "investment": 0,
+    "interest": 2797,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-44",
+    "date": "01/06/2023",
+    "account": "Inter",
+    "investment": 0,
+    "interest": 2520,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-45",
+    "date": "09/06/2023",
+    "account": "Inter",
+    "investment": -249999,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-46",
+    "date": "09/06/2023",
+    "account": "Santander",
+    "investment": 250756.64,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-47",
+    "date": "18/05/2023",
+    "account": "XP",
+    "investment": -6383.7,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-48",
+    "date": "15/06/2023",
+    "account": "XP",
+    "investment": -4000,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-49",
+    "date": "30/06/2023",
+    "account": "Santander",
+    "investment": 0,
+    "interest": 1692,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-50",
+    "date": "30/06/2023",
+    "account": "XP",
+    "investment": 0,
+    "interest": 11512,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-51",
+    "date": "21/07/2023",
+    "account": "XP",
+    "investment": -18100,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-52",
+    "date": "31/07/2023",
+    "account": "XP",
+    "investment": 0,
+    "interest": 5434,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-53",
+    "date": "31/07/2023",
+    "account": "Santander",
+    "investment": 0,
+    "interest": 2389,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-54",
+    "date": "01/08/2023",
+    "account": "XP",
+    "investment": -13500,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-55",
+    "date": "04/08/2023",
+    "account": "XP",
+    "investment": -175000,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-56",
+    "date": "07/08/2023",
+    "account": "XP",
+    "investment": -3300,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-57",
+    "date": "15/08/2023",
+    "account": "Inter",
+    "investment": 0,
+    "interest": -5400,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-58",
+    "date": "31/08/2023",
+    "account": "XP",
+    "investment": 0,
+    "interest": 4175,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-59",
+    "date": "31/08/2023",
+    "account": "Santander",
+    "investment": 0,
+    "interest": 2578,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-60",
+    "date": "01/09/2023",
+    "account": "Inter",
+    "investment": 0,
+    "interest": -1700,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-61",
+    "date": "12/09/2023",
+    "account": "Santander",
+    "investment": -171000,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-62",
+    "date": "15/09/2023",
+    "account": "XP",
+    "investment": -11409.92,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-63",
+    "date": "29/09/2023",
+    "account": "XP",
+    "investment": 0,
+    "interest": 2655.19,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-64",
+    "date": "29/09/2023",
+    "account": "Santander",
+    "investment": 0,
+    "interest": 1267,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-65",
+    "date": "29/09/2023",
+    "account": "Inter",
+    "investment": 0,
+    "interest": -1400,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-66",
+    "date": "02/10/2023",
+    "account": "XP",
+    "investment": -23578,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-67",
+    "date": "31/10/2023",
+    "account": "XP",
+    "investment": 0,
+    "interest": 3130,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-68",
+    "date": "31/10/2023",
+    "account": "Santander",
+    "investment": 0,
+    "interest": 776,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-69",
+    "date": "01/11/2023",
+    "account": "XP",
+    "investment": -19930,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-70",
+    "date": "01/12/2023",
+    "account": "XP",
+    "investment": 0,
+    "interest": 2901,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-71",
+    "date": "01/12/2023",
+    "account": "Santander",
+    "investment": 0,
+    "interest": 771,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-72",
+    "date": "01/12/2023",
+    "account": "Inter",
+    "investment": 0,
+    "interest": -350.75,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-73",
+    "date": "18/12/2023",
+    "account": "XP",
+    "investment": -5000,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-74",
+    "date": "01/01/2024",
+    "account": "XP",
+    "investment": 0,
+    "interest": 2303.52,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-75",
+    "date": "01/01/2024",
+    "account": "Santander",
+    "investment": 0,
+    "interest": 734,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-76",
+    "date": "03/01/2024",
+    "account": "XP",
+    "investment": -6600,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-77",
+    "date": "16/01/2024",
+    "account": "XP",
+    "investment": 2000,
+    "interest": 15,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-78",
+    "date": "01/02/2024",
+    "account": "Santander",
+    "investment": 0,
+    "interest": 771,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-79",
+    "date": "01/02/2024",
+    "account": "XP",
+    "investment": -3900,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-80",
+    "date": "23/02/2024",
+    "account": "XP",
+    "investment": 5793.36,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-81",
+    "date": "01/03/2024",
+    "account": "XP",
+    "investment": 0,
+    "interest": 2252,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-82",
+    "date": "01/03/2024",
+    "account": "Santander",
+    "investment": 0,
+    "interest": 730.25,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-83",
+    "date": "04/03/2024",
+    "account": "Santander",
+    "investment": -8000,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-84",
+    "date": "04/03/2024",
+    "account": "XP",
+    "investment": -5700,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-85",
+    "date": "20/03/2024",
+    "account": "XP",
+    "investment": -12396.38,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-86",
+    "date": "20/03/2024",
+    "account": "XP",
+    "investment": 0,
+    "interest": 3367,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-87",
+    "date": "20/03/2024",
+    "account": "Santander",
+    "investment": 0,
+    "interest": 638,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-88",
+    "date": "04/04/2024",
+    "account": "XP",
+    "investment": -9600,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-89",
+    "date": "22/04/2024",
+    "account": "XP",
+    "investment": 5400,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-90",
+    "date": "01/05/2024",
+    "account": "XP",
+    "investment": 0,
+    "interest": 2187,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-91",
+    "date": "01/05/2024",
+    "account": "Santander",
+    "investment": 0,
+    "interest": 771,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-92",
+    "date": "06/05/2024",
+    "account": "XP",
+    "investment": -3191.54,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-93",
+    "date": "20/05/2024",
+    "account": "Inter",
+    "investment": 4400.78,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-94",
+    "date": "30/05/2024",
+    "account": "Santander",
+    "investment": 0,
+    "interest": 672.72,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-95",
+    "date": "30/05/2024",
+    "account": "XP",
+    "investment": 0,
+    "interest": 2139.23,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-96",
+    "date": "30/05/2024",
+    "account": "Inter",
+    "investment": -177.7,
+    "interest": 17.18,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-97",
+    "date": "07/06/2024",
+    "account": "XP",
+    "investment": 1107.05,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-98",
+    "date": "07/06/2024",
+    "account": "Inter",
+    "investment": 23567.94,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-99",
+    "date": "28/06/2024",
+    "account": "XP",
+    "investment": 0,
+    "interest": 2558,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-100",
+    "date": "08/07/2024",
+    "account": "XP",
+    "investment": -2903.87,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-101",
+    "date": "08/07/2024",
+    "account": "Inter",
+    "investment": 4481.89,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-102",
+    "date": "05/08/2024",
+    "account": "XP",
+    "investment": -945.92,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-103",
+    "date": "05/08/2024",
+    "account": "Inter",
+    "investment": -1222.49,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-104",
+    "date": "30/08/2024",
+    "account": "Santander",
+    "investment": 0,
+    "interest": 1442,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-105",
+    "date": "30/08/2024",
+    "account": "XP",
+    "investment": 0,
+    "interest": 2625,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-106",
+    "date": "30/08/2024",
+    "account": "Inter",
+    "investment": 1201.42,
+    "interest": 448.61,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-107",
+    "date": "05/09/2024",
+    "account": "Inter",
+    "investment": -1773.53,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-108",
+    "date": "01/10/2024",
+    "account": "XP",
+    "investment": 0,
+    "interest": 2166.4,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-109",
+    "date": "10/10/2024",
+    "account": "Inter",
+    "investment": 4233.76,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-110",
+    "date": "18/10/2024",
+    "account": "Fidelity",
+    "investment": 1500,
+    "interest": 0,
+    "currency": "GBP",
+    "shares": 558,
+    "pricePerShare": 2.69
+  },
+  {
+    "id": "init-111",
+    "date": "01/11/2024",
+    "account": "XP",
+    "investment": 0,
+    "interest": 1581,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-112",
+    "date": "05/11/2024",
+    "account": "Inter",
+    "investment": -3246.81,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-113",
+    "date": "21/11/2024",
+    "account": "Fidelity",
+    "investment": -1485.96,
+    "interest": 0,
+    "currency": "GBP",
+    "shares": -558,
+    "pricePerShare": 2.66
+  },
+  {
+    "id": "init-114",
+    "date": "21/11/2024",
+    "account": "Santander",
+    "investment": -30710,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-115",
+    "date": "21/11/2024",
+    "account": "Inter",
+    "investment": 31314.57,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-116",
+    "date": "29/11/2024",
+    "account": "XP",
+    "investment": 0,
+    "interest": 1971.78,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-117",
+    "date": "02/12/2024",
+    "account": "Inter",
+    "investment": 1705,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-118",
+    "date": "06/12/2024",
+    "account": "Monzo",
+    "investment": 6225,
+    "interest": 25,
+    "currency": "GBP"
+  },
+  {
+    "id": "init-119",
+    "date": "27/12/2024",
+    "account": "XP",
+    "investment": -13955,
+    "interest": 1376,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-120",
+    "date": "04/01/2025",
+    "account": "Inter",
+    "investment": -8575.93,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-121",
+    "date": "08/01/2025",
+    "account": "Monzo",
+    "investment": 1500,
+    "interest": 12,
+    "currency": "GBP"
+  },
+  {
+    "id": "init-122",
+    "date": "03/02/2025",
+    "account": "Inter",
+    "investment": -8281.98,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-123",
+    "date": "03/03/2025",
+    "account": "XP",
+    "investment": 0,
+    "interest": 2363.87,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-124",
+    "date": "03/03/2025",
+    "account": "Monzo",
+    "investment": 3700,
+    "interest": 22.72,
+    "currency": "GBP"
+  },
+  {
+    "id": "init-125",
+    "date": "05/03/2025",
+    "account": "Inter",
+    "investment": 1250.03,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-126",
+    "date": "27/03/2025",
+    "account": "Monzo",
+    "investment": 2400,
+    "interest": 31.86,
+    "currency": "GBP"
+  },
+  {
+    "id": "init-127",
+    "date": "31/03/2025",
+    "account": "XP",
+    "investment": 0,
+    "interest": 3047.91,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-128",
+    "date": "31/03/2025",
+    "account": "Inter",
+    "investment": 320,
+    "interest": 950,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-129",
+    "date": "04/04/2025",
+    "account": "Inter",
+    "investment": 879.06,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-130",
+    "date": "28/04/2025",
+    "account": "Monzo",
+    "investment": 2500,
+    "interest": 40.18,
+    "currency": "GBP"
+  },
+  {
+    "id": "init-131",
+    "date": "30/04/2025",
+    "account": "XP",
+    "investment": 0,
+    "interest": 4192,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-132",
+    "date": "30/04/2025",
+    "account": "Inter",
+    "investment": 0,
+    "interest": 1000,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-133",
+    "date": "12/05/2025",
+    "account": "Inter",
+    "investment": 383.62,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-134",
+    "date": "22/05/2025",
+    "account": "Monzo",
+    "investment": 40633.62,
+    "interest": 63.09,
+    "currency": "GBP"
+  },
+  {
+    "id": "init-135",
+    "date": "30/05/2025",
+    "account": "XP",
+    "investment": 0,
+    "interest": 4568.45,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-136",
+    "date": "30/05/2025",
+    "account": "Inter",
+    "investment": 0,
+    "interest": 3510,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-137",
+    "date": "02/06/2025",
+    "account": "Monzo",
+    "investment": -34650,
+    "interest": 0,
+    "currency": "GBP"
+  },
+  {
+    "id": "init-138",
+    "date": "02/06/2025",
+    "account": "Inter",
+    "investment": 1430.74,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-139",
+    "date": "26/06/2025",
+    "account": "Monzo",
+    "investment": -18505,
+    "interest": 51.44,
+    "currency": "GBP"
+  },
+  {
+    "id": "init-140",
+    "date": "30/06/2025",
+    "account": "XP",
+    "investment": 0,
+    "interest": 4776.74,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-141",
+    "date": "30/06/2025",
+    "account": "Inter",
+    "investment": 0,
+    "interest": 969,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-142",
+    "date": "07/07/2025",
+    "account": "Inter",
+    "investment": 2117.35,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-143",
+    "date": "29/07/2025",
+    "account": "Monzo",
+    "investment": -4059.91,
+    "interest": 10,
+    "currency": "GBP"
+  },
+  {
+    "id": "init-144",
+    "date": "31/07/2025",
+    "account": "XP",
+    "investment": 0,
+    "interest": 3347.03,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-145",
+    "date": "04/08/2025",
+    "account": "Inter",
+    "investment": 4763.88,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-146",
+    "date": "30/08/2025",
+    "account": "XP",
+    "investment": 0,
+    "interest": 3507,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-147",
+    "date": "05/09/2025",
+    "account": "Inter",
+    "investment": -3383.6,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-148",
+    "date": "30/09/2025",
+    "account": "XP",
+    "investment": 0,
+    "interest": 4808,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-149",
+    "date": "03/10/2025",
+    "account": "Inter",
+    "investment": -6136.24,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-150",
+    "date": "31/10/2025",
+    "account": "XP",
+    "investment": 0,
+    "interest": 4112,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-151",
+    "date": "04/11/2025",
+    "account": "Inter",
+    "investment": 3606.82,
+    "interest": 2688.9,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-152",
+    "date": "10/11/2025",
+    "account": "XP",
+    "investment": 31547,
+    "interest": 3971,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-153",
+    "date": "05/12/2025",
+    "account": "Inter",
+    "investment": 13275.85,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-154",
+    "date": "30/12/2025",
+    "account": "XP",
+    "investment": 0,
+    "interest": 5028,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-155",
+    "date": "05/01/2026",
+    "account": "Inter",
+    "investment": -5032.82,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-156",
+    "date": "30/01/2026",
+    "account": "XP",
+    "investment": -2277.3,
+    "interest": 3281,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-157",
+    "date": "05/02/2026",
+    "account": "Inter",
+    "investment": 2609.43,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "init-158",
+    "date": "05/02/2026",
+    "account": "XP",
+    "investment": -14904.57,
+    "interest": 0,
+    "currency": "BRL"
+  },
+  {
+    "id": "1771005336587vvtfio8n2",
+    "date": "13/02/2025",
+    "account": "NuBank",
+    "investment": 1,
+    "interest": 0,
+    "currency": "BRL",
+    "notes": ""
+  },
+  {
+    "id": "1771005359568yi1qri2hj",
+    "date": "13/02/2025",
+    "account": "Fidelity",
+    "investment": -100,
+    "interest": 0,
+    "currency": "BRL",
+    "notes": ""
+  },
+  {
+    "id": "1771362806128f5krn31rv",
+    "date": "17/02/2024",
+    "account": "Fidelity",
+    "investment": 0,
+    "interest": 0.56,
+    "currency": "BRL",
+    "notes": "",
+    "isSalaryContribution": false
+  },
+  {
+    "id": "17713628346027smwcr7b1",
+    "date": "17/02/2024",
+    "account": "NuBank",
+    "investment": 0,
+    "interest": -0.35,
+    "currency": "BRL",
+    "notes": "",
+    "isSalaryContribution": false
+  }
+]
