@@ -5,30 +5,74 @@ export async function GET() {
     try {
         const sql = `
             SELECT 
-                l.id, l.date, l.type, 
+                l.id, l.asset_id, l.date, l.type, 
                 a.name as asset, a.broker, a.allocation_bucket,
-                l.quantity, l.price, l.amount
+                l.quantity, l.price, l.amount,
+                l.realized_pnl, l.realized_roi_percent,
+                l.is_salary_contribution
             FROM ledger l
             JOIN assets a ON l.asset_id = a.id
-            WHERE a.asset_class = 'Pension'
-            ORDER BY l.date DESC
+            WHERE a.asset_class = 'Pension' AND a.sync_status = 'ACTIVE'
+            ORDER BY l.date ASC
         `;
         const rows = await query(sql);
 
-        const data = rows.map(r => ({
-            id: r.id.toString(),
-            date: r.date,
-            asset: r.asset,
-            broker: r.broker,
-            allocationClass: r.allocation_bucket,
-            quantity: r.quantity,
-            price: r.price,
-            value: Math.abs(r.amount), // Pension JSON 'value' usually positive
-            type: r.type === 'Investment' ? 'Buy' : (r.type === 'Divestment' ? 'Sell' : r.type)
-        }));
+        const state = {}; // { [asset|broker]: { qty: 0, cost: 0 } }
+
+        const data = rows.map(r => {
+            const key = `${r.asset}|${r.broker}`;
+            if (!state[key]) state[key] = { qty: 0, cost: 0 };
+
+            let computedPnl = r.realized_pnl;
+            let computedRoi = r.realized_roi_percent;
+
+            const type = (r.type || '').toLowerCase();
+            if (type === 'investment' || type === 'buy') {
+                const qty = parseFloat(r.quantity) || 0;
+                const cost = -parseFloat(r.amount) || 0;
+                state[key].qty += qty;
+                state[key].cost += cost;
+            } else if (type === 'divestment' || type === 'sell') {
+                const qty = parseFloat(r.quantity) || 0;
+                const proceeds = parseFloat(r.amount) || 0;
+
+                const avgCost = state[key].qty > 0 ? state[key].cost / state[key].qty : (r.asset === 'Cash' ? 1 : 0);
+                const costBasis = avgCost * qty;
+
+                if (computedPnl === null || computedPnl === 0) {
+                    computedPnl = proceeds - costBasis;
+                }
+                if (computedRoi === null || computedRoi === 0) {
+                    computedRoi = costBasis > 0 ? (computedPnl / costBasis) * 100 : null;
+                }
+
+                state[key].qty -= qty;
+                state[key].cost -= costBasis;
+            }
+
+            return {
+                id: r.id.toString(),
+                asset_id: r.asset_id,
+                date: r.date,
+                asset: r.asset,
+                broker: r.broker,
+                allocationClass: r.allocation_bucket,
+                quantity: r.quantity,
+                price: r.price,
+                value: Math.abs(r.amount),
+                type: r.type === 'Investment' ? 'Buy' : (r.type === 'Divestment' ? 'Sell' : r.type),
+                pnl: computedPnl,
+                roiPercent: computedRoi,
+                isSalaryContribution: r.is_salary_contribution === 1
+            };
+        });
+
+        // Re-sort DESC for ledger
+        data.sort((a, b) => b.date.localeCompare(a.date));
 
         return NextResponse.json(data);
     } catch (e) {
+        console.error('Pensions API Error:', e);
         return NextResponse.json({ error: 'Failed to fetch pensions' }, { status: 500 });
     }
 }

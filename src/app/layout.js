@@ -1,22 +1,34 @@
-import { Roboto } from "next/font/google";
+import { Bebas_Neue, Space_Mono } from "next/font/google";
 import "./globals.css";
+import AppShell from "@/components/AppShell";
+import Providers from "@/components/Providers";
 
-const roboto = Roboto({
-  weight: ['300', '400', '500', '700'],
+const bebasNeue = Bebas_Neue({
+  weight: ['400'],
   subsets: ["latin"],
+  variable: '--font-bebas',
+  display: 'swap',
+});
+
+const spaceMono = Space_Mono({
+  weight: ['400', '700'],
+  subsets: ["latin"],
+  variable: '--font-space',
   display: 'swap',
 });
 
 export const metadata = {
-  title: "AssetTrack | Personal Finance Dashboard",
-  description: "Advanced personal finance tracking for stocks, crypto, and funds.",
+  title: "Finance Funk | Personal Finance Dashboard",
+  description: "Motown-inspired personal finance tracking for the modern DJ of money.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={roboto.className}>
-        {children}
+    <html lang="en" className={`${bebasNeue.variable} ${spaceMono.variable}`}>
+      <body className={`bg-midnight text-parchment antialiased font-space min-h-screen`}>
+        <Providers>
+          <AppShell>{children}</AppShell>
+        </Providers>
       </body>
     </html>
   );

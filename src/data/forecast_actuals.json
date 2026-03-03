@@ -442,11 +442,11 @@
   },
   {
     "date": "Feb/2026",
-    "actualBRL": 2565972,
-    "actualGBP": 360135,
-    "contribution": 0,
-    "interest": 7517,
-    "contributionGBP": 0,
-    "interestGBP": 1055
+    "actualBRL": 2629707,
+    "actualGBP": 379373,
+    "contribution": 61303,
+    "interest": -32242,
+    "contributionGBP": 8846,
+    "interestGBP": 6816
   }
 ]

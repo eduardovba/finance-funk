@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ConfirmationModal from './ConfirmationModal';
+import AssetSearch from './AssetSearch';
 import { formatCurrency } from '@/lib/currency';
 import pensionMap from '../data/pension_fund_map.json';
 
@@ -10,7 +11,7 @@ const BROKER_CURRENCY = {
     'OAB': 'GBP'
 };
 
-export default function PensionsTab({ transactions, rates, onRefresh }) {
+export default function PensionsTab({ transactions, rates, onRefresh, marketData: globalMarketData, pensionPrices: globalPensionPrices }) {
     const [isLoading, setIsLoading] = useState(false);
     const [ledgerOpen, setLedgerOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -23,48 +24,28 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
     const [sellData, setSellData] = useState(null);
     const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
     const [buyData, setBuyData] = useState(null);
-    const [livePrices, setLivePrices] = useState({});
-    const [marketData, setMarketData] = useState({});
+    const [isFetchingPrice, setIsFetchingPrice] = useState(false);
 
-    useEffect(() => {
-        fetchLivePrices();
-        fetchMarketData();
-    }, []);
+    // Ledger Sorting
+    const [ledgerSortKey, setLedgerSortKey] = useState('date');
+    const [ledgerSortDir, setLedgerSortDir] = useState('desc');
 
-    const fetchMarketData = async () => {
-        try {
-            const tickers = pensionMap
-                .filter(item => item.ticker && item.type === 'market-data')
-                .map(item => item.ticker);
-            if (tickers.length === 0) return;
-            const uniqueTickers = [...new Set(tickers)];
-            const res = await fetch('/api/market-data', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tickers: uniqueTickers })
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setMarketData(data);
-            }
-        } catch (e) { console.error('Error fetching market data:', e); }
+    const marketData = globalMarketData || {};
+    const livePrices = globalPensionPrices || {};
+
+    const handleLedgerSort = (key) => {
+        if (ledgerSortKey === key) {
+            setLedgerSortDir(d => d === 'asc' ? 'desc' : 'asc');
+        } else {
+            setLedgerSortKey(key);
+            setLedgerSortDir('asc');
+        }
     };
 
-    const fetchLivePrices = async () => {
-        try {
-            const res = await fetch('/api/pension-prices');
-            if (res.ok) {
-                const data = await res.json();
-                setLivePrices(prev => ({ ...prev, ...data }));
-            }
-            fetch('/api/pension-prices?refresh=true')
-                .then(res => res.json())
-                .then(data => {
-                    setLivePrices(prev => ({ ...prev, ...data }));
-                })
-                .catch(e => console.error('Error refreshing pension prices:', e));
-        } catch (e) { console.error('Error fetching pension prices:', e); }
-    };
+    const sortArrow = (key) => ledgerSortKey === key ? (ledgerSortDir === 'asc' ? ' ▲' : ' ▼') : '';
+
+    const thStyle = { padding: '12px 16px', color: 'var(--fg-secondary)', borderBottom: '1px solid rgba(255,255,255,0.05)', whiteSpace: 'nowrap' };
+    const thSortable = { ...thStyle, cursor: 'pointer', userSelect: 'none' };
 
     const handleDeleteClick = (id) => { setTrToDelete(id); setIsDeleteModalOpen(true); };
     const handleConfirmDelete = async () => {
@@ -88,6 +69,8 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
                 amount: parseFloat(editingTr.value) || 0,
                 quantity: parseFloat(editingTr.quantity) || 0,
                 price: parseFloat(editingTr.price) || 0,
+                pnl: parseFloat(editingTr.pnl) || null,
+                roiPercent: parseFloat(editingTr.roiPercent) || null
             };
 
             await fetch('/api/transactions', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -97,10 +80,23 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
     };
 
 
-    // Sell flow
     const handleSellClick = (holding) => {
-        // Simple default price = current value / qty? OR 0
-        const price = holding.currentValue && holding.qty ? holding.currentValue / holding.qty : 0;
+        // For Cash, default price to 1
+        let price = holding.currentValue && holding.qty ? holding.currentValue / holding.qty : 0;
+        if (holding.asset === 'Cash') price = 1;
+
+        // Find avg cost from history
+        const sameAssetTrs = transactions.filter(t => t.asset === holding.asset && t.broker === holding.broker);
+        let totalQty = 0;
+        let totalCost = 0;
+        sameAssetTrs.forEach(t => {
+            if (t.type === 'Buy') {
+                totalQty += parseFloat(t.quantity) || 0;
+                totalCost += parseFloat(t.value) || 0;
+            }
+        });
+        const avgCost = totalQty > 0 ? totalCost / totalQty : (holding.asset === 'Cash' ? 1 : 0);
+
         setSellData({
             asset: holding.asset,
             broker: holding.broker,
@@ -110,7 +106,8 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
             qtyToSell: holding.qty,
             sellPricePerShare: price,
             totalProceeds: price * holding.qty,
-            date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+            avgCost: avgCost,
+            date: new Date().toISOString().split('T')[0],
         });
         setIsSellModalOpen(true);
     };
@@ -130,7 +127,9 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
             category: 'Pension',
             quantity: qty,
             amount: value,
-            price: price
+            price: price,
+            pnl: sellData.pnl,
+            roiPercent: sellData.roi
         };
         try {
             const res = await fetch('/api/transactions', {
@@ -152,9 +151,9 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
             currency: 'GBP',
             ticker: holding.ticker,
             qtyToBuy: '',
-            buyPricePerShare: '',
+            buyPricePerShare: holding.asset === 'Cash' ? 1 : '',
             totalInvestment: 0,
-            date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+            date: new Date().toISOString().split('T')[0],
             allocationClass: holding.allocationClass || 'Equity' // Default or carry over
         });
         setIsBuyModalOpen(true);
@@ -169,20 +168,93 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
             qtyToBuy: '',
             buyPricePerShare: '',
             totalInvestment: 0,
-            date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }),
-            allocationClass: 'Equity' // Default
+            date: new Date().toISOString().split('T')[0],
+            allocationClass: 'Equity', // Default
+            buyPath: 'search', // 'search' or 'manual'
+            scraperUrl: '',
+            isVerified: false
         });
         setIsBuyModalOpen(true);
     };
 
-    // Calculate totals for Buy modal
-    useEffect(() => {
-        if (buyData) {
-            const qty = parseFloat(buyData.qtyToBuy) || 0;
-            const price = parseFloat(buyData.buyPricePerShare) || 0;
-            setBuyData(prev => ({ ...prev, totalInvestment: qty * price }));
+    const handleAssetSelect = async (selectedAsset) => {
+        setIsFetchingPrice(true);
+        try {
+            // Check if we already have it in marketData
+            let lp = marketData[selectedAsset.symbol]?.price;
+            let sourceCurrency = marketData[selectedAsset.symbol]?.currency || 'USD';
+
+            if (!lp) {
+                const res = await fetch('/api/market-data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tickers: [selectedAsset.symbol] })
+                });
+                const data = await res.json();
+                if (data[selectedAsset.symbol]?.price) {
+                    lp = data[selectedAsset.symbol].price;
+                    sourceCurrency = data[selectedAsset.symbol].currency || 'USD';
+                }
+            }
+
+            // Currency conversion if needed (Pensions are usually GBP)
+            let finalPrice = lp || '';
+            const destCurrency = buyData.currency || 'GBP';
+            if (lp && sourceCurrency !== destCurrency && rates) {
+                const sourceRate = rates[sourceCurrency] || 1;
+                const destRate = rates[destCurrency] || 1;
+                finalPrice = (parseFloat(lp) / sourceRate) * destRate;
+            }
+
+            setBuyData(prev => ({
+                ...prev,
+                asset: selectedAsset.name,
+                ticker: selectedAsset.symbol,
+                buyPricePerShare: finalPrice,
+                totalInvestment: finalPrice ? (parseFloat(prev.qtyToBuy) || 0) * finalPrice : 0
+            }));
+        } catch (e) {
+            console.error('Failed to fetch asset price:', e);
+        } finally {
+            setIsFetchingPrice(false);
         }
-    }, [buyData?.qtyToBuy, buyData?.buyPricePerShare]);
+    };
+
+    const handleVerifyScrape = async () => {
+        if (!buyData.scraperUrl) return;
+        setIsFetchingPrice(true);
+        try {
+            const res = await fetch('/api/pension-prices', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'test-scrape',
+                    url: buyData.scraperUrl,
+                    assetName: buyData.asset
+                })
+            });
+            const data = await res.json();
+            if (data.price) {
+                setBuyData(prev => ({
+                    ...prev,
+                    asset: prev.asset || data.scrapedName || '',
+                    buyPricePerShare: data.price,
+                    totalInvestment: (parseFloat(prev.qtyToBuy) || 0) * data.price,
+                    isVerified: true,
+                    scrapedType: data.type,
+                    selector: data.selector
+                }));
+            } else {
+                alert('Could not auto-detect price. Please check the URL or enter price manually.');
+            }
+        } catch (e) {
+            console.error('Scrape verification failed:', e);
+            alert('Verification failed.');
+        } finally {
+            setIsFetchingPrice(false);
+        }
+    };
+
 
 
     const handleBuyConfirm = async () => {
@@ -190,6 +262,27 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
         const qty = parseFloat(buyData.qtyToBuy) || 0;
         const price = parseFloat(buyData.buyPricePerShare) || 0;
         if (qty <= 0 || price <= 0) return;
+
+        // 1. If it's a new configuration, save it to the mapping
+        if (buyData.buyPath === 'manual' || (buyData.buyPath === 'search' && buyData.ticker)) {
+            try {
+                await fetch('/api/pension-prices', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'save-config',
+                        asset: buyData.asset,
+                        ticker: buyData.ticker,
+                        url: buyData.scraperUrl,
+                        buyPath: buyData.buyPath,
+                        type: buyData.scrapedType,
+                        selector: buyData.selector
+                    })
+                });
+            } catch (e) {
+                console.error('Failed to save pension config:', e);
+            }
+        }
 
         const tr = {
             date: buyData.date,
@@ -226,8 +319,8 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
 
         const sorted = [...transactions].sort((a, b) => {
             // Date parsing assuming DD/MM/YYYY
-            const da = a.date ? a.date.split('/').reverse().join('') : '';
-            const db = b.date ? b.date.split('/').reverse().join('') : '';
+            const da = a.date || '';
+            const db = b.date || '';
             return da.localeCompare(db);
         });
 
@@ -403,10 +496,10 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
                                     <td style={{ padding: '14px 24px', textAlign: 'right' }}>{formatCurrency(r.valuePerShare, cur)}</td>
                                     <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600 }}>{formatCurrency(r.currentValue, cur)}</td>
                                     <td style={{ padding: '14px 24px', textAlign: 'right', color: 'var(--fg-secondary)' }}>{formatCurrency(r.totalCost, cur)}</td>
-                                    <td style={{ padding: '14px 24px', textAlign: 'right', color: r.pnl >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                    <td style={{ padding: '14px 24px', textAlign: 'right', color: r.pnl >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                         {r.pnl >= 0 ? '+' : ''}{formatCurrency(r.pnl, cur)}
                                     </td>
-                                    <td style={{ padding: '14px 24px', textAlign: 'right', color: r.roi >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                    <td style={{ padding: '14px 24px', textAlign: 'right', color: r.roi >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                         {r.roi >= 0 ? '+' : ''}{r.roi.toFixed(1)}%
                                     </td>
                                     <td style={{ padding: '14px 24px', textAlign: 'center' }}>
@@ -436,12 +529,26 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
         setSellData(prev => {
             const updated = { ...prev, [field]: value };
             const qty = parseFloat(updated.qtyToSell) || 0;
-            const price = parseFloat(updated.sellPricePerShare) || 0;
-            // For Pensions, avgCost is totalCost / qty
+            let price = parseFloat(updated.sellPricePerShare) || 0;
+            let proceeds = parseFloat(updated.totalProceeds) || 0;
             const avgCost = prev.avgCost; // Passed on init
-            const costBasis = avgCost * qty;
-            updated.totalProceeds = price * qty;
-            // P&L = Proceeds - Cost Basis
+
+            if (updated.asset === 'Cash') {
+                price = 1;
+                updated.sellPricePerShare = 1;
+            }
+
+            if (field === 'totalProceeds') {
+                if (qty > 0) {
+                    price = proceeds / qty;
+                    updated.sellPricePerShare = price;
+                }
+            } else if (field === 'qtyToSell' || field === 'sellPricePerShare') {
+                proceeds = price * qty;
+                updated.totalProceeds = proceeds;
+            }
+
+            const costBasis = (avgCost || 0) * qty;
             updated.pnl = updated.totalProceeds - costBasis;
             updated.roi = costBasis !== 0 ? (updated.pnl / costBasis * 100) : 0;
             return updated;
@@ -452,8 +559,24 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
         setBuyData(prev => {
             const updated = { ...prev, [field]: value };
             const qty = parseFloat(updated.qtyToBuy) || 0;
-            const price = parseFloat(updated.buyPricePerShare) || 0;
-            updated.totalInvestment = qty * price;
+            let price = parseFloat(updated.buyPricePerShare) || 0;
+            let investment = parseFloat(updated.totalInvestment) || 0;
+
+            if (updated.asset === 'Cash') {
+                price = 1;
+                updated.buyPricePerShare = 1;
+            }
+
+            if (field === 'totalInvestment') {
+                if (qty > 0) {
+                    price = investment / qty;
+                    updated.buyPricePerShare = price;
+                }
+            } else if (field === 'qtyToBuy' || field === 'buyPricePerShare') {
+                investment = qty * price;
+                updated.totalInvestment = investment;
+            }
+
             return updated;
         });
     };
@@ -544,7 +667,7 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                 }}>
                     <h3 style={{ margin: 0, fontSize: '1.3rem' }}>📊 Consolidated Portfolio</h3>
-                    <span style={{ color: totalPnL >= 0 ? 'var(--accent-color)' : 'var(--error)', fontWeight: 700, fontSize: '1.1rem' }}>
+                    <span style={{ color: totalPnL >= 0 ? 'var(--vu-green)' : 'var(--error)', fontWeight: 700, fontSize: '1.1rem' }}>
                         {totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL, 'GBP')} ({totalROI.toFixed(1)}%)
                     </span>
                 </div>
@@ -564,10 +687,10 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
                                 <td style={{ padding: '14px 24px', fontWeight: 600 }}>{s.broker}</td>
                                 <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600 }}>{formatCurrency(s.currentValue, 'GBP')}</td>
                                 <td style={{ padding: '14px 24px', textAlign: 'right', color: 'var(--fg-secondary)' }}>{formatCurrency(s.purchasePrice, 'GBP')}</td>
-                                <td style={{ padding: '14px 24px', textAlign: 'right', color: s.pnl >= 0 ? 'var(--accent-color)' : 'var(--error)', fontWeight: 600 }}>
+                                <td style={{ padding: '14px 24px', textAlign: 'right', color: s.pnl >= 0 ? 'var(--vu-green)' : 'var(--error)', fontWeight: 600 }}>
                                     {s.pnl >= 0 ? '+' : ''}{formatCurrency(s.pnl, 'GBP')}
                                 </td>
-                                <td style={{ padding: '14px 24px', textAlign: 'right', color: s.roi >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                <td style={{ padding: '14px 24px', textAlign: 'right', color: s.roi >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                     {s.roi >= 0 ? '+' : ''}{s.roi.toFixed(1)}%
                                 </td>
                             </tr>
@@ -576,10 +699,10 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
                             <td style={{ padding: '14px 24px', fontWeight: 700, fontSize: '1.05rem' }}>Total</td>
                             <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 700, fontSize: '1.05rem' }}>{formatCurrency(totalGBP, 'GBP')}</td>
                             <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600, color: 'var(--fg-secondary)' }}>{formatCurrency(totalCostGBP, 'GBP')}</td>
-                            <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 700, fontSize: '1.05rem', color: totalPnL >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                            <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 700, fontSize: '1.05rem', color: totalPnL >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                 {totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL, 'GBP')}
                             </td>
-                            <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 700, fontSize: '1.05rem', color: totalROI >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                            <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 700, fontSize: '1.05rem', color: totalROI >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                 {totalROI >= 0 ? '+' : ''}{totalROI.toFixed(1)}%
                             </td>
                         </tr>
@@ -608,24 +731,46 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                             <thead>
                                 <tr style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
-                                    <th style={{ padding: '12px 16px', color: 'var(--fg-secondary)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Date</th>
-                                    <th style={{ padding: '12px 16px', color: 'var(--fg-secondary)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Broker</th>
-                                    <th style={{ padding: '12px 16px', color: 'var(--fg-secondary)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Asset</th>
-                                    <th style={{ padding: '12px 16px', textAlign: 'right', color: 'var(--fg-secondary)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Value</th>
-                                    <th style={{ padding: '12px 16px', textAlign: 'center', color: 'var(--fg-secondary)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Actions</th>
+                                    <th style={thSortable} onClick={() => handleLedgerSort('date')}>Date{sortArrow('date')}</th>
+                                    <th style={thSortable} onClick={() => handleLedgerSort('broker')}>Broker{sortArrow('broker')}</th>
+                                    <th style={thSortable} onClick={() => handleLedgerSort('asset')}>Asset{sortArrow('asset')}</th>
+                                    <th style={{ ...thSortable, textAlign: 'right' }} onClick={() => handleLedgerSort('value')}>Value{sortArrow('value')}</th>
+                                    <th style={{ ...thSortable, textAlign: 'right' }} onClick={() => handleLedgerSort('pnl')}>P&L{sortArrow('pnl')}</th>
+                                    <th style={{ ...thSortable, textAlign: 'right' }} onClick={() => handleLedgerSort('roiPercent')}>ROI %{sortArrow('roiPercent')}</th>
+                                    <th style={{ ...thStyle, textAlign: 'center' }}>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {[...transactions].sort((a, b) => {
-                                    const da = a.date ? a.date.split('/').reverse().join('') : '';
-                                    const db = b.date ? b.date.split('/').reverse().join('') : '';
-                                    return db.localeCompare(da);
+                                    let valA = a[ledgerSortKey];
+                                    let valB = b[ledgerSortKey];
+
+                                    if (ledgerSortKey === 'date') {
+                                        valA = new Date(valA || 0);
+                                        valB = new Date(valB || 0);
+                                    } else if (ledgerSortKey === 'value' || ledgerSortKey === 'pnl' || ledgerSortKey === 'roiPercent') {
+                                        valA = parseFloat(valA) || 0;
+                                        valB = parseFloat(valB) || 0;
+                                    } else {
+                                        valA = String(valA || '').toLowerCase();
+                                        valB = String(valB || '').toLowerCase();
+                                    }
+
+                                    if (valA < valB) return ledgerSortDir === 'asc' ? -1 : 1;
+                                    if (valA > valB) return ledgerSortDir === 'asc' ? 1 : -1;
+                                    return 0;
                                 }).map(tr => (
                                     <tr key={tr.id} className="ledger-row" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                         <td style={{ padding: '12px 16px', color: 'var(--fg-secondary)' }}>{tr.date}</td>
                                         <td style={{ padding: '12px 16px', color: 'var(--fg-secondary)' }}>{tr.broker}</td>
-                                        <td style={{ padding: '12px 16px', fontWeight: 600, color: tr.type === 'Sell' ? 'var(--error)' : 'var(--accent-color)' }}>{tr.type === 'Sell' ? '↓ ' : '↑ '}{tr.asset}</td>
+                                        <td style={{ padding: '12px 16px', fontWeight: 600, color: tr.type === 'Sell' ? 'var(--error)' : 'var(--vu-green)' }}>{tr.type === 'Sell' ? '↓ ' : '↑ '}{tr.asset}</td>
                                         <td style={{ padding: '12px 16px', textAlign: 'right' }}>{formatCurrency(parseFloat(tr.value) || 0, 'GBP')}</td>
+                                        <td style={{ padding: '12px 16px', textAlign: 'right', color: (tr.pnl || 0) >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
+                                            {tr.pnl !== null && tr.pnl !== undefined ? `${(tr.pnl >= 0 ? '+' : '')}${formatCurrency(tr.pnl, 'GBP')}` : '-'}
+                                        </td>
+                                        <td style={{ padding: '12px 16px', textAlign: 'right', color: (tr.roiPercent || 0) >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
+                                            {tr.roiPercent !== null && tr.roiPercent !== undefined ? `${(tr.roiPercent >= 0 ? '+' : '')}${tr.roiPercent.toFixed(1)}%` : '-'}
+                                        </td>
                                         <td style={{ padding: '12px 24px', textAlign: 'center' }}>
                                             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                                                 <button onClick={() => handleEditClick(tr)} className="btn-icon btn-edit">Edit</button>
@@ -670,7 +815,7 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Quantity to Sell</label>
                                     <input type="number" value={sellData.qtyToSell} onChange={e => updateSellCalc('qtyToSell', e.target.value)}
-                                        max={sellData.sharesHeld} step="any"
+                                        step="any"
                                         style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
                                 </div>
                                 <div>
@@ -683,9 +828,30 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
 
                             {/* Summary card */}
                             <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '20px', marginBottom: '24px', border: '1px solid var(--glass-border)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                                    <span style={{ color: 'var(--fg-secondary)' }}>Total Proceeds</span>
-                                    <span style={{ fontWeight: 600 }}>{formatCurrency(sellData.totalProceeds, sellData.currency)}</span>
+                                <div style={{ marginBottom: '16px' }}>
+                                    <label style={{ display: 'block', marginBottom: '8px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Total Sale Value (Proceeds)</label>
+                                    <div style={{ position: 'relative' }}>
+                                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--fg-secondary)' }}>
+                                            {sellData.currency === 'BRL' ? 'R$' : (sellData.currency === 'USD' ? '$' : '£')}
+                                        </span>
+                                        <input
+                                            type="number"
+                                            value={sellData.totalProceeds}
+                                            onChange={e => updateSellCalc('totalProceeds', e.target.value)}
+                                            step="any"
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px 12px 10px 32px',
+                                                background: 'rgba(255,255,255,0.08)',
+                                                border: '1px solid var(--accent-color)',
+                                                borderRadius: '8px',
+                                                color: '#fff',
+                                                fontSize: '1.1rem',
+                                                fontWeight: 600,
+                                                outline: 'none'
+                                            }}
+                                        />
+                                    </div>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                                     <span style={{ color: 'var(--fg-secondary)' }}>Cost Basis</span>
@@ -693,7 +859,7 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
                                 </div>
                                 <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between' }}>
                                     <span style={{ fontWeight: 600 }}>P&L</span>
-                                    <span style={{ fontWeight: 600, color: (sellData.pnl || 0) >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                    <span style={{ fontWeight: 600, color: (sellData.pnl || 0) >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                         {(sellData.pnl || 0) >= 0 ? '+' : ''}{formatCurrency(sellData.pnl || 0, sellData.currency)}
                                     </span>
                                 </div>
@@ -713,38 +879,109 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
                 isBuyModalOpen && buyData && (
                     <div style={{ position: 'fixed', inset: 0, zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} onClick={() => setIsBuyModalOpen(false)} />
-                        <div className="glass-card" style={{ position: 'relative', zIndex: 1000, padding: '32px', width: '520px', maxWidth: '90vw' }}>
-                            <h3 style={{ marginBottom: '24px', fontSize: '1.3rem', color: 'var(--accent-color)' }}>Buy Asset</h3>
+                        <div className="glass-card" style={{ position: 'relative', zIndex: 1000, padding: '32px', width: '560px', maxWidth: '95vw' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                                <h3 style={{ margin: 0, fontSize: '1.3rem', color: 'var(--accent-color)' }}>Buy Asset</h3>
+                                <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', padding: '4px' }}>
+                                    {['search', 'manual'].map(p => (
+                                        <button
+                                            key={p}
+                                            onClick={() => setBuyData(prev => ({ ...prev, buyPath: p }))}
+                                            style={{
+                                                padding: '6px 12px',
+                                                borderRadius: '16px',
+                                                border: 'none',
+                                                background: buyData.buyPath === p ? 'var(--accent-color)' : 'transparent',
+                                                color: buyData.buyPath === p ? '#000' : 'var(--fg-secondary)',
+                                                fontSize: '0.8rem',
+                                                fontWeight: 600,
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            {p === 'search' ? 'Search Asset' : 'Add Scraper URL'}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Broker</label>
-                                    <input type="text" value={buyData.broker} readOnly
-                                        style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--fg-secondary)', fontSize: '0.95rem', outline: 'none' }} />
+                                    <div style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--fg-secondary)', fontSize: '0.95rem' }}>
+                                        {buyData.broker}
+                                    </div>
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Currency</label>
-                                    <input type="text" value={buyData.currency} readOnly
-                                        style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--fg-secondary)', fontSize: '0.95rem', outline: 'none' }} />
+                                    <div style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--fg-secondary)', fontSize: '0.95rem' }}>
+                                        {buyData.currency}
+                                    </div>
                                 </div>
                             </div>
 
-                            <div style={{ marginBottom: '16px' }}>
-                                <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Asset Name</label>
-                                <input type="text" value={buyData.asset} onChange={e => setBuyData(prev => ({ ...prev, asset: e.target.value }))}
-                                    style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
-                            </div>
+                            {buyData.buyPath === 'search' ? (
+                                <div style={{ marginBottom: '16px' }}>
+                                    <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Search Asset (Ticker)</label>
+                                    {buyData.ticker ? (
+                                        <div style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--accent-color)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div>
+                                                <span style={{ fontWeight: 700, marginRight: '8px' }}>{buyData.ticker}</span>
+                                                <span style={{ color: 'var(--fg-secondary)', fontSize: '0.9rem' }}>{buyData.asset}</span>
+                                            </div>
+                                            <button onClick={() => setBuyData(prev => ({ ...prev, ticker: '', asset: '' }))} style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer' }}>✕</button>
+                                        </div>
+                                    ) : (
+                                        <AssetSearch onSelect={handleAssetSelect} />
+                                    )}
+                                </div>
+                            ) : (
+                                <>
+                                    <div style={{ marginBottom: '16px' }}>
+                                        <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Asset Name</label>
+                                        <input type="text" value={buyData.asset} onChange={e => setBuyData(prev => ({ ...prev, asset: e.target.value }))}
+                                            placeholder="e.g. Fidelity World Index"
+                                            style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
+                                    </div>
+                                    <div style={{ marginBottom: '16px' }}>
+                                        <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Scraper URL</label>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <input type="text" value={buyData.scraperUrl} onChange={e => setBuyData(prev => ({ ...prev, scraperUrl: e.target.value, isVerified: false }))}
+                                                placeholder="https://www.fidelity.co.uk/..."
+                                                style={{ flex: 1, padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
+                                            <button
+                                                onClick={handleVerifyScrape}
+                                                disabled={!buyData.scraperUrl || isFetchingPrice}
+                                                style={{
+                                                    padding: '0 16px',
+                                                    background: buyData.isVerified ? 'var(--accent-color)' : 'rgba(255,255,255,0.1)',
+                                                    border: 'none',
+                                                    borderRadius: '8px',
+                                                    color: buyData.isVerified ? '#000' : '#fff',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: 600,
+                                                    cursor: (buyData.scraperUrl) ? 'pointer' : 'not-allowed',
+                                                    opacity: isFetchingPrice ? 0.7 : 1
+                                                }}
+                                            >
+                                                {isFetchingPrice ? '...' : (buyData.isVerified ? 'Verified ✓' : 'Verify')}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Date</label>
-                                    <input type="text" value={buyData.date} onChange={e => setBuyData(prev => ({ ...prev, date: e.target.value }))}
+                                    <input type="date" value={buyData.date} onChange={e => setBuyData(prev => ({ ...prev, date: e.target.value }))}
                                         style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Ticker (Optional)</label>
-                                    <input type="text" value={buyData.ticker} onChange={e => setBuyData(prev => ({ ...prev, ticker: e.target.value }))}
-                                        style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
+                                    <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Ticker (Meta Data)</label>
+                                    <input type="text" value={buyData.ticker} readOnly={buyData.buyPath === 'search'}
+                                        onChange={e => setBuyData(prev => ({ ...prev, ticker: e.target.value }))}
+                                        style={{ width: '100%', padding: '10px 12px', background: buyData.buyPath === 'search' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: buyData.buyPath === 'search' ? 'var(--fg-secondary)' : '#fff', fontSize: '0.95rem', outline: 'none' }} />
                                 </div>
                             </div>
 
@@ -752,26 +989,50 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Quantity</label>
                                     <input type="number" value={buyData.qtyToBuy} onChange={e => updateBuyCalc('qtyToBuy', e.target.value)}
-                                        step="any"
+                                        step="any" placeholder="0.00"
                                         style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Price / Share</label>
-                                    <input type="number" value={buyData.buyPricePerShare} onChange={e => updateBuyCalc('buyPricePerShare', e.target.value)}
-                                        step="any"
-                                        style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
+                                    <div style={{ position: 'relative' }}>
+                                        <input type="number" value={buyData.buyPricePerShare} onChange={e => updateBuyCalc('buyPricePerShare', e.target.value)}
+                                            step="any" placeholder="0.00"
+                                            style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
+                                        {isFetchingPrice && <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.7rem', color: 'var(--accent-color)' }}>Fetching...</span>}
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Summary card */}
-                            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '20px', marginBottom: '24px', border: '1px solid var(--glass-border)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: 'var(--fg-secondary)' }}>Total Investment</span>
-                                    <span style={{ fontWeight: 600, color: 'var(--accent-color)' }}>{formatCurrency(buyData.totalInvestment, buyData.currency)}</span>
+                            {/* Total card */}
+                            <div style={{ background: 'rgba(16, 185, 129, 0.05)', borderRadius: '12px', padding: '20px', marginBottom: '24px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                                <div style={{ marginBottom: '8px' }}>
+                                    <label style={{ display: 'block', marginBottom: '8px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Total Investment</label>
+                                    <div style={{ position: 'relative' }}>
+                                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--fg-secondary)' }}>
+                                            {buyData.currency === 'BRL' ? 'R$' : (buyData.currency === 'USD' ? '$' : '£')}
+                                        </span>
+                                        <input
+                                            type="number"
+                                            value={buyData.totalInvestment}
+                                            onChange={e => updateBuyCalc('totalInvestment', e.target.value)}
+                                            step="any"
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px 12px 10px 32px',
+                                                background: 'rgba(255,255,255,0.08)',
+                                                border: '1px solid var(--accent-color)',
+                                                borderRadius: '8px',
+                                                color: '#fff',
+                                                fontSize: '1.1rem',
+                                                fontWeight: 700,
+                                                outline: 'none'
+                                            }}
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
                                 <input
                                     type="checkbox"
                                     checked={buyData.isSalaryContribution || false}
@@ -786,7 +1047,14 @@ export default function PensionsTab({ transactions, rates, onRefresh }) {
 
                             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                                 <button onClick={() => setIsBuyModalOpen(false)} style={{ padding: '10px 20px', background: 'transparent', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--fg-secondary)', cursor: 'pointer' }}>Cancel</button>
-                                <button onClick={handleBuyConfirm} className="btn-primary" style={{ padding: '10px 20px', borderRadius: '8px' }}>Confirm Buy</button>
+                                <button
+                                    onClick={handleBuyConfirm}
+                                    className="btn-primary"
+                                    disabled={!buyData.asset || !buyData.qtyToBuy || !buyData.buyPricePerShare}
+                                    style={{ padding: '10px 20px', borderRadius: '8px', opacity: (!buyData.asset || !buyData.qtyToBuy || !buyData.buyPricePerShare) ? 0.5 : 1 }}
+                                >
+                                    Confirm Buy
+                                </button>
                             </div>
                         </div>
                     </div>

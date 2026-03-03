@@ -49,14 +49,22 @@ node_modules/
 .next/
 out/
 build/
-.env
-*.sqlite
-*.sqlite-journal
 dist/
 .DS_Store
 
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+
+# Environment Variables
+.env
+.env.local
+
 # Temporary / Problem dirs
 .npm_cache/
+.npm_local_cache/
 npx_cache/
 new_node_modules/
 temp_install/

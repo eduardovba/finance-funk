@@ -1,6 +1,6 @@
-"use client";
-
 import { useState } from 'react';
+import CurrencySelector from './CurrencySelector';
+import { SUPPORTED_CURRENCIES } from '@/lib/currency';
 
 export default function MortgageTransactionForm({ onAdd, onCancel }) {
     const [formData, setFormData] = useState(() => {
@@ -13,13 +13,13 @@ export default function MortgageTransactionForm({ onAdd, onCancel }) {
             type: 'Mortgage',
             total: '',
             interest: '',
+            currency: 'GBP',
             notes: 'Mortgage',
-            isSalaryContribution: true // Default to true for mortgage usually? Or false? Let's default to false to be safe/consistent.
-            // Actually, for mortgage, it's almost always salary. But let's stick to false or let user check it. 
-            // User asked for a checkbox.
+            isSalaryContribution: true
         };
     });
 
+    const currencySymbol = SUPPORTED_CURRENCIES[formData.currency]?.symbol || '£';
     const principal = (parseFloat(formData.total) || 0) - (parseFloat(formData.interest) || 0);
 
     const handleSubmit = (e) => {
@@ -29,6 +29,7 @@ export default function MortgageTransactionForm({ onAdd, onCancel }) {
             costs: parseFloat(formData.total) || 0,
             principal: principal,
             interest: parseFloat(formData.interest) || 0,
+            currency: formData.currency,
             source: formData.type,
             notes: formData.notes,
             isSalaryContribution: formData.isSalaryContribution || false
@@ -78,9 +79,9 @@ export default function MortgageTransactionForm({ onAdd, onCancel }) {
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1.5fr)', gap: '16px', alignItems: 'end' }}>
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Total Paid (£)</label>
+                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Total Paid ({currencySymbol})</label>
                         <input
                             type="number"
                             step="0.01"
@@ -93,7 +94,13 @@ export default function MortgageTransactionForm({ onAdd, onCancel }) {
                         />
                     </div>
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Interest (£)</label>
+                        <CurrencySelector
+                            value={formData.currency}
+                            onChange={(val) => setFormData({ ...formData, currency: val })}
+                        />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Interest ({currencySymbol})</label>
                         <input
                             type="number"
                             step="0.01"
@@ -109,7 +116,7 @@ export default function MortgageTransactionForm({ onAdd, onCancel }) {
                 <div style={{ padding: '16px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', border: '1px solid var(--accent-color)' }}>
                     <div style={{ color: 'var(--fg-secondary)', fontSize: '0.8rem', marginBottom: '4px' }}>Calculated Principal</div>
                     <div style={{ fontSize: '1.5rem', fontWeight: '600', color: 'var(--accent-color)' }}>
-                        £ {principal.toLocaleString('en-GB', { minimumFractionDigits: 2 })}
+                        {currencySymbol} {principal.toLocaleString(SUPPORTED_CURRENCIES[formData.currency]?.locale || 'en-GB', { minimumFractionDigits: 2 })}
                     </div>
                 </div>
 

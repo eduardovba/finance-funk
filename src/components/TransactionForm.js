@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import CurrencySelector from './CurrencySelector';
 
 export default function TransactionForm({ onAdd, onCancel, initialData = null }) {
     const [formData, setFormData] = useState({
-        date: new Date().toLocaleDateString('en-GB'),
+        date: new Date().toISOString().split('T')[0],
         account: 'XP',
         investment: '',
         interest: '',
@@ -81,9 +82,9 @@ export default function TransactionForm({ onAdd, onCancel, initialData = null })
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', alignItems: 'end' }}>
-                    <div style={{ gridColumn: 'span 2' }}>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Investment Amount</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'end' }}>
+                    <div style={{ gridColumn: 'span 1' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Amount</label>
                         <input
                             type="number"
                             step="0.01"
@@ -94,18 +95,11 @@ export default function TransactionForm({ onAdd, onCancel, initialData = null })
                             style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         />
                     </div>
-                    <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Currency</label>
-                        <select
+                    <div style={{ gridColumn: 'span 1' }}>
+                        <CurrencySelector
                             value={formData.currency}
-                            onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                            className="glass-card"
-                            style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
-                        >
-                            <option value="BRL" style={{ background: '#111' }}>BRL</option>
-                            <option value="GBP" style={{ background: '#111' }}>GBP</option>
-                            <option value="USD" style={{ background: '#111' }}>USD</option>
-                        </select>
+                            onChange={(val) => setFormData({ ...formData, currency: val })}
+                        />
                     </div>
                 </div>
 

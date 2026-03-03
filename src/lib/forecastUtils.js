@@ -10,6 +10,13 @@ export const calculateFV = (PV, r, n, pmt) => {
     return PV * Math.pow(1 + r, n) + pmt * (Math.pow(1 + r, n) - 1) / r;
 };
 
+// Payment function (Reverse FV): Calculate required PMT to hit FV given PV, r, n
+export const calculatePMT = (FV, PV, r, n) => {
+    if (Math.abs(r) < 1e-9) return (FV - PV) / (n > 0 ? n : 1);
+    const term = Math.pow(1 + r, n);
+    return (FV - PV * term) * r / (term - 1);
+};
+
 export const parseDate = (str) => {
     if (!str) return new Date();
     const [mmm, yyyy] = str.split('/');

@@ -301,18 +301,20 @@ export const calculateMonthlyIncome = (transactions, realEstate, historicalIncom
             realEstate: 0,
             equity: 0,
             fixedIncome: 0,
+            extraordinary: 0,
             isHistorical: true
         };
-        map[h.month].salary += h.salarySavings;
-        map[h.month].fixedIncome += h.fixedIncome;
-        map[h.month].realEstate += h.realEstate;
-        map[h.month].equity += h.equity;
+        map[h.month].salary += h.salarySavings || 0;
+        map[h.month].fixedIncome += h.fixedIncome || 0;
+        map[h.month].realEstate += h.realEstate || 0;
+        map[h.month].equity += h.equity || 0;
+        map[h.month].extraordinary += h.extraordinary || 0;
     });
 
     // 2. Process Live Data
     transactions.forEach(tr => {
         const m = tr.date.slice(0, 7);
-        if (!map[m]) map[m] = { month: m, salary: 0, realEstate: 0, equity: 0, fixedIncome: 0, isHistorical: false };
+        if (!map[m]) map[m] = { month: m, salary: 0, realEstate: 0, equity: 0, fixedIncome: 0, extraordinary: 0, isHistorical: false };
 
         // A. Salary Contributions
         if (tr.isSalaryContribution) {
@@ -336,52 +338,19 @@ export const calculateMonthlyIncome = (transactions, realEstate, historicalIncom
     // C. Real Estate Revenue (Airbnb Ledger)
     if (realEstate && realEstate.airbnb && realEstate.airbnb.ledger) {
         realEstate.airbnb.ledger.forEach(row => {
-            // row: { month: 'Feb-26', costs: 1108.25, revenue: 7518 }
-            // revenue is in BRL (implied, as property is in Brazil/ledger is BRL based usually).
-            // Wait, previous code checked for 'Revenue' category transaction.
-            // But `airbnb.ledger` is an array of objects with `revenue` field.
-
             // Parse month: "Feb-26" -> "2026-02"
             if (!row.month || !row.month.includes('-')) return;
             const [mmm, yy] = row.month.split('-');
             const months = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06', Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12' };
             const m = `20${yy}-${months[mmm] || '01'}`;
-            if (!map[m]) map[m] = { month: m, salary: 0, realEstate: 0, equity: 0, fixedIncome: 0, isHistorical: false };
+            if (!map[m]) map[m] = { month: m, salary: 0, realEstate: 0, equity: 0, fixedIncome: 0, extraordinary: 0, isHistorical: false };
 
             // If historical realEstate is 0, supplement with live data
             if (!map[m].isHistorical || map[m].realEstate === 0) {
-                // Hack/Approximation: Use a default rate
+                // Approximate BRL to GBP conversion based on historical rate
                 const BRL_TO_GBP = 7.0;
                 map[m].realEstate += (row.revenue || 0) / BRL_TO_GBP;
             }
-
-            // Revenue is Income.
-            // It is likely in BRL. We need to convert to GBP?
-            // `ledgerUtils` doesn't have easy access to historical rates here unless passed...
-            // `transactions` (normalized) had rates applied.
-            // Here we are iterating raw ledger.
-            // Let's assume for now we use the `rates` passed to `normalizeTransactions`? 
-            // But this function doesn't have `rates`.
-            // However, `row.revenue` is BRL.
-            // We should ideally convert. The user mentioned "R$ 7518".
-            // If the chart is in GBP, we must convert.
-            // Filtered Historical Income is in GBP.
-
-            // Hack/Approximation: Use a default rate or try to find rate from `transactions` of that month?
-            // Better: `GeneralLedgerTab` should pass a `getRate` function or we pass `rates`.
-            // For now, let's assume `row.revenue` is the value we want, but if it is BRL (7518), and we show GBP...
-            // 7518 BRL ~ 1000 GBP.
-            // We MUST convert.
-            // Let's assume a static rate of 7.0 for BRL since we are deep in utils.
-            // OR better: Check if `transactions` has a rate for that month?
-            // Actually, `normalizeTransactions` was called before.
-            // Let's rely on `row.revenue` being in BRL and divide by ~7.0 if we can't find a rate.
-            // WAIT, `realEstate.inkCourt` was GBP. `airbnb` is Brazil.
-            // Let's use 7.0 as a safe placeholder if no rate available, but ideally we'd pass `rates`.
-            // Since we don't have `rates` arg here, we will approximate or check if `window.rates` exists? No.
-            // Let's hardcode a fallback divisor for BRL -> GBP.
-            const BRL_TO_GBP = 7.0;
-            map[m].realEstate += (row.revenue || 0) / BRL_TO_GBP;
         });
     }
 
@@ -399,7 +368,7 @@ export const calculateMonthlyIncome = (transactions, realEstate, historicalIncom
                     m = tr.date.slice(0, 7);
                 }
 
-                if (!map[m]) map[m] = { month: m, salary: 0, realEstate: 0, equity: 0, fixedIncome: 0, isHistorical: false };
+                if (!map[m]) map[m] = { month: m, salary: 0, realEstate: 0, equity: 0, fixedIncome: 0, extraordinary: 0, isHistorical: false };
 
                 // If historical fixedIncome is 0, supplement with live data
                 if (!map[m].isHistorical || map[m].fixedIncome === 0) {
@@ -417,11 +386,15 @@ export const calculateMonthlyIncome = (transactions, realEstate, historicalIncom
 
     // Ensure current month exists even if no transactions yet
     if (!map[currentMonth]) {
-        map[currentMonth] = { month: currentMonth, salary: 0, realEstate: 0, equity: 0, fixedIncome: 0, isHistorical: false };
+        map[currentMonth] = { month: currentMonth, salary: 0, realEstate: 0, equity: 0, fixedIncome: 0, extraordinary: 0, isHistorical: false };
     }
 
     return Object.values(map)
-        .filter(d => d.month <= currentMonth)
+        .map(d => ({
+            ...d,
+            total: d.salary + d.realEstate + d.equity + d.fixedIncome + d.extraordinary
+        }))
+        .filter(d => d.month <= currentMonth && (d.month === currentMonth || d.salary !== 0 || d.realEstate !== 0 || d.equity !== 0 || d.fixedIncome !== 0 || d.extraordinary !== 0))
         .sort((a, b) => b.month.localeCompare(a.month));
 };
 
@@ -431,12 +404,12 @@ export const calculateMonthlyInvestments = (allTransactions, historicalInvestmen
     // 1. Historical
     historicalInvestments.forEach(h => {
         if (!map[h.month]) map[h.month] = { month: h.month, equity: 0, fixedIncome: 0, realEstate: 0, pensions: 0, crypto: 0, debt: 0, isHistorical: true };
-        map[h.month].equity += h.equity;
-        map[h.month].fixedIncome += h.fixedIncome;
-        map[h.month].realEstate += h.realEstate;
-        map[h.month].pensions += h.pensions; // RECONCILIATION: Restored CSV data
-        map[h.month].crypto += h.crypto;
-        map[h.month].debt += h.debt;
+        map[h.month].equity += (h.equity || 0);
+        map[h.month].fixedIncome += (h.fixedIncome || 0);
+        map[h.month].realEstate += (h.realEstate || 0);
+        map[h.month].pensions += (h.pension || h.pensions || 0); // Handle both singular and plural
+        map[h.month].crypto += (h.crypto || 0);
+        map[h.month].debt += (h.debt || 0);
     });
 
     // 2. Live
@@ -471,6 +444,10 @@ export const calculateMonthlyInvestments = (allTransactions, historicalInvestmen
     }
 
     return Object.values(map)
+        .map(d => ({
+            ...d,
+            total: d.equity + d.fixedIncome + d.realEstate + d.pensions + d.crypto + d.debt
+        }))
         .filter(d => d.month <= currentMonth)
         .sort((a, b) => b.month.localeCompare(a.month));
 };

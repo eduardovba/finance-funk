@@ -2,81 +2,91 @@
   "L&G PMC 2045 - 2050 Target Date Pn 3": {
     "price": 18.321199999999997,
     "currency": "GBP",
-    "lastUpdated": "2026-02-19T23:29:50.229Z"
+    "lastUpdated": "2026-03-03T02:06:46.655Z"
   },
   "OAB": {
     "price": 1.4906514,
     "currency": "GBP",
-    "lastUpdated": "2026-02-19T23:29:50.229Z"
+    "lastUpdated": "2026-03-03T02:06:46.655Z"
   },
   "Fidelity Funds - Global Technology": {
-    "price": 10.33,
+    "price": 10.45,
     "currency": "GBP",
-    "lastUpdated": "2026-02-19T23:29:51.225Z"
+    "lastUpdated": "2026-03-03T02:06:47.485Z"
   },
   "HSBC FTSE All-World Index": {
-    "price": 3.7879,
+    "price": 3.8099000000000003,
     "currency": "GBP",
-    "lastUpdated": "2026-02-19T23:29:51.745Z"
+    "lastUpdated": "2026-03-03T02:06:47.683Z"
   },
   "Aviva Pensions International Index Tracking S2": {
-    "price": 10.67,
+    "price": 10.75,
     "currency": "GBP",
-    "lastUpdated": "2026-02-19T23:29:51.203Z"
+    "lastUpdated": "2026-03-03T02:06:47.974Z"
   },
   "Fidelity Index US Fund P-Acc": {
-    "price": 5.5077,
+    "price": 5.4776,
     "currency": "GBP",
-    "lastUpdated": "2026-02-19T23:29:51.341Z"
+    "lastUpdated": "2026-03-03T02:06:47.954Z"
   },
   "Aviva Pensions BlackRock US Equity Index Tracker S6": {
-    "price": 10.78,
+    "price": 10.82,
     "currency": "GBP",
-    "lastUpdated": "2026-02-19T23:29:51.186Z"
+    "lastUpdated": "2026-03-03T02:06:47.974Z"
   },
   "Fidelity Index Europe ex UK Fund P-Accumulation": {
-    "price": 2.8764999999999996,
+    "price": 2.8657,
     "currency": "GBP",
-    "lastUpdated": "2026-02-19T23:29:51.244Z"
+    "lastUpdated": "2026-03-03T02:06:48.032Z"
   },
   "BlackRock Consensus 85 I Acc": {
-    "price": 0.038,
+    "price": 0.0381,
     "currency": "GBP",
-    "lastUpdated": "2026-02-19T23:29:51.714Z"
+    "lastUpdated": "2026-03-03T02:06:47.656Z"
   },
   "Ishares US Bonds 20+ Years": {
-    "price": 2.4665,
+    "price": 2.4905,
     "currency": "GBP",
-    "lastUpdated": "2026-02-19T23:29:50.966Z"
+    "lastUpdated": "2026-03-03T02:06:49.538Z"
   },
   "Ishares Physical Gold": {
-    "price": 72.13,
+    "price": 77.07,
     "currency": "GBP",
-    "lastUpdated": "2026-02-19T23:29:51.026Z"
+    "lastUpdated": "2026-03-03T02:06:47.426Z"
   },
   "HL Growth Fund": {
-    "price": 1.3462,
+    "price": 1.3606,
     "currency": "GBP",
-    "lastUpdated": "2026-02-19T23:29:50.394Z"
+    "lastUpdated": "2026-03-03T02:06:48.034Z"
   },
   "HL Ishares Physical Silver ETC": {
-    "price": 55.26,
+    "price": 62.51,
     "currency": "GBP",
-    "lastUpdated": "2026-02-19T23:29:51.093Z"
+    "lastUpdated": "2026-03-03T02:06:47.619Z"
   },
   "Fidelity Ishares Physical Silver ETC": {
-    "price": 55.26,
+    "price": 62.51,
     "currency": "GBP",
-    "lastUpdated": "2026-02-19T23:29:51.082Z"
+    "lastUpdated": "2026-03-03T02:06:47.488Z"
   },
   "PLC Russell 2000": {
-    "price": 57.4,
+    "price": 57.21,
     "currency": "GBP",
-    "lastUpdated": "2026-02-19T23:29:50.969Z"
+    "lastUpdated": "2026-03-03T02:06:49.523Z"
   },
   "Ishares Global Bonds": {
-    "price": 1.2051699999999999,
+    "price": 1.2136,
     "currency": "GBP",
-    "lastUpdated": "2026-02-19T23:29:50.822Z"
+    "lastUpdated": "2026-03-03T02:06:49.132Z"
+  },
+  "YFS Charteris Gold and Precious Metals Fund I Accumulation Key Statistics": {
+    "price": 1.7743,
+    "currency": "GBP",
+    "lastUpdated": "2026-03-03T02:06:49.618Z"
+  },
+  "Global X Copper Miners": {
+    "price": 54.41,
+    "currency": "GBP",
+    "lastUpdated": "2026-03-03T02:06:47.666Z"
   }
 }

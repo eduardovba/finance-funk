@@ -1,6 +1,7 @@
 {
-  "Equity": 50,
-  "FixedIncome": 30,
-  "RealEstate": 15,
-  "Crypto": 5
+  "Equity": 30,
+  "FixedIncome": 35,
+  "RealEstate": 35,
+  "Crypto": 0,
+  "Cash": 0
 }

@@ -1,0 +1,263 @@
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-backdrop {
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(204, 85, 0, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(29, 17, 53, 0.5) 0%, transparent 100%),
+        #0B061A;
+    z-index: -1;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(13, 8, 20, 0.9);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: 20px;
+    padding: 40px 36px;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.5),
+        0 0 80px rgba(212, 175, 55, 0.04);
+    animation: cardEntry 0.6s cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+@keyframes cardEntry {
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ───── Header ───── */
+.login-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.login-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.login-logo-img {
+    height: 160px;
+    width: auto;
+    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.6));
+}
+
+.login-title {
+    font-family: var(--font-bebas), sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.04em;
+    background: linear-gradient(135deg, #F5F5DC 30%, #D4AF37 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+.login-subtitle {
+    color: rgba(245, 245, 220, 0.5);
+    font-size: 0.85rem;
+    margin-top: 6px;
+    font-family: var(--font-space), monospace;
+}
+
+/* ───── Error ───── */
+.login-error {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #fca5a5;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-space), monospace;
+}
+
+/* ───── Google Button ───── */
+.login-google-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: rgba(245, 245, 220, 0.06);
+    border: 1px solid rgba(245, 245, 220, 0.15);
+    border-radius: 12px;
+    color: #F5F5DC;
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-family: var(--font-space), monospace;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.login-google-btn:hover {
+    background: rgba(245, 245, 220, 0.1);
+    border-color: rgba(212, 175, 55, 0.35);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* ───── Divider ───── */
+.login-divider {
+    display: flex;
+    align-items: center;
+    margin: 24px 0;
+    gap: 12px;
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(212, 175, 55, 0.12);
+}
+
+.login-divider span {
+    color: rgba(245, 245, 220, 0.35);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    font-family: var(--font-space), monospace;
+}
+
+/* ───── Form ───── */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.login-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.login-field label {
+    color: rgba(245, 245, 220, 0.6);
+    font-size: 0.78rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-family: var(--font-space), monospace;
+}
+
+.login-field input {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(11, 6, 26, 0.6);
+    border: 1px solid rgba(212, 175, 55, 0.12);
+    border-radius: 10px;
+    color: #F5F5DC;
+    font-size: 0.9rem;
+    font-family: var(--font-space), monospace;
+    outline: none;
+    transition: all 0.25s ease;
+}
+
+.login-field input::placeholder {
+    color: rgba(245, 245, 220, 0.25);
+}
+
+.login-field input:focus {
+    border-color: rgba(212, 175, 55, 0.4);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
+    background: rgba(11, 6, 26, 0.8);
+}
+
+/* ───── Submit Button ───── */
+.login-submit-btn {
+    width: 100%;
+    padding: 13px 20px;
+    background: linear-gradient(135deg, #CC5500 0%, #D4AF37 100%);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 12px;
+    color: #1A0F2E;
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: var(--font-space), monospace;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 16px rgba(204, 85, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    margin-top: 4px;
+}
+
+.login-submit-btn:hover:not(:disabled) {
+    filter: brightness(1.12);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(204, 85, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+.login-submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* ───── Spinner ───── */
+.login-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(26, 15, 46, 0.3);
+    border-top: 2px solid #1A0F2E;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ───── Register Link ───── */
+.login-register-link {
+    text-align: center;
+    margin-top: 24px;
+    color: rgba(245, 245, 220, 0.45);
+    font-size: 0.83rem;
+    font-family: var(--font-space), monospace;
+}
+
+.login-register-link a {
+    color: #D4AF37;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.login-register-link a:hover {
+    color: #e8c84a;
+    text-decoration: underline;
+}

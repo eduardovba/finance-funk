@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import ConfirmationModal from './ConfirmationModal';
 import AssetSearch from './AssetSearch';
-import { formatCurrency } from '@/lib/currency';
+import { formatCurrency, SUPPORTED_CURRENCIES } from '@/lib/currency';
+import CurrencySelector from './CurrencySelector';
 
 // No more ASSET_TICKER_MAP - tickers are stored directly on transactions
 
@@ -9,11 +10,27 @@ const BROKER_CURRENCY = {
     'Trading 212': 'GBP', 'XP': 'BRL', 'Amazon': 'USD', 'GGF': 'USD', 'Green Gold Farms': 'USD', 'Monzo': 'GBP', 'Fidelity': 'GBP'
 };
 
-export default function EquityTab({ marketData, rates, onRefresh }) {
-    const [transactions, setTransactions] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+export default function EquityTab({ transactions = [], marketData, rates, onRefresh }) {
+    const [isLoading, setIsLoading] = useState(false);
     const [ledgerOpen, setLedgerOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+    // Scroll to hash on load
+    useEffect(() => {
+        if (!isLoading && typeof window !== 'undefined' && window.location.hash) {
+            const id = window.location.hash.substring(1); // remove '#'
+            const element = document.getElementById(id);
+            if (element) {
+                setTimeout(() => {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Highlight the row temporarily
+                    element.style.transition = 'background-color 1.5s ease-out';
+                    element.style.backgroundColor = 'rgba(212, 175, 55, 0.2)';
+                    setTimeout(() => { element.style.backgroundColor = ''; }, 2000);
+                }, 100);
+            }
+        }
+    }, [isLoading, transactions.length]);
     const [trToDelete, setTrToDelete] = useState(null);
     const [editingTr, setEditingTr] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -21,24 +38,14 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
     const [sellData, setSellData] = useState(null);
     const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
     const [buyData, setBuyData] = useState(null);
-
-    useEffect(() => { fetchTransactions(); }, []);
-
-    const fetchTransactions = async () => {
-        try {
-            const res = await fetch('/api/equity-transactions');
-            const data = await res.json();
-            setTransactions(data);
-        } catch (e) { console.error(e); }
-        finally { setIsLoading(false); }
-    };
+    const [isFetchingPrice, setIsFetchingPrice] = useState(false);
 
     const handleDeleteClick = (id) => { setTrToDelete(id); setIsDeleteModalOpen(true); };
     const handleConfirmDelete = async () => {
         if (!trToDelete) return;
         try {
             await fetch(`/api/equity-transactions?id=${trToDelete}`, { method: 'DELETE' });
-            setTransactions(prev => prev.filter(t => t.id !== trToDelete));
+            if (onRefresh) onRefresh();
             setIsDeleteModalOpen(false); setTrToDelete(null);
         } catch (e) { console.error(e); }
     };
@@ -59,7 +66,7 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
                 roiPercent: editingTr.roiPercent ? parseFloat(editingTr.roiPercent) : null,
             };
             await fetch('/api/equity-transactions', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            setTransactions(prev => prev.map(t => t.id === payload.id ? payload : t));
+            if (onRefresh) onRefresh();
             setIsEditModalOpen(false); setEditingTr(null);
         } catch (e) { console.error(e); }
     };
@@ -85,7 +92,7 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
             totalProceeds: proceeds,
             pnl,
             roi,
-            date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+            date: new Date().toISOString().split('T')[0],
         });
         setIsSellModalOpen(true);
     };
@@ -93,11 +100,24 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
     const updateSellCalc = (field, value) => {
         setSellData(prev => {
             const updated = { ...prev, [field]: value };
-            const qty = parseFloat(updated.qtyToSell) || 0;
-            const price = parseFloat(updated.sellPricePerShare) || 0;
+            let qty = parseFloat(updated.qtyToSell) || 0;
+            let price = parseFloat(updated.sellPricePerShare) || 0;
+            let proceeds = parseFloat(updated.totalProceeds) || 0;
             const avgCost = prev.avgCost;
+
+            if (field === 'totalProceeds') {
+                // If user inputs total value, calculate price per share
+                if (qty > 0) {
+                    price = proceeds / qty;
+                    updated.sellPricePerShare = price;
+                }
+            } else if (field === 'qtyToSell' || field === 'sellPricePerShare') {
+                // If user inputs qty or price, calculate total proceeds
+                proceeds = price * qty;
+                updated.totalProceeds = proceeds;
+            }
+
             const costBasis = avgCost * qty;
-            updated.totalProceeds = price * qty;
             updated.pnl = updated.totalProceeds - costBasis;
             updated.roi = costBasis !== 0 ? (updated.pnl / costBasis * 100) : 0;
             return updated;
@@ -126,8 +146,7 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
                 body: JSON.stringify(tr)
             });
             if (res.ok) {
-                const saved = await res.json();
-                setTransactions(prev => [...prev, saved]);
+                if (onRefresh) onRefresh();
                 setIsSellModalOpen(false); setSellData(null);
             }
         } catch (e) { console.error(e); }
@@ -144,7 +163,7 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
             qtyToBuy: '',
             buyPricePerShare: livePrice || '',
             totalInvestment: 0,
-            date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+            date: new Date().toISOString().split('T')[0],
         });
         setIsBuyModalOpen(true);
     };
@@ -159,7 +178,7 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
             qtyToBuy: '',
             buyPricePerShare: '',
             totalInvestment: 0,
-            date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+            date: new Date().toISOString().split('T')[0],
         });
         setIsBuyModalOpen(true);
     };
@@ -167,9 +186,22 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
     const updateBuyCalc = (field, value) => {
         setBuyData(prev => {
             const updated = { ...prev, [field]: value };
-            const qty = parseFloat(updated.qtyToBuy) || 0;
-            const price = parseFloat(updated.buyPricePerShare) || 0;
-            updated.totalInvestment = qty * price;
+            let qty = parseFloat(updated.qtyToBuy) || 0;
+            let price = parseFloat(updated.buyPricePerShare) || 0;
+            let investment = parseFloat(updated.totalInvestment) || 0;
+
+            if (field === 'totalInvestment') {
+                // If user inputs total investment, calculate price per share if quantity exists
+                if (qty > 0) {
+                    price = investment / qty;
+                    updated.buyPricePerShare = price;
+                }
+            } else if (field === 'qtyToBuy' || field === 'buyPricePerShare') {
+                // If user inputs qty or price, calculate total investment
+                investment = qty * price;
+                updated.totalInvestment = investment;
+            }
+
             return updated;
         });
     };
@@ -191,6 +223,7 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
             pnl: null,
             roiPercent: null,
             isSalaryContribution: buyData.isSalaryContribution || false,
+            type: 'Buy',
         };
         try {
             const res = await fetch('/api/equity-transactions', {
@@ -198,8 +231,7 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
                 body: JSON.stringify(tr)
             });
             if (res.ok) {
-                const saved = await res.json();
-                setTransactions(prev => [...prev, saved]);
+                if (onRefresh) onRefresh();
                 setIsBuyModalOpen(false); setBuyData(null);
             }
         } catch (e) { console.error(e); }
@@ -238,8 +270,17 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
             }
         });
 
-        // Filter out fully sold positions (qty ≈ 0)
-        const activeHoldings = Object.values(holdings).filter(h => Math.abs(h.qty) > 0.01);
+        // Ensure "Cash" for "Trading 212" is always present in holdings
+        const t212CashKey = 'Cash|Trading 212';
+        if (!holdings[t212CashKey]) {
+            holdings[t212CashKey] = { asset: 'Cash', qty: 0, totalCost: 0, broker: 'Trading 212', currency: 'GBP', ticker: null };
+        }
+
+        // Filter out fully sold positions (qty ≈ 0), but KEEP "Cash" for "Trading 212"
+        const activeHoldings = Object.values(holdings).filter(h => {
+            const isT212Cash = h.asset === 'Cash' && h.broker === 'Trading 212';
+            return isT212Cash || Math.abs(h.qty) > 0.01;
+        });
         return { activeHoldings, lockedPnL };
     };
 
@@ -319,7 +360,7 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
         const totalROI = totalPurchasePrice !== 0 ? (totalPnL / totalPurchasePrice * 100) : 0;
 
         return (
-            <div key={brokerName} className="glass-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '24px' }}>
+            <div key={brokerName} id={encodeURIComponent(brokerName)} className="glass-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '24px' }}>
                 <div style={{
                     padding: '20px 24px',
                     borderBottom: '1px solid var(--glass-border)',
@@ -374,10 +415,10 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
                                     <td style={{ padding: '14px 24px', textAlign: 'right', color: 'var(--fg-secondary)' }}>
                                         {formatCurrency(r.totalCost, cur)}
                                     </td>
-                                    <td style={{ padding: '14px 24px', textAlign: 'right', color: r.pnl >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                    <td style={{ padding: '14px 24px', textAlign: 'right', color: r.pnl >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                         {r.pnl >= 0 ? '+' : ''}{formatCurrency(r.pnl, cur)}
                                     </td>
-                                    <td style={{ padding: '14px 24px', textAlign: 'right', color: r.roi >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                    <td style={{ padding: '14px 24px', textAlign: 'right', color: r.roi >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                         {r.roi >= 0 ? '+' : ''}{r.roi.toFixed(1)}%
                                     </td>
                                     <td style={{ padding: '14px 24px', textAlign: 'center' }}>
@@ -415,10 +456,10 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
                                     <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600, fontSize: '0.9rem', color: 'var(--fg-secondary)' }}>
                                         {formatCurrency(totalPurchasePrice, cur)}
                                     </td>
-                                    <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600, fontSize: '0.9rem', color: (totalCurrentValue - totalPurchasePrice) >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                    <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600, fontSize: '0.9rem', color: (totalCurrentValue - totalPurchasePrice) >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                         {(totalCurrentValue - totalPurchasePrice) >= 0 ? '+' : ''}{formatCurrency(totalCurrentValue - totalPurchasePrice, cur)}
                                     </td>
-                                    <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600, fontSize: '0.9rem', color: (totalPurchasePrice !== 0 ? ((totalCurrentValue - totalPurchasePrice) / totalPurchasePrice * 100) : 0) >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                    <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600, fontSize: '0.9rem', color: (totalPurchasePrice !== 0 ? ((totalCurrentValue - totalPurchasePrice) / totalPurchasePrice * 100) : 0) >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                         {(totalPurchasePrice !== 0 ? ((totalCurrentValue - totalPurchasePrice) / totalPurchasePrice * 100) : 0) >= 0 ? '+' : ''}{(totalPurchasePrice !== 0 ? ((totalCurrentValue - totalPurchasePrice) / totalPurchasePrice * 100) : 0).toFixed(1)}%
                                     </td>
                                     <td></td>
@@ -427,7 +468,7 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
                                     <td colSpan={6} style={{ padding: '14px 24px', fontStyle: 'italic', color: 'var(--fg-secondary)', textAlign: 'right' }}>
                                         Realised P&L
                                     </td>
-                                    <td style={{ padding: '14px 24px', textAlign: 'right', color: lockedPnL[brokerName] >= 0 ? 'var(--accent-color)' : 'var(--error)', fontWeight: 600 }}>
+                                    <td style={{ padding: '14px 24px', textAlign: 'right', color: lockedPnL[brokerName] >= 0 ? 'var(--vu-green)' : 'var(--error)', fontWeight: 600 }}>
                                         {lockedPnL[brokerName] >= 0 ? '+' : ''}{formatCurrency(lockedPnL[brokerName], cur)}
                                     </td>
                                     <td colSpan={2}></td>
@@ -442,10 +483,10 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
                             <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600, color: 'var(--fg-secondary)' }}>
                                 {formatCurrency(totalPurchasePrice, cur)}
                             </td>
-                            <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 700, color: totalPnL >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                            <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 700, color: totalPnL >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                 {totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL, cur)}
                             </td>
-                            <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 700, color: totalROI >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                            <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 700, color: totalROI >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                 {totalROI >= 0 ? '+' : ''}{totalROI.toFixed(1)}%
                             </td>
                             <td></td>
@@ -532,7 +573,7 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                 }}>
                     <h3 style={{ margin: 0, fontSize: '1.3rem' }}>📊 Consolidated Portfolio</h3>
-                    <span style={{ color: totalPnL >= 0 ? 'var(--accent-color)' : 'var(--error)', fontWeight: 700, fontSize: '1.1rem' }}>
+                    <span style={{ color: totalPnL >= 0 ? 'var(--vu-green)' : 'var(--error)', fontWeight: 700, fontSize: '1.1rem' }}>
                         {totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL, 'GBP')} ({totalROI.toFixed(1)}%)
                     </span>
                 </div>
@@ -552,10 +593,10 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
                                 <td style={{ padding: '14px 24px', fontWeight: 600 }}>{s.broker}</td>
                                 <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600 }}>{formatCurrency(s.currentValue, 'GBP')}</td>
                                 <td style={{ padding: '14px 24px', textAlign: 'right', color: 'var(--fg-secondary)' }}>{formatCurrency(s.purchasePrice, 'GBP')}</td>
-                                <td style={{ padding: '14px 24px', textAlign: 'right', color: s.pnl >= 0 ? 'var(--accent-color)' : 'var(--error)', fontWeight: 600 }}>
+                                <td style={{ padding: '14px 24px', textAlign: 'right', color: s.pnl >= 0 ? 'var(--vu-green)' : 'var(--error)', fontWeight: 600 }}>
                                     {s.pnl >= 0 ? '+' : ''}{formatCurrency(s.pnl, 'GBP')}
                                 </td>
-                                <td style={{ padding: '14px 24px', textAlign: 'right', color: s.roi >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                <td style={{ padding: '14px 24px', textAlign: 'right', color: s.roi >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                     {s.roi >= 0 ? '+' : ''}{s.roi.toFixed(1)}%
                                 </td>
                             </tr>
@@ -564,10 +605,10 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
                             <td style={{ padding: '14px 24px', fontWeight: 700, fontSize: '1.05rem' }}>Total</td>
                             <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 700, fontSize: '1.05rem' }}>{formatCurrency(totalGBP, 'GBP')}</td>
                             <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600, color: 'var(--fg-secondary)' }}>{formatCurrency(totalCostGBP, 'GBP')}</td>
-                            <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 700, fontSize: '1.05rem', color: totalPnL >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                            <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 700, fontSize: '1.05rem', color: totalPnL >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                 {totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL, 'GBP')}
                             </td>
-                            <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 700, fontSize: '1.05rem', color: totalROI >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                            <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 700, fontSize: '1.05rem', color: totalROI >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                 {totalROI >= 0 ? '+' : ''}{totalROI.toFixed(1)}%
                             </td>
                         </tr>
@@ -579,9 +620,7 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
 
     // Transaction ledger
     const sortedTr = [...transactions].sort((a, b) => {
-        const da = a.date.split('/').reverse().join('');
-        const db = b.date.split('/').reverse().join('');
-        return db.localeCompare(da);
+        return b.date.localeCompare(a.date);
     });
 
     if (isLoading) {
@@ -638,7 +677,7 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
                                         <tr key={tr.id} className="ledger-row" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                             <td style={{ padding: '12px 16px', fontSize: '0.9rem', color: 'var(--fg-secondary)' }}>{tr.date}</td>
                                             <td style={{ padding: '12px 16px', fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>{tr.broker}</td>
-                                            <td style={{ padding: '12px 16px', fontWeight: 600, color: isSell ? 'var(--error)' : 'var(--accent-color)', fontSize: '0.9rem' }}>
+                                            <td style={{ padding: '12px 16px', fontWeight: 600, color: isSell ? 'var(--error)' : 'var(--vu-green)', fontSize: '0.9rem' }}>
                                                 {isSell ? '↓ ' : '↑ '}{tr.asset}
                                             </td>
                                             <td style={{ padding: '12px 16px', textAlign: 'right', color: isSell ? 'var(--error)' : 'inherit' }}>
@@ -650,10 +689,10 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
                                             <td style={{ padding: '12px 16px', textAlign: 'right', color: 'var(--fg-secondary)' }}>
                                                 {tr.costPerShare ? formatCurrency(tr.costPerShare, cur) : '-'}
                                             </td>
-                                            <td style={{ padding: '12px 16px', textAlign: 'right', color: tr.pnl ? (tr.pnl >= 0 ? 'var(--accent-color)' : 'var(--error)') : 'var(--fg-secondary)' }}>
+                                            <td style={{ padding: '12px 16px', textAlign: 'right', color: tr.pnl ? (tr.pnl >= 0 ? 'var(--vu-green)' : 'var(--error)') : 'var(--fg-secondary)' }}>
                                                 {tr.pnl !== null && tr.pnl !== undefined ? formatCurrency(tr.pnl, cur) : '-'}
                                             </td>
-                                            <td style={{ padding: '12px 16px', textAlign: 'right', color: tr.roiPercent ? (tr.roiPercent >= 0 ? 'var(--accent-color)' : 'var(--error)') : 'var(--fg-secondary)' }}>
+                                            <td style={{ padding: '12px 16px', textAlign: 'right', color: tr.roiPercent ? (tr.roiPercent >= 0 ? 'var(--vu-green)' : 'var(--error)') : 'var(--fg-secondary)' }}>
                                                 {tr.roiPercent !== null && tr.roiPercent !== undefined ? `${tr.roiPercent.toFixed(1)}%` : '-'}
                                             </td>
                                             <td style={{ padding: '12px 16px', textAlign: 'center' }}>
@@ -695,12 +734,19 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
                             {[['date', 'Date'], ['asset', 'Asset'], ['broker', 'Broker'], ['investment', 'Investment'], ['quantity', 'Quantity'], ['costPerShare', 'Cost/Share'], ['currency', 'Currency'], ['pnl', 'P&L'], ['roiPercent', 'ROI %']].map(([field, label]) => (
                                 <div key={field}>
                                     <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>{label}</label>
-                                    <input
-                                        type="text"
-                                        value={editingTr[field] ?? ''}
-                                        onChange={e => handleEditChange(field, e.target.value)}
-                                        style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }}
-                                    />
+                                    {field === 'currency' ? (
+                                        <CurrencySelector
+                                            value={editingTr.currency}
+                                            onChange={val => handleEditChange('currency', val)}
+                                        />
+                                    ) : (
+                                        <input
+                                            type="text"
+                                            value={editingTr[field] ?? ''}
+                                            onChange={e => handleEditChange(field, e.target.value)}
+                                            style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }}
+                                        />
+                                    )}
                                 </div>
                             ))}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
@@ -764,9 +810,30 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
 
                         {/* Summary card */}
                         <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '20px', marginBottom: '24px', border: '1px solid var(--glass-border)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                                <span style={{ color: 'var(--fg-secondary)' }}>Total Proceeds</span>
-                                <span style={{ fontWeight: 600 }}>{formatCurrency(sellData.totalProceeds, sellData.currency)}</span>
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Total Sale Value (Proceeds)</label>
+                                <div style={{ position: 'relative' }}>
+                                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--fg-secondary)' }}>
+                                        {sellData.currency === 'BRL' ? 'R$' : (sellData.currency === 'USD' ? '$' : '£')}
+                                    </span>
+                                    <input
+                                        type="number"
+                                        value={sellData.totalProceeds}
+                                        onChange={e => updateSellCalc('totalProceeds', e.target.value)}
+                                        step="any"
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px 12px 10px 32px',
+                                            background: 'rgba(255,255,255,0.08)',
+                                            border: '1px solid var(--accent-color)',
+                                            borderRadius: '8px',
+                                            color: '#fff',
+                                            fontSize: '1.1rem',
+                                            fontWeight: 600,
+                                            outline: 'none'
+                                        }}
+                                    />
+                                </div>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                                 <span style={{ color: 'var(--fg-secondary)' }}>Cost Basis</span>
@@ -774,7 +841,7 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
                             </div>
                             <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between' }}>
                                 <span style={{ fontWeight: 600 }}>P&L</span>
-                                <span style={{ fontWeight: 700, fontSize: '1.1rem', color: sellData.pnl >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                <span style={{ fontWeight: 700, fontSize: '1.1rem', color: sellData.pnl >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                     {sellData.pnl >= 0 ? '+' : ''}{formatCurrency(sellData.pnl, sellData.currency)} ({sellData.roi >= 0 ? '+' : ''}{sellData.roi.toFixed(1)}%)
                                 </span>
                             </div>
@@ -796,9 +863,17 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
                         <h3 style={{ marginBottom: '8px', fontSize: '1.3rem', color: 'var(--accent-color)' }}>
                             {buyData.asset ? `Buy More ${buyData.asset}` : 'New Asset Purchase'}
                         </h3>
-                        <p style={{ margin: '0 0 24px', color: 'var(--fg-secondary)', fontSize: '0.9rem' }}>
-                            {buyData.broker} · {buyData.currency}
-                        </p>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                            <div style={{ color: 'var(--fg-secondary)', fontSize: '0.9rem' }}>
+                                {buyData.broker}
+                            </div>
+                            <div style={{ width: '150px' }}>
+                                <CurrencySelector
+                                    value={buyData.currency}
+                                    onChange={val => setBuyData(prev => ({ ...prev, currency: val }))}
+                                />
+                            </div>
+                        </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '16px' }}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
@@ -815,16 +890,59 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
                                             <span style={{ color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>{buyData.asset}</span>
                                         </div>
                                     ) : (
-                                        <AssetSearch onSelect={(selectedAsset) => {
-                                            const lp = marketData[selectedAsset.symbol]?.price || '';
-                                            setBuyData(prev => ({
-                                                ...prev,
-                                                asset: selectedAsset.name,
-                                                ticker: selectedAsset.symbol,
-                                                buyPricePerShare: lp,
-                                                totalInvestment: lp ? (parseFloat(prev.qtyToBuy) || 0) * lp : 0,
-                                            }));
+                                        <AssetSearch onSelect={async (selectedAsset) => {
+                                            setIsFetchingPrice(true);
+                                            // Explicitly get destination currency from broker to be safe
+                                            const destCurrency = BROKER_CURRENCY[buyData.broker] || 'GBP';
+
+                                            // 1. Check if we already have it in marketData
+                                            let lp = marketData[selectedAsset.symbol]?.price;
+                                            let sourceCurrency = marketData[selectedAsset.symbol]?.currency || 'USD';
+
+                                            try {
+                                                // 2. If not in state, or if we want fresh price/currency, fetch it
+                                                if (!lp || !marketData[selectedAsset.symbol]?.currency) {
+                                                    const res = await fetch('/api/market-data', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ tickers: [selectedAsset.symbol] })
+                                                    });
+                                                    const data = await res.json();
+                                                    if (data[selectedAsset.symbol]?.price) {
+                                                        lp = data[selectedAsset.symbol].price;
+                                                        sourceCurrency = data[selectedAsset.symbol].currency || 'USD';
+                                                    }
+                                                }
+
+                                                // 3. Perform Currency Conversion
+                                                // Note: rates are relative to GBP (GBP=1). 
+                                                // Example: USD=1.28 means 1 GBP = 1.28 USD
+                                                let finalPrice = lp || '';
+                                                if (lp && sourceCurrency !== destCurrency) {
+                                                    const sourceRate = rates[sourceCurrency] || 1;
+                                                    const destRate = rates[destCurrency] || 1;
+                                                    // (Amount / SourcePerGBP) * DestPerGBP 
+                                                    finalPrice = (parseFloat(lp) / sourceRate) * destRate;
+                                                }
+
+                                                setBuyData(prev => ({
+                                                    ...prev,
+                                                    asset: selectedAsset.name,
+                                                    ticker: selectedAsset.symbol,
+                                                    buyPricePerShare: finalPrice,
+                                                    totalInvestment: finalPrice ? (parseFloat(prev.qtyToBuy) || 0) * finalPrice : 0,
+                                                }));
+                                            } catch (e) {
+                                                console.error('Failed to fetch/convert price:', e);
+                                            } finally {
+                                                setIsFetchingPrice(false);
+                                            }
                                         }} />
+                                    )}
+                                    {isFetchingPrice && (
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--accent-color)', marginTop: '4px' }}>
+                                            ⏳ Fetching latest price...
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -837,7 +955,7 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
                                         style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Buy Price / Share</label>
+                                    <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Buy Price / Share ({SUPPORTED_CURRENCIES[buyData.currency]?.symbol || buyData.currency})</label>
                                     <input type="number" value={buyData.buyPricePerShare} onChange={e => updateBuyCalc('buyPricePerShare', e.target.value)}
                                         placeholder="0.00" step="any"
                                         style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
@@ -860,11 +978,30 @@ export default function EquityTab({ marketData, rates, onRefresh }) {
 
                         {/* Total card */}
                         <div style={{ background: 'rgba(16, 185, 129, 0.05)', borderRadius: '12px', padding: '20px', marginBottom: '24px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ color: 'var(--fg-secondary)', fontWeight: 500 }}>Total Investment</span>
-                                <span style={{ fontWeight: 700, fontSize: '1.2rem', color: 'var(--accent-color)' }}>
-                                    {formatCurrency(buyData.totalInvestment, buyData.currency)}
-                                </span>
+                            <div style={{ marginBottom: '8px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Total Investment</label>
+                                <div style={{ position: 'relative' }}>
+                                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--fg-secondary)' }}>
+                                        {buyData.currency === 'BRL' ? 'R$' : (buyData.currency === 'USD' ? '$' : '£')}
+                                    </span>
+                                    <input
+                                        type="number"
+                                        value={buyData.totalInvestment}
+                                        onChange={e => updateBuyCalc('totalInvestment', e.target.value)}
+                                        step="any"
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px 12px 10px 32px',
+                                            background: 'rgba(255,255,255,0.08)',
+                                            border: '1px solid var(--accent-color)',
+                                            borderRadius: '8px',
+                                            color: '#fff',
+                                            fontSize: '1.2rem',
+                                            fontWeight: 700,
+                                            outline: 'none'
+                                        }}
+                                    />
+                                </div>
                             </div>
                         </div>
 

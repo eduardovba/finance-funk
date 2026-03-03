@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import CurrencySelector from './CurrencySelector';
+import { SUPPORTED_CURRENCIES } from '@/lib/currency';
 
 export default function FundsTransactionForm({ onSubmit, onCancel }) {
     const [formData, setFormData] = useState({
@@ -7,6 +9,7 @@ export default function FundsTransactionForm({ onSubmit, onCancel }) {
         investment: '',
         quantity: '',
         costPerShare: '',
+        currency: 'BRL',
         isSalaryContribution: false
     });
 
@@ -23,6 +26,8 @@ export default function FundsTransactionForm({ onSubmit, onCancel }) {
         }
     };
 
+    const currencySymbol = SUPPORTED_CURRENCIES[formData.currency]?.symbol || 'R$';
+
     const handleSubmit = (e) => {
         e.preventDefault();
         onSubmit({
@@ -31,6 +36,7 @@ export default function FundsTransactionForm({ onSubmit, onCancel }) {
             investment: parseFloat(formData.investment) || 0,
             quantity: parseInt(formData.quantity) || 0,
             costPerShare: parseFloat(formData.costPerShare) || 0,
+            currency: formData.currency,
             isSalaryContribution: formData.isSalaryContribution || false
         });
     };
@@ -95,31 +101,40 @@ export default function FundsTransactionForm({ onSubmit, onCancel }) {
                         />
                     </div>
 
-                    {/* Investment */}
-                    <div>
-                        <label style={{ display: 'block', color: 'var(--fg-secondary)', fontSize: '0.85rem', marginBottom: '6px' }}>
-                            Investment (R$) *
-                            <span style={{ fontSize: '0.75rem', marginLeft: '8px', color: 'var(--fg-tertiary)' }}>
-                                Use negative for sales
-                            </span>
-                        </label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            value={formData.investment}
-                            onChange={(e) => handleChange('investment', e.target.value)}
-                            placeholder="0.00"
-                            required
-                            style={{
-                                width: '100%',
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid var(--glass-border)',
-                                borderRadius: '8px',
-                                padding: '10px 12px',
-                                color: 'var(--fg-primary)',
-                                fontSize: '0.9rem'
-                            }}
-                        />
+                    {/* Investment & Currency Row */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div>
+                            <label style={{ display: 'block', color: 'var(--fg-secondary)', fontSize: '0.85rem', marginBottom: '6px' }}>
+                                Investment ({currencySymbol}) *
+                                <span style={{ fontSize: '0.75rem', marginLeft: '8px', color: 'var(--fg-tertiary)' }}>
+                                    Use negative for sales
+                                </span>
+                            </label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={formData.investment}
+                                onChange={(e) => handleChange('investment', e.target.value)}
+                                placeholder="0.00"
+                                required
+                                style={{
+                                    width: '100%',
+                                    background: 'rgba(255,255,255,0.05)',
+                                    border: '1px solid var(--glass-border)',
+                                    borderRadius: '8px',
+                                    padding: '10px 12px',
+                                    color: 'var(--fg-primary)',
+                                    fontSize: '0.9rem'
+                                }}
+                            />
+                        </div>
+                        <div>
+                            <CurrencySelector
+                                label="Currency *"
+                                value={formData.currency}
+                                onChange={(val) => handleChange('currency', val)}
+                            />
+                        </div>
                     </div>
 
                     {/* Quantity */}
@@ -152,7 +167,7 @@ export default function FundsTransactionForm({ onSubmit, onCancel }) {
                     {/* Cost Per Share */}
                     <div>
                         <label style={{ display: 'block', color: 'var(--fg-secondary)', fontSize: '0.85rem', marginBottom: '6px' }}>
-                            Cost / Share (R$) *
+                            Cost / Share ({currencySymbol}) *
                             <span style={{ fontSize: '0.75rem', marginLeft: '8px', color: 'var(--fg-tertiary)' }}>
                                 Auto-calculated
                             </span>

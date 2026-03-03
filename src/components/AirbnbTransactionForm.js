@@ -1,6 +1,6 @@
-"use client";
-
 import { useState } from 'react';
+import CurrencySelector from './CurrencySelector';
+import { SUPPORTED_CURRENCIES } from '@/lib/currency';
 
 export default function AirbnbTransactionForm({ onAdd, onCancel }) {
     const [formData, setFormData] = useState(() => {
@@ -12,10 +12,13 @@ export default function AirbnbTransactionForm({ onAdd, onCancel }) {
             month: `${mmm}-${yy}`,
             type: 'Revenue',
             amount: '',
+            currency: 'BRL',
             costType: 'Maintenance',
             notes: ''
         };
     });
+
+    const currencySymbol = SUPPORTED_CURRENCIES[formData.currency]?.symbol || 'R$';
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -23,6 +26,7 @@ export default function AirbnbTransactionForm({ onAdd, onCancel }) {
             month: formData.month,
             type: formData.type,
             amount: parseFloat(formData.amount) || 0,
+            currency: formData.currency,
             notes: formData.notes
         };
 
@@ -75,18 +79,26 @@ export default function AirbnbTransactionForm({ onAdd, onCancel }) {
                     </div>
                 </div>
 
-                <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Amount (R$)</label>
-                    <input
-                        type="number"
-                        step="0.01"
-                        value={formData.amount}
-                        onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                        placeholder="0.00"
-                        required
-                        className="glass-card"
-                        style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
-                    />
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: '16px', alignItems: 'end' }}>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Amount ({currencySymbol})</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            value={formData.amount}
+                            onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                            placeholder="0.00"
+                            required
+                            className="glass-card"
+                            style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
+                        />
+                    </div>
+                    <div>
+                        <CurrencySelector
+                            value={formData.currency}
+                            onChange={(val) => setFormData({ ...formData, currency: val })}
+                        />
+                    </div>
                 </div>
 
                 {formData.type === 'Cost' && (

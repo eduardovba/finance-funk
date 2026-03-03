@@ -1,0 +1,322 @@
+[
+  {
+    "month": "2025-05",
+    "roi": 29,
+    "categories": {
+      "FixedIncome": 870143,
+      "Equity": 302117.48,
+      "RealEstate": 777979,
+      "Crypto": 0,
+      "Pensions": 592828.11,
+      "Debt": 150000
+    },
+    "source": "DB.CSV",
+    "recordedAt": "2026-02-17T14:26:33.041Z",
+    "totalminuspensionsBRL": 1801519.8900000001,
+    "totalminuspensionsGBP": 236110.0773263434,
+    "totalminuspensionsUSD": 323546.95947575365,
+    "networthBRL": 2394348,
+    "networthGBP": 313536
+  },
+  {
+    "month": "2026-02",
+    "networthPrimary": 2629707.4032213045,
+    "networthSecondary": 379373.21771712875,
+    "networthBRL": 2629707.4032213045,
+    "networthGBP": 379373.21771712875,
+    "totalminuspensionsBRL": 1898585.2088717243,
+    "totalminuspensionsGBP": 273898.29717081954,
+    "totalminuspensionsUSD": 369543.5825428697,
+    "recordedAt": "2026-02-27T18:54:33.736Z",
+    "diffPrimary": 29061.40322130453,
+    "diffSecondary": 15662.217717128748,
+    "percPrimary": 1.1174686297675474,
+    "percSecondary": 4.30622601931994,
+    "categories": {
+      "FixedIncome": 500824.02999999997,
+      "Equity": 187200.8491085646,
+      "RealEstate": 1360560.3297631599,
+      "Crypto": 0,
+      "Pensions": 731122.1943495802,
+      "Debt": 150000
+    },
+    "categoryDiffs": {
+      "FixedIncome": -9403.97000000003,
+      "Equity": 10481.449108564586,
+      "RealEstate": -17813.670236840146,
+      "Crypto": 0,
+      "Pensions": 45587.344349580235,
+      "Debt": 64.5
+    },
+    "categoryPercs": {
+      "FixedIncome": -1.8430917158603664,
+      "Equity": 5.931125336869967,
+      "RealEstate": -1.2923684164704317,
+      "Crypto": 0,
+      "Pensions": 6.649894509313456,
+      "Debt": 0.04301849795412027
+    },
+    "assetDetails": {
+      "fixed-income": [
+        {
+          "name": "Post-fixated",
+          "brl": 182533.17352605067,
+          "gbp": 26333.042716414042
+        },
+        {
+          "name": "Inflation",
+          "brl": 96099.1073023417,
+          "gbp": 13863.682139075187
+        },
+        {
+          "name": "Pre-fixated",
+          "brl": 91647.71917160759,
+          "gbp": 13221.505204715195
+        },
+        {
+          "name": "Inter",
+          "brl": 74265.41999999998,
+          "gbp": 10713.85786722941
+        },
+        {
+          "name": "Santander",
+          "brl": 56278.610000000044,
+          "gbp": 8119.001124685434
+        }
+      ],
+      "equity": [
+        {
+          "name": "Green Gold Farms - Equity",
+          "brl": 64220.61221464571,
+          "gbp": 9264.749481174029,
+          "broker": "Green Gold Farms"
+        },
+        {
+          "name": "GS",
+          "brl": 16918.502083321673,
+          "gbp": 2440.7379187666766,
+          "broker": "Trading 212"
+        },
+        {
+          "name": "Amazon Shares",
+          "brl": 15024.992781950785,
+          "gbp": 2167.571894455974,
+          "broker": "Amazon"
+        },
+        {
+          "name": "TWLO",
+          "brl": 14896.366602158316,
+          "gbp": 2149.01571301512,
+          "broker": "Trading 212"
+        },
+        {
+          "name": "COPG",
+          "brl": 12370.052014214401,
+          "gbp": 1784.5584000000003,
+          "broker": "Trading 212"
+        },
+        {
+          "name": "Amazon",
+          "brl": 11386.798101178416,
+          "gbp": 1642.7098428698487,
+          "broker": "Trading 212"
+        },
+        {
+          "name": "Ryanair Holdings plc",
+          "brl": 9931.882586460117,
+          "gbp": 1432.8172975436555,
+          "broker": "Trading 212"
+        },
+        {
+          "name": "HANETF ICAV SPROTT URANIUM MINE",
+          "brl": 8536.767248301687,
+          "gbp": 1231.55179010532,
+          "broker": "Trading 212"
+        },
+        {
+          "name": "Alcoa Corporation",
+          "brl": 8444.371152942627,
+          "gbp": 1218.2223208427217,
+          "broker": "Trading 212"
+        },
+        {
+          "name": "Microstrategy",
+          "brl": 5872.203312152979,
+          "gbp": 847.1500148235992,
+          "broker": "Trading 212"
+        },
+        {
+          "name": "GE",
+          "brl": 5234.828121339757,
+          "gbp": 755.1994515268307,
+          "broker": "Trading 212"
+        },
+        {
+          "name": "T2I",
+          "brl": 4589.072397514973,
+          "gbp": 662.0398754817671,
+          "broker": "Trading 212"
+        },
+        {
+          "name": "RDDT",
+          "brl": 4103.157667373258,
+          "gbp": 591.9396679513786,
+          "broker": "Trading 212"
+        },
+        {
+          "name": "SCHW",
+          "brl": 2578.3651027364363,
+          "gbp": 371.96635042988436,
+          "broker": "Trading 212"
+        },
+        {
+          "name": "Trip.com Group Limited",
+          "brl": 2094.0174466735025,
+          "gbp": 302.0922159352031,
+          "broker": "Trading 212"
+        },
+        {
+          "name": "Monzo - Equity",
+          "brl": 998.8602755999999,
+          "gbp": 144.1,
+          "broker": "Monzo"
+        }
+      ],
+      "real-estate": [
+        {
+          "name": "Ink Court",
+          "brl": 581179.39976316,
+          "gbp": 83843.51000000001
+        },
+        {
+          "name": "Edifício Zara",
+          "brl": 444204,
+          "gbp": 64082.83316858337
+        },
+        {
+          "name": "Andyara 2",
+          "brl": 290000,
+          "gbp": 41836.68228761825
+        },
+        {
+          "name": "Realised P&L",
+          "brl": 226098,
+          "gbp": 32617.897213330725
+        },
+        {
+          "name": "FIIs (Funds)",
+          "brl": 45176.93000000001,
+          "gbp": 6517.423679792999
+        }
+      ],
+      "crypto": [],
+      "pensions": [
+        {
+          "name": "HL Growth Fund",
+          "brl": 163529.0332906435,
+          "gbp": 23591.4214158,
+          "broker": "Hargreaves Lansdown"
+        },
+        {
+          "name": "HSBC FTSE All-World Index",
+          "brl": 119824.91652149106,
+          "gbp": 17286.472285,
+          "broker": "Fidelity"
+        },
+        {
+          "name": "L&G PMC 2045 - 2050 Target Date Pn 3",
+          "brl": 94341.25526842047,
+          "gbp": 13610.086631999995,
+          "broker": "Legal & General"
+        },
+        {
+          "name": "OAB",
+          "brl": 66648.03367427104,
+          "gbp": 9614.940034223999,
+          "broker": "OAB"
+        },
+        {
+          "name": "HL Ishares Physical Silver ETC",
+          "brl": 58683.35311872,
+          "gbp": 8465.92,
+          "broker": "Hargreaves Lansdown"
+        },
+        {
+          "name": "Fidelity Index Europe ex UK Fund P-Accumulation",
+          "brl": 50075.23189571891,
+          "gbp": 7224.074369999999,
+          "broker": "Fidelity"
+        },
+        {
+          "name": "Fidelity Ishares Physical Silver ETC",
+          "brl": 49055.61549768,
+          "gbp": 7076.9800000000005,
+          "broker": "Fidelity"
+        },
+        {
+          "name": "YFS Charteris Gold and Precious Metals Fund I Accumulation Key Statistics",
+          "brl": 46236.176406189006,
+          "gbp": 6670.235250000001,
+          "broker": "Fidelity"
+        },
+        {
+          "name": "Fidelity Index US Fund P-Acc",
+          "brl": 38000.09793894455,
+          "gbp": 5482.062153000001,
+          "broker": "Fidelity"
+        },
+        {
+          "name": "Global X Copper Miners",
+          "brl": 22714.26289176,
+          "gbp": 3276.86,
+          "broker": "Fidelity"
+        },
+        {
+          "name": "Microstrategy - MSTR",
+          "brl": 11203.979383456865,
+          "gbp": 1616.3356062852063,
+          "broker": "Hargreaves Lansdown"
+        },
+        {
+          "name": "Fidelity Funds - Global Technology",
+          "brl": 10653.0964605648,
+          "gbp": 1536.8628,
+          "broker": "Fidelity"
+        },
+        {
+          "name": "Cash",
+          "brl": 157.14200172,
+          "gbp": 22.67,
+          "broker": "Hargreaves Lansdown"
+        }
+      ],
+      "debt": [
+        {
+          "name": "Dad",
+          "brl": 150000,
+          "gbp": 21639.663252216338
+        }
+      ]
+    },
+    "income": {
+      "month": "2026-02",
+      "salary": 2500,
+      "realEstate": 1074,
+      "equity": 0,
+      "fixedIncome": 318.5714285714327,
+      "isHistorical": false,
+      "total": 3892.5714285714325
+    },
+    "investment": {
+      "month": "2026-02",
+      "equity": 2500,
+      "fixedIncome": 471.7619706289179,
+      "realEstate": 536.3800000000001,
+      "pensions": 5337.646099999999,
+      "crypto": 0,
+      "debt": 0,
+      "isHistorical": false,
+      "total": 8845.788070628918
+    }
+  }
+]

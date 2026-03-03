@@ -1,23 +1,10 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { kvGet, kvSet } from '@/lib/kv';
 
-const dataFilePath = path.join(process.cwd(), 'src/data/live_assets.json');
-
-function getAssets() {
-    if (!fs.existsSync(dataFilePath)) {
-        return [];
-    }
-    const fileData = fs.readFileSync(dataFilePath, 'utf8');
-    return JSON.parse(fileData);
-}
-
-function saveAssets(assets) {
-    fs.writeFileSync(dataFilePath, JSON.stringify(assets, null, 2));
-}
+const KEY = 'live_assets';
 
 export async function GET() {
-    const assets = getAssets();
+    const assets = await kvGet(KEY, []);
     return NextResponse.json(assets);
 }
 
@@ -28,7 +15,7 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Ticker is required' }, { status: 400 });
         }
 
-        const assets = getAssets();
+        const assets = await kvGet(KEY, []);
 
         // Avoid duplicates
         if (assets.some(a => a.ticker === newAsset.ticker)) {
@@ -36,7 +23,7 @@ export async function POST(request) {
         }
 
         assets.push(newAsset);
-        saveAssets(assets);
+        await kvSet(KEY, assets);
 
         return NextResponse.json(newAsset);
     } catch (error) {
@@ -53,9 +40,9 @@ export async function DELETE(request) {
             return NextResponse.json({ error: 'Ticker is required' }, { status: 400 });
         }
 
-        let assets = getAssets();
+        let assets = await kvGet(KEY, []);
         assets = assets.filter(a => a.ticker !== ticker);
-        saveAssets(assets);
+        await kvSet(KEY, assets);
 
         return NextResponse.json({ success: true });
     } catch (error) {

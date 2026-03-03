@@ -11,13 +11,7 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
     // Sorting transactions by date (descending)
     const sortedTransactions = [...transactions].sort((a, b) => {
         // Handle both DD/MM/YYYY and YYYY-MM-DD
-        const parse = (d) => {
-            if (!d) return new Date(0);
-            if (d.includes('-')) return new Date(d);
-            const [day, month, year] = d.split('/').map(Number);
-            return new Date(year, month - 1, day);
-        };
-        return parse(b.date) - parse(a.date);
+        return (b.date || '').localeCompare(a.date || '');
     });
 
     // Compute Summary by Lender

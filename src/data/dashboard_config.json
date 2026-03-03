@@ -1,0 +1,99 @@
+{
+  "charts": [
+    {
+      "id": "nwh-1",
+      "title": "Total Net Worth History",
+      "chartType": "area",
+      "dataSources": [
+        "networth-history"
+      ],
+      "series": [
+        "networthPrimary",
+        "networthSecondary",
+        "targetPrimary"
+      ],
+      "order": 0,
+      "options": {
+        "dualAxis": true,
+        "showGradient": true
+      }
+    },
+    {
+      "id": "aah-1",
+      "title": "Asset Allocation History",
+      "chartType": "stacked-bar",
+      "dataSources": [
+        "category-history"
+      ],
+      "series": [
+        "RealEstate",
+        "Equity",
+        "Pensions",
+        "FixedIncome",
+        "Crypto",
+        "Debt"
+      ],
+      "order": 1,
+      "options": {}
+    },
+    {
+      "id": "rfx-1",
+      "title": "Portfolio ROI vs FX Rate",
+      "chartType": "line",
+      "dataSources": [
+        "roi-history",
+        "fx-rate-history"
+      ],
+      "series": [
+        "roi",
+        "impliedRate"
+      ],
+      "order": 2,
+      "options": {
+        "dualAxis": true
+      }
+    },
+    {
+      "id": "nio-1",
+      "title": "Net Inflow/Outflow",
+      "chartType": "bar",
+      "dataSources": [
+        "net-flow-history"
+      ],
+      "series": [
+        "Net"
+      ],
+      "order": 3,
+      "options": {}
+    },
+    {
+      "id": "avt-1",
+      "title": "Allocation vs Targets (%)",
+      "chartType": "horizontal-bar",
+      "dataSources": [
+        "allocation-current"
+      ],
+      "series": [
+        "actual",
+        "target"
+      ],
+      "order": 4,
+      "options": {}
+    },
+    {
+      "id": "cex-1",
+      "title": "Currency Exposure (Net)",
+      "chartType": "donut",
+      "dataSources": [
+        "currency-exposure"
+      ],
+      "series": [
+        "Primary",
+        "Secondary",
+        "Other"
+      ],
+      "order": 5,
+      "options": {}
+    }
+  ]
+}

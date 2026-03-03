@@ -12,6 +12,22 @@ import ConfirmationModal from './ConfirmationModal';
 
 export default function RealEstateTab({ data, rates, onRefresh, marketData = {} }) {
     const [isMortgageFormOpen, setIsMortgageFormOpen] = useState(false);
+
+    // Scroll to hash on load
+    useEffect(() => {
+        if (data && typeof window !== 'undefined' && window.location.hash) {
+            const id = window.location.hash.substring(1); // remove '#'
+            const element = document.getElementById(id);
+            if (element) {
+                setTimeout(() => {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.style.transition = 'box-shadow 1.5s ease-out';
+                    element.style.boxShadow = '0 0 20px rgba(212, 175, 55, 0.4)';
+                    setTimeout(() => { element.style.boxShadow = ''; }, 2000);
+                }, 100);
+            }
+        }
+    }, [data]);
     const [isAirbnbFormOpen, setIsAirbnbFormOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingMonth, setEditingMonth] = useState(null);
@@ -41,6 +57,21 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
 
     const [isEditingPropertyValue, setIsEditingPropertyValue] = useState(false);
     const [tempPropertyValue, setTempPropertyValue] = useState(0);
+
+    const [airbnbSortConfig, setAirbnbSortConfig] = useState({ key: 'month', direction: 'desc' });
+
+    const handleAirbnbSort = (key) => {
+        let direction = 'desc';
+        if (airbnbSortConfig.key === key && airbnbSortConfig.direction === 'desc') {
+            direction = 'asc';
+        }
+        setAirbnbSortConfig({ key, direction });
+    };
+
+    const getAirbnbSortIndicator = (key) => {
+        if (airbnbSortConfig.key !== key) return null;
+        return airbnbSortConfig.direction === 'asc' ? ' ▲' : ' ▼';
+    };
 
     const handleSavePropertyValue = async () => {
         if (!tempPropertyValue || isNaN(parseFloat(tempPropertyValue))) {
@@ -433,6 +464,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
             const totalPrincipalPaid = inkCourt.ledger.reduce((sum, t) => sum + (t.principal || 0), 0);
             const mortgageBalance = (inkCourt.mortgageAmount || 0) - totalPrincipalPaid;
             displayValue = (inkCourt.propertyValue || 0) - mortgageBalance;
+            p.investment = displayValue;
         }
 
         let roi = p.investment > 0 ? ((displayValue - p.investment) / p.investment) * 100 : 0;
@@ -470,14 +502,46 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
         roi: fundsTotalInvestmentBrl !== 0 ? ((fundsTotalValueBrl - fundsTotalInvestmentBrl) / fundsTotalInvestmentBrl * 100) : 0
     });
 
-    // Sort by BRL High to Low (excluding Total for now)
-    currentAssets.sort((a, b) => b.brl - a.brl);
+    // Realised P&L calculation
+    let totalRealisedPnLBrl = 0;
+    properties.filter(p => p.status === 'Sold').forEach(p => {
+        let inv = p.investment || 0;
+        let tax = p.taxes || 0;
+        let sale = p.salePrice || 0;
 
-    const totalCurrentBrl = currentAssets.reduce((sum, a) => sum + a.brl, 0);
-    const totalCurrentGbp = currentAssets.reduce((sum, a) => sum + a.gbp, 0);
-    const totalInvestmentGbp = currentAssets.reduce((sum, a) => sum + a.investmentGBP, 0);
-    const totalRoi = totalInvestmentGbp !== 0 ? ((totalCurrentGbp - totalInvestmentGbp) / totalInvestmentGbp * 100) : 0;
-    const totalPnL = totalCurrentGbp - totalInvestmentGbp; // In GBP for consistency with other tabs
+        if (p.name.includes('Andyara 1')) {
+            inv = 237000; tax = 9074; sale = 360000;
+        } else if (p.name.includes('Montes Claros')) {
+            inv = 681000; tax = 29748; sale = 822920;
+        }
+
+        const profit = sale - (inv + tax);
+        totalRealisedPnLBrl += (p.currency === 'GBP' ? profit * BRL : profit);
+    });
+
+    if (totalRealisedPnLBrl !== 0) {
+        currentAssets.push({
+            name: 'Realised P&L',
+            brl: totalRealisedPnLBrl,
+            gbp: totalRealisedPnLBrl / BRL,
+            investmentGBP: 0,
+            roi: 0,
+            isRealisedPnL: true
+        });
+    }
+
+    const activeAssets = currentAssets.filter(a => !a.isRealisedPnL).sort((a, b) => b.brl - a.brl);
+
+    const totalCurrentBrl = activeAssets.reduce((sum, a) => sum + a.brl, 0);
+    const totalCurrentGbp = activeAssets.reduce((sum, a) => sum + a.gbp, 0);
+    const totalInvestmentGbp = activeAssets.reduce((sum, a) => sum + (a.investmentGBP || 0), 0);
+
+    const subtotalPnL = totalCurrentGbp - totalInvestmentGbp;
+    const subtotalRoi = totalInvestmentGbp !== 0 ? (subtotalPnL / totalInvestmentGbp * 100) : 0;
+
+    const totalRealisedPnLGbp = totalRealisedPnLBrl !== 0 ? (totalRealisedPnLBrl / BRL) : 0;
+    const totalPnL = subtotalPnL + totalRealisedPnLGbp;
+    const totalRoi = totalInvestmentGbp !== 0 ? (totalPnL / totalInvestmentGbp * 100) : 0;
 
     // Add Total row for rendering if needed, but we'll render it separately in the footer
     // currentAssets.push({ ... }); // Let's keep the array clean for mapping and render Total manually
@@ -510,12 +574,8 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                 );
                 taxes = taxesTx.reduce((sum, t) => sum + t.costs, 0);
 
-                // Adjust investment to exclude taxes (as we sum them separately for display if needed, 
-                // but "Total Investment" usually includes them. The breakdown separates them.)
-                // p.investment usually is "Purchase Price". 
-                // Here "inv" is Equity. 
-                // Let's assume Inv = Equity - Taxes.
-                inv = inv - taxes;
+                // Adjust investment to match equity (as we want ROI to be 0 for now)
+                inv = inv; // Now inv is equity
             }
 
             // Convert to GBP if BRL
@@ -565,7 +625,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                     }}>
                         <h3 style={{ margin: 0, fontSize: '1.3rem' }}>📊 Real Estate Consolidated Portfolio</h3>
                         <div style={{ textAlign: 'right' }}>
-                            <span style={{ color: totalPnL >= 0 ? 'var(--accent-color)' : 'var(--error)', fontWeight: 700, fontSize: '1.1rem' }}>
+                            <span style={{ color: totalPnL >= 0 ? 'var(--vu-green)' : 'var(--error)', fontWeight: 700, fontSize: '1.1rem' }}>
                                 {totalPnL >= 0 ? '+' : ''}£{totalPnL.toLocaleString(undefined, { maximumFractionDigits: 0 })} ({totalRoi.toFixed(1)}%)
                             </span>
                             <div style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)', marginTop: '4px' }}>
@@ -585,23 +645,53 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                             </tr>
                         </thead>
                         <tbody>
-                            {currentAssets.map(asset => (
+                            {activeAssets.map(asset => (
                                 <tr key={asset.name} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                     <td style={{ padding: '14px 24px', fontWeight: 600 }}>{asset.name}</td>
                                     <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600 }}>R$ {asset.brl.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
                                     <td style={{ padding: '14px 24px', textAlign: 'right', color: 'var(--fg-secondary)' }}>£{asset.gbp.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
                                     <td style={{ padding: '14px 24px', textAlign: 'right', color: 'var(--fg-secondary)' }}>£{asset.investmentGBP.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
-                                    <td style={{ padding: '14px 24px', textAlign: 'right', color: asset.roi >= 0 ? 'var(--accent-color)' : 'var(--error)', fontWeight: 600 }}>
-                                        {asset.roi >= 0 ? '+' : ''}{asset.roi.toFixed(1)}%
+                                    <td style={{ padding: '14px 24px', textAlign: 'right', color: asset.roi >= 0 ? 'var(--vu-green)' : 'var(--error)', fontWeight: 600 }}>
+                                        {asset.roi !== null ? (asset.roi >= 0 ? '+' : '') + asset.roi.toFixed(1) + '%' : '-'}
                                     </td>
                                 </tr>
                             ))}
+                            {totalRealisedPnLBrl !== 0 && (
+                                <>
+                                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                                        <td style={{ padding: '14px 24px', fontWeight: 600, color: 'var(--fg-secondary)', textAlign: 'right', fontStyle: 'italic' }}>
+                                            Current Holdings Subtotal
+                                        </td>
+                                        <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600, fontSize: '0.9rem' }}>
+                                            R$ {totalCurrentBrl.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                        </td>
+                                        <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600, fontSize: '0.9rem', color: 'var(--fg-secondary)' }}>
+                                            £{totalCurrentGbp.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                        </td>
+                                        <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600, fontSize: '0.9rem', color: 'var(--fg-secondary)' }}>
+                                            £{totalInvestmentGbp.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                        </td>
+                                        <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600, fontSize: '0.9rem', color: subtotalRoi >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
+                                            {subtotalRoi >= 0 ? '+' : ''}{subtotalRoi.toFixed(1)}%
+                                        </td>
+                                    </tr>
+                                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                                        <td colSpan={2} style={{ padding: '14px 24px', fontStyle: 'italic', color: 'var(--fg-secondary)', textAlign: 'right' }}>
+                                            Realised P&L
+                                        </td>
+                                        <td style={{ padding: '14px 24px', textAlign: 'right', color: totalRealisedPnLGbp >= 0 ? 'var(--vu-green)' : 'var(--error)', fontWeight: 600 }}>
+                                            {totalRealisedPnLGbp >= 0 ? '+' : ''}£{totalRealisedPnLGbp.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                        </td>
+                                        <td colSpan={2}></td>
+                                    </tr>
+                                </>
+                            )}
                             <tr style={{ backgroundColor: 'rgba(16, 185, 129, 0.05)' }}>
                                 <td style={{ padding: '14px 24px', fontWeight: 700, fontSize: '1.05rem' }}>Total</td>
                                 <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 700, fontSize: '1.05rem' }}>R$ {totalCurrentBrl.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
                                 <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600, color: 'var(--fg-secondary)' }}>£{totalCurrentGbp.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
                                 <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600, color: 'var(--fg-secondary)' }}>£{totalInvestmentGbp.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
-                                <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 700, fontSize: '1.05rem', color: totalRoi >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 700, fontSize: '1.05rem', color: totalRoi >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                     {totalRoi >= 0 ? '+' : ''}{totalRoi.toFixed(1)}%
                                 </td>
                             </tr>
@@ -699,7 +789,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                         const isExpanded = expandedPropertyId === prop.id;
 
                         return (
-                            <div key={prop.id} className="glass-card" style={{ padding: '0', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                            <div key={prop.id} id={encodeURIComponent(prop.name)} className="glass-card" style={{ padding: '0', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'rgba(255,255,255,0.02)' }}>
                                 {/* Header / Hero */}
                                 <div style={{
                                     padding: '24px',
@@ -754,7 +844,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                                             <div style={{ color: 'var(--fg-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>
                                                 {isSold ? 'Realized P/L' : (prop.id === 'zara' ? 'Airbnb P/L' : 'Unrealized P/L')}
                                             </div>
-                                            <div style={{ fontSize: '1.1rem', fontWeight: '600', color: profitLoss >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                            <div style={{ fontSize: '1.1rem', fontWeight: '600', color: profitLoss >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                                 {symbol} {Math.abs(profitLoss).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                                                 <span style={{ fontSize: '0.8rem', opacity: 0.8, marginLeft: '6px' }}>
                                                     ({profitLoss >= 0 ? '+' : '-'}{Math.abs(roi).toFixed(1)}%)
@@ -869,7 +959,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                                                     {liveData && (
                                                         <span style={{
                                                             fontSize: '0.7rem',
-                                                            color: liveData.changePercent >= 0 ? 'var(--accent-color)' : 'var(--error)',
+                                                            color: liveData.changePercent >= 0 ? 'var(--vu-green)' : 'var(--error)',
                                                             marginLeft: '6px'
                                                         }}>
                                                             ({liveData.changePercent >= 0 ? '+' : ''}{liveData.changePercent.toFixed(2)}%)
@@ -882,10 +972,10 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                                                 <td style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-primary)' }}>
                                                     R$ {summary.totalInvestment.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                                 </td>
-                                                <td style={{ padding: '12px', textAlign: 'right', color: profitLoss >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                                <td style={{ padding: '12px', textAlign: 'right', color: profitLoss >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                                     R$ {profitLoss.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                                 </td>
-                                                <td style={{ padding: '12px', textAlign: 'right', color: roi >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                                <td style={{ padding: '12px', textAlign: 'right', color: roi >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                                     {roi.toFixed(1)}%
                                                 </td>
                                                 <td style={{ padding: '12px', textAlign: 'center' }}>
@@ -931,10 +1021,10 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                                             <td style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-primary)' }}>
                                                 R$ {grandTotalInvestment.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                             </td>
-                                            <td style={{ padding: '12px', textAlign: 'right', color: totalProfitLoss >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                            <td style={{ padding: '12px', textAlign: 'right', color: totalProfitLoss >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                                 R$ {totalProfitLoss.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                             </td>
-                                            <td style={{ padding: '12px', textAlign: 'right', color: totalRoi >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                            <td style={{ padding: '12px', textAlign: 'right', color: totalRoi >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                                 {totalRoi.toFixed(1)}%
                                             </td>
                                             <td></td>
@@ -1005,7 +1095,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                                                     {tr.quantity}
                                                 </td>
                                                 <td style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-primary)' }}>
-                                                    R$ {tr.costPerShare.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                    R$ {(tr.costPerShare || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                                 </td>
                                                 <td style={{ padding: '12px', textAlign: 'center' }}>
                                                     <div className="funds-actions" style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
@@ -1151,7 +1241,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                                 </div>
                                 <div>
                                     <div style={{ color: 'var(--fg-secondary)', fontSize: '0.8rem', marginBottom: '4px' }}>P&L</div>
-                                    <div style={{ fontSize: '1.1rem', fontWeight: 700, color: fundSellData.pnl >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                    <div style={{ fontSize: '1.1rem', fontWeight: 700, color: fundSellData.pnl >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                         R$ {(fundSellData.pnl || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                         <span style={{ fontSize: '0.75rem', marginLeft: '4px' }}>({(fundSellData.roi || 0).toFixed(1)}%)</span>
                                     </div>
@@ -1200,7 +1290,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                             fontSize: '1.2rem', fontWeight: '600', color: airbnb.ledger.reduce((sum, l) => {
                                 const agg = calculateMonthAggregates(l);
                                 return sum + (agg.revenue - agg.costs);
-                            }, 0) >= 0 ? 'var(--accent-color)' : 'var(--error)'
+                            }, 0) >= 0 ? 'var(--vu-green)' : 'var(--error)'
                         }}>
                             R$ {airbnb.ledger.reduce((sum, l) => {
                                 const agg = calculateMonthAggregates(l);
@@ -1241,88 +1331,128 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                    <th style={{ padding: '12px', textAlign: 'left', color: 'var(--fg-secondary)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Month</th>
-                                    <th style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-secondary)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Costs</th>
-                                    <th style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-secondary)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Revenue</th>
-                                    <th style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-secondary)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Profit/Loss</th>
-                                    <th style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-secondary)', fontSize: '0.8rem', textTransform: 'uppercase' }}>ROI %</th>
+                                    <th style={{ padding: '12px', textAlign: 'left', color: 'var(--fg-secondary)', fontSize: '0.8rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleAirbnbSort('month')}>Month{getAirbnbSortIndicator('month')}</th>
+                                    <th style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-secondary)', fontSize: '0.8rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleAirbnbSort('costs')}>Costs{getAirbnbSortIndicator('costs')}</th>
+                                    <th style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-secondary)', fontSize: '0.8rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleAirbnbSort('revenue')}>Revenue{getAirbnbSortIndicator('revenue')}</th>
+                                    <th style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-secondary)', fontSize: '0.8rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleAirbnbSort('profit')}>Profit/Loss{getAirbnbSortIndicator('profit')}</th>
+                                    <th style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-secondary)', fontSize: '0.8rem', textTransform: 'uppercase', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleAirbnbSort('roi')}>ROI %{getAirbnbSortIndicator('roi')}</th>
                                     <th style={{ padding: '12px', textAlign: 'center', color: 'var(--fg-secondary)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {sortLedger(airbnb.ledger, 'month').filter(l => {
-                                    const agg = calculateMonthAggregates(l);
-                                    return agg.costs > 0 || agg.revenue > 0;
-                                }).map((entry, idx) => {
-                                    const agg = calculateMonthAggregates(entry);
-                                    const profit = agg.revenue - agg.costs;
-                                    const roi = (profit / 444204) * 100;
+                                {(() => {
+                                    const enrichedLedger = airbnb.ledger.filter(l => {
+                                        const agg = calculateMonthAggregates(l);
+                                        return agg.costs > 0 || agg.revenue > 0;
+                                    }).map(l => {
+                                        const agg = calculateMonthAggregates(l);
+                                        const profit = agg.revenue - agg.costs;
+                                        const roi = (profit / 444204) * 100;
+                                        return { ...l, agg, profit, roi };
+                                    });
 
-                                    return (
-                                        <tr key={idx} className="airbnb-ledger-row ledger-row" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <td style={{ padding: '12px', color: 'var(--fg-primary)' }}>{entry.month}</td>
-                                            <td
-                                                style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-primary)', position: 'relative', cursor: 'pointer' }}
-                                                onMouseEnter={() => setHoveredCostMonth(entry.month)}
-                                                onMouseLeave={() => setHoveredCostMonth(null)}
-                                            >
-                                                R$ {agg.costs.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                                {hoveredCostMonth === entry.month && (
-                                                    <div style={{
-                                                        position: 'absolute',
-                                                        bottom: '100%',
-                                                        right: '0',
-                                                        backgroundColor: 'rgba(30, 41, 59, 0.95)',
-                                                        border: '1px solid var(--glass-border)',
-                                                        borderRadius: '8px',
-                                                        padding: '12px',
-                                                        minWidth: '200px',
-                                                        zIndex: 1000,
-                                                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                                                        marginBottom: '8px'
-                                                    }}>
-                                                        <div style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)', marginBottom: '8px', fontWeight: '600' }}>Cost Breakdown</div>
-                                                        {agg.costBreakdown ? (
-                                                            Object.entries(agg.costBreakdown).map(([type, amount]) => (
-                                                                <div key={type} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                                                                    <span style={{ color: 'var(--fg-secondary)' }}>{type}:</span>
-                                                                    <span style={{ color: 'var(--fg-primary)', fontWeight: '500' }}>R$ {amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                                                </div>
-                                                            ))
-                                                        ) : (
-                                                            <div style={{ fontSize: '0.8rem', color: 'var(--fg-secondary)', fontStyle: 'italic' }}>Breakdown not available</div>
-                                                        )}
+                                    enrichedLedger.sort((a, b) => {
+                                        let valA, valB;
+                                        switch (airbnbSortConfig.key) {
+                                            case 'costs':
+                                                valA = a.agg.costs;
+                                                valB = b.agg.costs;
+                                                break;
+                                            case 'revenue':
+                                                valA = a.agg.revenue;
+                                                valB = b.agg.revenue;
+                                                break;
+                                            case 'profit':
+                                                valA = a.profit;
+                                                valB = b.profit;
+                                                break;
+                                            case 'roi':
+                                                valA = a.roi;
+                                                valB = b.roi;
+                                                break;
+                                            case 'month':
+                                            default:
+                                                valA = a.month;
+                                                valB = b.month;
+                                                break;
+                                        }
+
+                                        if (valA < valB) return airbnbSortConfig.direction === 'asc' ? -1 : 1;
+                                        if (valA > valB) return airbnbSortConfig.direction === 'asc' ? 1 : -1;
+                                        return 0;
+                                    });
+
+                                    return enrichedLedger.map((entry, idx) => {
+                                        const agg = entry.agg;
+                                        const profit = entry.profit;
+                                        const roi = entry.roi;
+
+                                        return (
+                                            <tr key={idx} className="airbnb-ledger-row ledger-row" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <td style={{ padding: '12px', color: 'var(--fg-primary)' }}>{entry.month}</td>
+                                                <td
+                                                    style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-primary)', position: 'relative', cursor: 'pointer' }}
+                                                    onMouseEnter={() => setHoveredCostMonth(entry.month)}
+                                                    onMouseLeave={() => setHoveredCostMonth(null)}
+                                                >
+                                                    R$ {agg.costs.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                    {hoveredCostMonth === entry.month && (
+                                                        <div style={{
+                                                            position: 'absolute',
+                                                            bottom: '100%',
+                                                            right: '0',
+                                                            backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                                                            border: '1px solid var(--glass-border)',
+                                                            borderRadius: '8px',
+                                                            padding: '12px',
+                                                            minWidth: '200px',
+                                                            zIndex: 1000,
+                                                            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                                                            marginBottom: '8px'
+                                                        }}>
+                                                            <div style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)', marginBottom: '8px', fontWeight: '600' }}>Cost Breakdown</div>
+                                                            {agg.costBreakdown ? (
+                                                                Object.entries(agg.costBreakdown).map(([type, amount]) => (
+                                                                    <div key={type} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
+                                                                        <span style={{ color: 'var(--fg-secondary)' }}>{type}:</span>
+                                                                        <span style={{ color: 'var(--fg-primary)', fontWeight: '500' }}>R$ {amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                                                    </div>
+                                                                ))
+                                                            ) : (
+                                                                <div style={{ fontSize: '0.8rem', color: 'var(--fg-secondary)', fontStyle: 'italic' }}>Breakdown not available</div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td style={{ padding: '12px', textAlign: 'right', color: 'var(--accent-color)' }}>
+                                                    R$ {agg.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                </td>
+                                                <td style={{ padding: '12px', textAlign: 'right', color: profit >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
+                                                    R$ {profit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                </td>
+                                                <td style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-primary)' }}>
+                                                    {roi.toFixed(1)}%
+                                                </td>
+                                                <td style={{ padding: '12px', textAlign: 'center' }}>
+                                                    <div className="airbnb-actions" style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                                        <button
+                                                            onClick={() => handleEditAirbnbMonth(entry.month)}
+                                                            className="btn-icon btn-edit"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteAirbnbMonth(entry.month)}
+                                                            className="btn-icon btn-delete"
+                                                        >
+                                                            Delete
+                                                        </button>
                                                     </div>
-                                                )}
-                                            </td>
-                                            <td style={{ padding: '12px', textAlign: 'right', color: 'var(--accent-color)' }}>
-                                                R$ {agg.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                            </td>
-                                            <td style={{ padding: '12px', textAlign: 'right', color: profit >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
-                                                R$ {profit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                            </td>
-                                            <td style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-primary)' }}>
-                                                {roi.toFixed(1)}%
-                                            </td>
-                                            <td style={{ padding: '12px', textAlign: 'center' }}>
-                                                <div className="airbnb-actions" style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                                                    <button
-                                                        onClick={() => handleEditAirbnbMonth(entry.month)}
-                                                        className="btn-icon btn-edit"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteAirbnbMonth(entry.month)}
-                                                        className="btn-icon btn-delete"
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
+                                                </td>
+                                            </tr>
+                                        );
+                                    });
+                                })()}
                             </tbody>
                         </table>
                     </div>
@@ -1342,7 +1472,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                             {(() => {
                                 const totalPrincipalPaid = inkCourt.ledger.reduce((s, l) => s + l.principal, 0);
                                 const mortgageBalance = inkCourt.mortgageAmount - totalPrincipalPaid;
-                                const currentPrice = liveMarketValue || inkCourt.marketValue || inkCourt.propertyValue;
+                                const currentPrice = inkCourt.propertyValue;
                                 const equity = currentPrice - mortgageBalance;
                                 return `£${Math.max(0, equity).toLocaleString()} `;
                             })()}
@@ -1451,15 +1581,35 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                         background: 'rgba(139, 92, 246, 0.05)',
                         borderLeft: '3px solid #8b5cf6'
                     }}>
-                        <div style={{ color: 'var(--fg-secondary)', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>Market Value (Live)</div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: '600', color: '#a78bfa' }}>
-                            £{(liveMarketValue || inkCourt.marketValue || inkCourt.propertyValue).toLocaleString()}
-                        </div>
-                        {lastUpdated && (
-                            <div style={{ fontSize: '0.65rem', color: 'var(--fg-secondary)', marginTop: '4px' }}>
-                                Updated on {lastUpdated.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}, {lastUpdated.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                        <a
+                            href="https://themovemarket.com/tools/propertyprices/flat-307-ink-court-419-wick-lane-london-e3-2pw"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ textDecoration: 'none', display: 'block' }}
+                            className="market-value-link"
+                        >
+                            <div style={{ color: 'var(--fg-secondary)', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                Market Value (Live)
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                             </div>
-                        )}
+                            <div style={{ fontSize: '1.2rem', fontWeight: '600', color: '#a78bfa' }}>
+                                £{(liveMarketValue || inkCourt.marketValue || inkCourt.propertyValue).toLocaleString()}
+                            </div>
+                            {lastUpdated && (
+                                <div style={{ fontSize: '0.65rem', color: 'var(--fg-secondary)', marginTop: '4px' }}>
+                                    Updated on {lastUpdated.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}, {lastUpdated.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                            )}
+                        </a>
+                        <style jsx>{`
+                            .market-value-link {
+                                transition: opacity 0.2s ease, transform 0.2s ease;
+                            }
+                            .market-value-link:hover {
+                                opacity: 0.8;
+                                transform: translateY(-1px);
+                            }
+                        `}</style>
                     </div>
 
                     <div className="glass-card" style={{ padding: '16px', background: 'rgba(255,255,255,0.02)' }}>

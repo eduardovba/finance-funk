@@ -8,7 +8,7 @@ export async function GET(request) {
             SELECT a.id, a.name, a.currency, MAX(l.price) as currentValue, SUM(l.amount) as totalInvestment
             FROM assets a
             JOIN ledger l ON l.asset_id = a.id
-            WHERE a.asset_class = 'Real Estate' AND a.broker = 'Manual'
+            WHERE a.asset_class = 'Real Estate' AND a.broker = 'Manual' AND a.sync_status = 'ACTIVE'
             GROUP BY a.id
         `);
 
@@ -16,7 +16,7 @@ export async function GET(request) {
             SELECT l.asset_id, l.date, l.amount, l.type, l.notes
             FROM ledger l
             JOIN assets a ON l.asset_id = a.id
-            WHERE a.asset_class = 'Real Estate' AND a.broker = 'Manual'
+            WHERE a.asset_class = 'Real Estate' AND a.broker = 'Manual' AND a.sync_status = 'ACTIVE'
             ORDER BY l.date DESC
         `);
 
@@ -119,6 +119,7 @@ export async function GET(request) {
             WHERE a.asset_class = 'Real Estate'
             AND a.ticker IS NOT NULL 
             AND a.ticker != 'INK'
+            AND a.sync_status = 'ACTIVE'
         `);
 
         const fundTransactions = fundRows.map(r => ({
@@ -128,6 +129,7 @@ export async function GET(request) {
             ticker: r.ticker,
             quantity: r.quantity,
             price: r.price,
+            costPerShare: r.price,
             investment: -r.amount,
             currency: r.currency
         }));
@@ -136,7 +138,7 @@ export async function GET(request) {
         const holdingsRows = await query(`
             SELECT name, ticker, currency 
             FROM assets 
-            WHERE asset_class = 'Real Estate' AND ticker IS NOT NULL AND ticker != 'INK'
+            WHERE asset_class = 'Real Estate' AND ticker IS NOT NULL AND ticker != 'INK' AND sync_status = 'ACTIVE'
         `);
 
         const holdings = holdingsRows.map(r => ({
@@ -307,6 +309,37 @@ export async function POST(request) {
 
         // Handle Add Airbnb Month? (If needed, currently manual)
 
+        // Handle Add Funds
+        if (body.section === 'funds') {
+            const t = body.transaction || body;
+            const ticker = (t.fund.split(' - ')[1] || t.fund || '').toUpperCase();
+
+            // 1. Get or create asset
+            let assetId;
+            const assetRows = await query("SELECT id FROM assets WHERE ticker = ?", [ticker]);
+
+            if (assetRows.length > 0) {
+                assetId = assetRows[0].id;
+            } else {
+                const name = t.fund || `Fund ${ticker}`;
+                const result = await run(
+                    `INSERT INTO assets (name, ticker, asset_class, broker, currency) VALUES (?, ?, ?, ?, ?)`,
+                    [name, ticker, 'Real Estate', 'XP', 'BRL']
+                );
+                assetId = result.lastID;
+            }
+
+            // 2. Insert ledger entry
+            // amount should be negative for investment (outflow)
+            const amt = -Math.abs(t.investment || (t.quantity * t.costPerShare));
+            await run(
+                `INSERT INTO ledger (date, asset_id, amount, quantity, price, currency, type, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                [t.date, assetId, amt, t.quantity, t.costPerShare, 'BRL', 'Buy', t.isSalaryContribution ? 'Salary Contribution' : 'Manual Buy']
+            );
+
+            return NextResponse.json({ success: true });
+        }
+
         return NextResponse.json({ success: true });
 
     } catch (e) {
@@ -388,12 +421,17 @@ export async function PUT(request) {
             return NextResponse.json({ success: true });
         }
 
-        // Handle Airbnb Update
-        if (body.section === 'airbnb') {
-            // body: { month, transactions: [...] }
-            // Update logic: Delete all for month -> Insert all new
-            // Already have delete logic?
-            // Or simplified update calls?
+        // Handle Fund Update
+        if (body.section === 'funds') {
+            const t = body.transaction;
+            if (!t.id) return NextResponse.json({ error: 'Transaction ID required' }, { status: 400 });
+
+            await run(
+                `UPDATE ledger SET date = ?, amount = ?, quantity = ?, price = ?, notes = ? WHERE id = ?`,
+                [t.date, -Math.abs(t.investment), t.quantity, t.costPerShare, t.isSalaryContribution ? 'Salary Contribution' : 'Edited Transaction', t.id]
+            );
+
+            return NextResponse.json({ success: true });
         }
 
         return NextResponse.json({ success: true });

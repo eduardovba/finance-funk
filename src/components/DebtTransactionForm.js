@@ -1,13 +1,19 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import CurrencySelector from './CurrencySelector';
+import { usePortfolio } from '../context/PortfolioContext';
+import { convertCurrency } from '@/lib/currency';
 
-export default function DebtTransactionForm({ onSave, onCancel, initialData = null, rates }) {
+export default function DebtTransactionForm({ onSave, onCancel, initialData = null, rates: propRates }) {
+    const { primaryCurrency, rates: contextRates } = usePortfolio();
+    const rates = propRates || contextRates;
+
     const [formData, setFormData] = useState({
-        date: new Date().toLocaleDateString('en-GB'),
+        date: new Date().toISOString().split('T')[0],
         lender: '',
         amount: '',
-        currency: 'BRL',
+        currency: primaryCurrency,
         obs: '',
         isSalaryContribution: false
     });
@@ -21,7 +27,7 @@ export default function DebtTransactionForm({ onSave, onCancel, initialData = nu
                 lender: initialData.lender,
                 obs: initialData.obs,
                 amount: initialData.value_brl || 0,
-                currency: 'BRL',
+                currency: initialData.currency || 'BRL',
                 isSalaryContribution: initialData.isSalaryContribution || false
             });
         }
@@ -34,18 +40,9 @@ export default function DebtTransactionForm({ onSave, onCancel, initialData = nu
         let val_brl = 0;
         let val_gbp = 0;
 
-        // Rates: GBP=1, BRL=~7.20, USD=~1.28 (1 GBP = X CURRENCY)
-        if (formData.currency === 'BRL') {
-            val_brl = amount;
-            val_gbp = Number((amount / rates.BRL).toFixed(2));
-        } else if (formData.currency === 'GBP') {
-            val_gbp = amount;
-            val_brl = Number((amount * rates.BRL).toFixed(2));
-        } else if (formData.currency === 'USD') {
-            // USD -> GBP -> BRL
-            val_gbp = Number((amount / rates.USD).toFixed(2));
-            val_brl = Number((val_gbp * rates.BRL).toFixed(2));
-        }
+        // Use standard convertCurrency helper
+        val_gbp = convertCurrency(amount, formData.currency, 'GBP', rates);
+        val_brl = convertCurrency(amount, formData.currency, 'BRL', rates);
 
         onSave({
             id: initialData?.id,
@@ -80,7 +77,7 @@ export default function DebtTransactionForm({ onSave, onCancel, initialData = nu
                             type="text"
                             value={formData.date}
                             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                            placeholder="DD/MM/YYYY"
+                            placeholder="YYYY-MM-DD"
                             className="glass-card"
                             style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         />
@@ -98,8 +95,8 @@ export default function DebtTransactionForm({ onSave, onCancel, initialData = nu
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
-                    <div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'end' }}>
+                    <div style={{ gridColumn: 'span 1' }}>
                         <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Value</label>
                         <input
                             type="number"
@@ -111,18 +108,11 @@ export default function DebtTransactionForm({ onSave, onCancel, initialData = nu
                             style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         />
                     </div>
-                    <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Currency</label>
-                        <select
+                    <div style={{ gridColumn: 'span 1' }}>
+                        <CurrencySelector
                             value={formData.currency}
-                            onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                            className="glass-card"
-                            style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
-                        >
-                            <option value="BRL" style={{ background: '#111', color: 'white' }}>BRL</option>
-                            <option value="GBP" style={{ background: '#111', color: 'white' }}>GBP</option>
-                            <option value="USD" style={{ background: '#111', color: 'white' }}>USD</option>
-                        </select>
+                            onChange={(val) => setFormData({ ...formData, currency: val })}
+                        />
                     </div>
                 </div>
 

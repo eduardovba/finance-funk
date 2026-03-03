@@ -1,12 +1,29 @@
 import { useState, useEffect } from 'react';
 import AssetSearch from './AssetSearch';
+import ConfirmationModal from './ConfirmationModal';
+import CurrencySelector from './CurrencySelector';
+import { SUPPORTED_CURRENCIES } from '@/lib/currency';
 
-export default function CryptoTab({ marketData, rates }) {
-    const [transactions, setTransactions] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-
+export default function CryptoTab({ transactions = [], marketData, rates, onRefresh }) {
+    const [isLoading, setIsLoading] = useState(false);
     // Modal states
     const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
+
+    // Scroll to hash on load
+    useEffect(() => {
+        if (!isLoading && typeof window !== 'undefined' && window.location.hash) {
+            const id = window.location.hash.substring(1); // remove '#'
+            const element = document.getElementById(id);
+            if (element) {
+                setTimeout(() => {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.style.transition = 'background-color 1.5s ease-out';
+                    element.style.backgroundColor = 'rgba(212, 175, 55, 0.2)';
+                    setTimeout(() => { element.style.backgroundColor = ''; }, 2000);
+                }, 100);
+            }
+        }
+    }, [isLoading, transactions.length]);
     const [isSellModalOpen, setIsSellModalOpen] = useState(false);
     const [buyData, setBuyData] = useState(null);
     const [sellData, setSellData] = useState(null);
@@ -17,18 +34,13 @@ export default function CryptoTab({ marketData, rates }) {
     // Ledger toggle
     const [ledgerOpen, setLedgerOpen] = useState(false);
 
-    useEffect(() => {
-        fetch('/api/crypto-transactions')
-            .then(res => res.json())
-            .then(data => {
-                setTransactions(data);
-                setIsLoading(false);
-            })
-            .catch(err => {
-                console.error('Failed to load crypto transactions:', err);
-                setIsLoading(false);
-            });
-    }, []);
+    // Ledger sort: default newest date first
+    const [ledgerSortKey, setLedgerSortKey] = useState('date');
+    const [ledgerSortDir, setLedgerSortDir] = useState('desc');
+
+    // Delete confirmation modal
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [transactionToDelete, setTransactionToDelete] = useState(null);
 
     const formatCurrency = (val, currency = 'USD') => {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(val);
@@ -159,7 +171,7 @@ export default function CryptoTab({ marketData, rates }) {
 
     const handleNewBuyClick = () => {
         setBuyData({
-            date: new Date().toLocaleDateString('en-GB'),
+            date: new Date().toISOString().split('T')[0],
             ticker: '',
             asset: '',
             currency: 'USD',
@@ -172,7 +184,7 @@ export default function CryptoTab({ marketData, rates }) {
 
     const handleBuyMore = (item) => {
         setBuyData({
-            date: new Date().toLocaleDateString('en-GB'),
+            date: new Date().toISOString().split('T')[0],
             ticker: item.ticker,
             asset: item.asset,
             currency: 'USD',
@@ -186,7 +198,7 @@ export default function CryptoTab({ marketData, rates }) {
     const handleSellClick = (item) => {
         setSellData({
             ...item,
-            date: new Date().toLocaleDateString('en-GB'),
+            date: new Date().toISOString().split('T')[0],
             currency: 'USD',
             qtyToSell: '',
             sellPricePerShare: item.price || '',
@@ -200,8 +212,7 @@ export default function CryptoTab({ marketData, rates }) {
     const handleEditClick = (tr) => {
         setEditData({
             ...tr,
-            // Convert YYYY-MM-DD back to DD/MM/YYYY for input
-            date: tr.date.split('-').reverse().join('/'),
+            date: tr.date,
             // Ensure numbers are strings for inputs if needed, or keep as numbers
             quantity: Math.abs(tr.quantity), // localized? No, raw number
             investment: Math.abs(tr.investment),
@@ -210,17 +221,25 @@ export default function CryptoTab({ marketData, rates }) {
         setIsEditModalOpen(true);
     };
 
-    const handleDeleteClick = async (id) => {
-        if (!confirm('Are you sure you want to delete this transaction?')) return;
+    const handleDeleteClick = (id) => {
+        setTransactionToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!transactionToDelete) return;
         try {
-            const res = await fetch(`/api/crypto-transactions?id=${id}`, { method: 'DELETE' });
+            const res = await fetch(`/api/crypto-transactions?id=${transactionToDelete}`, { method: 'DELETE' });
             if (res.ok) {
-                setTransactions(prev => prev.filter(t => t.id !== id));
+                if (onRefresh) onRefresh();
             } else {
                 console.error('Failed to delete');
             }
         } catch (e) {
             console.error('Error deleting transaction:', e);
+        } finally {
+            setIsDeleteModalOpen(false);
+            setTransactionToDelete(null);
         }
     };
 
@@ -260,7 +279,7 @@ export default function CryptoTab({ marketData, rates }) {
 
         const newTr = {
             id: `crypto-new-${Date.now()}`,
-            date: buyData.date.split('/').reverse().join('-'), // DD/MM/YYYY -> YYYY-MM-DD
+            date: buyData.date, // YYYY-MM-DD
             ticker: buyData.ticker,
             asset: buyData.asset,
             type: 'Buy',
@@ -278,8 +297,7 @@ export default function CryptoTab({ marketData, rates }) {
                 body: JSON.stringify(newTr)
             });
             if (res.ok) {
-                const savedTr = await res.json();
-                setTransactions(prev => [...prev, savedTr]);
+                if (onRefresh) onRefresh();
                 setIsBuyModalOpen(false);
             }
         } catch (e) {
@@ -292,7 +310,7 @@ export default function CryptoTab({ marketData, rates }) {
 
         const newTr = {
             id: `crypto-new-${Date.now()}`,
-            date: sellData.date.split('/').reverse().join('-'),
+            date: sellData.date, // YYYY-MM-DD
             ticker: sellData.ticker,
             asset: sellData.asset,
             type: 'Sell',
@@ -310,8 +328,7 @@ export default function CryptoTab({ marketData, rates }) {
                 body: JSON.stringify(newTr)
             });
             if (res.ok) {
-                const savedTr = await res.json();
-                setTransactions(prev => [...prev, savedTr]);
+                if (onRefresh) onRefresh();
                 setIsSellModalOpen(false);
             }
         } catch (e) {
@@ -333,7 +350,7 @@ export default function CryptoTab({ marketData, rates }) {
 
         const updatedTr = {
             ...editData,
-            date: editData.date.split('/').reverse().join('-'),
+            date: editData.date,
             quantity: type === 'Sell' ? -qMag : qMag,
             investment: type === 'Sell' ? -iMag : iMag, // Keep logic consistent: Sell has negative investment (proceeds)
             pnl: parseFloat(editData.pnl) || 0
@@ -347,7 +364,7 @@ export default function CryptoTab({ marketData, rates }) {
             });
 
             if (res.ok) {
-                setTransactions(prev => prev.map(t => t.id === updatedTr.id ? updatedTr : t));
+                if (onRefresh) onRefresh();
                 setIsEditModalOpen(false);
             }
         } catch (e) {
@@ -355,8 +372,39 @@ export default function CryptoTab({ marketData, rates }) {
         }
     };
 
+    // Ledger sort handler
+    const handleLedgerSort = (key) => {
+        if (ledgerSortKey === key) {
+            setLedgerSortDir(d => d === 'asc' ? 'desc' : 'asc');
+        } else {
+            setLedgerSortKey(key);
+            setLedgerSortDir('asc');
+        }
+    };
+
+    const sortedTransactions = [...transactions].sort((a, b) => {
+        let aVal = a[ledgerSortKey];
+        let bVal = b[ledgerSortKey];
+        if (ledgerSortKey === 'date') {
+            aVal = new Date(aVal);
+            bVal = new Date(bVal);
+        } else if (ledgerSortKey === 'quantity' || ledgerSortKey === 'investment') {
+            aVal = Math.abs(parseFloat(aVal) || 0);
+            bVal = Math.abs(parseFloat(bVal) || 0);
+        } else {
+            aVal = String(aVal || '').toLowerCase();
+            bVal = String(bVal || '').toLowerCase();
+        }
+        if (aVal < bVal) return ledgerSortDir === 'asc' ? -1 : 1;
+        if (aVal > bVal) return ledgerSortDir === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    const sortArrow = (key) => ledgerSortKey === key ? (ledgerSortDir === 'asc' ? ' ▲' : ' ▼') : '';
+
     // Styling helpers
     const thStyle = { padding: '12px 24px', textAlign: 'left', color: 'var(--fg-secondary)', fontWeight: 500, fontSize: '0.9rem', borderBottom: '1px solid rgba(255,255,255,0.05)' };
+    const thSortable = { ...thStyle, cursor: 'pointer', userSelect: 'none' };
 
     if (isLoading) {
         return <div style={{ textAlign: 'center', padding: '80px', color: 'var(--fg-secondary)' }}>Loading crypto data...</div>;
@@ -378,7 +426,7 @@ export default function CryptoTab({ marketData, rates }) {
                     </h3>
                     <div style={{ textAlign: 'right' }}>
                         <div style={{ fontSize: '0.9rem', color: 'var(--fg-secondary)', marginBottom: '4px' }}>Unrealized Return</div>
-                        <div style={{ color: totalPnL >= 0 ? 'var(--accent-color)' : 'var(--error)', fontWeight: 600 }}>
+                        <div style={{ color: totalPnL >= 0 ? 'var(--vu-green)' : 'var(--error)', fontWeight: 600 }}>
                             {totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL)} ({totalROI.toFixed(1)}%)
                         </div>
                     </div>
@@ -394,7 +442,7 @@ export default function CryptoTab({ marketData, rates }) {
                     </div>
                     <div>
                         <div style={{ color: 'var(--fg-secondary)', fontSize: '0.9rem', marginBottom: '8px' }}>Total P&L</div>
-                        <div style={{ fontSize: '1.8rem', fontWeight: 700, color: totalPnL >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                        <div style={{ fontSize: '1.8rem', fontWeight: 700, color: totalPnL >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                             {totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL)}
                         </div>
                     </div>
@@ -431,7 +479,7 @@ export default function CryptoTab({ marketData, rates }) {
                     </thead>
                     <tbody>
                         {rows.map(r => (
-                            <tr key={r.ticker} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <tr key={r.ticker} id={encodeURIComponent(r.asset)} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                 <td style={{ padding: '14px 24px', fontWeight: 600, color: 'var(--fg-secondary)', fontSize: '0.8rem' }}>{r.ticker}</td>
                                 <td style={{ padding: '14px 24px', fontWeight: 600, color: '#fff', fontSize: '0.9rem' }}>{r.asset}</td>
                                 <td style={{ padding: '14px 24px' }}>{r.qty.toLocaleString(undefined, { maximumFractionDigits: 4 })}</td>
@@ -440,10 +488,10 @@ export default function CryptoTab({ marketData, rates }) {
                                 </td>
                                 <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 600 }}>{formatCurrency(r.currentValue)}</td>
                                 <td style={{ padding: '14px 24px', textAlign: 'right', color: 'var(--fg-secondary)' }}>{formatCurrency(r.netInvestment)}</td>
-                                <td style={{ padding: '14px 24px', textAlign: 'right', color: r.pnl >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                <td style={{ padding: '14px 24px', textAlign: 'right', color: r.pnl >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                     {r.pnl >= 0 ? '+' : ''}{formatCurrency(r.pnl)}
                                 </td>
-                                <td style={{ padding: '14px 24px', textAlign: 'right', color: r.roi >= 0 ? 'var(--accent-color)' : 'var(--error)' }}>
+                                <td style={{ padding: '14px 24px', textAlign: 'right', color: r.roi >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                     {r.roi >= 0 ? '+' : ''}{r.roi.toFixed(1)}%
                                 </td>
                                 <td style={{ padding: '14px 24px', textAlign: 'center' }}>
@@ -478,10 +526,16 @@ export default function CryptoTab({ marketData, rates }) {
                                 <input type="number" value={buyData.qtyToBuy} onChange={e => updateBuyCalc('qtyToBuy', e.target.value)} style={{ width: '100%', padding: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }} />
                             </div>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '8px' }}>Price per Coin ($)</label>
-                                <input type="number" value={buyData.buyPricePerShare} onChange={e => updateBuyCalc('buyPricePerShare', e.target.value)} style={{ width: '100%', padding: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }} />
+                                <label style={{ display: 'block', marginBottom: '8px' }}>Price per Coin ({SUPPORTED_CURRENCIES[buyData.currency || 'USD']?.symbol || '$'})</label>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                    <input type="number" value={buyData.buyPricePerShare} onChange={e => updateBuyCalc('buyPricePerShare', e.target.value)} style={{ width: '100%', padding: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }} />
+                                    <CurrencySelector
+                                        value={buyData.currency || 'USD'}
+                                        onChange={val => setBuyData(p => ({ ...p, currency: val }))}
+                                    />
+                                </div>
                             </div>
-                            <div>Total: {formatCurrency(buyData.totalInvestment)}</div>
+                            <div>Total: {formatCurrency(buyData.totalInvestment, buyData.currency || 'USD')}</div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <input
                                     type="checkbox"
@@ -517,10 +571,10 @@ export default function CryptoTab({ marketData, rates }) {
                                 <input type="number" value={sellData.qtyToSell} onChange={e => updateSellCalc('qtyToSell', e.target.value)} style={{ width: '100%', padding: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }} />
                             </div>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '8px' }}>Price per Coin ($)</label>
+                                <label style={{ display: 'block', marginBottom: '8px' }}>Price per Coin ({SUPPORTED_CURRENCIES[sellData.currency || 'USD']?.symbol || '$'})</label>
                                 <input type="number" value={sellData.sellPricePerShare} onChange={e => updateSellCalc('sellPricePerShare', e.target.value)} style={{ width: '100%', padding: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }} />
                             </div>
-                            <div>Proceeds: {formatCurrency(sellData.totalProceeds)}</div>
+                            <div>Proceeds: {formatCurrency(sellData.totalProceeds, sellData.currency || 'USD')}</div>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
                             <button onClick={() => setIsSellModalOpen(false)} style={{ padding: '8px 16px', background: 'transparent', color: 'gray', border: 'none', cursor: 'pointer' }}>Cancel</button>
@@ -540,7 +594,7 @@ export default function CryptoTab({ marketData, rates }) {
                         </h3>
                         <div style={{ display: 'grid', gap: '16px', marginTop: '16px' }}>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '8px' }}>Date (DD/MM/YYYY)</label>
+                                <label style={{ display: 'block', marginBottom: '8px' }}>Date (YYYY-MM-DD)</label>
                                 <input type="text" value={editData.date} onChange={e => setEditData({ ...editData, date: e.target.value })}
                                     style={{ width: '100%', padding: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }} />
                             </div>
@@ -609,16 +663,16 @@ export default function CryptoTab({ marketData, rates }) {
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
                             <thead>
                                 <tr style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
-                                    <th style={thStyle}>Date</th>
-                                    <th style={thStyle}>Asset</th>
-                                    <th style={thStyle}>Type</th>
-                                    <th style={{ ...thStyle, textAlign: 'right' }}>Quantity</th>
-                                    <th style={{ ...thStyle, textAlign: 'right' }}>Value ($)</th>
+                                    <th style={thSortable} onClick={() => handleLedgerSort('date')}>Date{sortArrow('date')}</th>
+                                    <th style={thSortable} onClick={() => handleLedgerSort('ticker')}>Asset{sortArrow('ticker')}</th>
+                                    <th style={thSortable} onClick={() => handleLedgerSort('type')}>Type{sortArrow('type')}</th>
+                                    <th style={{ ...thSortable, textAlign: 'right' }} onClick={() => handleLedgerSort('quantity')}>Quantity{sortArrow('quantity')}</th>
+                                    <th style={{ ...thSortable, textAlign: 'right' }} onClick={() => handleLedgerSort('investment')}>Value ($){sortArrow('investment')}</th>
                                     <th style={{ ...thStyle, textAlign: 'center' }}>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {[...transactions].reverse().map(tr => (
+                                {sortedTransactions.map(tr => (
                                     <tr key={tr.id} className="ledger-row" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                         <td style={{ padding: '12px 24px', color: 'var(--fg-secondary)' }}>{tr.date}</td>
                                         <td style={{ padding: '12px 24px', fontWeight: 600, color: '#fff' }}>{tr.ticker}</td>
@@ -626,7 +680,7 @@ export default function CryptoTab({ marketData, rates }) {
                                             <span style={{
                                                 padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600,
                                                 background: tr.type === 'Buy' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                                                color: tr.type === 'Buy' ? 'var(--accent-color)' : 'var(--error)'
+                                                color: tr.type === 'Buy' ? 'var(--vu-green)' : 'var(--error)'
                                             }}>
                                                 {tr.type}
                                             </span>
@@ -652,6 +706,14 @@ export default function CryptoTab({ marketData, rates }) {
                     </div>
                 )}
             </section>
+
+            <ConfirmationModal
+                isOpen={isDeleteModalOpen}
+                title="Delete Transaction"
+                message="Are you sure you want to delete this crypto transaction? This action cannot be undone."
+                onConfirm={handleConfirmDelete}
+                onCancel={() => { setIsDeleteModalOpen(false); setTransactionToDelete(null); }}
+            />
         </div>
     );
 }
