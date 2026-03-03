@@ -6,8 +6,7 @@
     "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "safe-migrate": "node scripts/backup-db.js"
+    "lint": "eslint"
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",

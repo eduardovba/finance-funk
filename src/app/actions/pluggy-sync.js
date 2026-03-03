@@ -3,8 +3,6 @@
 import { getPluggyClient, mapPluggyToFinanceFunk } from '@/lib/pluggy';
 import { run, query, get } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
-import fs from 'fs';
-import path from 'path';
 
 /**
  * Update Asset Sync Status
@@ -45,10 +43,7 @@ export async function batchVerifyAssets(assetIds) {
 }
 
 function logSync(data) {
-    const logPath = path.join(process.cwd(), 'debug_sync.log');
-    const timestamp = new Date().toISOString();
-    const entry = `\n[${timestamp}] ${JSON.stringify(data, null, 2)}\n---`;
-    fs.appendFileSync(logPath, entry);
+    console.log(`[Pluggy Sync] ${JSON.stringify(data)}`);
 }
 
 export async function createConnectToken() {
