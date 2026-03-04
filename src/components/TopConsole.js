@@ -34,20 +34,20 @@ export default function TopConsole() {
     const isAssetRoute = assetTabs.some(t => pathname.startsWith(t.href));
 
     return (
-        <header className="h-16 w-full flex items-center justify-between px-4 lg:px-6 bg-[#1A0F2E]/90 backdrop-blur-md border-b border-[#D4AF37]/20 z-40 flex-shrink-0">
+        <header className="h-12 md:h-16 w-full flex items-center justify-between px-3 md:px-4 lg:px-6 bg-[#1A0F2E]/90 backdrop-blur-md border-b border-[#D4AF37]/20 z-40 flex-shrink-0">
 
             {/* Left: Logo */}
-            <Link href="/dashboard" className="relative flex items-center w-[90px] h-full flex-shrink-0 no-underline group z-[100]">
+            <Link href="/dashboard" className="relative flex items-center w-[60px] md:w-[90px] h-full flex-shrink-0 no-underline group z-[100]">
                 <img
                     src="/ff-logo.png"
                     alt="Finance Funk"
-                    className="absolute -top-2 left-2 h-24 w-auto drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)] group-hover:scale-[1.05] transition-all duration-500 pointer-events-none"
+                    className="absolute -top-2 left-0 md:left-2 h-16 md:h-24 w-auto drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)] group-hover:scale-[1.05] transition-all duration-500 pointer-events-none"
                     style={{ maxHeight: 'none', maxWidth: 'none' }}
                 />
             </Link>
 
-            {/* Center: Navigation Tabs */}
-            <nav className="flex items-center gap-1 mx-4">
+            {/* Center: Navigation Tabs — hidden on mobile (BottomNav handles it) */}
+            <nav className="hidden md:flex items-center gap-1 mx-4">
                 {trackingTabs.map(tab => {
                     const Icon = tab.icon;
                     const isActive = pathname === tab.href || (tab.href === '/dashboard' && pathname === '/');
@@ -145,7 +145,7 @@ export default function TopConsole() {
             </nav>
 
             {/* Right: Controls */}
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
                 <CurrencyPill />
                 <button
                     onClick={() => setIsInspectorOpen(!isInspectorOpen)}
@@ -161,9 +161,9 @@ export default function TopConsole() {
                     <SlidersHorizontal size={16} />
                 </button>
 
-                {/* User / Sign Out */}
+                {/* User / Sign Out — hidden on mobile (More sheet handles it) */}
                 {session?.user && (
-                    <div className="flex items-center gap-2 ml-1">
+                    <div className="hidden md:flex items-center gap-2 ml-1">
                         <span className="text-xs text-gray-400 font-space hidden lg:inline truncate max-w-[120px]" title={session.user.email}>
                             {session.user.name || session.user.email}
                         </span>

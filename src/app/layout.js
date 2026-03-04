@@ -20,6 +20,23 @@ const spaceMono = Space_Mono({
 export const metadata = {
   title: "Finance Funk | Personal Finance Dashboard",
   description: "Motown-inspired personal finance tracking for the modern DJ of money.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Finance Funk",
+  },
+  themeColor: "#0B0611",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    viewportFit: "cover",
+  },
+  icons: {
+    icon: "/icon-512x512.png",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({ children }) {

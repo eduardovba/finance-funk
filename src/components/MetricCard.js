@@ -1,40 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatCurrency, convertCurrency } from "@/lib/currency";
+import { ChevronDown } from 'lucide-react';
 
 export default function MetricCard({ id, title, amount, percentage, diffAmount, contributors = [], currency = 'BRL', primaryCurrency = 'BRL', secondaryCurrency = 'GBP', rates, invertColor = false, isLoading = false, onNavigate }) {
-    const [isHovered, setIsHovered] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [isTouchDevice, setIsTouchDevice] = useState(false);
     const isActuallyPositive = (percentage || 0) >= 0;
     const isPositiveForColor = invertColor ? !isActuallyPositive : isActuallyPositive;
+
+    useEffect(() => {
+        setIsTouchDevice(window.matchMedia('(hover: none)').matches);
+    }, []);
 
     // Convert amount to secondary currency dynamically
     const secondaryValue = rates ? convertCurrency(amount, currency, secondaryCurrency, rates) : 0;
 
+    const handleInteraction = () => {
+        if (isTouchDevice && contributors.length > 0) {
+            setIsExpanded(!isExpanded);
+        } else if (onNavigate) {
+            onNavigate(id);
+        }
+    };
+
     return (
         <motion.div
             className={`
-                glass-card p-6
+                glass-card p-4 md:p-6
                 flex flex-col justify-between
                 relative overflow-hidden
-                ${onNavigate ? 'cursor-pointer' : 'cursor-default'}
+                ${onNavigate || (isTouchDevice && contributors.length > 0) ? 'cursor-pointer' : 'cursor-default'}
             `}
-            onClick={() => onNavigate && onNavigate(id)}
-            onHoverStart={() => setIsHovered(true)}
-            onHoverEnd={() => setIsHovered(false)}
+            onClick={handleInteraction}
+            onHoverStart={() => !isTouchDevice && setIsExpanded(true)}
+            onHoverEnd={() => !isTouchDevice && setIsExpanded(false)}
             initial={false}
+            whileTap={{ scale: 0.98 }}
         >
             {/* Shimmer effect on hover */}
             <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-parchment/[0.05] to-transparent -translate-x-full pointer-events-none"
-                animate={{ x: isHovered ? '200%' : '-100%' }}
-                transition={{ duration: 1.5, repeat: isHovered ? Infinity : 0, ease: "linear" }}
+                animate={{ x: isExpanded ? '200%' : '-100%' }}
+                transition={{ duration: 1.5, repeat: isExpanded ? Infinity : 0, ease: "linear" }}
             />
 
             <div className="mb-4 relative z-10">
-                <h3 className="text-[#F5F5DC]/60 text-xs mb-2 tracking-[2px] uppercase font-space">{title}</h3>
+                <div className="flex items-center justify-between">
+                    <h3 className="text-[#F5F5DC]/60 text-xs mb-2 tracking-[2px] uppercase font-space">{title}</h3>
+                    {isTouchDevice && contributors.length > 0 && (
+                        <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                            <ChevronDown size={14} className="text-parchment/30" />
+                        </motion.div>
+                    )}
+                </div>
                 <motion.p
                     className={`text-4xl font-normal text-[#D4AF37] mb-1 drop-shadow-[0_0_10px_rgba(212,175,55,0.4)] font-bebas ${isLoading ? 'opacity-30' : 'opacity-100'}`}
-                    animate={{ scale: isHovered ? 1.02 : 1 }}
+                    animate={{ scale: isExpanded ? 1.02 : 1 }}
                 >
                     {isLoading ? '---' : formatCurrency(amount, currency)}
                 </motion.p>
@@ -57,7 +79,7 @@ export default function MetricCard({ id, title, amount, percentage, diffAmount, 
 
             <div className="border-t border-white/5 pt-4 relative z-10">
                 <AnimatePresence mode="wait">
-                    {isHovered && contributors && contributors.length > 0 ? (
+                    {isExpanded && contributors && contributors.length > 0 ? (
                         <motion.div
                             key="contributors"
                             initial={{ height: 0, opacity: 0, y: 10 }}

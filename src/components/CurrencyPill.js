@@ -78,7 +78,7 @@ function CurrencyDropdown({ selected, onSelect, otherSelected, side, isOpen, onT
                                     <button
                                         key={c.code}
                                         onClick={() => { onSelect(c.code); onToggle(false); }}
-                                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-all duration-150 border-none cursor-pointer ${c.code === selected
+                                        className={`w-full flex items-center gap-3 px-3 py-3.5 md:py-2.5 text-left transition-all duration-150 border-none cursor-pointer active:scale-[0.98] ${c.code === selected
                                             ? 'bg-[#D4AF37]/15 text-[#D4AF37]'
                                             : 'bg-transparent text-parchment/80 hover:bg-white/5 hover:text-white'
                                             }`}
@@ -99,7 +99,7 @@ function CurrencyDropdown({ selected, onSelect, otherSelected, side, isOpen, onT
                             <button
                                 key={c.code}
                                 onClick={() => { onSelect(c.code); onToggle(false); }}
-                                className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-all duration-150 border-none cursor-pointer ${c.code === selected
+                                className={`w-full flex items-center gap-3 px-3 py-3.5 md:py-2.5 text-left transition-all duration-150 border-none cursor-pointer active:scale-[0.98] ${c.code === selected
                                     ? 'bg-[#D4AF37]/15 text-[#D4AF37]'
                                     : 'bg-transparent text-parchment/80 hover:bg-white/5 hover:text-white'
                                     }`}
@@ -161,7 +161,7 @@ export default function CurrencyPill() {
         <div className="relative" ref={menuRef}>
             {/* Minimal Pill (Collapsed) */}
             <div
-                className="bg-[#0B0611] backdrop-blur-md border border-[#D4AF37]/30 rounded-full px-3 py-1.5 flex items-center gap-2 cursor-pointer hover:border-[#D4AF37]/50 transition-all duration-300 shadow-lg shadow-black/40 group"
+                className="bg-[#0B0611] backdrop-blur-md border border-[#D4AF37]/30 rounded-full px-3 py-2.5 md:py-1.5 flex items-center gap-2 cursor-pointer hover:border-[#D4AF37]/50 active:scale-[0.97] transition-all duration-300 shadow-lg shadow-black/40 group"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
                 {/* Left Side: Primary Flag + Code */}

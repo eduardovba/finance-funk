@@ -141,15 +141,102 @@ export default function DashboardTab({
 
     return (
         <div className="pb-10">
-            {/* Hero Section - Total Net Worth */}
-            <div className="bg-[#1A0F2E] border-t border-l border-t-[#D4AF37]/40 border-l-[#D4AF37]/40 border-b-2 border-r-2 border-b-black/60 border-r-black/60 shadow-2xl rounded-2xl overflow-hidden mb-8">
+            {/* ═════════════════════════════════════════════ */}
+            {/* MOBILE HERO SECTION (Cleaner, Native-like app)  */}
+            {/* ═════════════════════════════════════════════ */}
+            <div className="md:hidden flex flex-col items-center justify-center pt-2 pb-8 px-4 mb-4 relative">
+                {/* Subtle Refresh Indicator */}
+                <div className="absolute top-0 right-2 flex items-center gap-2">
+                    {lastUpdatedLabel && (
+                        <span className="text-[9px] text-[#F5F5DC]/30 font-space tracking-widest uppercase">
+                            {lastUpdatedLabel}
+                        </span>
+                    )}
+                    <button
+                        onClick={forceRefreshMarketData}
+                        disabled={isRefreshingMarketData}
+                        className="p-1.5 rounded-full bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.08] active:scale-95 transition-all duration-300 disabled:opacity-40"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-[#D4AF37]/60 ${isRefreshingMarketData ? 'animate-spin' : ''}`}>
+                            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                            <path d="M21 3v5h-5" />
+                        </svg>
+                    </button>
+                </div>
+
+                <span className="text-[9px] text-[#F5F5DC]/40 uppercase tracking-[4px] font-space mb-3 text-center w-full block">Total Balance</span>
+
+                {/* Main Balance BRL */}
+                <div className="flex items-start justify-center gap-1 mb-1">
+                    <span className="text-xl text-[#F5F5DC]/60 font-medium font-space mt-1.5">{primaryMeta?.symbol}</span>
+                    <span className="text-[3.5rem] leading-[1] font-normal tracking-wide text-[#D4AF37] drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] font-bebas">
+                        {isLoading ? '---' : ((toPrimary(data.netWorth.amount, 'BRL') / 1000000).toLocaleString(primaryMeta?.locale || 'en-GB', { minimumFractionDigits: 3, maximumFractionDigits: 3 }))}M
+                    </span>
+                </div>
+
+                {/* Secondary Balance GBP */}
+                <span className="text-[13px] text-[#CC5500]/70 font-space mb-6 tracking-wide">
+                    ≈ {secondaryMeta?.symbol}{(toSecondary(data.netWorth.amount, 'BRL') / 1000).toLocaleString(secondaryMeta?.locale || 'en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k
+                </span>
+
+                {/* Metric Pills (MoM and ROI) */}
+                <div className={`flex flex-wrap justify-center gap-3 transition-opacity duration-300 ${isLoading ? 'opacity-30' : 'opacity-100'}`}>
+                    {/* MoM Pill */}
+                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm ${(diffPrevMonth?.amount || 0) >= 0
+                        ? 'bg-vu-green/10 border-vu-green/20 text-vu-green'
+                        : 'bg-red-400/10 border-red-400/20 text-red-400'
+                        }`}>
+                        <span className="text-[10px] uppercase font-space tracking-widest opacity-70 hidden min-[400px]:inline">MoM:</span>
+                        <span className="text-[11px] font-space font-bold">
+                            {(diffPrevMonth?.amount || 0) >= 0 ? '+' : '-'}{primaryMeta?.symbol}{Math.abs(toPrimary(diffPrevMonth?.amount || 0, 'BRL')).toLocaleString(primaryMeta?.locale || 'en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                        </span>
+                        <span className="text-[10px] font-space opacity-80">
+                            ({(diffPrevMonth?.percentage || 0) >= 0 ? '+' : ''}{(diffPrevMonth?.percentage || 0).toFixed(1)}%)
+                        </span>
+                        <span className="text-[10px]">{(diffPrevMonth?.amount || 0) >= 0 ? '▲' : '▼'}</span>
+                    </div>
+
+                    {/* vs Target Pill */}
+                    {Math.abs(diffTarget?.amount || 0) > 1 && (
+                        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm ${(diffTarget?.amount || 0) >= 0
+                            ? 'bg-vu-green/10 border-vu-green/20 text-vu-green'
+                            : 'bg-red-400/10 border-red-400/20 text-red-400'
+                            }`}>
+                            <span className="text-[10px] uppercase font-space tracking-widest opacity-70 hidden min-[400px]:inline">Target:</span>
+                            <span className="text-[11px] font-space font-bold">
+                                {(diffTarget?.amount || 0) >= 0 ? '+' : '-'}{primaryMeta?.symbol}{Math.abs(toPrimary(diffTarget?.amount || 0, 'BRL')).toLocaleString(primaryMeta?.locale || 'en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                            </span>
+                            <span className="text-[10px] font-space opacity-80">
+                                ({(diffTarget?.percentage || 0) >= 0 ? '+' : ''}{(diffTarget?.percentage || 0).toFixed(1)}%)
+                            </span>
+                            <span className="text-[10px]">{(diffTarget?.amount || 0) >= 0 ? '▲' : '▼'}</span>
+                        </div>
+                    )}
+
+                    {/* ROI Pill */}
+                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm ${currentROI.percentage >= 0
+                        ? 'bg-vu-green/10 border-vu-green/20 text-vu-green'
+                        : 'bg-red-400/10 border-red-400/20 text-red-400'
+                        }`}>
+                        <span className="text-[10px] uppercase font-space tracking-widest opacity-70">ROI:</span>
+                        <span className="text-[11px] font-space font-bold">
+                            {currentROI.percentage >= 0 ? '+' : ''}{currentROI.percentage.toFixed(1)}%
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {/* ═════════════════════════════════════════════ */}
+            {/* DESKTOP HERO SECTION (Original Complex Layout)*/}
+            {/* ═════════════════════════════════════════════ */}
+            <div className="hidden md:block bg-[#1A0F2E] border-t border-l border-t-[#D4AF37]/40 border-l-[#D4AF37]/40 border-b-2 border-r-2 border-b-black/60 border-r-black/60 shadow-2xl rounded-2xl overflow-hidden mb-8">
                 <div className="p-8">
-                    <div className="flex justify-center mb-8 relative">
-                        <h3 className="text-[#D4AF37]/60 text-2xl uppercase tracking-[4px] m-0 font-bebas flex items-center gap-4">
+                    <div className="flex justify-between items-center mb-8">
+                        <h3 className="text-[#D4AF37]/60 text-2xl uppercase tracking-[4px] m-0 font-bebas">
                             Total Net Worth
                         </h3>
                         {/* Refresh Prices Button */}
-                        <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-3">
+                        <div className="flex items-center gap-3">
                             {lastUpdatedLabel && (
                                 <span className="text-[10px] text-[#F5F5DC]/25 font-space tracking-wider uppercase">
                                     {lastUpdatedLabel}
@@ -158,7 +245,7 @@ export default function DashboardTab({
                             <button
                                 onClick={forceRefreshMarketData}
                                 disabled={isRefreshingMarketData}
-                                className="group flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.08] hover:border-[#D4AF37]/20 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="group flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.08] hover:border-[#D4AF37]/20 active:scale-95 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
                                 title="Refresh live prices"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-[#F5F5DC]/40 group-hover:text-[#D4AF37]/70 transition-colors ${isRefreshingMarketData ? 'animate-spin' : ''}`}>
@@ -172,7 +259,7 @@ export default function DashboardTab({
                         </div>
                     </div>
 
-                    <div className={`grid grid-cols-1 lg:grid-cols-[1fr_1px_auto_1px_1fr] gap-6 lg:gap-10 items-center transition-opacity duration-300 ${isLoading ? 'opacity-30' : 'opacity-100'}`}>
+                    <div className={`grid grid-cols-[1fr_1px_auto_1px_1fr] gap-10 items-center transition-opacity duration-300 ${isLoading ? 'opacity-30' : 'opacity-100'}`}>
 
                         {/* Primary Currency Section */}
                         <div className="text-center p-8 rounded-xl bg-black/40 shadow-inner border border-white/5 flex flex-col justify-center min-h-[220px] transition-all duration-300 hover:bg-black/60 hover:border-[#D4AF37]/30 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(212,175,55,0.1)]">
@@ -186,7 +273,7 @@ export default function DashboardTab({
                             {/* Primary Variances */}
                             <div className={`flex flex-col items-center gap-2 ${isLoading ? 'invisible' : 'visible'}`}>
                                 <div className="text-center">
-                                    <div className={`text-base font-semibold font-space flex items-center gap-1.5 ${(diffPrevMonth?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
+                                    <div className={`text-base font-semibold font-space flex items-center justify-center gap-1.5 flex-wrap ${(diffPrevMonth?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                                         <span className="text-xs uppercase tracking-widest text-[#F5F5DC]/40 mr-1 font-space font-medium">MoM:</span>
                                         {(diffPrevMonth?.amount || 0) >= 0 ? '+' : '-'} {primaryMeta?.symbol} {Math.abs(toPrimary(diffPrevMonth?.amount || 0, 'BRL')).toLocaleString(primaryMeta?.locale || 'en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                         <span className="ml-1">({(diffPrevMonth?.percentage || 0) >= 0 ? '+' : ''}{(diffPrevMonth?.percentage || 0).toFixed(1)}%)</span>
@@ -224,7 +311,7 @@ export default function DashboardTab({
                         </div>
 
                         {/* Left Divider */}
-                        <div className="hidden lg:block w-px h-[100px] bg-gradient-to-b from-transparent via-[#D4AF37]/20 to-transparent mx-2" />
+                        <div className="w-px h-[100px] bg-gradient-to-b from-transparent via-[#D4AF37]/20 to-transparent mx-2" />
 
                         {/* Center ROI Badge */}
                         <div className="flex flex-col items-center justify-center relative px-6 group cursor-default">
@@ -265,7 +352,7 @@ export default function DashboardTab({
                         </div>
 
                         {/* Right Divider */}
-                        <div className="hidden lg:block w-px h-[100px] bg-gradient-to-b from-transparent via-[#D4AF37]/20 to-transparent mx-2" />
+                        <div className="w-px h-[100px] bg-gradient-to-b from-transparent via-[#D4AF37]/20 to-transparent mx-2" />
 
                         {/* Secondary Currency Section */}
                         <div className="text-center p-8 rounded-xl bg-black/40 shadow-inner border border-white/5 flex flex-col justify-center min-h-[220px] transition-all duration-300 hover:bg-black/60 hover:border-[#CC5500]/30 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(204,85,0,0.1)]">
@@ -352,7 +439,7 @@ export default function DashboardTab({
             }
 
             {/* Sub-categories Grid */}
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6 mb-12">
+            <div className="grid grid-cols-2 md:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3 md:gap-6 mb-8 md:mb-12">
                 {expandedSummaries.map((metric) => {
                     const contributors = categoryAssetDiffs?.[metric.id]
                         ? Object.entries(categoryAssetDiffs[metric.id])

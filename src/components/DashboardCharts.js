@@ -1,3 +1,4 @@
+import React from 'react';
 import { usePortfolio } from '@/context/PortfolioContext';
 import { SUPPORTED_CURRENCIES } from '@/lib/currency';
 import { calculateTWRHistory } from '@/lib/roiUtils';
@@ -429,16 +430,30 @@ export default function DashboardCharts({ historicalData, currentMonthData, rate
 
     const chartsToRender = dashboardConfig?.charts ? [...dashboardConfig.charts].sort((a, b) => a.order - b.order) : [];
 
+    const [showAllCharts, setShowAllCharts] = React.useState(false);
+
     if (chartsToRender.length === 0) {
         return null;
     }
 
     return (
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(500px,1fr))] gap-6 mb-8">
-            {chartsToRender.map(cfg => (
-                <GenericChart key={cfg.id} config={cfg} dataRegistry={dataRegistry} meta={meta} onCustomizeClick={onCustomizeClick} />
-            ))}
-        </div>
+        <>
+            <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(500px,1fr))] gap-4 md:gap-6 mb-8">
+                {chartsToRender.map((cfg, index) => (
+                    <div key={cfg.id} className={`${!showAllCharts && index >= 2 ? 'hidden md:block' : ''}`}>
+                        <GenericChart config={cfg} dataRegistry={dataRegistry} meta={meta} onCustomizeClick={onCustomizeClick} />
+                    </div>
+                ))}
+            </div>
+            {!showAllCharts && chartsToRender.length > 2 && (
+                <button
+                    onClick={() => setShowAllCharts(true)}
+                    className="md:hidden w-full py-3 mb-6 text-sm font-space text-[#D4AF37] border border-[#D4AF37]/20 rounded-xl bg-[#D4AF37]/5 active:bg-[#D4AF37]/10 active:scale-[0.99] transition-all"
+                >
+                    View All Charts ({chartsToRender.length - 2} more) ›
+                </button>
+            )}
+        </>
     );
 }
 
@@ -707,7 +722,7 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick }) {
                 </div>
                 {renderHeaderBadges()}
             </div>
-            <div className="h-[300px]">
+            <div className="h-[220px] md:h-[300px]">
                 {isDonut ? chartContent : (
                     <ResponsiveContainer width="100%" height="100%">
                         {chartContent || <div />}
