@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { query, run } from '@/lib/db';
+import { requireAuth } from '@/lib/authGuard';
 
 export async function GET() {
     try {
-        const rows = await query('SELECT * FROM monthly_ledger ORDER BY month ASC');
+        const user = await requireAuth();
+        const rows = await query('SELECT * FROM monthly_ledger WHERE user_id = ? ORDER BY month ASC', [user.id]);
 
         const income = rows.map(r => ({
             month: r.month,
@@ -28,6 +30,7 @@ export async function GET() {
 
         return NextResponse.json({ content: { income, investments } });
     } catch (error) {
+        if (error instanceof Response) return error;
         console.error('Failed to fetch ledger data:', error);
         return NextResponse.json({ error: 'Failed to fetch ledger data' }, { status: 500 });
     }
@@ -35,6 +38,7 @@ export async function GET() {
 
 export async function PUT(request) {
     try {
+        const user = await requireAuth();
         const body = await request.json();
         const { month, type, data } = body;
 
@@ -44,13 +48,13 @@ export async function PUT(request) {
 
         if (type === 'income') {
             await run(
-                `UPDATE monthly_ledger SET salary_savings = ?, fixed_income_income = ?, equity_income = ?, real_estate_income = ?, extraordinary_income = ?, total_income = ? WHERE month = ?`,
-                [data.salarySavings || data.salary || 0, data.fixedIncome || 0, data.equity || 0, data.realEstate || 0, data.extraordinary || 0, (data.salarySavings || data.salary || 0) + (data.fixedIncome || 0) + (data.equity || 0) + (data.realEstate || 0) + (data.extraordinary || 0), month]
+                `UPDATE monthly_ledger SET salary_savings = ?, fixed_income_income = ?, equity_income = ?, real_estate_income = ?, extraordinary_income = ?, total_income = ? WHERE month = ? AND user_id = ?`,
+                [data.salarySavings || data.salary || 0, data.fixedIncome || 0, data.equity || 0, data.realEstate || 0, data.extraordinary || 0, (data.salarySavings || data.salary || 0) + (data.fixedIncome || 0) + (data.equity || 0) + (data.realEstate || 0) + (data.extraordinary || 0), month, user.id]
             );
         } else if (type === 'investments') {
             await run(
-                `UPDATE monthly_ledger SET equity = ?, fixed_income = ?, real_estate = ?, pension = ?, crypto = ?, debt = ?, total_investments = ? WHERE month = ?`,
-                [data.equity || 0, data.fixedIncome || 0, data.realEstate || 0, data.pensions || 0, data.crypto || 0, data.debt || 0, (data.equity || 0) + (data.fixedIncome || 0) + (data.realEstate || 0) + (data.pensions || 0) + (data.crypto || 0) + (data.debt || 0), month]
+                `UPDATE monthly_ledger SET equity = ?, fixed_income = ?, real_estate = ?, pension = ?, crypto = ?, debt = ?, total_investments = ? WHERE month = ? AND user_id = ?`,
+                [data.equity || 0, data.fixedIncome || 0, data.realEstate || 0, data.pensions || 0, data.crypto || 0, data.debt || 0, (data.equity || 0) + (data.fixedIncome || 0) + (data.realEstate || 0) + (data.pensions || 0) + (data.crypto || 0) + (data.debt || 0), month, user.id]
             );
         } else {
             return NextResponse.json({ error: 'Invalid type. Must be "income" or "investments"' }, { status: 400 });
@@ -58,6 +62,7 @@ export async function PUT(request) {
 
         return NextResponse.json({ success: true, month, type });
     } catch (error) {
+        if (error instanceof Response) return error;
         console.error('Failed to update ledger data:', error);
         return NextResponse.json({ error: 'Failed to update ledger data' }, { status: 500 });
     }
@@ -65,6 +70,7 @@ export async function PUT(request) {
 
 export async function POST(request) {
     try {
+        const user = await requireAuth();
         const body = await request.json();
         const { month, income, investments } = body;
 
@@ -72,8 +78,8 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Missing required field: month' }, { status: 400 });
         }
 
-        // Check if row for this month already exists
-        const existing = await query('SELECT month FROM monthly_ledger WHERE month = ?', [month]);
+        // Check if row for this month already exists for this user
+        const existing = await query('SELECT month FROM monthly_ledger WHERE month = ? AND user_id = ?', [month, user.id]);
 
         const salSav = income?.salarySavings || income?.salary || 0;
         const fiInc = income?.fixedIncome || 0;
@@ -92,18 +98,19 @@ export async function POST(request) {
 
         if (existing.length > 0) {
             await run(
-                `UPDATE monthly_ledger SET salary_savings = ?, fixed_income_income = ?, equity_income = ?, real_estate_income = ?, extraordinary_income = ?, total_income = ?, equity = ?, fixed_income = ?, real_estate = ?, pension = ?, crypto = ?, debt = ?, total_investments = ? WHERE month = ?`,
-                [salSav, fiInc, eqInc, reInc, extInc, totalInc, eqInv, fiInv, reInv, penInv, crInv, debtInv, totalInv, month]
+                `UPDATE monthly_ledger SET salary_savings = ?, fixed_income_income = ?, equity_income = ?, real_estate_income = ?, extraordinary_income = ?, total_income = ?, equity = ?, fixed_income = ?, real_estate = ?, pension = ?, crypto = ?, debt = ?, total_investments = ? WHERE month = ? AND user_id = ?`,
+                [salSav, fiInc, eqInc, reInc, extInc, totalInc, eqInv, fiInv, reInv, penInv, crInv, debtInv, totalInv, month, user.id]
             );
         } else {
             await run(
-                `INSERT INTO monthly_ledger (month, salary_savings, fixed_income_income, equity_income, real_estate_income, extraordinary_income, total_income, equity, fixed_income, real_estate, pension, crypto, debt, total_investments) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [month, salSav, fiInc, eqInc, reInc, extInc, totalInc, eqInv, fiInv, reInv, penInv, crInv, debtInv, totalInv]
+                `INSERT INTO monthly_ledger (month, salary_savings, fixed_income_income, equity_income, real_estate_income, extraordinary_income, total_income, equity, fixed_income, real_estate, pension, crypto, debt, total_investments, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [month, salSav, fiInc, eqInc, reInc, extInc, totalInc, eqInv, fiInv, reInv, penInv, crInv, debtInv, totalInv, user.id]
             );
         }
 
         return NextResponse.json({ success: true, month });
     } catch (error) {
+        if (error instanceof Response) return error;
         console.error('Failed to upsert ledger data:', error);
         return NextResponse.json({ error: 'Failed to upsert ledger data' }, { status: 500 });
     }
@@ -111,6 +118,7 @@ export async function POST(request) {
 
 export async function DELETE(request) {
     try {
+        const user = await requireAuth();
         const { searchParams } = new URL(request.url);
         const month = searchParams.get('month');
 
@@ -118,9 +126,10 @@ export async function DELETE(request) {
             return NextResponse.json({ error: 'Month parameter required' }, { status: 400 });
         }
 
-        await run('DELETE FROM monthly_ledger WHERE month = ?', [month]);
+        await run('DELETE FROM monthly_ledger WHERE month = ? AND user_id = ?', [month, user.id]);
         return NextResponse.json({ success: true, month });
     } catch (error) {
+        if (error instanceof Response) return error;
         console.error('Failed to delete ledger data:', error);
         return NextResponse.json({ error: 'Failed to delete ledger data' }, { status: 500 });
     }

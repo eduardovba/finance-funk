@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { kvGet, kvSet } from '@/lib/kv';
+import { requireAuth } from '@/lib/authGuard';
 
 const KEY = 'dashboard_config';
 
@@ -73,9 +74,11 @@ const defaultDashboardConfig = {
 
 export async function GET() {
     try {
-        const config = await kvGet(KEY, defaultDashboardConfig);
+        const user = await requireAuth();
+        const config = await kvGet(KEY, defaultDashboardConfig, user.id);
         return NextResponse.json(config);
     } catch (error) {
+        if (error instanceof Response) return error;
         console.error('Error reading dashboard config:', error);
         return NextResponse.json(defaultDashboardConfig);
     }
@@ -83,10 +86,12 @@ export async function GET() {
 
 export async function POST(request) {
     try {
+        const user = await requireAuth();
         const config = await request.json();
-        await kvSet(KEY, config);
+        await kvSet(KEY, config, user.id);
         return NextResponse.json({ success: true, config });
     } catch (error) {
+        if (error instanceof Response) return error;
         console.error('Error saving dashboard config:', error);
         return NextResponse.json({ success: false, error: 'Failed to save dashboard config' }, { status: 500 });
     }

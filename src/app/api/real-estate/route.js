@@ -1,24 +1,27 @@
 import { NextResponse } from 'next/server';
 import { query, run } from '@/lib/db';
+import { requireAuth } from '@/lib/authGuard';
 
 export async function GET(request) {
     try {
+        const user = await requireAuth();
+
         // 1. Fetch Properties (Manual assets)
         const propertiesRows = await query(`
             SELECT a.id, a.name, a.currency, MAX(l.price) as currentValue, SUM(l.amount) as totalInvestment
             FROM assets a
             JOIN ledger l ON l.asset_id = a.id
-            WHERE a.asset_class = 'Real Estate' AND a.broker = 'Manual' AND a.sync_status = 'ACTIVE'
+            WHERE a.asset_class = 'Real Estate' AND a.broker = 'Manual' AND a.sync_status = 'ACTIVE' AND a.user_id = ?
             GROUP BY a.id
-        `);
+        `, [user.id]);
 
         const allLedgerRows = await query(`
             SELECT l.asset_id, l.date, l.amount, l.type, l.notes
             FROM ledger l
             JOIN assets a ON l.asset_id = a.id
-            WHERE a.asset_class = 'Real Estate' AND a.broker = 'Manual' AND a.sync_status = 'ACTIVE'
+            WHERE a.asset_class = 'Real Estate' AND a.broker = 'Manual' AND a.sync_status = 'ACTIVE' AND l.user_id = ?
             ORDER BY l.date DESC
-        `);
+        `, [user.id]);
 
         const properties = propertiesRows.map(r => ({
             id: r.name ? r.name.toLowerCase().replace(/\s+/g, '-').replace(/[í]/g, 'i') : 'property-' + Math.random().toString(36).substr(2, 9),
@@ -44,19 +47,13 @@ export async function GET(request) {
             SELECT l.id, l.date, l.notes, l.type, l.amount
             FROM ledger l
             JOIN assets a ON l.asset_id = a.id
-            WHERE a.name = 'Ink Court'
+            WHERE a.name = 'Ink Court' AND l.user_id = ?
             ORDER BY l.date DESC
-        `);
-
-        // Process and Merge Rows by Month
-        // The original `inkCourtMap` was commented out, using the `mortgageMap` and `otherEntries` approach.
-        // The provided snippet for `inkCourtMap` initialization and `entry.ids.push` seems to refer to the old logic.
-        // Applying the `ids` logic to the active `mortgageMap` and `otherEntries` strategy.
+        `, [user.id]);
 
         const mortgageMap = new Map();
         const otherEntries = [];
 
-        // Helper to format YYYY-MM to MMM-YY
         const toShortMonth = (yyyy_mm) => {
             if (!yyyy_mm || yyyy_mm.length < 7) return yyyy_mm;
             const [y, m] = yyyy_mm.split('-');
@@ -67,10 +64,7 @@ export async function GET(request) {
 
         inkCourtRows.forEach(r => {
             const isMortgage = (r.type && r.type.includes('Mortgage')) || (r.notes && r.notes.includes('Mortgage'));
-            const rawMonth = r.date.substring(0, 7); // YYYY-MM
-            // We use rawMonth (YYYY-MM) as key for sorting correctness during merge, 
-            // but we will want to display MMM-YY.
-            // Actually, map key should probably be YYYY-MM to ensure correct grouping headers if we used them.
+            const rawMonth = r.date.substring(0, 7);
 
             const amt = Math.abs(r.amount);
 
@@ -102,10 +96,9 @@ export async function GET(request) {
 
         mortgageMap.forEach(entry => {
             entry.interest = entry.costs - entry.principal;
-            entry.id = entry.ids.join(','); // Composite ID for frontend
+            entry.id = entry.ids.join(',');
         });
 
-        // Sort by rawDate (YYYY-MM) descending
         const inkCourtLedger = [...otherEntries, ...Array.from(mortgageMap.values())].sort((a, b) => b.rawDate.localeCompare(a.rawDate));
 
         // 3. Funds
@@ -120,7 +113,8 @@ export async function GET(request) {
             AND a.ticker IS NOT NULL 
             AND a.ticker != 'INK'
             AND a.sync_status = 'ACTIVE'
-        `);
+            AND l.user_id = ?
+        `, [user.id]);
 
         const fundTransactions = fundRows.map(r => ({
             id: r.id,
@@ -138,8 +132,8 @@ export async function GET(request) {
         const holdingsRows = await query(`
             SELECT name, ticker, currency 
             FROM assets 
-            WHERE asset_class = 'Real Estate' AND ticker IS NOT NULL AND ticker != 'INK' AND sync_status = 'ACTIVE'
-        `);
+            WHERE asset_class = 'Real Estate' AND ticker IS NOT NULL AND ticker != 'INK' AND sync_status = 'ACTIVE' AND user_id = ?
+        `, [user.id]);
 
         const holdings = holdingsRows.map(r => ({
             ticker: r.ticker,
@@ -155,9 +149,9 @@ export async function GET(request) {
             SELECT strftime('%Y-%m', l.date) as monthKey, l.date, l.type, l.amount
             FROM ledger l
             JOIN assets a ON l.asset_id = a.id
-            WHERE a.name LIKE '%Zara%' AND l.type IN ('Income', 'Expense')
+            WHERE a.name LIKE '%Zara%' AND l.type IN ('Income', 'Expense') AND l.user_id = ?
             ORDER BY l.date ASC
-        `);
+        `, [user.id]);
 
         const airbnbMap = new Map();
         for (const r of airbnbRows) {
@@ -175,7 +169,7 @@ export async function GET(request) {
         }
         const airbnbLedger = Array.from(airbnbMap.values());
 
-        // 6. Get Latest Valuation for Ink Court (Ticker: INK for Live, INK_MANUAL for Property Value)
+        // 6. Get Latest Valuation for Ink Court
         const latestLive = await query(`
             SELECT price, date FROM market_data 
             WHERE ticker = 'INK' 
@@ -216,6 +210,7 @@ export async function GET(request) {
         });
 
     } catch (e) {
+        if (e instanceof Response) return e;
         console.error('API Error:', e);
         return NextResponse.json({ error: 'Failed to fetch real estate' }, { status: 500 });
     }
@@ -223,24 +218,22 @@ export async function GET(request) {
 
 export async function DELETE(request) {
     try {
+        const user = await requireAuth();
         const { searchParams } = new URL(request.url);
         const idParam = searchParams.get('id');
         const section = searchParams.get('section');
 
         if (section === 'airbnb') {
-            const month = searchParams.get('month'); // e.g. "Aug-23"
+            const month = searchParams.get('month');
             if (!month) return NextResponse.json({ error: 'Month required' }, { status: 400 });
 
-            // Convert MMM-YY or YYYY-MM to YYYY-MM% for LIKE query
             const months = { 'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12' };
 
             let datePattern;
 
             if (month.match(/^\d{4}-\d{2}$/)) {
-                // YYYY-MM
                 datePattern = `${month}%`;
             } else if (month.match(/^[A-Z][a-z]{2}-\d{2}$/)) {
-                // MMM-YY
                 const [mmm, yy] = month.split('-');
                 const yyyy = '20' + yy;
                 const mm = months[mmm];
@@ -251,24 +244,24 @@ export async function DELETE(request) {
 
             await run(`
                 DELETE FROM ledger 
-                WHERE asset_id IN (SELECT id FROM assets WHERE name LIKE '%Zara%') 
+                WHERE asset_id IN (SELECT id FROM assets WHERE name LIKE '%Zara%' AND user_id = ?) 
                 AND date LIKE ?
-             `, [datePattern]);
+                AND user_id = ?
+             `, [user.id, datePattern, user.id]);
 
             return NextResponse.json({ success: true });
         }
 
         if (idParam) {
             const ids = idParam.split(',');
-            // Delete all IDs
-            // Use placeholder loop based on length
             const placeholders = ids.map(() => '?').join(',');
-            await run(`DELETE FROM ledger WHERE id IN (${placeholders})`, ids);
+            await run(`DELETE FROM ledger WHERE id IN (${placeholders}) AND user_id = ?`, [...ids, user.id]);
             return NextResponse.json({ success: true });
         }
 
         return NextResponse.json({ error: 'Missing ID or parameters' }, { status: 400 });
     } catch (e) {
+        if (e instanceof Response) return e;
         console.error('Delete Error:', e);
         return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
     }
@@ -276,12 +269,12 @@ export async function DELETE(request) {
 
 export async function POST(request) {
     try {
+        const user = await requireAuth();
         const body = await request.json();
-        const t = body.transaction || body; // Handle unwrapped or wrapped transaction
+        const t = body.transaction || body;
 
         // Handle Add Mortgage
         if (body.section === 'mortgages') {
-            // t: { month: 'Feb-26', costs, principal, interest, source, notes }
             const months = { 'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12' };
             const [mmm, yy] = (t.month || '').split('-');
 
@@ -289,52 +282,44 @@ export async function POST(request) {
 
             const dateStr = `20${yy}-${months[mmm]}-01`;
 
-            const assetRow = await query("SELECT id FROM assets WHERE name = 'Ink Court'");
+            const assetRow = await query("SELECT id FROM assets WHERE name = 'Ink Court' AND user_id = ?", [user.id]);
             if (!assetRow.length) return NextResponse.json({ error: 'Ink Court asset not found' }, { status: 404 });
             const assetId = assetRow[0].id;
 
-            // Row 1: Mortgage Payment (Full Amount)
-            await run(`INSERT INTO ledger (date, type, asset_id, amount, currency, notes) VALUES (?, ?, ?, ?, ?, ?)`,
-                [dateStr, 'Mortgage', assetId, -Math.abs(t.costs), 'GBP', t.notes || 'Mortgage Payment']);
+            await run(`INSERT INTO ledger (date, type, asset_id, amount, currency, notes, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                [dateStr, 'Mortgage', assetId, -Math.abs(t.costs), 'GBP', t.notes || 'Mortgage Payment', user.id]);
 
-            // Row 2: Principal Part (Simulated? Or real?)
-            // Legacy logic relies on two entries for correct Principal/Interest split display.
             if (t.principal > 0) {
-                await run(`INSERT INTO ledger (date, type, asset_id, amount, currency, notes) VALUES (?, ?, ?, ?, ?, ?)`,
-                    [dateStr, 'Mortgage Principal', assetId, -Math.abs(t.principal), 'GBP', 'Mortgage Principal']);
+                await run(`INSERT INTO ledger (date, type, asset_id, amount, currency, notes, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    [dateStr, 'Mortgage Principal', assetId, -Math.abs(t.principal), 'GBP', 'Mortgage Principal', user.id]);
             }
 
             return NextResponse.json({ success: true });
         }
-
-        // Handle Add Airbnb Month? (If needed, currently manual)
 
         // Handle Add Funds
         if (body.section === 'funds') {
             const t = body.transaction || body;
             const ticker = (t.fund.split(' - ')[1] || t.fund || '').toUpperCase();
 
-            // 1. Get or create asset
             let assetId;
-            const assetRows = await query("SELECT id FROM assets WHERE ticker = ?", [ticker]);
+            const assetRows = await query("SELECT id FROM assets WHERE ticker = ? AND user_id = ?", [ticker, user.id]);
 
             if (assetRows.length > 0) {
                 assetId = assetRows[0].id;
             } else {
                 const name = t.fund || `Fund ${ticker}`;
                 const result = await run(
-                    `INSERT INTO assets (name, ticker, asset_class, broker, currency) VALUES (?, ?, ?, ?, ?)`,
-                    [name, ticker, 'Real Estate', 'XP', 'BRL']
+                    `INSERT INTO assets (name, ticker, asset_class, broker, currency, user_id) VALUES (?, ?, ?, ?, ?, ?)`,
+                    [name, ticker, 'Real Estate', 'XP', 'BRL', user.id]
                 );
                 assetId = result.lastID;
             }
 
-            // 2. Insert ledger entry
-            // amount should be negative for investment (outflow)
             const amt = -Math.abs(t.investment || (t.quantity * t.costPerShare));
             await run(
-                `INSERT INTO ledger (date, asset_id, amount, quantity, price, currency, type, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                [t.date, assetId, amt, t.quantity, t.costPerShare, 'BRL', 'Buy', t.isSalaryContribution ? 'Salary Contribution' : 'Manual Buy']
+                `INSERT INTO ledger (date, asset_id, amount, quantity, price, currency, type, notes, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [t.date, assetId, amt, t.quantity, t.costPerShare, 'BRL', 'Buy', t.isSalaryContribution ? 'Salary Contribution' : 'Manual Buy', user.id]
             );
 
             return NextResponse.json({ success: true });
@@ -343,6 +328,7 @@ export async function POST(request) {
         return NextResponse.json({ success: true });
 
     } catch (e) {
+        if (e instanceof Response) return e;
         console.error('POST Error:', e);
         return NextResponse.json({ error: 'Failed to add' }, { status: 500 });
     }
@@ -350,6 +336,7 @@ export async function POST(request) {
 
 export async function PUT(request) {
     try {
+        const user = await requireAuth();
         const body = await request.json();
 
         if (body.action === 'updatePropertyValue') {
@@ -358,14 +345,12 @@ export async function PUT(request) {
 
             const today = new Date().toISOString().split('T')[0];
 
-            // Try to update today's entry first
             const result = await run(`
                 UPDATE market_data SET price = ? 
                 WHERE ticker = 'INK_MANUAL' AND date = ?
             `, [value, today]);
 
             if (result.changes === 0) {
-                // No entry for today, insert new one
                 await run(`
                     INSERT INTO market_data (ticker, price, date)
                     VALUES ('INK_MANUAL', ?, ?)
@@ -377,45 +362,37 @@ export async function PUT(request) {
 
         if (body.section === 'inkCourt') {
             const t = body.transaction;
-            // t: { id: "123,124", month: "Feb-26", costs, principal... }
 
             if (!t.id) return NextResponse.json({ error: 'Transaction ID required' }, { status: 400 });
 
-            // 1. Delete old entries (composite ID)
             const ids = t.id.split(',');
             const placeholders = ids.map(() => '?').join(',');
-            await run(`DELETE FROM ledger WHERE id IN (${placeholders})`, ids);
+            await run(`DELETE FROM ledger WHERE id IN (${placeholders}) AND user_id = ?`, [...ids, user.id]);
 
-            // Convert Month to Date (YYYY-MM-01)
-            // Support MMM-YY (Feb-26) AND YYYY-MM (2026-02)
             const months = { 'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12' };
 
             let dateStr;
             const tMonth = t.month || '';
 
             if (tMonth.match(/^\d{4}-\d{2}$/)) {
-                // YYYY-MM
                 dateStr = `${tMonth}-01`;
             } else if (tMonth.match(/^[A-Z][a-z]{2}-\d{2}$/)) {
-                // MMM-YY
                 const [mmm, yy] = tMonth.split('-');
                 dateStr = `20${yy}-${months[mmm]}-01`;
             } else {
                 return NextResponse.json({ error: 'Invalid month format. Use MMM-YY or YYYY-MM' }, { status: 400 });
             }
 
-            const assetRow = await query("SELECT id FROM assets WHERE name = 'Ink Court'");
+            const assetRow = await query("SELECT id FROM assets WHERE name = 'Ink Court' AND user_id = ?", [user.id]);
             if (!assetRow.length) return NextResponse.json({ error: 'Ink Court asset not found' }, { status: 404 });
             const assetId = assetRow[0].id;
 
-            // Row 1: Costs
-            await run(`INSERT INTO ledger (date, type, asset_id, amount, currency, notes) VALUES (?, ?, ?, ?, ?, ?)`,
-                [dateStr, t.source || 'Mortgage', assetId, -Math.abs(t.costs), 'GBP', t.notes || 'Mortgage Payment']);
+            await run(`INSERT INTO ledger (date, type, asset_id, amount, currency, notes, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                [dateStr, t.source || 'Mortgage', assetId, -Math.abs(t.costs), 'GBP', t.notes || 'Mortgage Payment', user.id]);
 
-            // Row 2: Principal (if > 0)
             if (t.principal > 0) {
-                await run(`INSERT INTO ledger (date, type, asset_id, amount, currency, notes) VALUES (?, ?, ?, ?, ?, ?)`,
-                    [dateStr, 'Mortgage Principal', assetId, -Math.abs(t.principal), 'GBP', 'Mortgage Principal']);
+                await run(`INSERT INTO ledger (date, type, asset_id, amount, currency, notes, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    [dateStr, 'Mortgage Principal', assetId, -Math.abs(t.principal), 'GBP', 'Mortgage Principal', user.id]);
             }
 
             return NextResponse.json({ success: true });
@@ -427,8 +404,8 @@ export async function PUT(request) {
             if (!t.id) return NextResponse.json({ error: 'Transaction ID required' }, { status: 400 });
 
             await run(
-                `UPDATE ledger SET date = ?, amount = ?, quantity = ?, price = ?, notes = ? WHERE id = ?`,
-                [t.date, -Math.abs(t.investment), t.quantity, t.costPerShare, t.isSalaryContribution ? 'Salary Contribution' : 'Edited Transaction', t.id]
+                `UPDATE ledger SET date = ?, amount = ?, quantity = ?, price = ?, notes = ? WHERE id = ? AND user_id = ?`,
+                [t.date, -Math.abs(t.investment), t.quantity, t.costPerShare, t.isSalaryContribution ? 'Salary Contribution' : 'Edited Transaction', t.id, user.id]
             );
 
             return NextResponse.json({ success: true });
@@ -436,6 +413,7 @@ export async function PUT(request) {
 
         return NextResponse.json({ success: true });
     } catch (e) {
+        if (e instanceof Response) return e;
         console.error('PUT Error:', e);
         return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
     }

@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { query, run } from '@/lib/db';
+import { requireAuth } from '@/lib/authGuard';
 
 export async function GET() {
     try {
-        // Fetch all Ledger entries for Equity assets
-        // Join with Assets table to get details
+        const user = await requireAuth();
         const sql = `
             SELECT 
                 l.id, l.date, l.type, 
@@ -17,11 +17,11 @@ export async function GET() {
                 l.is_salary_contribution
             FROM ledger l
             JOIN assets a ON l.asset_id = a.id
-            WHERE a.asset_class = 'Equity' AND a.sync_status = 'ACTIVE'
+            WHERE a.asset_class = 'Equity' AND a.sync_status = 'ACTIVE' AND l.user_id = ?
             ORDER BY l.date DESC
         `;
 
-        const rows = await query(sql);
+        const rows = await query(sql, [user.id]);
 
         // Transform to match frontend expected JSON format
         const data = rows.map(r => ({
@@ -30,10 +30,10 @@ export async function GET() {
             asset: r.asset,
             ticker: r.ticker,
             broker: r.broker,
-            currency: r.currency, // Asset currency or Tx currency? Frontend expects Asset currency usually.
+            currency: r.currency,
             quantity: r.quantity,
             costPerShare: r.costPerShare,
-            investment: r.investment, // Frontend expects "investment" as the cost basis amount
+            investment: r.investment,
             pnl: r.pnl,
             roiPercent: r.roiPercent !== null ? r.roiPercent : (
                 (r.pnl && r.investment < 0) ? (r.pnl / (Math.abs(r.investment) - r.pnl) * 100) : null
@@ -44,6 +44,7 @@ export async function GET() {
 
         return NextResponse.json(data);
     } catch (e) {
+        if (e instanceof Response) return e;
         console.error('Database Error:', e);
         return NextResponse.json({ error: 'Failed to fetch equity transactions' }, { status: 500 });
     }
@@ -51,36 +52,32 @@ export async function GET() {
 
 export async function POST(request) {
     try {
+        const user = await requireAuth();
         const body = await request.json();
-        // body: { date, ticker, broker, quantity, investment, type, asset (name) }
 
         // 1. Get/Create Asset
         let assetId;
-        // Check exact match on ticker/broker
         const existing = await query(
-            `SELECT id FROM assets WHERE ticker = ? AND broker = ?`,
-            [body.ticker, body.broker]
+            `SELECT id FROM assets WHERE ticker = ? AND broker = ? AND user_id = ?`,
+            [body.ticker, body.broker, user.id]
         );
 
         if (existing.length > 0) {
             assetId = existing[0].id;
         } else {
-            // Create new Asset
             const res = await run(
-                `INSERT INTO assets (name, ticker, broker, asset_class, currency, allocation_bucket) VALUES (?, ?, ?, ?, ?, ?)`,
-                [body.asset || body.ticker, body.ticker, body.broker, 'Equity', body.currency || 'USD', 'Equity']
+                `INSERT INTO assets (name, ticker, broker, asset_class, currency, allocation_bucket, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                [body.asset || body.ticker, body.ticker, body.broker, 'Equity', body.currency || 'USD', 'Equity', user.id]
             );
             assetId = res.lastID;
         }
 
         // 2. Insert Ledger
-        // Frontend sends 'investment' as positive cost.
-        // Ledger expects -amount for Outflow (Buy), +amount for Inflow (Sell).
         const amount = body.type === 'Buy' ? -Math.abs(body.investment) : Math.abs(body.investment);
         const price = body.quantity ? Math.abs(body.investment / body.quantity) : 0;
 
         const res = await run(
-            `INSERT INTO ledger (date, type, asset_id, quantity, price, amount, currency, notes, is_salary_contribution, realized_pnl, realized_roi_percent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO ledger (date, type, asset_id, quantity, price, amount, currency, notes, is_salary_contribution, realized_pnl, realized_roi_percent, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 body.date,
                 body.type === 'Buy' ? 'Investment' : 'Divestment',
@@ -92,12 +89,14 @@ export async function POST(request) {
                 'API Input',
                 body.is_salary_contribution ? 1 : (body.isSalaryContribution ? 1 : 0),
                 body.pnl || null,
-                body.roiPercent || null
+                body.roiPercent || null,
+                user.id
             ]
         );
 
         return NextResponse.json({ success: true, id: res.lastID });
     } catch (error) {
+        if (error instanceof Response) return error;
         console.error('POST Error:', error);
         return NextResponse.json({ error: 'Failed to add transaction' }, { status: 500 });
     }
@@ -105,23 +104,23 @@ export async function POST(request) {
 
 export async function PUT(request) {
     try {
+        const user = await requireAuth();
         const body = await request.json();
         const { id, date, type, quantity, investment, costPerShare, pnl, currency } = body;
 
         if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
 
-        // Frontend sends investment as positive cost (Buy) or negative proceeds (Sell).
-        // Ledger stores amount as negative for Buy (outflow) and positive for Sell (inflow).
         const amount = (type === 'Buy' || type === 'Investment') ? -Math.abs(investment) : Math.abs(investment);
         const dbType = (type === 'Buy' || type === 'Investment') ? 'Investment' : 'Divestment';
 
         await run(
-            `UPDATE ledger SET date = ?, type = ?, quantity = ?, amount = ?, price = ?, realized_pnl = ?, realized_roi_percent = ?, currency = ?, is_salary_contribution = ? WHERE id = ?`,
-            [date, dbType, quantity, amount, costPerShare, pnl, body.roiPercent, currency || 'USD', body.isSalaryContribution ? 1 : 0, id]
+            `UPDATE ledger SET date = ?, type = ?, quantity = ?, amount = ?, price = ?, realized_pnl = ?, realized_roi_percent = ?, currency = ?, is_salary_contribution = ? WHERE id = ? AND user_id = ?`,
+            [date, dbType, quantity, amount, costPerShare, pnl, body.roiPercent, currency || 'USD', body.isSalaryContribution ? 1 : 0, id, user.id]
         );
 
         return NextResponse.json({ success: true });
     } catch (error) {
+        if (error instanceof Response) return error;
         console.error('PUT Error:', error);
         return NextResponse.json({ error: 'Failed to update transaction' }, { status: 500 });
     }
@@ -129,15 +128,17 @@ export async function PUT(request) {
 
 export async function DELETE(request) {
     try {
+        const user = await requireAuth();
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');
 
         if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
 
-        await run(`DELETE FROM ledger WHERE id = ?`, [id]);
+        await run(`DELETE FROM ledger WHERE id = ? AND user_id = ?`, [id, user.id]);
 
         return NextResponse.json({ success: true });
     } catch (error) {
+        if (error instanceof Response) return error;
         console.error('DELETE Error:', error);
         return NextResponse.json({ error: 'Failed to delete transaction' }, { status: 500 });
     }

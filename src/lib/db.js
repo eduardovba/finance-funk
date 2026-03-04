@@ -61,10 +61,103 @@ async function runMigrations() {
             value TEXT NOT NULL,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`,
+        // ── Per-account data separation migrations ──
+        'ALTER TABLE assets ADD COLUMN user_id INTEGER REFERENCES users(id)',
+        'ALTER TABLE ledger ADD COLUMN user_id INTEGER REFERENCES users(id)',
+        'ALTER TABLE connections ADD COLUMN user_id INTEGER REFERENCES users(id)',
     ];
 
     for (const sql of migrations) {
         try { await db.execute(sql); } catch (e) { /* already applied */ }
+    }
+
+    // ── Monthly_ledger & snapshots: recreate with composite UNIQUE(month, user_id) ──
+    try {
+        const hasUserIdCol = await db.execute(
+            `SELECT COUNT(*) as cnt FROM pragma_table_info('monthly_ledger') WHERE name = 'user_id'`
+        );
+        if (Number(hasUserIdCol.rows[0].cnt) === 0) {
+            console.log('Migrating monthly_ledger to add user_id...');
+            await db.execute(`CREATE TABLE IF NOT EXISTS monthly_ledger_new (
+                month TEXT,
+                salary_savings REAL DEFAULT 0,
+                fixed_income REAL DEFAULT 0,
+                equity REAL DEFAULT 0,
+                real_estate REAL DEFAULT 0,
+                crypto REAL DEFAULT 0,
+                debt REAL DEFAULT 0,
+                pension REAL DEFAULT 0,
+                total_income REAL DEFAULT 0,
+                total_investments REAL DEFAULT 0,
+                fixed_income_income REAL DEFAULT 0,
+                equity_income REAL DEFAULT 0,
+                real_estate_income REAL DEFAULT 0,
+                extraordinary_income REAL DEFAULT 0,
+                user_id INTEGER REFERENCES users(id),
+                UNIQUE(month, user_id)
+            )`);
+            await db.execute(`INSERT OR IGNORE INTO monthly_ledger_new 
+                (month, salary_savings, fixed_income, equity, real_estate, crypto, debt, pension, total_income, total_investments, fixed_income_income, equity_income, real_estate_income, extraordinary_income)
+                SELECT month, salary_savings, fixed_income, equity, real_estate, crypto, debt, pension, total_income, total_investments, 
+                    COALESCE(fixed_income_income, 0), COALESCE(equity_income, 0), COALESCE(real_estate_income, 0), COALESCE(extraordinary_income, 0) 
+                FROM monthly_ledger`);
+            await db.execute(`DROP TABLE monthly_ledger`);
+            await db.execute(`ALTER TABLE monthly_ledger_new RENAME TO monthly_ledger`);
+            console.log('monthly_ledger migration complete.');
+        }
+    } catch (e) {
+        console.error('monthly_ledger migration failed:', e);
+    }
+
+    try {
+        const hasUserIdCol = await db.execute(
+            `SELECT COUNT(*) as cnt FROM pragma_table_info('snapshots') WHERE name = 'user_id'`
+        );
+        if (Number(hasUserIdCol.rows[0].cnt) === 0) {
+            console.log('Migrating snapshots to add user_id...');
+            await db.execute(`CREATE TABLE IF NOT EXISTS snapshots_new (
+                month TEXT,
+                content TEXT,
+                user_id INTEGER REFERENCES users(id),
+                UNIQUE(month, user_id)
+            )`);
+            // snapshots table may not exist yet
+            try {
+                await db.execute(`INSERT OR IGNORE INTO snapshots_new (month, content)
+                    SELECT month, content FROM snapshots`);
+                await db.execute(`DROP TABLE snapshots`);
+            } catch (e) { /* snapshots table didn't exist yet, that's fine */ }
+            await db.execute(`ALTER TABLE snapshots_new RENAME TO snapshots`);
+            console.log('snapshots migration complete.');
+        }
+    } catch (e) {
+        console.error('snapshots migration failed:', e);
+    }
+
+    // ── One-time data migration: assign all existing data to duduviana@gmail.com ──
+    try {
+        const duduviana = await db.execute({
+            sql: "SELECT id FROM users WHERE email = 'duduviana@gmail.com'",
+            args: [],
+        });
+        if (duduviana.rows.length > 0) {
+            const uid = duduviana.rows[0].id;
+            // Disable FK checks to avoid watchlist->assets FK mismatch
+            try { await db.execute('PRAGMA foreign_keys = OFF'); } catch (e) { /* Turso may not support */ }
+            const tables = ['assets', 'ledger', 'monthly_ledger', 'connections', 'snapshots'];
+            for (const table of tables) {
+                const result = await db.execute({
+                    sql: `UPDATE ${table} SET user_id = ? WHERE user_id IS NULL`,
+                    args: [uid],
+                });
+                if (result.rowsAffected > 0) {
+                    console.log(`Assigned ${result.rowsAffected} rows in ${table} to user ${uid} (duduviana@gmail.com)`);
+                }
+            }
+            try { await db.execute('PRAGMA foreign_keys = ON'); } catch (e) { /* Turso may not support */ }
+        }
+    } catch (e) {
+        console.error('Data ownership migration failed:', e);
     }
 
     // ONE-TIME REPAIR: Fixing the "Billionaire" bug and missing review button

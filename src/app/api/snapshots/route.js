@@ -2,19 +2,27 @@
 import { NextResponse } from 'next/server';
 import { query, run } from '@/lib/db';
 import { kvGet, kvSet } from '@/lib/kv';
+import { requireAuth } from '@/lib/authGuard';
 
 const KEY = 'historical_snapshots';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-    const data = await kvGet(KEY, []);
-    // Sort by month ascending
-    data.sort((a, b) => a.month.localeCompare(b.month));
-    return NextResponse.json(data);
+    try {
+        const user = await requireAuth();
+        const data = await kvGet(KEY, [], user.id);
+        // Sort by month ascending
+        data.sort((a, b) => a.month.localeCompare(b.month));
+        return NextResponse.json(data);
+    } catch (error) {
+        if (error instanceof Response) return error;
+        return NextResponse.json({ error: 'Failed to fetch snapshots' }, { status: 500 });
+    }
 }
 
 export async function POST(request) {
     try {
+        const user = await requireAuth();
         const newSnapshot = await request.json();
 
         // Validate required fields
@@ -22,7 +30,7 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        let data = await kvGet(KEY, []);
+        let data = await kvGet(KEY, [], user.id);
 
         // Check if snapshot for this month already exists
         const existingIndex = data.findIndex(s => s.month === newSnapshot.month);
@@ -38,15 +46,15 @@ export async function POST(request) {
         // Sort by month
         data.sort((a, b) => a.month.localeCompare(b.month));
 
-        await kvSet(KEY, data);
+        await kvSet(KEY, data, user.id);
 
         // Also upsert into DB snapshots table so /api/history returns it
         try {
-            const existing = await query('SELECT month FROM snapshots WHERE month = ?', [newSnapshot.month]);
+            const existing = await query('SELECT month FROM snapshots WHERE month = ? AND user_id = ?', [newSnapshot.month, user.id]);
             if (existing.length > 0) {
-                await run('UPDATE snapshots SET content = ? WHERE month = ?', [JSON.stringify(newSnapshot), newSnapshot.month]);
+                await run('UPDATE snapshots SET content = ? WHERE month = ? AND user_id = ?', [JSON.stringify(newSnapshot), newSnapshot.month, user.id]);
             } else {
-                await run('INSERT INTO snapshots (month, content) VALUES (?, ?)', [newSnapshot.month, JSON.stringify(newSnapshot)]);
+                await run('INSERT INTO snapshots (month, content, user_id) VALUES (?, ?, ?)', [newSnapshot.month, JSON.stringify(newSnapshot), user.id]);
             }
         } catch (dbErr) {
             console.error('Failed to sync snapshot to DB:', dbErr);
@@ -54,12 +62,14 @@ export async function POST(request) {
 
         return NextResponse.json(newSnapshot);
     } catch (error) {
+        if (error instanceof Response) return error;
         return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
     }
 }
 
 export async function DELETE(request) {
     try {
+        const user = await requireAuth();
         const { searchParams } = new URL(request.url);
         const month = searchParams.get('month');
 
@@ -67,7 +77,7 @@ export async function DELETE(request) {
             return NextResponse.json({ error: 'Month parameter required' }, { status: 400 });
         }
 
-        let data = await kvGet(KEY, []);
+        let data = await kvGet(KEY, [], user.id);
         const initialLength = data.length;
         data = data.filter(s => s.month !== month);
 
@@ -75,17 +85,18 @@ export async function DELETE(request) {
             return NextResponse.json({ error: 'Snapshot not found' }, { status: 404 });
         }
 
-        await kvSet(KEY, data);
+        await kvSet(KEY, data, user.id);
 
         // Also remove from DB
         try {
-            await run('DELETE FROM snapshots WHERE month = ?', [month]);
+            await run('DELETE FROM snapshots WHERE month = ? AND user_id = ?', [month, user.id]);
         } catch (dbErr) {
             console.error('Failed to delete snapshot from DB:', dbErr);
         }
 
         return NextResponse.json({ success: true, month });
     } catch (error) {
+        if (error instanceof Response) return error;
         return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
     }
 }

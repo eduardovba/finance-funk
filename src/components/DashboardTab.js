@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import MetricCard from './MetricCard';
 import ConsolidatedAssetTable from './ConsolidatedAssetTable';
 import DashboardCharts from './DashboardCharts';
@@ -166,20 +167,40 @@ export default function DashboardTab({
 
                 <span className="text-[9px] text-[#F5F5DC]/40 uppercase tracking-[4px] font-space mb-3 text-center w-full block">Total Balance</span>
 
-                {/* Main Balance BRL */}
-                <div className="flex items-start justify-center gap-1 mb-1">
-                    <span className="text-xl text-[#F5F5DC]/60 font-medium font-space mt-1.5">{primaryMeta?.symbol}</span>
-                    <span className="text-[3.5rem] leading-[1] font-normal tracking-wide text-[#D4AF37] drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] font-bebas">
-                        {isLoading ? '---' : ((toPrimary(data.netWorth.amount, 'BRL') / 1000000).toLocaleString(primaryMeta?.locale || 'en-GB', { minimumFractionDigits: 3, maximumFractionDigits: 3 }))}M
-                    </span>
+                {/* Main Balance BRL + ROI Badge */}
+                <div className="flex items-start justify-center gap-6 mb-1 relative">
+                    <div className="flex items-start gap-1">
+                        <span className="text-xl text-[#F5F5DC]/60 font-medium font-space mt-1.5">{primaryMeta?.symbol}</span>
+                        <span className="text-[3.5rem] leading-[1] font-normal tracking-wide text-[#D4AF37] drop-shadow-[0_0_12px_rgba(212,175,55,0.4)] font-bebas">
+                            {isLoading ? '---' : ((toPrimary(data.netWorth.amount, 'BRL') / 1000000).toLocaleString(primaryMeta?.locale || 'en-GB', { minimumFractionDigits: 3, maximumFractionDigits: 3 }))}M
+                        </span>
+                    </div>
+
+                    {/* Circular ROI Badge (Matching Desktop Style) */}
+                    <motion.div
+                        whileTap={{ scale: 0.9 }}
+                        className={`mt-0.5 relative group cursor-pointer w-16 h-16 shrink-0`}
+                    >
+                        <div className={`absolute inset-0 rounded-full blur-md opacity-30 ${currentROI.percentage >= 0 ? 'bg-vu-green' : 'bg-red-400'}`}></div>
+                        <div className={`
+                            relative z-10 w-full h-full rounded-full flex flex-col items-center justify-center
+                            bg-gradient-to-br from-black/80 to-[#1A0F2E]/80 border shadow-inner transition-colors duration-500
+                            ${currentROI.percentage >= 0 ? 'border-vu-green/40 shadow-vu-green/20' : 'border-red-400/40 shadow-red-400/20'}
+                        `}>
+                            <span className="text-[9px] uppercase tracking-widest text-[#F5F5DC]/50 font-space mt-px">ROI</span>
+                            <span className={`text-[13px] font-bold font-space leading-tight ${currentROI.percentage >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
+                                {currentROI.percentage >= 0 ? '+' : ''}{currentROI.percentage.toFixed(1)}%
+                            </span>
+                        </div>
+                    </motion.div>
                 </div>
 
                 {/* Secondary Balance GBP */}
-                <span className="text-[13px] text-[#CC5500]/70 font-space mb-6 tracking-wide">
+                <span className="text-[13px] text-[#CC5500]/70 font-space mb-6 tracking-wide text-center block">
                     ≈ {secondaryMeta?.symbol}{(toSecondary(data.netWorth.amount, 'BRL') / 1000).toLocaleString(secondaryMeta?.locale || 'en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k
                 </span>
 
-                {/* Metric Pills (MoM and ROI) */}
+                {/* Metric Pills (MoM and Target) */}
                 <div className={`flex flex-wrap justify-center gap-3 transition-opacity duration-300 ${isLoading ? 'opacity-30' : 'opacity-100'}`}>
                     {/* MoM Pill */}
                     <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm ${(diffPrevMonth?.amount || 0) >= 0
@@ -212,17 +233,6 @@ export default function DashboardTab({
                             <span className="text-[10px]">{(diffTarget?.amount || 0) >= 0 ? '▲' : '▼'}</span>
                         </div>
                     )}
-
-                    {/* ROI Pill */}
-                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm ${currentROI.percentage >= 0
-                        ? 'bg-vu-green/10 border-vu-green/20 text-vu-green'
-                        : 'bg-red-400/10 border-red-400/20 text-red-400'
-                        }`}>
-                        <span className="text-[10px] uppercase font-space tracking-widest opacity-70">ROI:</span>
-                        <span className="text-[11px] font-space font-bold">
-                            {currentROI.percentage >= 0 ? '+' : ''}{currentROI.percentage.toFixed(1)}%
-                        </span>
-                    </div>
                 </div>
             </div>
 

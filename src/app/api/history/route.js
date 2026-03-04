@@ -1,15 +1,18 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { kvGet } from '@/lib/kv';
+import { requireAuth } from '@/lib/authGuard';
 
 export async function GET() {
     try {
+        const user = await requireAuth();
+
         // 1. Primary source: DB snapshots table
         let dbSnapshots = [];
         try {
             const rows = await query(`
-                SELECT content FROM snapshots ORDER BY month ASC
-            `);
+                SELECT content FROM snapshots WHERE user_id = ? ORDER BY month ASC
+            `, [user.id]);
             dbSnapshots = rows.map(r => JSON.parse(r.content));
         } catch (dbErr) {
             console.error('Failed to read snapshots from DB:', dbErr);
@@ -18,7 +21,7 @@ export async function GET() {
         // 2. Fallback source: kv_store
         let kvSnapshots = [];
         try {
-            kvSnapshots = await kvGet('historical_snapshots', []);
+            kvSnapshots = await kvGet('historical_snapshots', [], user.id);
         } catch (kvErr) {
             console.error('Failed to read snapshots from kv_store:', kvErr);
         }
@@ -36,6 +39,7 @@ export async function GET() {
 
         return NextResponse.json(data);
     } catch (e) {
+        if (e instanceof Response) return e;
         return NextResponse.json({ error: 'Failed to fetch history' }, { status: 500 });
     }
 }

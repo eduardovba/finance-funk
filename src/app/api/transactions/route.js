@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { query, run } from '@/lib/db';
+import { requireAuth } from '@/lib/authGuard';
 
 export async function GET() {
     try {
+        const user = await requireAuth();
         const sql = `
       SELECT 
         l.id, l.date, l.type, 
@@ -13,10 +15,10 @@ export async function GET() {
         l.quantity, l.price
       FROM ledger l
       JOIN assets a ON l.asset_id = a.id
-      WHERE a.sync_status = 'ACTIVE'
+      WHERE a.sync_status = 'ACTIVE' AND l.user_id = ?
       ORDER BY l.date DESC
     `;
-        const rows = await query(sql);
+        const rows = await query(sql, [user.id]);
 
         const data = rows.map(r => ({
             id: r.id.toString(),
@@ -45,6 +47,7 @@ export async function GET() {
 
         return NextResponse.json(data);
     } catch (error) {
+        if (error instanceof Response) return error;
         console.error('Database Error:', error);
         return NextResponse.json({ error: 'Failed to fetch transactions' }, { status: 500 });
     }
@@ -52,6 +55,7 @@ export async function GET() {
 
 export async function POST(request) {
     try {
+        const user = await requireAuth();
         const body = await request.json();
 
         // Normalization
@@ -70,25 +74,26 @@ export async function POST(request) {
 
         const broker = body.account || body.broker || 'Manual';
         let assetId;
-        const rows = await query('SELECT id FROM assets WHERE name = ? AND broker = ?', [assetName, broker]);
+        const rows = await query('SELECT id FROM assets WHERE name = ? AND broker = ? AND user_id = ?', [assetName, broker, user.id]);
 
         if (rows.length > 0) {
             assetId = rows[0].id;
         } else {
             const res = await run(
-                `INSERT INTO assets (name, asset_class, currency, broker) VALUES (?, ?, ?, ?)`,
-                [assetName, category, currency, broker]
+                `INSERT INTO assets (name, asset_class, currency, broker, user_id) VALUES (?, ?, ?, ?, ?)`,
+                [assetName, category, currency, broker, user.id]
             );
             assetId = res.lastID;
         }
 
         const res = await run(
-            `INSERT INTO ledger (date, type, asset_id, amount, currency, notes, quantity, price, is_salary_contribution, realized_pnl, realized_roi_percent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [body.date, type, assetId, amount, currency, notes, body.quantity || null, body.price || null, body.isSalaryContribution ? 1 : 0, body.pnl || null, body.roiPercent || null]
+            `INSERT INTO ledger (date, type, asset_id, amount, currency, notes, quantity, price, is_salary_contribution, realized_pnl, realized_roi_percent, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [body.date, type, assetId, amount, currency, notes, body.quantity || null, body.price || null, body.isSalaryContribution ? 1 : 0, body.pnl || null, body.roiPercent || null, user.id]
         );
 
         return NextResponse.json({ success: true, id: res.lastID });
     } catch (e) {
+        if (e instanceof Response) return e;
         console.error('POST Error:', e);
         return NextResponse.json({ error: 'Failed' }, { status: 500 });
     }
@@ -96,6 +101,7 @@ export async function POST(request) {
 
 export async function PUT(request) {
     try {
+        const user = await requireAuth();
         const body = await request.json();
         const { id, type, investment, interest, amount, description, account, category, currency } = body;
         if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
@@ -109,25 +115,26 @@ export async function PUT(request) {
             const broker = account || body.broker || 'Manual';
             const cat = category || 'Fixed Income';
 
-            const rows = await query('SELECT id FROM assets WHERE name = ? AND broker = ?', [assetName, broker]);
+            const rows = await query('SELECT id FROM assets WHERE name = ? AND broker = ? AND user_id = ?', [assetName, broker, user.id]);
             if (rows.length > 0) {
                 assetId = rows[0].id;
             } else {
                 const res = await run(
-                    `INSERT INTO assets (name, asset_class, currency, broker) VALUES (?, ?, ?, ?)`,
-                    [assetName, cat, currency || 'GBP', broker]
+                    `INSERT INTO assets (name, asset_class, currency, broker, user_id) VALUES (?, ?, ?, ?, ?)`,
+                    [assetName, cat, currency || 'GBP', broker, user.id]
                 );
                 assetId = res.lastID;
             }
         }
 
         await run(
-            `UPDATE ledger SET date = ?, type = ?, asset_id = ?, amount = ?, currency = ?, notes = ?, quantity = ?, price = ?, is_salary_contribution = ?, realized_pnl = ?, realized_roi_percent = ? WHERE id = ?`,
-            [body.date, type || 'Investment', assetId, finalAmount, body.currency, body.notes || '', body.quantity || null, body.price || null, body.isSalaryContribution ? 1 : 0, body.pnl || null, body.roiPercent || null, id]
+            `UPDATE ledger SET date = ?, type = ?, asset_id = ?, amount = ?, currency = ?, notes = ?, quantity = ?, price = ?, is_salary_contribution = ?, realized_pnl = ?, realized_roi_percent = ? WHERE id = ? AND user_id = ?`,
+            [body.date, type || 'Investment', assetId, finalAmount, body.currency, body.notes || '', body.quantity || null, body.price || null, body.isSalaryContribution ? 1 : 0, body.pnl || null, body.roiPercent || null, id, user.id]
         );
 
         return NextResponse.json({ success: true, id });
     } catch (e) {
+        if (e instanceof Response) return e;
         console.error('PUT Error:', e);
         return NextResponse.json({ error: 'Failed' }, { status: 500 });
     }
@@ -135,15 +142,17 @@ export async function PUT(request) {
 
 export async function DELETE(request) {
     try {
+        const user = await requireAuth();
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');
 
         if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
 
-        await run('DELETE FROM ledger WHERE id = ?', [id]);
+        await run('DELETE FROM ledger WHERE id = ? AND user_id = ?', [id, user.id]);
 
         return NextResponse.json({ success: true });
     } catch (e) {
+        if (e instanceof Response) return e;
         console.error('DELETE Error:', e);
         return NextResponse.json({ error: 'Failed' }, { status: 500 });
     }

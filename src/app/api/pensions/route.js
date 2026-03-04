@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { requireAuth } from '@/lib/authGuard';
 
 export async function GET() {
     try {
+        const user = await requireAuth();
         const sql = `
             SELECT 
                 l.id, l.asset_id, l.date, l.type, 
@@ -12,10 +14,10 @@ export async function GET() {
                 l.is_salary_contribution
             FROM ledger l
             JOIN assets a ON l.asset_id = a.id
-            WHERE a.asset_class = 'Pension' AND a.sync_status = 'ACTIVE'
+            WHERE a.asset_class = 'Pension' AND a.sync_status = 'ACTIVE' AND l.user_id = ?
             ORDER BY l.date ASC
         `;
-        const rows = await query(sql);
+        const rows = await query(sql, [user.id]);
 
         const state = {}; // { [asset|broker]: { qty: 0, cost: 0 } }
 
@@ -72,6 +74,7 @@ export async function GET() {
 
         return NextResponse.json(data);
     } catch (e) {
+        if (e instanceof Response) return e;
         console.error('Pensions API Error:', e);
         return NextResponse.json({ error: 'Failed to fetch pensions' }, { status: 500 });
     }
