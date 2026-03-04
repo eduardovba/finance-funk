@@ -1,4 +1,9 @@
-import { LayoutDashboard, BookOpen, TrendingUp, Eye, Landmark, Home, LineChart, Bitcoin, Wallet, CreditCard } from 'lucide-react';
+"use client";
+
+import { useSession } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+import { LayoutDashboard, BookOpen, TrendingUp, Eye, Landmark, Home, LineChart, Bitcoin, Wallet, CreditCard, ChevronRight } from 'lucide-react';
 
 const iconMap = {
     'dashboard': LayoutDashboard,
@@ -14,6 +19,10 @@ const iconMap = {
 };
 
 export default function Sidebar({ activeItem, onNavigate }) {
+    const { data: session } = useSession();
+    const pathname = usePathname();
+    const isProfileActive = pathname === '/profile';
+
     const trackingItems = [
         { id: 'dashboard', label: 'Dashboard' },
         { id: 'general-ledger', label: 'General Ledger' },
@@ -63,6 +72,11 @@ export default function Sidebar({ activeItem, onNavigate }) {
         </div>
     );
 
+    // Avatar: session image → fallback to initials
+    const userName = session?.user?.name || 'User';
+    const userImage = session?.user?.image;
+    const initials = userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+
     return (
         <aside className="glass-card h-[calc(100vh-64px)] w-[260px] sticky top-8 p-6 flex-shrink-0 overflow-y-auto flex flex-col border-r border-[#D4AF37]/20">
             {/* Logo */}
@@ -76,18 +90,28 @@ export default function Sidebar({ activeItem, onNavigate }) {
                 {renderGroup('Assets', assetItems)}
             </nav>
 
-            {/* Profile Section */}
-            <div className="mt-auto pt-4 border-t border-record/10 flex items-center gap-3 px-2">
-                <img
-                    src="/pocket-puma.png"
-                    alt="DJ Moneybags"
-                    className="w-10 h-10 rounded-full object-cover border-2 border-record/30"
-                />
-                <div>
-                    <p className="text-record text-sm font-bold tracking-wide m-0">DJ_MONEYBAGS</p>
+            {/* Profile Section — Clickable link to /profile */}
+            <Link
+                href="/profile"
+                className={`mt-auto pt-4 border-t border-record/10 flex items-center gap-3 px-2 no-underline rounded-lg transition-all duration-200 group cursor-pointer hover:bg-white/5 ${isProfileActive ? 'bg-[#D4AF37]/10' : ''}`}
+            >
+                {userImage ? (
+                    <img
+                        src={userImage}
+                        alt={userName}
+                        className="w-10 h-10 rounded-full object-cover border-2 border-record/30 flex-shrink-0"
+                    />
+                ) : (
+                    <div className="w-10 h-10 rounded-full bg-[#D4AF37]/10 border-2 border-record/30 flex items-center justify-center text-[#D4AF37] text-sm font-bold flex-shrink-0">
+                        {initials}
+                    </div>
+                )}
+                <div className="flex-1 min-w-0">
+                    <p className="text-record text-sm font-bold tracking-wide m-0 truncate">{userName}</p>
                     <p className="text-parchment/40 text-xs m-0">Portfolio Manager</p>
                 </div>
-            </div>
+                <ChevronRight size={14} className="text-parchment/20 group-hover:text-[#D4AF37]/60 transition-colors flex-shrink-0" />
+            </Link>
         </aside>
     );
 }

@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
-import { findUserByEmail, verifyPassword, findOrCreateOAuthUser } from "@/lib/users";
+import { findUserByEmail, verifyPassword, findOrCreateOAuthUser, updateUserAvatar, getUserById } from "@/lib/users";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     providers: [
@@ -55,6 +55,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         provider: "google",
                     });
                     user.id = String(dbUser.id);
+                    // Persist Google avatar to our DB
+                    if (user.image) {
+                        await updateUserAvatar(dbUser.id, user.image);
+                    }
                 } catch (error) {
                     console.error("Error creating OAuth user:", error);
                     return false;
@@ -65,12 +69,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;
+                token.picture = user.image || null;
+            }
+            // Refresh avatar from DB on every token refresh
+            if (token.id && !token.picture) {
+                try {
+                    const dbUser = await getUserById(token.id);
+                    if (dbUser?.avatar_url) token.picture = dbUser.avatar_url;
+                } catch (e) { /* ignore */ }
             }
             return token;
         },
         async session({ session, token }) {
             if (token?.id) {
                 session.user.id = token.id;
+            }
+            if (token?.picture) {
+                session.user.image = token.picture;
             }
             return session;
         },

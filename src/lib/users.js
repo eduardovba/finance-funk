@@ -1,4 +1,4 @@
-import { get, run } from './db';
+import { get, run, query } from './db';
 import bcrypt from 'bcryptjs';
 
 /**
@@ -55,4 +55,62 @@ export async function findOrCreateOAuthUser({ name, email, provider }) {
  */
 export async function verifyPassword(password, hash) {
     return bcrypt.compare(password, hash);
+}
+
+/**
+ * Get a user by their ID.
+ */
+export async function getUserById(id) {
+    return get('SELECT id, name, email, provider, avatar_url, created_at FROM users WHERE id = ?', [id]);
+}
+
+/**
+ * Update mutable user profile fields (name).
+ */
+export async function updateUser(id, { name }) {
+    await run('UPDATE users SET name = ? WHERE id = ?', [name, id]);
+    return getUserById(id);
+}
+
+/**
+ * Persist OAuth avatar URL for a user.
+ */
+export async function updateUserAvatar(id, avatarUrl) {
+    await run('UPDATE users SET avatar_url = ? WHERE id = ?', [avatarUrl, id]);
+}
+
+/**
+ * Change the password for a credentials-based user.
+ * Verifies the current password before updating.
+ */
+export async function changePassword(id, currentPassword, newPassword) {
+    const user = await get('SELECT password_hash, provider FROM users WHERE id = ?', [id]);
+    if (!user) throw new Error('User not found');
+    if (user.provider !== 'credentials' || !user.password_hash) {
+        throw new Error('Password change is only available for email/password accounts');
+    }
+    const isValid = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!isValid) throw new Error('Current password is incorrect');
+    const newHash = await bcrypt.hash(newPassword, 12);
+    await run('UPDATE users SET password_hash = ? WHERE id = ?', [newHash, id]);
+    return { success: true };
+}
+
+/**
+ * Delete a user and all their associated data (cascade).
+ */
+export async function deleteUserAndData(id) {
+    // Delete from child tables first (order matters for FK constraints)
+    const tables = ['ledger', 'monthly_ledger', 'snapshots', 'connections', 'assets'];
+    for (const table of tables) {
+        await run(`DELETE FROM ${table} WHERE user_id = ?`, [id]);
+    }
+    // Delete user-scoped kv_store entries (prefixed with "userId:")
+    const kvRows = await query('SELECT key FROM kv_store WHERE key LIKE ?', [`${id}:%`]);
+    for (const row of kvRows) {
+        await run('DELETE FROM kv_store WHERE key = ?', [row.key]);
+    }
+    // Finally delete the user record
+    await run('DELETE FROM users WHERE id = ?', [id]);
+    return { success: true };
 }

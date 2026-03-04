@@ -147,17 +147,25 @@ function MoreSheet({ isOpen, onClose }) {
 
                             {session?.user && (
                                 <div className="flex items-center justify-between px-4 py-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37] text-xs font-bold">
-                                            {(session.user.name || session.user.email)?.[0]?.toUpperCase()}
-                                        </div>
+                                    <Link
+                                        href="/profile"
+                                        onClick={onClose}
+                                        className="flex items-center gap-3 no-underline flex-1 min-w-0 active:scale-[0.98] transition-transform"
+                                    >
+                                        {session.user.image ? (
+                                            <img src={session.user.image} alt={session.user.name} className="w-8 h-8 rounded-full object-cover border border-[#D4AF37]/20 flex-shrink-0" />
+                                        ) : (
+                                            <div className="w-8 h-8 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37] text-xs font-bold flex-shrink-0">
+                                                {(session.user.name || session.user.email)?.[0]?.toUpperCase()}
+                                            </div>
+                                        )}
                                         <span className="text-xs text-parchment/50 font-space truncate max-w-[180px]">
                                             {session.user.name || session.user.email}
                                         </span>
-                                    </div>
+                                    </Link>
                                     <button
                                         onClick={() => signOut({ callbackUrl: '/login' })}
-                                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-space active:scale-[0.95] transition-all"
+                                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-space active:scale-[0.95] transition-all flex-shrink-0"
                                     >
                                         <LogOut size={14} />
                                         Sign Out

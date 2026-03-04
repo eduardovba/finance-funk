@@ -61,6 +61,8 @@ async function runMigrations() {
             value TEXT NOT NULL,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`,
+        // ── User profile avatar ──
+        'ALTER TABLE users ADD COLUMN avatar_url TEXT',
         // ── Per-account data separation migrations ──
         'ALTER TABLE assets ADD COLUMN user_id INTEGER REFERENCES users(id)',
         'ALTER TABLE ledger ADD COLUMN user_id INTEGER REFERENCES users(id)',

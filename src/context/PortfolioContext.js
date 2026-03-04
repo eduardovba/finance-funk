@@ -57,27 +57,54 @@ export function PortfolioProvider({ children }) {
     const [primaryCurrency, setPrimaryCurrency] = useState('BRL');
     const [secondaryCurrency, setSecondaryCurrency] = useState('GBP');
     const [rateFlipped, setRateFlipped] = useState(false);
+    const [currencyLoaded, setCurrencyLoaded] = useState(false);
 
-    // Load saved currency preferences from localStorage
+    // Load currency prefs: DB first, then localStorage fallback
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const savedPrimary = localStorage.getItem('ff_primaryCurrency');
-            const savedSecondary = localStorage.getItem('ff_secondaryCurrency');
-            const savedFlipped = localStorage.getItem('ff_rateFlipped');
-            if (savedPrimary && SUPPORTED_CURRENCIES[savedPrimary]) setPrimaryCurrency(savedPrimary);
-            if (savedSecondary && SUPPORTED_CURRENCIES[savedSecondary]) setSecondaryCurrency(savedSecondary);
-            if (savedFlipped !== null) setRateFlipped(savedFlipped === 'true');
-        }
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetch('/api/user/profile');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (!cancelled && data.currencyPreferences) {
+                        setPrimaryCurrency(data.currencyPreferences.primary || 'BRL');
+                        setSecondaryCurrency(data.currencyPreferences.secondary || 'GBP');
+                        setCurrencyLoaded(true);
+                        return;
+                    }
+                }
+            } catch { /* fall through to localStorage */ }
+
+            // Fallback to localStorage
+            if (!cancelled && typeof window !== 'undefined') {
+                const savedPrimary = localStorage.getItem('ff_primaryCurrency');
+                const savedSecondary = localStorage.getItem('ff_secondaryCurrency');
+                const savedFlipped = localStorage.getItem('ff_rateFlipped');
+                if (savedPrimary && SUPPORTED_CURRENCIES[savedPrimary]) setPrimaryCurrency(savedPrimary);
+                if (savedSecondary && SUPPORTED_CURRENCIES[savedSecondary]) setSecondaryCurrency(savedSecondary);
+                if (savedFlipped !== null) setRateFlipped(savedFlipped === 'true');
+            }
+            if (!cancelled) setCurrencyLoaded(true);
+        })();
+        return () => { cancelled = true; };
     }, []);
 
-    // Persist currency preferences
+    // Persist currency preferences to localStorage (instant) and DB (background)
     useEffect(() => {
+        if (!currencyLoaded) return; // don't persist initial defaults
         if (typeof window !== 'undefined') {
             localStorage.setItem('ff_primaryCurrency', primaryCurrency);
             localStorage.setItem('ff_secondaryCurrency', secondaryCurrency);
             localStorage.setItem('ff_rateFlipped', rateFlipped);
         }
-    }, [primaryCurrency, secondaryCurrency, rateFlipped]);
+        // Background persist to DB
+        fetch('/api/user/profile', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ primaryCurrency, secondaryCurrency }),
+        }).catch(() => { /* ignore – localStorage is the instant fallback */ });
+    }, [primaryCurrency, secondaryCurrency, rateFlipped, currencyLoaded]);
 
     // ═══════════ CURRENCY HELPERS ═══════════
     const formatPrimary = useCallback((amount) => formatCurrency(amount, primaryCurrency), [primaryCurrency]);

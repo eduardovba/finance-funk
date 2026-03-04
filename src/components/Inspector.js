@@ -4,6 +4,8 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, Database } from 'lucide-react';
 import { usePortfolio } from '@/context/PortfolioContext';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import BankConnectButton from './BankConnectButton';
 import ConnectedInstitutionsList from './ConnectedInstitutionsList';
 
@@ -16,6 +18,12 @@ export default function Inspector() {
         isInspectorOpen, setIsInspectorOpen,
         setIsFormOpen, setEditingTransaction,
     } = usePortfolio();
+    const { data: session } = useSession();
+
+    const userName = session?.user?.name || 'User';
+    const userImage = session?.user?.image;
+    const userEmail = session?.user?.email;
+    const initials = userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 
     return (
         <AnimatePresence>
@@ -88,22 +96,32 @@ export default function Inspector() {
                             </div>
                         </div>
 
-                        <div className="mt-auto pt-6 border-t border-white/5">
-                            <div className="flex items-center gap-3">
+                        {/* User profile section */}
+                        <Link
+                            href="/profile"
+                            onClick={() => setIsInspectorOpen(false)}
+                            className="mt-auto pt-6 border-t border-white/5 flex items-center gap-3 no-underline group hover:bg-white/[0.03] -mx-6 px-6 pb-1 transition-all"
+                        >
+                            {userImage ? (
                                 <img
-                                    src="/pocket-puma.png"
-                                    alt="DJ Moneybags"
-                                    className="w-10 h-10 rounded-full object-cover border-2 border-[#D4AF37]/30"
+                                    src={userImage}
+                                    alt={userName}
+                                    className="w-10 h-10 rounded-full object-cover border-2 border-[#D4AF37]/30 flex-shrink-0"
                                 />
-                                <div>
-                                    <p className="text-[#D4AF37] text-sm font-bold tracking-wide m-0 font-space">DJ_MONEYBAGS</p>
-                                    <p className="text-parchment/40 text-xs m-0 font-space">Portfolio Manager</p>
+                            ) : (
+                                <div className="w-10 h-10 rounded-full bg-[#D4AF37]/10 border-2 border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] text-sm font-bold flex-shrink-0">
+                                    {initials}
                                 </div>
+                            )}
+                            <div className="min-w-0">
+                                <p className="text-[#D4AF37] text-sm font-bold tracking-wide m-0 font-space truncate">{userName}</p>
+                                <p className="text-parchment/40 text-xs m-0 font-space truncate">{userEmail || 'Portfolio Manager'}</p>
                             </div>
-                        </div>
+                        </Link>
                     </motion.div>
                 </>
             )}
         </AnimatePresence>
     );
 }
+
