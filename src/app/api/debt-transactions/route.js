@@ -37,8 +37,12 @@ export async function POST(request) {
         const body = await request.json();
         const { date, lender, value_brl, obs } = body;
 
+        if (!lender || value_brl === undefined || value_brl === null || isNaN(value_brl)) {
+            return NextResponse.json({ error: 'Lender and value_brl are required' }, { status: 400 });
+        }
+
         let assetId;
-        const rows = await query('SELECT id FROM assets WHERE name = ? AND asset_class = "Debt" AND user_id = ?', [lender, user.id]);
+        const rows = await query('SELECT id FROM assets WHERE name = ? AND asset_class = ? AND user_id = ?', [lender, 'Debt', user.id]);
 
         if (rows.length > 0) {
             assetId = rows[0].id;
@@ -52,14 +56,14 @@ export async function POST(request) {
 
         const res = await run(
             `INSERT INTO ledger (date, type, asset_id, amount, currency, notes, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [date, 'Liability', assetId, value_brl, 'BRL', obs, user.id]
+            [date, 'Liability', assetId, value_brl, 'BRL', obs || '', user.id]
         );
 
         return NextResponse.json({ success: true, id: res.lastID });
     } catch (e) {
         if (e instanceof Response) return e;
         console.error('POST Debt Error:', e);
-        return NextResponse.json({ error: 'Failed' }, { status: 500 });
+        return NextResponse.json({ error: e.message || 'Failed' }, { status: 500 });
     }
 }
 
@@ -72,7 +76,7 @@ export async function PUT(request) {
         if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
 
         let assetId;
-        const rows = await query('SELECT id FROM assets WHERE name = ? AND asset_class = "Debt" AND user_id = ?', [lender, user.id]);
+        const rows = await query('SELECT id FROM assets WHERE name = ? AND asset_class = ? AND user_id = ?', [lender, 'Debt', user.id]);
 
         if (rows.length > 0) {
             assetId = rows[0].id;

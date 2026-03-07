@@ -61,12 +61,29 @@ async function runMigrations() {
             value TEXT NOT NULL,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`,
+        `CREATE TABLE IF NOT EXISTS brokers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            currency TEXT DEFAULT 'USD',
+            user_id INTEGER REFERENCES users(id),
+            asset_class TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(name, user_id)
+        )`,
         // ── User profile avatar ──
         'ALTER TABLE users ADD COLUMN avatar_url TEXT',
         // ── Per-account data separation migrations ──
         'ALTER TABLE assets ADD COLUMN user_id INTEGER REFERENCES users(id)',
         'ALTER TABLE ledger ADD COLUMN user_id INTEGER REFERENCES users(id)',
         'ALTER TABLE connections ADD COLUMN user_id INTEGER REFERENCES users(id)',
+        'ALTER TABLE brokers ADD COLUMN asset_class TEXT',
+        // ── Asset logo cache ──
+        `CREATE TABLE IF NOT EXISTS asset_logos (
+            ticker TEXT PRIMARY KEY,
+            logo_url TEXT NOT NULL,
+            source TEXT,
+            fetched_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`,
     ];
 
     for (const sql of migrations) {
@@ -181,6 +198,66 @@ async function runMigrations() {
         console.log('Database repair: deduplicated Pluggy Sync entries and reset status.');
     } catch (e) {
         console.error('Repair failed:', e);
+    }
+
+    // ONE-TIME MIGRATION: Create sold properties and Ink Court config that were previously hardcoded
+    try {
+        // Get user ID for duduviana
+        const duduRes = await db.execute("SELECT id FROM users WHERE email = 'duduviana@gmail.com'");
+        if (duduRes.rows.length > 0) {
+            const uid = duduRes.rows[0].id;
+
+            // Helper to check if asset exists
+            const assetExists = async (name) => {
+                const r = await db.execute({ sql: "SELECT id FROM assets WHERE name = ? AND user_id = ?", args: [name, uid] });
+                return r.rows.length > 0 ? r.rows[0].id : null;
+            };
+
+            // --- Andyara 1 (Sold) ---
+            let a1Id = await assetExists('Andyara 1');
+            if (!a1Id) {
+                await db.execute({ sql: "INSERT INTO assets (name, asset_class, broker, currency, sync_status, user_id) VALUES (?, 'Real Estate', 'Manual', 'BRL', 'ACTIVE', ?)", args: ['Andyara 1', uid] });
+                const a1 = await db.execute({ sql: "SELECT id FROM assets WHERE name = 'Andyara 1' AND user_id = ?", args: [uid] });
+                a1Id = a1.rows[0].id;
+                // Purchase, Tax, Sale entries
+                await db.execute({ sql: "INSERT INTO ledger (date, type, asset_id, amount, price, currency, notes, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", args: ['2015-01-01', 'Purchase', a1Id, 237000, 237000, 'BRL', 'Initial investment', uid] });
+                await db.execute({ sql: "INSERT INTO ledger (date, type, asset_id, amount, price, currency, notes, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", args: ['2023-01-01', 'Stamp Duty', a1Id, -9074, 0, 'BRL', 'Stamp Duty', uid] });
+                await db.execute({ sql: "INSERT INTO ledger (date, type, asset_id, amount, price, currency, notes, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", args: ['2023-06-01', 'Sale', a1Id, -360000, 360000, 'BRL', 'Property sold', uid] });
+                console.log('Migration: Created Andyara 1 (sold property) with ledger entries.');
+            }
+
+            // --- Rua Montes Claros (Sold) ---
+            let mcId = await assetExists('Rua Montes Claros');
+            if (!mcId) {
+                await db.execute({ sql: "INSERT INTO assets (name, asset_class, broker, currency, sync_status, user_id) VALUES (?, 'Real Estate', 'Manual', 'BRL', 'ACTIVE', ?)", args: ['Rua Montes Claros', uid] });
+                const mc = await db.execute({ sql: "SELECT id FROM assets WHERE name = 'Rua Montes Claros' AND user_id = ?", args: [uid] });
+                mcId = mc.rows[0].id;
+                await db.execute({ sql: "INSERT INTO ledger (date, type, asset_id, amount, price, currency, notes, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", args: ['2018-01-01', 'Purchase', mcId, 681000, 681000, 'BRL', 'Initial investment', uid] });
+                await db.execute({ sql: "INSERT INTO ledger (date, type, asset_id, amount, price, currency, notes, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", args: ['2024-01-01', 'Stamp Duty', mcId, -29748, 0, 'BRL', 'Stamp Duty', uid] });
+                await db.execute({ sql: "INSERT INTO ledger (date, type, asset_id, amount, price, currency, notes, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", args: ['2024-06-01', 'Sale', mcId, -822920, 822920, 'BRL', 'Property sold', uid] });
+                console.log('Migration: Created Rua Montes Claros (sold property) with ledger entries.');
+            }
+
+            // --- Ink Court: Ensure it has a Mortgage Setup config and a current valuation ---
+            const inkId = await assetExists('Ink Court');
+            if (inkId) {
+                // Check if Mortgage Setup already exists
+                const setupExists = await db.execute({ sql: "SELECT id FROM ledger WHERE asset_id = ? AND type = 'Mortgage Setup' AND user_id = ?", args: [inkId, uid] });
+                if (setupExists.rows.length === 0) {
+                    const config = JSON.stringify({ originalAmount: 541000, deposit: 60000, durationMonths: 408, interestRate: 6.24 });
+                    await db.execute({ sql: "INSERT INTO ledger (date, type, asset_id, amount, price, currency, notes, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", args: ['2024-03-01', 'Mortgage Setup', inkId, 0, 0, 'GBP', config, uid] });
+                    console.log('Migration: Created Ink Court mortgage setup config.');
+                }
+                // Check if it has a valuation entry (price > 0)
+                const hasValuation = await db.execute({ sql: "SELECT id FROM ledger WHERE asset_id = ? AND price > 0 AND user_id = ?", args: [inkId, uid] });
+                if (hasValuation.rows.length === 0) {
+                    await db.execute({ sql: "INSERT INTO ledger (date, type, asset_id, amount, price, currency, notes, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", args: ['2026-02-19', 'Valuation Update', inkId, 0, 620000, 'GBP', 'Initial valuation', uid] });
+                    console.log('Migration: Created Ink Court initial valuation (£620,000).');
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Sold properties migration failed:', e);
     }
 }
 

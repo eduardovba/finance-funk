@@ -415,7 +415,7 @@ export default function PlanningTab({ currentPortfolioValueBrl, currentPortfolio
     const projectedGrowthGbp = finalValueGbp - (currentPortfolioValueGbp || 0) - totalContributedGbp;
 
     return (
-        <div style={{ maxWidth: '1400px', margin: '0 auto', paddingBottom: '3rem' }}>
+        <div className="w-full max-w-[1800px] mx-auto pb-12">
             <h2 className="text-[#D4AF37] text-4xl m-0 mb-8 font-bebas tracking-widest drop-shadow-[0_0_12px_rgba(212,175,55,0.6)] uppercase text-center">
                 Long-Term Planning
             </h2>
@@ -617,238 +617,242 @@ export default function PlanningTab({ currentPortfolioValueBrl, currentPortfolio
 
             </div> {/* Closes the 2-Column Grid */}
 
-            {/* Chart Panel */}
-            <div className="bg-[#1A0F2E] border-t border-l border-t-[#D4AF37]/40 border-l-[#D4AF37]/40 border-b-2 border-r-2 border-b-black/60 border-r-black/60 shadow-[0_15px_30px_rgba(0,0,0,0.6)] rounded-2xl p-8 mb-12">
-                <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
-                    <LineChart color="#D4AF37" size={24} />
-                    <h3 className="font-bebas text-2xl tracking-widest text-[#D4AF37] m-0">Wealth Trajectory</h3>
-                </div>
-                {/* Recharts sometimes fails if container dims are 0 initially. width=99% hack helps. */}
-                <div style={{ width: '100%', height: '500px' }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={forecastData} margin={{ top: 10, right: 30, left: 20, bottom: 10 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                            <XAxis
-                                dataKey="date"
-                                stroke="var(--fg-secondary)"
-                                fontSize={12}
-                                tickMargin={10}
-                                interval={11}
-                            />
-                            {/* Left Axis: BRL */}
-                            <YAxis
-                                yAxisId="left"
-                                stroke="rgba(255,255,255,0.4)"
-                                fontSize={12}
-                                fontFamily="Space Mono, monospace"
-                                tickFormatter={(val) => `R$${(val / 1000000).toFixed(1)}M`}
-                                domain={['auto', 'auto']}
-                            />
-                            {/* Right Axis: GBP */}
-                            <YAxis
-                                yAxisId="right"
-                                orientation="right"
-                                stroke="rgba(255,255,255,0.4)"
-                                fontSize={12}
-                                fontFamily="Space Mono, monospace"
-                                tickFormatter={(val) => `£${(val / 1000).toFixed(0)}k`}
-                                domain={['auto', 'auto']}
-                            />
-                            <Tooltip
-                                contentStyle={{ backgroundColor: '#170d2b', borderColor: 'rgba(212,175,55,0.3)', borderRadius: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.8)', fontFamily: 'Space Mono, monospace', fontSize: '0.8rem' }}
-                                formatter={(val, name) => {
-                                    if (name && (name.includes('BRL') || name === 'Actual Portfolio' || name === 'Forecast')) return formatCurrency(val, 'BRL');
-                                    if (name === 'Target Line') return formatCurrency(val, 'BRL');
-                                    return formatCurrency(val, 'GBP');
-                                }}
-                                labelStyle={{ color: 'var(--fg-secondary)' }}
-                            />
-                            <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                            <ReferenceLine yAxisId="left" y={target2031} label={`Goal '31`} stroke="#ff7f00" strokeOpacity={0.5} strokeDasharray="3 3" />
+            {/* Chart & Table Side-by-Side Wrapper at xl */}
+            <div className="flex flex-col xl:flex-row gap-8 mb-12 items-start w-full">
 
-                            {/* Target Line */}
-                            <Line
-                                yAxisId="left"
-                                type="monotone"
-                                dataKey="targetBrl"
-                                name="Target Line"
-                                stroke="#ff7f00"
-                                strokeWidth={2}
-                                strokeDasharray="3 3"
-                                dot={false}
-                                connectNulls
-                            />
+                {/* Chart Panel */}
+                <div className="flex-1 min-w-0 bg-[#1A0F2E] border-t border-l border-t-[#D4AF37]/40 border-l-[#D4AF37]/40 border-b-2 border-r-2 border-b-black/60 border-r-black/60 shadow-[0_15px_30px_rgba(0,0,0,0.6)] rounded-2xl p-6 lg:p-8 xl:sticky xl:top-24">
+                    <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
+                        <LineChart color="#D4AF37" size={24} />
+                        <h3 className="font-bebas text-2xl tracking-widest text-[#D4AF37] m-0">Wealth Trajectory</h3>
+                    </div>
+                    {/* Recharts sometimes fails if container dims are 0 initially. width=99% hack helps. */}
+                    <div style={{ width: '100%', height: '500px' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={forecastData} margin={{ top: 10, right: 30, left: 20, bottom: 10 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                                <XAxis
+                                    dataKey="date"
+                                    stroke="var(--fg-secondary)"
+                                    fontSize={12}
+                                    tickMargin={10}
+                                    interval={11}
+                                />
+                                {/* Left Axis: BRL */}
+                                <YAxis
+                                    yAxisId="left"
+                                    stroke="rgba(255,255,255,0.4)"
+                                    fontSize={12}
+                                    fontFamily="Space Mono, monospace"
+                                    tickFormatter={(val) => `R$${(val / 1000000).toFixed(1)}M`}
+                                    domain={['auto', 'auto']}
+                                />
+                                {/* Right Axis: GBP */}
+                                <YAxis
+                                    yAxisId="right"
+                                    orientation="right"
+                                    stroke="rgba(255,255,255,0.4)"
+                                    fontSize={12}
+                                    fontFamily="Space Mono, monospace"
+                                    tickFormatter={(val) => `£${(val / 1000).toFixed(0)}k`}
+                                    domain={['auto', 'auto']}
+                                />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: '#170d2b', borderColor: 'rgba(212,175,55,0.3)', borderRadius: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.8)', fontFamily: 'Space Mono, monospace', fontSize: '0.8rem' }}
+                                    formatter={(val, name) => {
+                                        if (name && (name.includes('BRL') || name === 'Actual Portfolio' || name === 'Forecast')) return formatCurrency(val, 'BRL');
+                                        if (name === 'Target Line') return formatCurrency(val, 'BRL');
+                                        return formatCurrency(val, 'GBP');
+                                    }}
+                                    labelStyle={{ color: 'var(--fg-secondary)' }}
+                                />
+                                <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                                <ReferenceLine yAxisId="left" y={target2031} label={`Goal '31`} stroke="#ff7f00" strokeOpacity={0.5} strokeDasharray="3 3" />
 
-                            {/* BRL Lines */}
-                            <Line
-                                yAxisId="left"
-                                type="monotone"
-                                dataKey="actual"
-                                name="Actual (BRL)"
-                                stroke="var(--vu-green)"
-                                strokeWidth={3}
-                                dot={false}
-                                connectNulls
-                            />
-                            <Line
-                                yAxisId="left"
-                                type="monotone"
-                                dataKey="forecast"
-                                name="Forecast (BRL)"
-                                stroke="#34d399"
-                                strokeWidth={3}
-                                strokeDasharray="5 5"
-                                dot={false}
-                                connectNulls
-                            >
-                                <LabelList
+                                {/* Target Line */}
+                                <Line
+                                    yAxisId="left"
+                                    type="monotone"
+                                    dataKey="targetBrl"
+                                    name="Target Line"
+                                    stroke="#ff7f00"
+                                    strokeWidth={2}
+                                    strokeDasharray="3 3"
+                                    dot={false}
+                                    connectNulls
+                                />
+
+                                {/* BRL Lines */}
+                                <Line
+                                    yAxisId="left"
+                                    type="monotone"
+                                    dataKey="actual"
+                                    name="Actual (BRL)"
+                                    stroke="var(--vu-green)"
+                                    strokeWidth={3}
+                                    dot={false}
+                                    connectNulls
+                                />
+                                <Line
+                                    yAxisId="left"
+                                    type="monotone"
                                     dataKey="forecast"
-                                    position="top"
-                                    content={({ x, y, value, index }) => {
-                                        if (index === forecastData.length - 1) {
-                                            return (
-                                                <text x={x} y={y} dy={-10} fill="#34d399" fontSize={12} fontWeight="bold" textAnchor="middle">
-                                                    {formatK(value, 'BRL')}
-                                                </text>
-                                            );
-                                        }
-                                        return null;
-                                    }}
-                                />
-                            </Line>
+                                    name="Forecast (BRL)"
+                                    stroke="#34d399"
+                                    strokeWidth={3}
+                                    strokeDasharray="5 5"
+                                    dot={false}
+                                    connectNulls
+                                >
+                                    <LabelList
+                                        dataKey="forecast"
+                                        position="top"
+                                        content={({ x, y, value, index }) => {
+                                            if (index === forecastData.length - 1) {
+                                                return (
+                                                    <text x={x} y={y} dy={-10} fill="#34d399" fontSize={12} fontWeight="bold" textAnchor="middle">
+                                                        {formatK(value, 'BRL')}
+                                                    </text>
+                                                );
+                                            }
+                                            return null;
+                                        }}
+                                    />
+                                </Line>
 
-                            {/* GBP Lines */}
-                            <Line
-                                yAxisId="right"
-                                type="monotone"
-                                dataKey="actualGbp"
-                                name="Actual (GBP)"
-                                stroke="#a855f7"
-                                strokeWidth={3}
-                                dot={false}
-                                connectNulls
-                            />
-                            <Line
-                                yAxisId="right"
-                                type="monotone"
-                                dataKey="forecastGbp"
-                                name="Forecast (GBP)"
-                                stroke="#d8b4fe"
-                                strokeWidth={3}
-                                strokeDasharray="5 5"
-                                dot={false}
-                                connectNulls
-                            >
-                                <LabelList
+                                {/* GBP Lines */}
+                                <Line
+                                    yAxisId="right"
+                                    type="monotone"
+                                    dataKey="actualGbp"
+                                    name="Actual (GBP)"
+                                    stroke="#a855f7"
+                                    strokeWidth={3}
+                                    dot={false}
+                                    connectNulls
+                                />
+                                <Line
+                                    yAxisId="right"
+                                    type="monotone"
                                     dataKey="forecastGbp"
-                                    position="top"
-                                    content={({ x, y, value, index }) => {
-                                        if (index === forecastData.length - 1) {
-                                            return (
-                                                <text x={x} y={y} dy={-10} fill="#d8b4fe" fontSize={12} fontWeight="bold" textAnchor="middle">
-                                                    {formatK(value, 'GBP')}
-                                                </text>
-                                            );
-                                        }
-                                        return null;
-                                    }}
-                                />
-                            </Line>
-                        </LineChart>
-                    </ResponsiveContainer>
+                                    name="Forecast (GBP)"
+                                    stroke="#d8b4fe"
+                                    strokeWidth={3}
+                                    strokeDasharray="5 5"
+                                    dot={false}
+                                    connectNulls
+                                >
+                                    <LabelList
+                                        dataKey="forecastGbp"
+                                        position="top"
+                                        content={({ x, y, value, index }) => {
+                                            if (index === forecastData.length - 1) {
+                                                return (
+                                                    <text x={x} y={y} dy={-10} fill="#d8b4fe" fontSize={12} fontWeight="bold" textAnchor="middle">
+                                                        {formatK(value, 'GBP')}
+                                                    </text>
+                                                );
+                                            }
+                                            return null;
+                                        }}
+                                    />
+                                </Line>
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
                 </div>
-            </div>
 
-            {/* Ledger Table */}
-            <div className="bg-[#1A0F2E] border-t border-l border-t-[#D4AF37]/40 border-l-[#D4AF37]/40 border-b-2 border-r-2 border-b-black/60 border-r-black/60 shadow-[0_15px_30px_rgba(0,0,0,0.6)] rounded-2xl overflow-hidden">
-                <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/20">
-                    <h3 className="font-bebas text-2xl tracking-widest text-[#D4AF37] m-0">📜 Planning Ledger</h3>
-                    <button
-                        onClick={() => {
-                            document.getElementById('live-row')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }}
-                        className="bg-black/50 border border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/20 font-mono text-xs tracking-wider px-3 py-1.5 rounded shadow-inner transition-colors"
-                    >
-                        📍 JUMP TO LIVE
-                    </button>
-                </div>
-                <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
-                        <thead>
-                            {/* Group Headers */}
-                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                <th colSpan="2"></th>
-                                <th colSpan="4" style={{ padding: '12px', textAlign: 'center', color: 'var(--accent-color)', fontWeight: '600', letterSpacing: '1px', borderBottom: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                                    🇧🇷 BRL PORTFOLIO
-                                </th>
-                                <th colSpan="1" style={{ padding: '12px', textAlign: 'center', color: '#a855f7', fontWeight: '600', letterSpacing: '1px', borderBottom: '1px solid rgba(168, 85, 247, 0.2)', borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
-                                    🇬🇧 GBP PORTFOLIO
-                                </th>
-                            </tr>
-                            {/* Column Headers */}
-                            <tr style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: 'rgba(255,255,255,0.02)' }}>
-                                <th style={{ padding: '12px', textAlign: 'left', color: 'var(--fg-secondary)', fontWeight: '500' }}>Date</th>
-                                <th style={{ padding: '12px', textAlign: 'left', color: 'var(--fg-secondary)', fontWeight: '500' }}>Type</th>
+                {/* Ledger Table */}
+                <div className="w-full xl:w-[500px] shrink-0 bg-[#1A0F2E] border-t border-l border-t-[#D4AF37]/40 border-l-[#D4AF37]/40 border-b-2 border-r-2 border-b-black/60 border-r-black/60 shadow-[0_15px_30px_rgba(0,0,0,0.6)] rounded-2xl overflow-hidden">
+                    <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
+                        <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] m-0">📜 Planning Ledger</h3>
+                        <button
+                            onClick={() => {
+                                document.getElementById('live-row')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }}
+                            className="bg-black/50 border border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/20 font-mono text-xs tracking-wider px-3 py-1.5 rounded shadow-inner transition-colors"
+                        >
+                            📍 JUMP TO LIVE
+                        </button>
+                    </div>
+                    <div className="overflow-x-auto overflow-y-auto max-h-[600px] xl:max-h-[calc(100vh-14rem)]">
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
+                            <thead className="sticky top-0 z-10 bg-[#120a20] shadow-md border-b border-white/10">
+                                {/* Group Headers */}
+                                <tr>
+                                    <th colSpan="2"></th>
+                                    <th colSpan="4" style={{ padding: '8px', textAlign: 'center', color: 'var(--accent-color)', fontWeight: '600', letterSpacing: '1px', borderBottom: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                                        🇧🇷 BRL
+                                    </th>
+                                    <th colSpan="1" style={{ padding: '8px', textAlign: 'center', color: '#a855f7', fontWeight: '600', letterSpacing: '1px', borderBottom: '1px solid rgba(168, 85, 247, 0.2)', borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
+                                        🇬🇧 GBP
+                                    </th>
+                                </tr>
+                                {/* Column Headers */}
+                                <tr style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                                    <th style={{ padding: '8px', textAlign: 'left', color: 'var(--fg-secondary)', fontWeight: '500' }}>Date</th>
+                                    <th style={{ padding: '8px', textAlign: 'left', color: 'var(--fg-secondary)', fontWeight: '500' }}>Type</th>
 
-                                <th style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-secondary)', fontWeight: '500' }}>Contr.</th>
-                                <th style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-secondary)', fontWeight: '500' }}>Total</th>
-                                <th style={{ padding: '12px', textAlign: 'right', color: '#D4AF37', fontWeight: '500' }}>Target</th>
-                                <th style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-secondary)', fontWeight: '500' }}>Diff</th>
+                                    <th style={{ padding: '8px', textAlign: 'right', color: 'var(--fg-secondary)', fontWeight: '500' }}>Contr.</th>
+                                    <th style={{ padding: '8px', textAlign: 'right', color: 'var(--fg-secondary)', fontWeight: '500' }}>Total</th>
+                                    <th style={{ padding: '8px', textAlign: 'right', color: '#D4AF37', fontWeight: '500' }}>Target</th>
+                                    <th style={{ padding: '8px', textAlign: 'right', color: 'var(--fg-secondary)', fontWeight: '500' }}>Diff</th>
 
-                                <th style={{ padding: '12px', textAlign: 'right', color: 'var(--fg-secondary)', fontWeight: '500', borderLeft: '1px solid rgba(255,255,255,0.05)' }}>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {reversedData.map((row, index) => {
-                                const isTargetRow = row.date === 'Dec/2026' || row.date === 'Dec/2031';
-                                return (
-                                    <tr key={index} id={row.type === 'live' ? 'live-row' : undefined} style={{
-                                        borderBottom: row.type === 'live' ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(255,255,255,0.03)',
-                                        height: '50px',
-                                        backgroundColor: row.type === 'live' ? 'rgba(16, 185, 129, 0.1)' :
-                                            isTargetRow ? 'rgba(250, 204, 21, 0.1)' : 'transparent'
-                                    }}>
-                                        <td style={{ padding: '0 12px', fontFamily: 'var(--font-mono)', color: isTargetRow ? '#facc15' : 'var(--fg-secondary)', fontWeight: isTargetRow ? 'bold' : 'normal' }}>{row.date}</td>
-                                        <td style={{ padding: '0 12px' }}>
-                                            <span style={{
-                                                padding: '2px 6px',
-                                                borderRadius: '4px',
-                                                backgroundColor: row.type === 'actual' ? 'rgba(59, 130, 246, 0.1)' :
-                                                    row.type === 'live' ? 'rgba(5, 255, 155, 0.1)' : 'rgba(212, 175, 55, 0.1)',
-                                                color: row.type === 'actual' ? '#3b82f6' :
-                                                    row.type === 'live' ? '#05ff9b' : '#D4AF37',
-                                                fontSize: '0.7rem',
-                                                textTransform: 'uppercase',
-                                                fontWeight: '600',
-                                                border: row.type === 'actual' ? '1px solid rgba(59, 130, 246, 0.2)' :
-                                                    row.type === 'live' ? '1px solid rgba(5, 255, 155, 0.3)' : '1px solid rgba(212, 175, 55, 0.2)'
-                                            }}>
-                                                {row.type === 'actual' ? 'ACT' : row.type === 'live' ? 'LIVE' : 'EST'}
-                                            </span>
-                                        </td>
+                                    <th style={{ padding: '8px', textAlign: 'right', color: 'var(--fg-secondary)', fontWeight: '500', borderLeft: '1px solid rgba(255,255,255,0.05)' }}>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {reversedData.map((row, index) => {
+                                    const isTargetRow = row.date === 'Dec/2026' || row.date === 'Dec/2031';
+                                    return (
+                                        <tr key={index} id={row.type === 'live' ? 'live-row' : undefined} style={{
+                                            borderBottom: row.type === 'live' ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(255,255,255,0.03)',
+                                            height: '50px',
+                                            backgroundColor: row.type === 'live' ? 'rgba(16, 185, 129, 0.1)' :
+                                                isTargetRow ? 'rgba(250, 204, 21, 0.1)' : 'transparent'
+                                        }}>
+                                            <td style={{ padding: '0 12px', fontFamily: 'var(--font-mono)', color: isTargetRow ? '#facc15' : 'var(--fg-secondary)', fontWeight: isTargetRow ? 'bold' : 'normal' }}>{row.date}</td>
+                                            <td style={{ padding: '0 12px' }}>
+                                                <span style={{
+                                                    padding: '2px 6px',
+                                                    borderRadius: '4px',
+                                                    backgroundColor: row.type === 'actual' ? 'rgba(59, 130, 246, 0.1)' :
+                                                        row.type === 'live' ? 'rgba(5, 255, 155, 0.1)' : 'rgba(212, 175, 55, 0.1)',
+                                                    color: row.type === 'actual' ? '#3b82f6' :
+                                                        row.type === 'live' ? '#05ff9b' : '#D4AF37',
+                                                    fontSize: '0.7rem',
+                                                    textTransform: 'uppercase',
+                                                    fontWeight: '600',
+                                                    border: row.type === 'actual' ? '1px solid rgba(59, 130, 246, 0.2)' :
+                                                        row.type === 'live' ? '1px solid rgba(5, 255, 155, 0.3)' : '1px solid rgba(212, 175, 55, 0.2)'
+                                                }}>
+                                                    {row.type === 'actual' ? 'ACT' : row.type === 'live' ? 'LIVE' : 'EST'}
+                                                </span>
+                                            </td>
 
-                                        {/* BRL Columns */}
-                                        <td style={{ padding: '0 12px', textAlign: 'right', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>
-                                            {formatCurrency(row.contribution, 'BRL').replace('R$', '')}
-                                        </td>
-                                        <td style={{ padding: '0 12px', textAlign: 'right', fontWeight: '500', fontSize: '0.9rem', color: (row.actual || row.forecast) >= row.targetBrl ? 'var(--vu-green)' : '#ff4d4d' }}>
-                                            {formatCurrency(row.actual || row.forecast, 'BRL')}
-                                        </td>
-                                        <td style={{ padding: '0 12px', textAlign: 'right', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
-                                            {formatCurrency(row.targetBrl, 'BRL').replace('R$', '')}
-                                        </td>
-                                        <td style={{ padding: '0 12px', textAlign: 'right', fontSize: '0.85rem', fontWeight: '500', color: (row.actual || row.forecast) - row.targetBrl >= 0 ? 'var(--vu-green)' : '#ff4d4d' }}>
-                                            {((row.actual || row.forecast) - row.targetBrl) > 0 ? '+' : ''}{formatCurrency((row.actual || row.forecast) - row.targetBrl, 'BRL').replace('R$', '')}
-                                        </td>
+                                            {/* BRL Columns */}
+                                            <td style={{ padding: '0 12px', textAlign: 'right', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>
+                                                {formatCurrency(row.contribution, 'BRL').replace('R$', '')}
+                                            </td>
+                                            <td style={{ padding: '0 12px', textAlign: 'right', fontWeight: '500', fontSize: '0.9rem', color: (row.actual || row.forecast) >= row.targetBrl ? 'var(--vu-green)' : '#ff4d4d' }}>
+                                                {formatCurrency(row.actual || row.forecast, 'BRL')}
+                                            </td>
+                                            <td style={{ padding: '0 12px', textAlign: 'right', color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
+                                                {formatCurrency(row.targetBrl, 'BRL').replace('R$', '')}
+                                            </td>
+                                            <td style={{ padding: '0 12px', textAlign: 'right', fontSize: '0.85rem', fontWeight: '500', color: (row.actual || row.forecast) - row.targetBrl >= 0 ? 'var(--vu-green)' : '#ff4d4d' }}>
+                                                {((row.actual || row.forecast) - row.targetBrl) > 0 ? '+' : ''}{formatCurrency((row.actual || row.forecast) - row.targetBrl, 'BRL').replace('R$', '')}
+                                            </td>
 
-                                        <td style={{ padding: '0 12px', textAlign: 'right', fontWeight: '500', fontSize: '0.9rem', color: '#e9d5ff', borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
-                                            {formatCurrency(row.actualGbp || row.forecastGbp, 'GBP')}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                            <td style={{ padding: '0 12px', textAlign: 'right', fontWeight: '500', fontSize: '0.9rem', color: '#e9d5ff', borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
+                                                {formatCurrency(row.actualGbp || row.forecastGbp, 'GBP')}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 

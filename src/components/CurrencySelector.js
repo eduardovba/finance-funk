@@ -4,7 +4,7 @@ import { usePortfolio } from '@/context/PortfolioContext';
 import { SUPPORTED_CURRENCIES } from '@/lib/currency';
 import { useState, useMemo, useRef, useEffect } from 'react';
 
-export default function CurrencySelector({ value, onChange, label = "Currency" }) {
+export default function CurrencySelector({ value, onChange, label = "" }) {
     const { primaryCurrency, secondaryCurrency } = usePortfolio();
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
@@ -66,7 +66,6 @@ export default function CurrencySelector({ value, onChange, label = "Currency" }
                 <div className="flex items-center gap-3">
                     <span className="text-xl">{selectedCurrency.flag}</span>
                     <span className="font-bold">{selectedCurrency.code}</span>
-                    <span className="text-white/40 text-xs hidden sm:inline">{selectedCurrency.name}</span>
                 </div>
                 <svg className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="19 9l-7 7-7-7" />

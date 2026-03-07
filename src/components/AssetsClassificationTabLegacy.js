@@ -1,10 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { formatCurrency } from '@/lib/currency';
 import pensionMap from '../data/pension_fund_map.json';
-import AssetsClassificationTabLegacy from './AssetsClassificationTabLegacy';
-import { usePortfolio } from '@/context/PortfolioContext';
 
-export default function AssetsClassificationTab({
+export default function AssetsClassificationTabLegacy({
     assetClasses,
     onSave, // Function to call when save is clicked
     equityTransactions,
@@ -14,9 +12,6 @@ export default function AssetsClassificationTab({
     transactions, // fixed income
     realEstate
 }) {
-    const { layoutMode } = usePortfolio();
-    if (layoutMode === 'legacy') return <AssetsClassificationTabLegacy assetClasses={assetClasses} onSave={onSave} equityTransactions={equityTransactions} cryptoTransactions={cryptoTransactions} pensionTransactions={pensionTransactions} debtTransactions={debtTransactions} transactions={transactions} realEstate={realEstate} />;
-
     const [localOverrides, setLocalOverrides] = useState(assetClasses || {});
     const [isSaving, setIsSaving] = useState(false);
     const [filterCategory, setFilterCategory] = useState('All');
@@ -264,81 +259,117 @@ export default function AssetsClassificationTab({
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredAssets.map(asset => {
-                    const overrideCat = localOverrides[asset.name]?.category;
-                    const overrideCur = localOverrides[asset.name]?.currency;
+            <div style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.2)' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                    <thead>
+                        <tr style={{ borderBottom: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.03)' }}>
+                            <th style={{ padding: '16px', color: 'var(--fg-secondary)', fontWeight: 600 }}>Asset Name / Ticker</th>
+                            <th style={{ padding: '16px', color: 'var(--fg-secondary)', fontWeight: 600 }}>Broker</th>
+                            <th style={{ padding: '16px', color: 'var(--fg-secondary)', fontWeight: 600 }}>Source</th>
+                            <th style={{ padding: '16px', color: 'var(--fg-secondary)', fontWeight: 600 }}>Allocation Category</th>
+                            <th style={{ padding: '16px', color: 'var(--fg-secondary)', fontWeight: 600 }}>Native Currency</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredAssets.map(asset => {
+                            const overrideCat = localOverrides[asset.name]?.category;
+                            const overrideCur = localOverrides[asset.name]?.currency;
 
-                    const isCatOverridden = !!overrideCat && overrideCat !== asset.defaultCategory;
-                    const isCurOverridden = !!overrideCur && overrideCur !== asset.defaultCurrency;
+                            const isCatOverridden = !!overrideCat && overrideCat !== asset.defaultCategory;
+                            const isCurOverridden = !!overrideCur && overrideCur !== asset.defaultCurrency;
 
-                    return (
-                        <div key={asset.name} className="bg-white/5 border border-white/5 rounded-2xl p-4 transition-colors hover:bg-white/10">
-                            <div className="mb-4">
-                                <h4 className="text-white/90 font-semibold text-lg mb-2">{asset.name}</h4>
-                                <div className="flex flex-wrap gap-2">
-                                    {asset.broker && (
-                                        <span className="text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-1 rounded-lg">
-                                            {asset.broker}
+                            return (
+                                <tr key={asset.name} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' }}>
+                                    <td style={{ padding: '16px', color: 'var(--fg-primary)', fontWeight: 500 }}>
+                                        {asset.name}
+                                    </td>
+                                    <td style={{ padding: '16px' }}>
+                                        {asset.broker ? (
+                                            <span style={{
+                                                padding: '4px 10px',
+                                                borderRadius: '6px',
+                                                fontSize: '0.8rem',
+                                                fontWeight: 600,
+                                                background: 'rgba(99, 102, 241, 0.12)',
+                                                color: '#a5b4fc',
+                                                border: '1px solid rgba(99, 102, 241, 0.25)'
+                                            }}>
+                                                {asset.broker}
+                                            </span>
+                                        ) : (
+                                            <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.8rem' }}>—</span>
+                                        )}
+                                    </td>
+                                    <td style={{ padding: '16px' }}>
+                                        <span style={{
+                                            padding: '4px 10px',
+                                            borderRadius: '6px',
+                                            fontSize: '0.8rem',
+                                            fontWeight: 600,
+                                            background: 'rgba(255,255,255,0.06)',
+                                            color: 'var(--fg-secondary)'
+                                        }}>
+                                            {asset.sourceType}
                                         </span>
-                                    )}
-                                    <span className="text-xs font-medium bg-white/10 text-white/60 px-2 py-1 rounded-lg">
-                                        {asset.sourceType}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="space-y-3">
-                                <div className="flex flex-col gap-1.5">
-                                    <div className="flex justify-between items-center">
-                                        <label className="text-xs text-white/40 font-medium">Allocation Category</label>
-                                        {isCatOverridden && (
-                                            <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-semibold tracking-wide uppercase">
-                                                Overridden
-                                            </span>
-                                        )}
-                                    </div>
-                                    <select
-                                        value={overrideCat || asset.defaultCategory}
-                                        onChange={(e) => handleOverrideChange(asset.name, 'category', e.target.value)}
-                                        className={`w-full p-2.5 rounded-xl text-sm font-medium outline-none transition-colors appearance-none ${isCatOverridden
-                                            ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
-                                            : 'bg-white/5 border border-white/5 text-white/80 focus:border-white/20'
-                                            }`}
-                                    >
-                                        {ALLOCATION_BUCKETS.map(cat => <option key={cat} value={cat} className="bg-slate-900 text-white">{cat}</option>)}
-                                    </select>
-                                </div>
-
-                                <div className="flex flex-col gap-1.5">
-                                    <div className="flex justify-between items-center">
-                                        <label className="text-xs text-white/40 font-medium">Native Currency</label>
-                                        {isCurOverridden && (
-                                            <span className="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-semibold tracking-wide uppercase">
-                                                Overridden
-                                            </span>
-                                        )}
-                                    </div>
-                                    <select
-                                        value={overrideCur || asset.defaultCurrency}
-                                        onChange={(e) => handleOverrideChange(asset.name, 'currency', e.target.value)}
-                                        className={`w-full p-2.5 rounded-xl text-sm font-medium outline-none transition-colors appearance-none ${isCurOverridden
-                                            ? 'bg-blue-500/10 border border-blue-500/30 text-blue-400'
-                                            : 'bg-white/5 border border-white/5 text-white/80 focus:border-white/20'
-                                            }`}
-                                    >
-                                        {CURRENCIES.map(cur => <option key={cur} value={cur} className="bg-slate-900 text-white">{cur}</option>)}
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
-                {filteredAssets.length === 0 && (
-                    <div className="col-span-full py-12 text-center text-white/40 text-sm">
-                        No assets found matching your filters.
-                    </div>
-                )}
+                                    </td>
+                                    <td style={{ padding: '16px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <select
+                                                value={overrideCat || asset.defaultCategory}
+                                                onChange={(e) => handleOverrideChange(asset.name, 'category', e.target.value)}
+                                                style={{
+                                                    padding: '8px 12px',
+                                                    borderRadius: '8px',
+                                                    border: `1px solid ${isCatOverridden ? 'var(--accent-color)' : 'var(--glass-border)'}`,
+                                                    background: isCatOverridden ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255,255,255,0.05)',
+                                                    color: isCatOverridden ? 'var(--accent-color)' : 'var(--fg-primary)',
+                                                    outline: 'none',
+                                                    cursor: 'pointer',
+                                                    minWidth: '160px'
+                                                }}
+                                            >
+                                                {ALLOCATION_BUCKETS.map(cat => <option key={cat} value={cat} style={{ background: '#1a1a2e', color: '#fff' }}>{cat}</option>)}
+                                            </select>
+                                            {isCatOverridden && (
+                                                <span style={{ fontSize: '0.75rem', background: 'var(--accent-color)', color: '#000', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>Override (Def: {asset.defaultCategory})</span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td style={{ padding: '16px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <select
+                                                value={overrideCur || asset.defaultCurrency}
+                                                onChange={(e) => handleOverrideChange(asset.name, 'currency', e.target.value)}
+                                                style={{
+                                                    padding: '8px 12px',
+                                                    borderRadius: '8px',
+                                                    border: `1px solid ${isCurOverridden ? '#3b82f6' : 'var(--glass-border)'}`,
+                                                    background: isCurOverridden ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.05)',
+                                                    color: isCurOverridden ? '#3b82f6' : 'var(--fg-primary)',
+                                                    outline: 'none',
+                                                    cursor: 'pointer',
+                                                    minWidth: '100px'
+                                                }}
+                                            >
+                                                {CURRENCIES.map(cur => <option key={cur} value={cur} style={{ background: '#1a1a2e', color: '#fff' }}>{cur}</option>)}
+                                            </select>
+                                            {isCurOverridden && (
+                                                <span style={{ fontSize: '0.75rem', background: '#3b82f6', color: '#000', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>Override (Def: {asset.defaultCurrency})</span>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                        {filteredAssets.length === 0 && (
+                            <tr>
+                                <td colSpan="5" style={{ padding: '32px', textAlign: 'center', color: 'var(--fg-secondary)' }}>
+                                    No assets found matching your filters.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
         </div>
     );

@@ -17,6 +17,7 @@ import BottomNav from '@/components/BottomNav';
 function AppShellInner({ children }) {
     const {
         isFormOpen, setIsFormOpen,
+        inspectorMode, // Import inspectorMode here
         editingTransaction, setEditingTransaction,
         isDeleteModalOpen, setIsDeleteModalOpen,
         isInspectorOpen, setIsInspectorOpen,
@@ -71,14 +72,17 @@ function AppShellInner({ children }) {
                 <main id="main-scroll" className="flex-1 overflow-y-auto p-3 md:p-6 lg:p-8 pb-24 md:pb-8 w-full">
                     {children}
 
-                    {isFormOpen && (
+                    {isFormOpen && inspectorMode !== 'add-transaction' && (
                         <div style={{ position: 'fixed', inset: 0, zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <div
                                 style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
                                 onClick={() => setIsFormOpen(false)}
                             />
                             <TransactionForm
-                                onAdd={handleSaveTransaction}
+                                onAdd={(tx) => {
+                                    handleSaveTransaction(tx);
+                                    setIsFormOpen(false);
+                                }}
                                 onCancel={() => setIsFormOpen(false)}
                                 initialData={editingTransaction}
                             />

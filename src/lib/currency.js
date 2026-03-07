@@ -35,7 +35,7 @@ const FALLBACK_RATES = {
  * @param {string} currency Currency code (e.g. 'GBP', 'BRL')
  * @returns {string}
  */
-export const formatCurrency = (amount, currency = 'GBP') => {
+export const formatCurrency = (amount, currency = 'GBP', options = {}) => {
     const meta = SUPPORTED_CURRENCIES[currency];
     const locale = meta?.locale || 'en-GB';
 
@@ -43,6 +43,7 @@ export const formatCurrency = (amount, currency = 'GBP') => {
         style: 'currency',
         currency: currency,
         currencyDisplay: 'symbol',
+        ...options
     }).format(amount);
 };
 

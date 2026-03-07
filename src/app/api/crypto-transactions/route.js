@@ -5,11 +5,13 @@ import { requireAuth } from '@/lib/authGuard';
 export async function GET() {
     try {
         const user = await requireAuth();
+
         const sql = `
             SELECT 
                 l.id, l.date, l.type, 
                 a.name as asset, a.ticker, a.broker as platform, l.currency,
                 l.quantity, l.amount,
+                l.realized_pnl as pnl, l.realized_roi_percent as roiPercent,
                 l.notes,
                 l.is_salary_contribution
             FROM ledger l
@@ -24,10 +26,13 @@ export async function GET() {
             date: r.date,
             asset: r.asset,
             ticker: r.ticker,
+            broker: r.platform,
             platform: r.platform,
             currency: r.currency,
             quantity: r.quantity,
             investment: -r.amount,
+            pnl: r.pnl,
+            roiPercent: r.roiPercent,
             type: r.type === 'Investment' ? 'Buy' : (r.type === 'Divestment' ? 'Sell' : r.type),
             isSalaryContribution: r.is_salary_contribution === 1
         }));
@@ -72,7 +77,7 @@ export async function POST(request) {
                 body.quantity,
                 0,
                 amount,
-                'USD',
+                body.currency || 'USD',
                 'API Input',
                 body.isSalaryContribution ? 1 : 0,
                 user.id
@@ -91,16 +96,16 @@ export async function PUT(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
-        const { id, date, type, quantity, investment } = body;
+        const { id, date, type, quantity, investment, currency, pnl } = body;
 
         if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
 
-        const amount = type === 'Buy' ? -Math.abs(investment) : Math.abs(investment);
-        const dbType = type === 'Buy' ? 'Investment' : 'Divestment';
+        const amount = (type === 'Buy' || type === 'Investment') ? -Math.abs(investment) : Math.abs(investment);
+        const dbType = (type === 'Buy' || type === 'Investment') ? 'Investment' : 'Divestment';
 
         await run(
-            `UPDATE ledger SET date = ?, type = ?, quantity = ?, amount = ?, is_salary_contribution = ? WHERE id = ? AND user_id = ?`,
-            [date, dbType, quantity, amount, body.isSalaryContribution ? 1 : 0, id, user.id]
+            `UPDATE ledger SET date = ?, type = ?, quantity = ?, amount = ?, price = ?, realized_pnl = ?, currency = ?, is_salary_contribution = ? WHERE id = ? AND user_id = ?`,
+            [date, dbType, quantity, amount, body.costPerShare || 0, pnl || null, currency || 'USD', body.isSalaryContribution ? 1 : 0, id, user.id]
         );
 
         return NextResponse.json({ success: true });

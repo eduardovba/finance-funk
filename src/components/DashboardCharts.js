@@ -708,8 +708,8 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick }) {
     const isDonut = chartType === 'donut';
 
     return (
-        <div className="bg-[#1A0F2E] border border-[#D4AF37]/30 rounded-xl p-6 shadow-lg shadow-black/20" data-chart-id={config.id}>
-            <div className="flex justify-between items-center mb-5">
+        <div className="bg-[#1A0F2E] border border-[#D4AF37]/30 rounded-xl p-6 shadow-lg shadow-black/20 flex flex-col h-full" data-chart-id={config.id}>
+            <div className="flex justify-between items-center mb-5 shrink-0">
                 <div className="flex items-center gap-3">
                     <h3 className="text-[#D4AF37] m-0 text-xl font-normal font-bebas tracking-wide">{title}</h3>
                     <button
@@ -722,7 +722,7 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick }) {
                 </div>
                 {renderHeaderBadges()}
             </div>
-            <div className="h-[220px] md:h-[300px]">
+            <div className="h-[220px] md:h-[300px] flex-grow relative">
                 {isDonut ? chartContent : (
                     <ResponsiveContainer width="100%" height="100%">
                         {chartContent || <div />}
@@ -730,11 +730,11 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick }) {
                 )}
             </div>
             {chartType === 'donut' && (
-                <div className="mt-4 flex justify-center gap-6">
+                <div className="mt-4 flex justify-center gap-6 shrink-0 flex-wrap">
                     {data.map((entry) => (
                         <div key={entry.name} className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }}></div>
-                            <span className="text-[#F5F5DC]/80 font-space text-sm">
+                            <span className="text-[#F5F5DC]/80 font-space text-[10px] md:text-sm">
                                 {entry.name}: <span className="font-bold">{((entry.value / totalCurrencyTokensPrimary) * 100).toFixed(1)}%</span>
                             </span>
                         </div>

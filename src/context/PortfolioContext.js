@@ -44,12 +44,27 @@ export function PortfolioProvider({ children }) {
     const [appSettings, setAppSettings] = useState({ autoMonthlyCloseEnabled: true });
     const [dashboardConfig, setDashboardConfig] = useState(null);
 
+    // ═══════════ LAYOUT MODE ═══════════
+    const [layoutMode, setLayoutMode] = useState('modern');
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('ff_layoutMode');
+            if (saved === 'legacy' || saved === 'modern') setLayoutMode(saved);
+        }
+    }, []);
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('ff_layoutMode', layoutMode);
+        }
+    }, [layoutMode]);
+
     // ═══════════ UI STATE ═══════════
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [transactionToDelete, setTransactionToDelete] = useState(null);
     const [isInspectorOpen, setIsInspectorOpen] = useState(false);
+    const [inspectorMode, setInspectorMode] = useState('default'); // 'default', 'add-broker', 'add-transaction'
     const [statusModal, setStatusModal] = useState({ isOpen: false, title: '', message: '', type: 'success' });
     const [isMonthlyCloseModalOpen, setIsMonthlyCloseModalOpen] = useState(false);
 
@@ -70,6 +85,11 @@ export function PortfolioProvider({ children }) {
                     if (!cancelled && data.currencyPreferences) {
                         setPrimaryCurrency(data.currencyPreferences.primary || 'BRL');
                         setSecondaryCurrency(data.currencyPreferences.secondary || 'GBP');
+                        // rateFlipped is not stored in DB, always read from localStorage
+                        if (typeof window !== 'undefined') {
+                            const savedFlipped = localStorage.getItem('ff_rateFlipped');
+                            if (savedFlipped !== null) setRateFlipped(savedFlipped === 'true');
+                        }
                         setCurrencyLoaded(true);
                         return;
                     }
@@ -107,8 +127,8 @@ export function PortfolioProvider({ children }) {
     }, [primaryCurrency, secondaryCurrency, rateFlipped, currencyLoaded]);
 
     // ═══════════ CURRENCY HELPERS ═══════════
-    const formatPrimary = useCallback((amount) => formatCurrency(amount, primaryCurrency), [primaryCurrency]);
-    const formatSecondary = useCallback((amount) => formatCurrency(amount, secondaryCurrency), [secondaryCurrency]);
+    const formatPrimary = useCallback((amount, options = {}) => formatCurrency(amount, primaryCurrency, options), [primaryCurrency]);
+    const formatSecondary = useCallback((amount, options = {}) => formatCurrency(amount, secondaryCurrency, options), [secondaryCurrency]);
     const toPrimary = useCallback((amount, fromCurrency = 'GBP') => convertCurrency(amount, fromCurrency, primaryCurrency, rates), [primaryCurrency, rates]);
     const toSecondary = useCallback((amount, fromCurrency = 'GBP') => convertCurrency(amount, fromCurrency, secondaryCurrency, rates), [secondaryCurrency, rates]);
 
@@ -713,6 +733,7 @@ export function PortfolioProvider({ children }) {
         isDeleteModalOpen, setIsDeleteModalOpen,
         transactionToDelete,
         isInspectorOpen, setIsInspectorOpen,
+        inspectorMode, setInspectorMode,
         statusModal, setStatusModal,
         isMonthlyCloseModalOpen, setIsMonthlyCloseModalOpen,
 
@@ -721,6 +742,9 @@ export function PortfolioProvider({ children }) {
         secondaryCurrency, setSecondaryCurrency,
         rateFlipped, setRateFlipped,
         formatPrimary, formatSecondary, toPrimary, toSecondary,
+
+        // Layout mode
+        layoutMode, setLayoutMode,
     }), [
         transactions, equityTransactions, cryptoTransactions, pensionTransactions, debtTransactions,
         fixedIncomeTransactions, realEstate, historicalSnapshots, marketData, pensionPrices,
@@ -733,10 +757,11 @@ export function PortfolioProvider({ children }) {
         refreshAllData, fetchRealEstate, fetchMarketData, forceRefreshMarketData,
         handleSaveTransaction, handleEditTransaction, handleDeleteClick, handleConfirmDelete, handleRecordSnapshot,
         isFormOpen, editingTransaction, isDeleteModalOpen, transactionToDelete,
-        isInspectorOpen, statusModal, isMonthlyCloseModalOpen,
-        setIsFormOpen, setEditingTransaction, setIsDeleteModalOpen, setIsInspectorOpen, setStatusModal, setIsMonthlyCloseModalOpen,
+        isInspectorOpen, inspectorMode, statusModal, isMonthlyCloseModalOpen,
+        setIsFormOpen, setEditingTransaction, setIsDeleteModalOpen, setIsInspectorOpen, setInspectorMode, setStatusModal, setIsMonthlyCloseModalOpen,
         primaryCurrency, secondaryCurrency, rateFlipped, formatPrimary, formatSecondary, toPrimary, toSecondary,
-        setPrimaryCurrency, setSecondaryCurrency, setRateFlipped
+        setPrimaryCurrency, setSecondaryCurrency, setRateFlipped,
+        layoutMode, setLayoutMode
     ]);
 
     return (

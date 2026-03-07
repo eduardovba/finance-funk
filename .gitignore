@@ -72,3 +72,7 @@ env_temp/
 _scripts/node_modules/
 _scripts/migration_env/node_modules/
 _scripts/node_modules
+
+# npm cache
+.npm-cache/
+.npm-cache-clean/

@@ -325,7 +325,7 @@ export default function GeneralLedgerTab({
     };
 
     return (
-        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        <div className="w-full max-w-[1800px] mx-auto pb-12">
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                 <h2 className="text-gradient" style={{ fontSize: '2rem' }}>General Ledger</h2>
 
@@ -435,10 +435,10 @@ export default function GeneralLedgerTab({
             </header>
 
             {view === 'income' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:items-start w-full">
 
                     {/* Chart */}
-                    <div className="glass-card">
+                    <div className="glass-card lg:sticky lg:top-24">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                             <h3 style={{ fontSize: '1.2rem', margin: 0 }}>Monthly Income (Salary, Real Estate, Equity, Interest)</h3>
 
@@ -491,10 +491,10 @@ export default function GeneralLedgerTab({
                     </div>
 
                     {/* Table */}
-                    <div className="glass-card" style={{ padding: 0, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div className="glass-card" style={{ padding: 0, overflowY: 'auto', maxHeight: 'calc(100vh - 12rem)', border: '1px solid rgba(255,255,255,0.1)' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--glass-border)' }}>
+                            <thead className="sticky top-0 z-10" style={{ background: '#121418', backdropFilter: 'blur(10px)' }}>
+                                <tr style={{ borderBottom: '1px solid var(--glass-border)' }}>
                                     <th style={{ padding: '16px', textAlign: 'left', color: 'var(--fg-secondary)' }}>Month</th>
                                     <th style={{ padding: '16px', textAlign: 'right', color: 'var(--fg-secondary)' }}>Salary Con.</th>
                                     <th style={{ padding: '16px', textAlign: 'right', color: 'var(--fg-secondary)' }}>Extraordinary</th>
@@ -552,10 +552,10 @@ export default function GeneralLedgerTab({
             )}
 
             {view === 'historicals' && (
-                <div className="glass-card" style={{ padding: 0, overflowX: 'auto', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div className="glass-card" style={{ padding: 0, overflowY: 'auto', overflowX: 'auto', maxHeight: 'calc(100vh - 12rem)', border: '1px solid rgba(255,255,255,0.1)' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--glass-border)' }}>
+                        <thead className="sticky top-0 z-10" style={{ background: '#121418', backdropFilter: 'blur(10px)' }}>
+                            <tr style={{ borderBottom: '1px solid var(--glass-border)' }}>
                                 <th style={{ padding: '16px', textAlign: 'left', color: 'var(--fg-secondary)' }}>Month</th>
                                 <th style={{ padding: '16px', textAlign: 'right', color: 'var(--fg-secondary)' }}>Net Worth (BRL)</th>
                                 <th style={{ padding: '16px', textAlign: 'right', color: 'var(--fg-secondary)' }}>Net Worth (GBP)</th>
@@ -611,10 +611,10 @@ export default function GeneralLedgerTab({
             )}
 
             {view === 'investments' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:items-start w-full">
 
                     {/* Chart */}
-                    <div className="glass-card">
+                    <div className="glass-card lg:sticky lg:top-24">
                         <h3 style={{ marginBottom: '24px', fontSize: '1.2rem' }}>Monthly Investments (Capital Injection)</h3>
                         <div style={{ height: '400px', width: '100%' }}>
                             <ResponsiveContainer>
@@ -640,10 +640,10 @@ export default function GeneralLedgerTab({
                     </div>
 
                     {/* Table */}
-                    <div className="glass-card" style={{ padding: 0, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div className="glass-card" style={{ padding: 0, overflowY: 'auto', maxHeight: 'calc(100vh - 12rem)', border: '1px solid rgba(255,255,255,0.1)' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--glass-border)' }}>
+                            <thead className="sticky top-0 z-10" style={{ background: '#121418', backdropFilter: 'blur(10px)' }}>
+                                <tr style={{ borderBottom: '1px solid var(--glass-border)' }}>
                                     <th style={{ padding: '16px', textAlign: 'left', color: 'var(--fg-secondary)' }}>Month</th>
                                     <th style={{ padding: '16px', textAlign: 'right', color: 'var(--fg-secondary)' }}>Equity</th>
                                     <th style={{ padding: '16px', textAlign: 'right', color: 'var(--fg-secondary)' }}>Pensions</th>

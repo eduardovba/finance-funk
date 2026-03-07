@@ -32,7 +32,8 @@ export default function TopConsole() {
         { id: 'debt', href: '/assets/debt', label: 'Debt', icon: CreditCard },
     ];
 
-    const isAssetRoute = assetTabs.some(t => pathname.startsWith(t.href));
+    const activeAssetTab = assetTabs.find(t => pathname.startsWith(t.href));
+    const isAssetRoute = !!activeAssetTab;
 
     return (
         <header className="h-12 md:h-16 w-full flex items-center justify-between px-3 md:px-4 lg:px-6 bg-[#1A0F2E]/90 backdrop-blur-md border-b border-[#D4AF37]/20 z-40 flex-shrink-0">
@@ -87,8 +88,18 @@ export default function TopConsole() {
                             }
             `}
                     >
-                        <LayoutDashboard size={14} strokeWidth={1.5} />
+                        <LayoutDashboard size={14} strokeWidth={isAssetRoute ? 2.5 : 1.5} />
                         <span>Assets</span>
+                        {activeAssetTab && (() => {
+                            const ActiveIcon = activeAssetTab.icon;
+                            return (
+                                <>
+                                    <span className="opacity-50 mx-0.5 font-bold">&gt;</span>
+                                    <ActiveIcon size={13} strokeWidth={2.5} />
+                                    <span>{activeAssetTab.label}</span>
+                                </>
+                            );
+                        })()}
                         <motion.span
                             animate={{ rotate: isAssetsDropdownOpen ? 180 : 0 }}
                             transition={{ duration: 0.2 }}

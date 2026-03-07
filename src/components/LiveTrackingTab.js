@@ -103,7 +103,7 @@ export default function LiveTrackingTab({ marketData, onRefresh, isMarketDataLoa
                 <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-3">
                     <h3 className="font-bebas text-2xl tracking-widest text-parchment/80 m-0">{title}</h3>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {items.map(asset => {
                         const data = marketData[asset.ticker];
                         const price = data?.price;
@@ -172,12 +172,74 @@ export default function LiveTrackingTab({ marketData, onRefresh, isMarketDataLoa
                         );
                     })}
                 </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden lg:block overflow-x-auto bg-[#1A0F2E]/80 border border-white/10 rounded-xl shadow-[0_8px_25px_rgba(0,0,0,0.3)]">
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-black/30 border-b border-white/10">
+                            <tr>
+                                <th className="p-4 text-parchment/50 font-mono text-xs uppercase tracking-wider font-semibold">Asset</th>
+                                <th className="p-4 text-right text-parchment/50 font-mono text-xs uppercase tracking-wider font-semibold">Price</th>
+                                <th className="p-4 text-right text-parchment/50 font-mono text-xs uppercase tracking-wider font-semibold">24H Var</th>
+                                <th className="p-4 text-right text-parchment/50 font-mono text-xs uppercase tracking-wider font-semibold">1M Var</th>
+                                <th className="p-4 text-center text-parchment/50 font-mono text-xs uppercase tracking-wider font-semibold w-16">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                            {items.map(asset => {
+                                const data = marketData[asset.ticker];
+                                const price = data?.price;
+                                const change1D = data?.changePercent;
+                                const change1M = data?.change1M;
+
+                                return (
+                                    <tr key={asset.ticker} className="hover:bg-white/5 transition-colors group">
+                                        <td className="p-4">
+                                            <div className="font-bold text-[#D4AF37] font-mono mb-0.5 text-lg">{asset.ticker}</div>
+                                            <div className="text-xs text-parchment/50 truncate max-w-[250px]">{asset.name}</div>
+                                        </td>
+                                        <td className="p-4 text-right">
+                                            <span className="font-mono text-lg text-parchment font-semibold">
+                                                {price ? formatCurrency(price, currencyCode) : '---'}
+                                            </span>
+                                        </td>
+                                        <td className="p-4 text-right">
+                                            {change1D !== undefined ? (
+                                                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded border ${change1D >= 0 ? 'bg-vu-green/10 text-vu-green border-vu-green/30' : 'bg-red-500/10 text-red-400 border-red-500/30'}`}>
+                                                    {change1D >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                                                    <span className="font-mono text-sm font-bold">{Math.abs(change1D).toFixed(2)}%</span>
+                                                </div>
+                                            ) : '---'}
+                                        </td>
+                                        <td className="p-4 text-right">
+                                            {change1M !== undefined ? (
+                                                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded border ${change1M >= 0 ? 'bg-vu-green/10 text-vu-green border-vu-green/30' : 'bg-red-500/10 text-red-400 border-red-500/30'}`}>
+                                                    {change1M >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                                                    <span className="font-mono text-sm font-bold">{Math.abs(change1M).toFixed(2)}%</span>
+                                                </div>
+                                            ) : '---'}
+                                        </td>
+                                        <td className="p-4 text-center">
+                                            <button
+                                                onClick={() => handleDeleteClick(asset.ticker)}
+                                                className="text-parchment/30 hover:text-red-400 transition-colors bg-white/5 hover:bg-white/10 rounded p-1.5 opacity-0 group-hover:opacity-100"
+                                                title="Remove"
+                                            >
+                                                ✕
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         );
     };
 
     return (
-        <div style={{ maxWidth: '1400px', margin: '0 auto', paddingBottom: '3rem' }}>
+        <div className="w-full max-w-[1800px] mx-auto pb-12">
             {/* Header matches Planning Tab style */}
             <div className="flex flex-col items-center justify-center mb-10 relative">
                 <div className="absolute right-0 top-0">
