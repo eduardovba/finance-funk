@@ -109,7 +109,7 @@ const fetchGoogleFinance = async (ticker) => {
                             change1M = parseFloat(pctMatch[2]) * 100;
                         }
                     }
-                } catch (e) { }
+                } catch (e) { console.warn(`[Market] Failed to parse ds:11 for ${ticker}:`, e.message); }
             }
 
             if (price !== null) {

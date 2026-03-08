@@ -26,17 +26,18 @@ export const metadata = {
     statusBarStyle: "black-translucent",
     title: "Finance Funk",
   },
-  themeColor: "#0B0611",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    viewportFit: "cover",
-  },
   icons: {
     icon: "/icon-512x512.png",
     apple: "/apple-touch-icon.png",
   },
+};
+
+export const viewport = {
+  themeColor: "#0B0611",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }) {

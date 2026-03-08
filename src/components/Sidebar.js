@@ -3,13 +3,12 @@
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, BookOpen, TrendingUp, Eye, Landmark, Home, LineChart, Bitcoin, Wallet, CreditCard, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, BookOpen, TrendingUp, Landmark, Home, LineChart, Bitcoin, Wallet, CreditCard, ChevronRight } from 'lucide-react';
 
 const iconMap = {
     'dashboard': LayoutDashboard,
     'general-ledger': BookOpen,
     'forecast': TrendingUp,
-    'live-tracking': Eye,
     'fixed-income': Landmark,
     'real-estate': Home,
     'equity': LineChart,
@@ -28,7 +27,6 @@ export default function Sidebar({ activeItem, onNavigate }) {
         { id: 'general-ledger', label: 'General Ledger' },
         { id: 'forecast', label: 'Targets' },
         { id: 'long-term-forecast', label: 'Long-Term Forecast' },
-        { id: 'live-tracking', label: 'Watchlist' },
     ];
 
     const assetItems = [

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SlidersHorizontal, LayoutDashboard, BookOpen, TrendingUp, Eye, Landmark, Home as HomeIcon, LineChart, Bitcoin, Wallet, CreditCard, Target, LogOut, Settings } from 'lucide-react';
+import { SlidersHorizontal, LayoutDashboard, BookOpen, TrendingUp, Landmark, Home as HomeIcon, LineChart, Bitcoin, Wallet, CreditCard, Target, LogOut, Settings } from 'lucide-react';
 import CurrencyPill from '@/components/CurrencyPill';
 import { usePortfolio } from '@/context/PortfolioContext';
 import { useSession, signOut } from 'next-auth/react';
@@ -20,7 +20,6 @@ export default function TopConsole() {
         { id: 'dashboard', href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { id: 'general-ledger', href: '/general-ledger', label: 'Ledger', icon: BookOpen },
         { id: 'planning', href: '/planning', label: 'Planning', icon: TrendingUp },
-        { id: 'live-tracking', href: '/live-tracking', label: 'Watchlist', icon: Eye },
     ];
 
     const assetTabs = [

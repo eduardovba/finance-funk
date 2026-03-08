@@ -90,6 +90,9 @@ async function runMigrations() {
         try { await db.execute(sql); } catch (e) { /* already applied */ }
     }
 
+    // Drop watchlist table (feature removed) to fix FK constraint on assets
+    try { await db.execute('DROP TABLE IF EXISTS watchlist'); } catch (e) { /* ignore */ }
+
     // ── Monthly_ledger & snapshots: recreate with composite UNIQUE(month, user_id) ──
     try {
         const hasUserIdCol = await db.execute(
@@ -153,57 +156,42 @@ async function runMigrations() {
         console.error('snapshots migration failed:', e);
     }
 
-    // ── One-time data migration: assign all existing data to duduviana@gmail.com ──
+    // ── One-time data migration: assign all existing data to the initial admin user ──
     try {
-        const duduviana = await db.execute({
-            sql: "SELECT id FROM users WHERE email = 'duduviana@gmail.com'",
-            args: [],
+        const adminEmail = process.env.ADMIN_EMAIL;
+        if (!adminEmail) throw new Error('ADMIN_EMAIL not set, skipping data migration');
+        const adminUser = await db.execute({
+            sql: "SELECT id FROM users WHERE email = ?",
+            args: [adminEmail],
         });
-        if (duduviana.rows.length > 0) {
-            const uid = duduviana.rows[0].id;
-            // Disable FK checks to avoid watchlist->assets FK mismatch
-            try { await db.execute('PRAGMA foreign_keys = OFF'); } catch (e) { /* Turso may not support */ }
+        if (adminUser.rows.length > 0) {
+            const uid = adminUser.rows[0].id;
             const tables = ['assets', 'ledger', 'monthly_ledger', 'connections', 'snapshots'];
             for (const table of tables) {
-                const result = await db.execute({
-                    sql: `UPDATE ${table} SET user_id = ? WHERE user_id IS NULL`,
-                    args: [uid],
-                });
-                if (result.rowsAffected > 0) {
-                    console.log(`Assigned ${result.rowsAffected} rows in ${table} to user ${uid} (duduviana@gmail.com)`);
+                try {
+                    const result = await db.execute({
+                        sql: `UPDATE ${table} SET user_id = ? WHERE user_id IS NULL`,
+                        args: [uid],
+                    });
+                    if (result.rowsAffected > 0) {
+                        console.log(`Assigned ${result.rowsAffected} rows in ${table} to user ${uid} (${adminEmail})`);
+                    }
+                } catch (tableErr) {
+                    console.warn(`Skipped ${table} ownership migration:`, tableErr.message);
                 }
             }
-            try { await db.execute('PRAGMA foreign_keys = ON'); } catch (e) { /* Turso may not support */ }
         }
     } catch (e) {
         console.error('Data ownership migration failed:', e);
     }
 
-    // ONE-TIME REPAIR: Fixing the "Billionaire" bug and missing review button
-    try {
-        await db.execute(`
-            UPDATE assets SET sync_status = 'PENDING' 
-            WHERE pluggy_asset_id IS NOT NULL AND sync_status = 'ACTIVE'
-        `);
-        await db.execute(`
-            DELETE FROM ledger 
-            WHERE notes = 'Pluggy Sync' 
-            AND id NOT IN (
-                SELECT MAX(id) 
-                FROM ledger 
-                WHERE notes = 'Pluggy Sync' 
-                GROUP BY asset_id
-            )
-        `);
-        console.log('Database repair: deduplicated Pluggy Sync entries and reset status.');
-    } catch (e) {
-        console.error('Repair failed:', e);
-    }
 
     // ONE-TIME MIGRATION: Create sold properties and Ink Court config that were previously hardcoded
     try {
-        // Get user ID for duduviana
-        const duduRes = await db.execute("SELECT id FROM users WHERE email = 'duduviana@gmail.com'");
+        // Get user ID for admin
+        const adminEmail2 = process.env.ADMIN_EMAIL;
+        if (!adminEmail2) throw new Error('ADMIN_EMAIL not set');
+        const duduRes = await db.execute({ sql: "SELECT id FROM users WHERE email = ?", args: [adminEmail2] });
         if (duduRes.rows.length > 0) {
             const uid = duduRes.rows[0].id;
 

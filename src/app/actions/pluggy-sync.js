@@ -5,6 +5,8 @@ import { run, query, get } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 
+const DEBUG_SYNC = process.env.DEBUG_PLUGGY === 'true';
+
 /**
  * Get the current user's ID from the session.
  * For server actions called from the UI, this will always have a session.
@@ -64,7 +66,7 @@ export async function batchVerifyAssets(assetIds) {
 }
 
 function logSync(data) {
-    console.log(`[Pluggy Sync] ${JSON.stringify(data)}`);
+    if (DEBUG_SYNC) console.log(`[Pluggy Sync] ${JSON.stringify(data)}`);
 }
 
 export async function createConnectToken() {
@@ -117,12 +119,12 @@ export async function syncItem(itemId) {
 
         // 2. Fetch Accounts (Cash)
         const accounts = await client.fetchAccounts(itemId);
-        logSync({ stage: 'accounts', count: accounts.results?.length, results: accounts.results });
+        logSync({ stage: 'accounts', count: accounts.results?.length });
 
         if (accounts.results) {
             for (const account of accounts.results) {
                 if (account.type === 'CREDIT_CARD' || account.subtype === 'CREDIT_CARD') {
-                    console.log(`- Skipping credit card account: ${account.name}`);
+                    if (DEBUG_SYNC) console.log(`- Skipping credit card account: ${account.name}`);
                     continue;
                 }
 
@@ -134,22 +136,22 @@ export async function syncItem(itemId) {
 
         // 3. Fetch Investments
         const investments = await client.fetchInvestments(itemId);
-        logSync({ stage: 'investments', count: investments.results?.length, results: investments.results });
+        logSync({ stage: 'investments', count: investments.results?.length });
 
         if (investments.results) {
-            console.log(`Syncing ${investments.results.length} investments for ${institutionName}...`);
+            if (DEBUG_SYNC) console.log(`Syncing ${investments.results.length} investments for ${institutionName}...`);
             logSync({ stage: 'investments_start', count: investments.results.length });
 
             for (const investment of investments.results) {
                 try {
                     const hasValue = (investment.balance > 0) || (investment.quantity > 0) || (investment.amount > 0);
                     if (!hasValue) {
-                        console.log(`- Skipping ghost asset: ${investment.name}`);
+                        if (DEBUG_SYNC) console.log(`- Skipping ghost asset: ${investment.name}`);
                         continue;
                     }
 
                     const mapped = mapPluggyToFinanceFunk(investment);
-                    console.log(`- Mapping ${investment.name} (${investment.type}/${investment.subtype}) -> FF:${mapped.category}`);
+                    if (DEBUG_SYNC) console.log(`- Mapping ${investment.name} (${investment.type}/${investment.subtype}) -> FF:${mapped.category}`);
                     await upsertAsset(mapped, institutionName, itemId, userId);
                 } catch (assetErr) {
                     console.error(`Failed to sync asset ${investment.name}:`, assetErr);
@@ -175,7 +177,7 @@ export async function deleteConnection(itemId) {
     try {
         const userId = await getCurrentUserId(itemId);
         const client = await getPluggyClient();
-        try { await client.deleteItem(itemId); } catch (e) { }
+        try { await client.deleteItem(itemId); } catch (e) { console.warn('Failed to delete Pluggy item:', e.message); }
 
         await run(`DELETE FROM ledger WHERE asset_id IN (SELECT id FROM assets WHERE pluggy_item_id = ? AND user_id = ?) AND user_id = ?`, [itemId, userId, userId]);
         await run(`DELETE FROM assets WHERE pluggy_item_id = ? AND user_id = ?`, [itemId, userId]);
@@ -224,7 +226,7 @@ async function upsertAsset(mapped, brokerName, itemId, userId) {
 
     // SKIP LEDGER UPDATE IF IGNORED
     if (existing?.sync_status === 'IGNORED') {
-        console.log(`- Skipping ledger update for IGNORED asset: ${name}`);
+        if (DEBUG_SYNC) console.log(`- Skipping ledger update for IGNORED asset: ${name}`);
         return;
     }
 

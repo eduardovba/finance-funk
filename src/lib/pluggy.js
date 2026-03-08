@@ -4,10 +4,6 @@ const PLUGGY_CLIENT_ID = process.env.PLUGGY_CLIENT_ID;
 const PLUGGY_CLIENT_SECRET = process.env.PLUGGY_CLIENT_SECRET;
 
 let clientInstance = null;
-let tokenCache = {
-    token: null,
-    expiresAt: null
-};
 
 export const getPluggyClient = async () => {
     if (clientInstance) return clientInstance;

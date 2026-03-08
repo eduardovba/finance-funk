@@ -38,7 +38,8 @@ async function fetchParqetLogo(ticker) {
 async function fetchBrapiLogo(ticker) {
     try {
         const cleanTicker = ticker.replace('.SA', '');
-        const res = await fetch(`https://brapi.dev/api/quote/${cleanTicker}?token=demo`, { signal: AbortSignal.timeout(5000) });
+        const brapiToken = process.env.BRAPI_TOKEN || 'demo';
+        const res = await fetch(`https://brapi.dev/api/quote/${cleanTicker}?token=${brapiToken}`, { signal: AbortSignal.timeout(5000) });
         if (!res.ok) return null;
         const data = await res.json();
         const url = data?.results?.[0]?.logourl;

@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     LayoutDashboard, BookOpen, PieChart, Menu, X,
     Landmark, HomeIcon, LineChart, Bitcoin, Wallet, CreditCard,
-    TrendingUp, Eye, Target, LogOut, Settings
+    TrendingUp, Target, LogOut, Settings
 } from 'lucide-react';
 import { usePortfolio } from '@/context/PortfolioContext';
 import { useSession, signOut } from 'next-auth/react';
@@ -24,7 +24,6 @@ const ASSET_TABS = [
 
 const MORE_ITEMS = [
     { id: 'planning', href: '/planning', label: 'Planning', icon: TrendingUp },
-    { id: 'watchlist', href: '/live-tracking', label: 'Watchlist', icon: Eye },
 ];
 
 /* ─── Assets Bottom Sheet ─── */
@@ -199,7 +198,7 @@ export default function BottomNav() {
         if (tab.id === 'home') return pathname === '/dashboard' || pathname === '/';
         if (tab.id === 'assets') return isAssetRoute || assetsOpen;
         if (tab.id === 'activity') return pathname === '/general-ledger';
-        if (tab.id === 'more') return moreOpen || pathname === '/planning' || pathname === '/live-tracking';
+        if (tab.id === 'more') return moreOpen || pathname === '/planning';
         return false;
     };
 
