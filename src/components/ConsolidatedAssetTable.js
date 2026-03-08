@@ -84,7 +84,7 @@ export default function ConsolidatedAssetTable({ title, categoryId, assets, rate
             {(realisedPnL || totalAsset) && (
                 <div className="mt-4 bg-[#0D0814] border border-[#D4AF37]/20 rounded-xl overflow-hidden font-space">
                     {/* Current Holdings Subtotal */}
-                    {realisedPnL && (
+                    {realisedPnL && categoryId !== 'real-estate' && (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 border-b border-white/5 bg-white/5 items-center">
                             <div className="col-span-2 md:col-span-1 text-[#F5F5DC]/50 italic text-xs">
                                 Current Holdings

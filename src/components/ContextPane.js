@@ -12,7 +12,11 @@ export default function ContextPane({
     renderEmptyState,
     onClose
 }) {
-    if (!selectedAsset || rightPaneMode !== 'default') {
+    // Modes that render inline within renderDetails (not as separate pane content)
+    const inlineModes = ['default', 'add-rental-month', 'add-mortgage-payment'];
+    const showDetails = selectedAsset && inlineModes.includes(rightPaneMode);
+
+    if (!showDetails) {
         return (
             <div className={`${rightPaneMode !== 'default' ? 'flex' : 'hidden'} lg:flex w-full lg:w-[400px] xl:w-[450px] flex-col h-[calc(100vh-6rem)] shrink-0 rounded-2xl border border-white/10 bg-gradient-to-br from-black/60 to-[#1A0F2E]/60 backdrop-blur-xl shadow-2xl relative`}>
                 {/* Subtle glow effect behind content */}

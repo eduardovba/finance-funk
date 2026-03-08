@@ -21,7 +21,7 @@ import AssetLogo from './AssetLogo';
 // No more ASSET_TICKER_MAP - tickers are stored directly on transactions
 
 const BROKER_CURRENCY = {
-    'Trading 212': 'GBP', 'XP': 'BRL', 'Amazon': 'USD', 'Monzo': 'GBP', 'Fidelity': 'GBP'
+    'Trading 212': 'GBP', 'XP': 'BRL', 'Amazon': 'USD', 'Green Gold Farms': 'USD', 'Monzo': 'GBP', 'Fidelity': 'GBP'
 };
 
 export default function EquityTab({ transactions = [], marketData, rates, onRefresh }) {

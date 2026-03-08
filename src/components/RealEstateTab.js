@@ -14,7 +14,7 @@ import { X } from 'lucide-react';
 
 export default function RealEstateTab({ data, rates, onRefresh, marketData = {} }) {
     // --- State ---
-    const [expandedAccordions, setExpandedAccordions] = useState({ Properties: true });
+    const [expandedAccordions, setExpandedAccordions] = useState({});
     const [selectedAsset, setSelectedAsset] = useState(null);
     const [rightPaneMode, setRightPaneMode] = useState('default');
     const [searchTerm, setSearchTerm] = useState('');
@@ -23,6 +23,10 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
     // Delete
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState(null); // { type: 'id'|'airbnb-month', value }
+
+    // Delete broker
+    const [isDeleteBrokerModalOpen, setIsDeleteBrokerModalOpen] = useState(false);
+    const [brokerToDelete, setBrokerToDelete] = useState(null);
 
     // Property value editing
     const [editingValues, setEditingValues] = useState(null);
@@ -35,6 +39,37 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
 
     // Add property (ContextPane form)
     const [newPropertyData, setNewPropertyData] = useState({ name: '', currency: 'BRL', investment: '', currentValue: '', hasMortgage: false, hasRental: false });
+
+    // DB brokers for Real Estate & glow tracking
+    const [dbBrokers, setDbBrokers] = useState([]);
+    const [newlyAddedBrokers, setNewlyAddedBrokers] = useState([]);
+    const [newlyAddedProperties, setNewlyAddedProperties] = useState([]);
+
+    const fetchREBrokers = async () => {
+        try {
+            const res = await fetch('/api/brokers?assetClass=Real Estate');
+            const d = await res.json();
+            if (d.brokers) setDbBrokers(d.brokers);
+        } catch (e) { console.error('Failed to fetch RE brokers', e); }
+    };
+    useEffect(() => { fetchREBrokers(); }, []);
+
+    const handleDeleteBrokerClick = (brokerName) => {
+        setBrokerToDelete(brokerName);
+        setIsDeleteBrokerModalOpen(true);
+    };
+
+    const handleConfirmDeleteBroker = async () => {
+        if (!brokerToDelete) return;
+        try {
+            const res = await fetch(`/api/brokers?name=${encodeURIComponent(brokerToDelete)}`, { method: 'DELETE' });
+            if (!res.ok) { console.error('Delete failed:', await res.text()); return; }
+            setDbBrokers(prev => prev.filter(b => b.name !== brokerToDelete));
+            setIsDeleteBrokerModalOpen(false);
+            setBrokerToDelete(null);
+            if (onRefresh) onRefresh();
+        } catch (e) { console.error('Failed to delete broker', e); }
+    };
 
     // Sell property
     const [sellPropertyData, setSellPropertyData] = useState(null);
@@ -49,13 +84,13 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
     const [fundSellData, setFundSellData] = useState(null);
 
     // Mortgage form
-    const [mortgageFormData, setMortgageFormData] = useState({ month: '', costs: '', interest: '', notes: '' });
+    const [mortgageFormData, setMortgageFormData] = useState({ month: new Date().toISOString().split('T')[0], costs: '', interest: '', notes: '' });
 
     // Mortgage setup form
     const [mortgageSetupData, setMortgageSetupData] = useState({ originalAmount: '', deposit: '', durationMonths: '', interestRate: '' });
 
     // Rental form — individual entries (revenue or cost on a specific date)
-    const [rentalFormData, setRentalFormData] = useState({ date: '', entryType: 'Cost', amount: '', notes: '' });
+    const [rentalFormData, setRentalFormData] = useState({ date: new Date().toISOString().split('T')[0], entryType: 'Cost', amount: '', notes: '' });
 
     // Airbnb sort
     const [airbnbSortConfig, setAirbnbSortConfig] = useState({ key: 'month', direction: 'desc' });
@@ -149,7 +184,9 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
     };
 
     const fundHoldings = computeFundHoldings();
-    const fundBrokers = [...new Set(fundHoldings.map(f => f.broker))];
+    const fundBrokersFromHoldings = [...new Set(fundHoldings.map(f => f.broker))];
+    const dbBrokerNames = dbBrokers.map(b => b.name).filter(n => !fundBrokersFromHoldings.includes(n));
+    const fundBrokers = [...fundBrokersFromHoldings, ...dbBrokerNames];
 
     // Determine the "top currency" — the most common currency in the tab
     const currencyCounts = {};
@@ -320,7 +357,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                     }
                 })
             });
-            setMortgageFormData({ month: '', costs: '', interest: '', notes: '' });
+            setMortgageFormData({ month: new Date().toISOString().split('T')[0], costs: '', interest: '', notes: '' });
             setRightPaneMode('default');
             onRefresh();
         } catch (e) { console.error(e); }
@@ -376,18 +413,20 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
         const livePrice = liveData?.price || fundRow.currentPrice || 0;
         setFundBuyData({
             fund: fundRow.fund, ticker: fundRow.ticker,
+            broker: fundRow.broker || 'XP',
             qtyToBuy: '', buyPricePerShare: livePrice, totalInvestment: 0,
             date: new Date().toISOString().split('T')[0],
         });
-        setIsFundBuyModalOpen(true);
+        setRightPaneMode('add-transaction');
     };
 
-    const handleNewFundBuyClick = () => {
+    const handleNewFundBuyClick = (brokerName) => {
         setFundBuyData({
-            fund: '', ticker: '', qtyToBuy: '', buyPricePerShare: '', totalInvestment: 0,
+            fund: '', ticker: '', broker: brokerName || 'XP',
+            qtyToBuy: '', buyPricePerShare: '', totalInvestment: 0,
             date: new Date().toISOString().split('T')[0],
         });
-        setIsFundBuyModalOpen(true);
+        setRightPaneMode('add-transaction');
     };
 
     const updateFundBuyCalc = (field, value) => {
@@ -611,6 +650,8 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                             <span className="text-xl font-bold text-white tracking-tight">{formatCurrency(totalVal, currency)}</span>
                             <span className="text-xs text-white/40 mt-0.5">Cost: {formatCurrency(totalCost, currency)}</span>
                         </div>
+                        <button onClick={(e) => { e.stopPropagation(); setRightPaneMode('add-property'); }}
+                            className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 flex items-center justify-center text-lg font-bold transition-colors shrink-0">+</button>
                     </div>
                 </div>
 
@@ -621,24 +662,27 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                             {activeProperties.map(prop => {
                                 const d = getPropertyDisplayData(prop);
                                 const displayVal = prop.mortgage ? d.equity : d.currentValue;
+                                const isNewProp = newlyAddedProperties.includes(prop.name);
                                 return (
-                                    <AssetCard
-                                        key={prop.id}
-                                        title={prop.name}
-                                        subtitle={prop.currency}
-                                        value={formatCurrency(displayVal, prop.currency)}
-                                        performance={`${d.profitLoss >= 0 ? '+' : ''}${formatCurrency(d.profitLoss, prop.currency)} (${d.roi.toFixed(1)}%)`}
-                                        isPositive={d.profitLoss >= 0}
-                                        icon="🏢"
-                                        expandedContent={
-                                            <div className="flex gap-2 mt-3 pt-3 border-t border-white/5">
-                                                <button onClick={(e) => { e.stopPropagation(); setSelectedAsset({ ...prop, type: 'property', displayData: d }); setContextTab('overview'); }}
-                                                    className="flex-1 py-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl text-sm font-semibold transition-colors">
-                                                    View Details
-                                                </button>
-                                            </div>
-                                        }
-                                    />
+                                    <div key={prop.id} className={`rounded-2xl transition-all duration-1000 ${isNewProp ? 'shadow-[0_0_25px_rgba(212,175,55,0.4)] ring-1 ring-[#D4AF37]/50' : ''}`}>
+                                        <AssetCard
+                                            key={prop.id}
+                                            title={prop.name}
+                                            subtitle={prop.currency}
+                                            value={formatCurrency(displayVal, prop.currency)}
+                                            performance={`${d.profitLoss >= 0 ? '+' : ''}${formatCurrency(d.profitLoss, prop.currency)} (${d.roi.toFixed(1)}%)`}
+                                            isPositive={d.profitLoss >= 0}
+                                            icon="🏢"
+                                            expandedContent={
+                                                <div className="flex gap-2 mt-3 pt-3 border-t border-white/5">
+                                                    <button onClick={(e) => { e.stopPropagation(); setSelectedAsset({ ...prop, type: 'property', displayData: d }); setContextTab('overview'); }}
+                                                        className="flex-1 py-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl text-sm font-semibold transition-colors">
+                                                        View Details
+                                                    </button>
+                                                </div>
+                                            }
+                                        />
+                                    </div>
                                 );
                             })}
                             {soldProperties.length > 0 && (
@@ -675,11 +719,12 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                                     const d = getPropertyDisplayData(prop);
                                     const displayVal = prop.mortgage ? d.equity : d.currentValue;
                                     const isSelected = selectedAsset?.id === prop.id;
+                                    const isNewProp = newlyAddedProperties.includes(prop.name);
                                     return (
                                         <div
                                             key={prop.id}
                                             onClick={() => { setSelectedAsset({ ...prop, type: 'property', displayData: d }); setContextTab('overview'); setRightPaneMode('default'); }}
-                                            className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200 group ${isSelected ? 'bg-white/[0.08] border-l-2 border-l-[#D4AF37]' : 'hover:bg-white/[0.04] border-l-2 border-l-transparent'}`}
+                                            className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200 group ${isSelected ? 'bg-white/[0.08] border-l-2 border-l-[#D4AF37]' : 'hover:bg-white/[0.04] border-l-2 border-l-transparent'} ${isNewProp ? 'shadow-[0_0_20px_rgba(212,175,55,0.3)] bg-[#D4AF37]/[0.05]' : ''}`}
                                         >
                                             <div className="w-9 h-9 min-w-[36px] rounded-full bg-emerald-500/20 flex items-center justify-center text-lg shrink-0">🏢</div>
                                             <div className="flex-1 min-w-0">
@@ -751,7 +796,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
         const isOpen = expandedAccordions[brokerName];
 
         return (
-            <div key={brokerName} className="mb-4">
+            <div key={brokerName} className={`mb-4 rounded-2xl transition-all duration-1000 ${newlyAddedBrokers.includes(brokerName) ? 'shadow-[0_0_25px_rgba(212,175,55,0.4)] border-[#D4AF37] ring-1 ring-[#D4AF37]/50' : ''}`}>
                 <div onClick={() => toggleAccordion(brokerName)}
                     className="flex justify-between items-center mb-4 px-4 py-3 cursor-pointer bg-white/5 hover:bg-white/10 rounded-2xl transition-colors">
                     <div className="flex items-center gap-3">
@@ -768,53 +813,71 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                             <span className="text-xl font-bold text-white tracking-tight">{formatCurrency(totalVal, 'BRL')}</span>
                             <span className="text-xs text-white/40 mt-0.5">Cost: {formatCurrency(totalCost, 'BRL')}</span>
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); handleNewFundBuyClick(); }}
+                        <button onClick={(e) => { e.stopPropagation(); handleNewFundBuyClick(brokerName); }}
                             className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 flex items-center justify-center text-lg font-bold transition-colors shrink-0">+</button>
+                        {brokerFunds.length === 0 && (
+                            <button onClick={(e) => { e.stopPropagation(); handleDeleteBrokerClick(brokerName); }}
+                                className="w-8 h-8 rounded-full bg-rose-500/10 hover:bg-rose-500/20 flex items-center justify-center transition-colors shrink-0 text-sm"
+                                title="Delete Broker"
+                            >🗑️</button>
+                        )}
                     </div>
                 </div>
 
                 {isOpen && (
                     <>
-                        <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {brokerFunds.map(f => (
-                                <AssetCard key={f.ticker} title={f.fund}
-                                    subtitle={`${f.totalQuantity} shares · ${formatCurrency(f.currentPrice, 'BRL')}/share`}
-                                    value={formatCurrency(f.currentValue, 'BRL')}
-                                    performance={`${f.pnl >= 0 ? '+' : ''}${formatCurrency(f.pnl, 'BRL')} (${f.roi.toFixed(1)}%)`}
-                                    isPositive={f.pnl >= 0}
-                                    icon={<div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-xs font-bold text-blue-400">{f.ticker.slice(0, 2)}</div>}
-                                    expandedContent={
-                                        <div className="flex gap-2 mt-3 pt-3 border-t border-white/5">
-                                            <button onClick={(e) => { e.stopPropagation(); handleFundBuyClick(f); }} className="flex-1 py-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl text-sm font-semibold transition-colors">Buy</button>
-                                            <button onClick={(e) => { e.stopPropagation(); handleFundSellClick(f); }} className="flex-1 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl text-sm font-semibold transition-colors">Sell</button>
-                                        </div>
-                                    }
-                                />
-                            ))}
-                        </div>
-                        <div className="hidden lg:block">
-                            <div className="overflow-hidden rounded-xl border border-white/5 bg-black/40 backdrop-blur-sm shadow-xl divide-y divide-white/[0.04]">
-                                {brokerFunds.map(f => {
-                                    const isSelected = selectedAsset?.ticker === f.ticker && selectedAsset?.type === 'fund';
-                                    return (
-                                        <div key={f.ticker} onClick={() => { setSelectedAsset({ ...f, type: 'fund' }); setRightPaneMode('default'); }}
-                                            className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200 group ${isSelected ? 'bg-white/[0.08] border-l-2 border-l-[#D4AF37]' : 'hover:bg-white/[0.04] border-l-2 border-l-transparent'}`}>
-                                            <div className="w-9 h-9 min-w-[36px] rounded-full bg-blue-500/20 flex items-center justify-center text-xs font-bold text-blue-400 shrink-0">{f.ticker.slice(0, 2)}</div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-semibold text-white/90 truncate leading-tight">{f.fund}</p>
-                                                <p className="text-[11px] text-white/40 mt-0.5 font-mono">{f.totalQuantity} shares · {f.ticker}</p>
-                                            </div>
-                                            <div className="text-right shrink-0">
-                                                <p className="text-sm font-bold text-white tracking-tight leading-tight">{formatCurrency(f.currentValue, 'BRL')}</p>
-                                                <p className={`text-[11px] mt-0.5 font-semibold ${f.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                                    {f.pnl >= 0 ? '+' : ''}{formatCurrency(f.pnl, 'BRL')} ({f.roi >= 0 ? '+' : ''}{f.roi.toFixed(1)}%)
-                                                </p>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                        {brokerFunds.length === 0 ? (
+                            <div className="p-6 text-center bg-white/[0.02] border border-white/5 rounded-xl">
+                                <p className="text-sm text-white/40 mb-3">No fund holdings yet</p>
+                                <button onClick={() => handleNewFundBuyClick(brokerName)}
+                                    className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl text-sm font-semibold transition-colors">
+                                    Buy First Fund
+                                </button>
                             </div>
-                        </div>
+                        ) : (
+                            <>
+                                <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {brokerFunds.map(f => (
+                                        <AssetCard key={f.ticker} title={f.fund}
+                                            subtitle={`${f.totalQuantity} shares · ${formatCurrency(f.currentPrice, 'BRL')}/share`}
+                                            value={formatCurrency(f.currentValue, 'BRL')}
+                                            performance={`${f.pnl >= 0 ? '+' : ''}${formatCurrency(f.pnl, 'BRL')} (${f.roi.toFixed(1)}%)`}
+                                            isPositive={f.pnl >= 0}
+                                            icon={<div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-xs font-bold text-blue-400">{f.ticker.slice(0, 2)}</div>}
+                                            expandedContent={
+                                                <div className="flex gap-2 mt-3 pt-3 border-t border-white/5">
+                                                    <button onClick={(e) => { e.stopPropagation(); handleFundBuyClick(f); }} className="flex-1 py-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl text-sm font-semibold transition-colors">Buy</button>
+                                                    <button onClick={(e) => { e.stopPropagation(); handleFundSellClick(f); }} className="flex-1 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl text-sm font-semibold transition-colors">Sell</button>
+                                                </div>
+                                            }
+                                        />
+                                    ))}
+                                </div>
+                                <div className="hidden lg:block">
+                                    <div className="overflow-hidden rounded-xl border border-white/5 bg-black/40 backdrop-blur-sm shadow-xl divide-y divide-white/[0.04]">
+                                        {brokerFunds.map(f => {
+                                            const isSelected = selectedAsset?.ticker === f.ticker && selectedAsset?.type === 'fund';
+                                            return (
+                                                <div key={f.ticker} onClick={() => { setSelectedAsset({ ...f, type: 'fund' }); setRightPaneMode('default'); }}
+                                                    className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200 group ${isSelected ? 'bg-white/[0.08] border-l-2 border-l-[#D4AF37]' : 'hover:bg-white/[0.04] border-l-2 border-l-transparent'}`}>
+                                                    <div className="w-9 h-9 min-w-[36px] rounded-full bg-blue-500/20 flex items-center justify-center text-xs font-bold text-blue-400 shrink-0">{f.ticker.slice(0, 2)}</div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-semibold text-white/90 truncate leading-tight">{f.fund}</p>
+                                                        <p className="text-[11px] text-white/40 mt-0.5 font-mono">{f.totalQuantity} shares · {f.ticker}</p>
+                                                    </div>
+                                                    <div className="text-right shrink-0">
+                                                        <p className="text-sm font-bold text-white tracking-tight leading-tight">{formatCurrency(f.currentValue, 'BRL')}</p>
+                                                        <p className={`text-[11px] mt-0.5 font-semibold ${f.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                            {f.pnl >= 0 ? '+' : ''}{formatCurrency(f.pnl, 'BRL')} ({f.roi >= 0 ? '+' : ''}{f.roi.toFixed(1)}%)
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </>
                 )}
             </div>
@@ -1206,8 +1269,8 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                         <div className="flex flex-col gap-3">
                             <div>
                                 <label className="block mb-1 text-white/50 text-xs">Month</label>
-                                <input type="text" value={mortgageFormData.month} onChange={e => setMortgageFormData(p => ({ ...p, month: e.target.value }))}
-                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50" placeholder="Mar-26" />
+                                <input type="date" value={mortgageFormData.month} onChange={e => setMortgageFormData(p => ({ ...p, month: e.target.value }))}
+                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 cursor-pointer" style={{ colorScheme: 'dark' }} />
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
@@ -1238,12 +1301,22 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                     <h4 className="text-[10px] text-white/40 uppercase tracking-[2px] mb-3">Payment History</h4>
                     <div className="bg-black/20 rounded-xl p-4 border border-white/[0.03] max-h-[300px] overflow-y-auto custom-scrollbar">
                         <TransactionTimeline transactions={mortgagePayments.slice(0, 20)}
+                            onEdit={(tx) => {
+                                // For mortgage entries with composite IDs, take the first one
+                                const entryId = tx.id?.split(',')?.[0] || tx.id;
+                                handleEditTransaction({ id: entryId, date: tx.rawDate, amount: tx.costs, notes: tx.month, type: 'Mortgage', category: 'mortgage' });
+                            }}
+                            onDelete={(id) => {
+                                // For composite IDs, delete the first (primary) entry
+                                const entryId = id?.split(',')?.[0] || id;
+                                handleDeleteEntry(entryId);
+                            }}
                             renderItem={(tx) => (
                                 <>
                                     <div className="flex items-center gap-2 mb-1.5">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                                         <span className="font-medium text-[10px] text-white/90 uppercase tracking-wider font-space">
-                                            {tx.month}
+                                            {tx.rawDate ? new Date(tx.rawDate + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : tx.month}
                                         </span>
                                     </div>
                                     <div className="flex flex-col gap-1">
@@ -1290,7 +1363,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                             <div>
                                 <label className="block mb-1 text-white/50 text-xs">Date</label>
                                 <input type="date" value={rentalFormData.date} onChange={e => setRentalFormData(p => ({ ...p, date: e.target.value }))}
-                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50" />
+                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 cursor-pointer" style={{ colorScheme: 'dark' }} />
                             </div>
                             <div>
                                 <label className="block mb-1 text-white/50 text-xs">Amount</label>
@@ -1366,7 +1439,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                             <div>
                                 <label className="block mb-1 text-white/50 text-xs">Date</label>
                                 <input type="date" value={rentalFormData.date} onChange={e => setRentalFormData(p => ({ ...p, date: e.target.value }))}
-                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50" />
+                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 cursor-pointer" style={{ colorScheme: 'dark' }} />
                             </div>
                             <div>
                                 <label className="block mb-1 text-white/50 text-xs">Amount</label>
@@ -1412,6 +1485,37 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                         );
                     })}
                 </div>
+                {/* Individual Entries with Edit/Delete */}
+                {r.entries && r.entries.length > 0 && (
+                    <div className="pt-4 border-t border-white/5 mt-4">
+                        <h4 className="text-[10px] text-white/40 uppercase tracking-[2px] mb-3">All Entries</h4>
+                        <div className="bg-black/20 rounded-xl p-4 border border-white/[0.03] max-h-[300px] overflow-y-auto custom-scrollbar">
+                            <TransactionTimeline
+                                transactions={[...r.entries].sort((a, b) => b.date.localeCompare(a.date))}
+                                onEdit={(tx) => handleEditTransaction({ ...tx, category: 'rental' })}
+                                onDelete={handleDeleteEntry}
+                                renderItem={(tx) => (
+                                    <>
+                                        <div className="flex items-center gap-2 mb-1.5">
+                                            <div className={`w-1.5 h-1.5 rounded-full ${tx.type === 'Income' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                                            <span className="font-medium text-[10px] text-white/90 uppercase tracking-wider font-space">
+                                                {tx.type === 'Income' ? 'Revenue' : 'Cost'}
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-col gap-1">
+                                            <span className={`text-sm font-bold tracking-tight font-mono ${tx.type === 'Income' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                {tx.type === 'Income' ? '+' : '-'}{formatCurrency(Math.abs(tx.amount), asset.currency)}
+                                            </span>
+                                            <span className="text-[10px] text-white/40 font-mono tracking-tight">
+                                                {tx.date}{tx.notes ? ` · ${tx.notes}` : ''}
+                                            </span>
+                                        </div>
+                                    </>
+                                )}
+                            />
+                        </div>
+                    </div>
+                )}
             </>
         );
     };
@@ -1515,7 +1619,17 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                                                 <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors hidden lg:block ml-auto"><X size={16} /></button>
                                             </div>
                                             <div className="flex-1">
-                                                <BrokerForm assetClass="Real Estate" onSave={() => { setRightPaneMode('default'); if (onRefresh) onRefresh(); }} onCancel={() => setRightPaneMode('default')} />
+                                                <BrokerForm assetClass="Real Estate" onSave={(savedBroker) => {
+                                                    const brokerName = savedBroker?.name || '';
+                                                    if (brokerName) {
+                                                        setNewlyAddedBrokers(prev => [...prev, brokerName]);
+                                                        setExpandedAccordions(prev => ({ ...prev, [brokerName]: true }));
+                                                        setTimeout(() => setNewlyAddedBrokers(prev => prev.filter(n => n !== brokerName)), 5000);
+                                                    }
+                                                    fetchREBrokers();
+                                                    setRightPaneMode('default');
+                                                    if (onRefresh) onRefresh();
+                                                }} onCancel={() => setRightPaneMode('default')} />
                                             </div>
                                         </div>
                                     );
@@ -1561,6 +1675,34 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                                                                 <p className="text-[11px] text-white/40">Track mortgage payments, principal, and interest</p>
                                                             </div>
                                                         </label>
+                                                        {newPropertyData.hasMortgage && (
+                                                            <div className="ml-7 flex flex-col gap-3 p-3 bg-white/[0.03] border border-white/5 rounded-xl">
+                                                                <div className="grid grid-cols-2 gap-3">
+                                                                    <div>
+                                                                        <label className="block text-[10px] text-white/50 uppercase tracking-wider mb-1">Original Amount</label>
+                                                                        <NumberInput value={newPropertyData.mortgageAmount || ''} onChange={val => setNewPropertyData(p => ({ ...p, mortgageAmount: val }))}
+                                                                            className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="0" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="block text-[10px] text-white/50 uppercase tracking-wider mb-1">Deposit</label>
+                                                                        <NumberInput value={newPropertyData.mortgageDeposit || ''} onChange={val => setNewPropertyData(p => ({ ...p, mortgageDeposit: val }))}
+                                                                            className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="0" />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="grid grid-cols-2 gap-3">
+                                                                    <div>
+                                                                        <label className="block text-[10px] text-white/50 uppercase tracking-wider mb-1">Duration (months)</label>
+                                                                        <NumberInput value={newPropertyData.mortgageDuration || ''} onChange={val => setNewPropertyData(p => ({ ...p, mortgageDuration: val }))}
+                                                                            className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="e.g. 360" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="block text-[10px] text-white/50 uppercase tracking-wider mb-1">Interest Rate (%)</label>
+                                                                        <NumberInput value={newPropertyData.mortgageRate || ''} onChange={val => setNewPropertyData(p => ({ ...p, mortgageRate: val }))}
+                                                                            className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="e.g. 5.5" />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                         <label className="flex items-center gap-3 cursor-pointer group">
                                                             <input type="checkbox" checked={newPropertyData.hasRental} onChange={e => setNewPropertyData(p => ({ ...p, hasRental: e.target.checked }))}
                                                                 className="w-4 h-4 rounded bg-white/5 border-white/20 text-[#D4AF37] focus:ring-[#D4AF37]/50" />
@@ -1582,8 +1724,28 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                                                                 headers: { 'Content-Type': 'application/json' },
                                                                 body: JSON.stringify({ type: 'property', ...newPropertyData, investment: parseFloat(newPropertyData.investment) || 0, currentValue: parseFloat(newPropertyData.currentValue) || 0 })
                                                             });
+                                                            if (newPropertyData.hasMortgage && (newPropertyData.mortgageAmount || newPropertyData.mortgageDeposit || newPropertyData.mortgageDuration || newPropertyData.mortgageRate)) {
+                                                                await fetch('/api/real-estate', {
+                                                                    method: 'POST',
+                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                    body: JSON.stringify({
+                                                                        section: 'mortgage-setup',
+                                                                        propertyName: newPropertyData.name,
+                                                                        originalAmount: parseFloat(newPropertyData.mortgageAmount) || 0,
+                                                                        deposit: parseFloat(newPropertyData.mortgageDeposit) || 0,
+                                                                        durationMonths: parseInt(newPropertyData.mortgageDuration) || 0,
+                                                                        interestRate: parseFloat(newPropertyData.mortgageRate) || 0
+                                                                    })
+                                                                });
+                                                            }
+                                                            const savedName = newPropertyData.name;
                                                             setRightPaneMode('default');
-                                                            setNewPropertyData({ name: '', currency: 'BRL', investment: '', currentValue: '', hasMortgage: false, hasRental: false });
+                                                            setNewPropertyData({ name: '', currency: 'BRL', investment: '', currentValue: '', hasMortgage: false, hasRental: false, mortgageAmount: '', mortgageDeposit: '', mortgageDuration: '', mortgageRate: '' });
+                                                            if (savedName) {
+                                                                setNewlyAddedProperties(prev => [...prev, savedName]);
+                                                                setExpandedAccordions(prev => ({ ...prev, Properties: true }));
+                                                                setTimeout(() => setNewlyAddedProperties(prev => prev.filter(n => n !== savedName)), 5000);
+                                                            }
                                                             if (onRefresh) onRefresh();
                                                         } catch (e) { console.error('Failed to add property', e); }
                                                     }}
@@ -1946,6 +2108,13 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                     message="Are you sure you want to delete this entry?"
                     onConfirm={confirmDelete}
                     onCancel={() => { setIsDeleteModalOpen(false); setDeleteTarget(null); }}
+                />
+                <ConfirmationModal
+                    isOpen={isDeleteBrokerModalOpen}
+                    title="Delete Broker"
+                    message={`Are you sure you want to delete the broker "${brokerToDelete}"? This cannot be undone.`}
+                    onConfirm={handleConfirmDeleteBroker}
+                    onCancel={() => { setIsDeleteBrokerModalOpen(false); setBrokerToDelete(null); }}
                 />
             </div>
         </PullToRefresh>

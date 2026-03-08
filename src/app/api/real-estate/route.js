@@ -226,7 +226,7 @@ export async function GET(request) {
 
                     if (isMortgagePayment) {
                         if (!mortgageMap.has(rawMonth)) {
-                            mortgageMap.set(rawMonth, { month: toShortMonth(rawMonth), rawDate: rawMonth, costs: 0, principal: 0, interest: 0, source: 'Mortgage', ids: [] });
+                            mortgageMap.set(rawMonth, { month: toShortMonth(rawMonth), rawDate: r.date, costs: 0, principal: 0, interest: 0, source: 'Mortgage', ids: [] });
                         }
                         const entry = mortgageMap.get(rawMonth);
                         entry.ids.push(r.id);
@@ -247,7 +247,7 @@ export async function GET(request) {
                     otherEntries.push({
                         id: r.id.toString(),
                         month: toShortMonth(rawMonth),
-                        rawDate: rawMonth,
+                        rawDate: r.date,
                         costs: amt,
                         principal: 0,
                         interest: 0,
@@ -316,11 +316,20 @@ export async function GET(request) {
                 const rentalLedger = Array.from(rentalMap.values());
                 const totalRevenue = rentalLedger.reduce((sum, m) => sum + m.revenue, 0);
                 const totalCosts = rentalLedger.reduce((sum, m) => sum + m.costs, 0);
+                // Include raw entries with IDs for edit/delete
+                const rawEntries = rData.map(r => ({
+                    id: r.id.toString(),
+                    date: r.date,
+                    type: r.type,
+                    amount: r.amount,
+                    notes: r.notes || ''
+                }));
                 enriched.rental = {
                     totalRevenue,
                     totalCosts,
                     totalProfit: totalRevenue - totalCosts,
-                    ledger: rentalLedger
+                    ledger: rentalLedger,
+                    entries: rawEntries
                 };
             }
 
@@ -476,11 +485,21 @@ export async function POST(request) {
         // Handle Add Mortgage Payment (works for any property)
         if (body.section === 'mortgages') {
             const months = { 'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12' };
-            const [mmm, yy] = (t.month || '').split('-');
+            const monthVal = (t.month || '');
+            let dateStr;
 
-            if (!mmm || !yy) return NextResponse.json({ error: 'Invalid month format' }, { status: 400 });
-
-            const dateStr = `20${yy}-${months[mmm]}-01`;
+            if (monthVal.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                // YYYY-MM-DD format from date picker — use first of month
+                dateStr = monthVal.substring(0, 7) + '-01';
+            } else if (monthVal.match(/^\d{4}-\d{2}$/)) {
+                // YYYY-MM format
+                dateStr = monthVal + '-01';
+            } else {
+                // Legacy MMM-YY format (e.g. "Mar-26")
+                const [mmm, yy] = monthVal.split('-');
+                if (!mmm || !yy || !months[mmm]) return NextResponse.json({ error: 'Invalid month format' }, { status: 400 });
+                dateStr = `20${yy}-${months[mmm]}-01`;
+            }
 
             // Accept propertyName, fallback to 'Ink Court' for backward compat
             const propertyName = body.propertyName || 'Ink Court';

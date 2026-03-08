@@ -141,7 +141,7 @@ export default function DashboardTab({
 
     // Use original summaries for the MetricCard grid (one card per category)
     const expandedSummaries = useMemo(() => {
-        return data.summaries;
+        return [...data.summaries].sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount));
     }, [data.summaries]);
 
     return (
