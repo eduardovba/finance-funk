@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     LayoutDashboard, BookOpen, PieChart, Menu, X,
     Landmark, HomeIcon, LineChart, Bitcoin, Wallet, CreditCard,
-    TrendingUp, Target, LogOut, Settings
+    TrendingUp, Target, LogOut, Settings, Scale
 } from 'lucide-react';
 import { usePortfolio } from '@/context/PortfolioContext';
 import { useSession, signOut } from 'next-auth/react';
@@ -22,8 +22,10 @@ const ASSET_TABS = [
     { id: 'debt', href: '/assets/debt', label: 'Debt', icon: CreditCard, color: '#ec4899' },
 ];
 
-const MORE_ITEMS = [
-    { id: 'planning', href: '/planning', label: 'Planning', icon: TrendingUp },
+const PLANNING_ITEMS = [
+    { id: 'targets', href: '/planning/targets', label: 'Allocation', icon: Target },
+    { id: 'forecast', href: '/planning/forecast', label: 'Forecast', icon: TrendingUp },
+    { id: 'advisor', href: '/planning/advisor', label: 'Advisor', icon: Scale },
 ];
 
 /* ─── Assets Bottom Sheet ─── */
@@ -127,20 +129,25 @@ function MoreSheet({ isOpen, onClose }) {
                         </div>
 
                         <div className="px-5 pb-6 flex flex-col gap-1">
-                            {MORE_ITEMS.map(item => {
-                                const Icon = item.icon;
-                                return (
-                                    <Link
-                                        key={item.id}
-                                        href={item.href}
-                                        onClick={onClose}
-                                        className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-parchment/80 hover:bg-white/5 active:bg-white/5 active:scale-[0.98] transition-all no-underline"
-                                    >
-                                        <Icon size={20} className="text-[#D4AF37]/60" />
-                                        <span className="text-sm font-space font-medium">{item.label}</span>
-                                    </Link>
-                                );
-                            })}
+                            <div className="px-4 py-2 mt-2">
+                                <h4 className="font-bebas text-lg tracking-widest text-[#D4AF37] mb-2">Planning</h4>
+                                <div className="flex flex-col gap-1">
+                                    {PLANNING_ITEMS.map(item => {
+                                        const Icon = item.icon;
+                                        return (
+                                            <Link
+                                                key={item.id}
+                                                href={item.href}
+                                                onClick={onClose}
+                                                className="flex items-center gap-4 px-3 py-3 rounded-xl text-parchment/80 hover:bg-white/5 active:bg-white/5 active:scale-[0.98] transition-all no-underline"
+                                            >
+                                                <Icon size={18} className="text-[#D4AF37]/60" />
+                                                <span className="text-sm font-space font-medium">{item.label}</span>
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+                            </div>
 
                             <div className="h-px bg-white/5 my-2" />
 

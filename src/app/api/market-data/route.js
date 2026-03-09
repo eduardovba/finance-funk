@@ -5,34 +5,25 @@ import { kvGet, kvSet } from '@/lib/kv';
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const CACHE_KEY = 'market_data_cache';
 
-// In-memory cache: Map<ticker, { data, timestamp }>
-const tickerCache = new Map();
-let cacheHydrated = false;
+// Track in-flight background refresh to prevent duplicate scrapes
+let backgroundRefreshInFlight = false;
 
 // ═══════════ CACHE HELPERS ═══════════
-const hydrateFromDB = async () => {
-    if (cacheHydrated) return;
-    cacheHydrated = true;
+const loadCacheFromDB = async () => {
     try {
         const raw = await kvGet(CACHE_KEY, null);
-        if (raw) {
-            for (const [ticker, entry] of Object.entries(raw)) {
-                tickerCache.set(ticker, entry);
-            }
-            console.log(`[Cache] Hydrated ${tickerCache.size} tickers from DB`);
+        if (raw && typeof raw === 'object') {
+            return raw;
         }
     } catch (e) {
-        console.error('[Cache] Failed to hydrate from DB:', e.message);
+        console.error('[Cache] Failed to load from DB:', e.message);
     }
+    return {};
 };
 
-const persistToDB = async () => {
+const persistCacheToDB = async (cache) => {
     try {
-        const obj = {};
-        for (const [ticker, entry] of tickerCache.entries()) {
-            obj[ticker] = entry;
-        }
-        await kvSet(CACHE_KEY, obj);
+        await kvSet(CACHE_KEY, cache);
     } catch (e) {
         console.error('[Cache] Failed to persist to DB:', e.message);
     }
@@ -137,6 +128,33 @@ const fetchGoogleFinance = async (ticker) => {
     return null;
 };
 
+// ═══════════ BACKGROUND REFRESH (SWR) ═══════════
+const backgroundRefresh = async (staleTickers, dbCache) => {
+    if (backgroundRefreshInFlight) return;
+    backgroundRefreshInFlight = true;
+
+    try {
+        console.log(`[Cache] Background refresh: scraping ${staleTickers.length} stale tickers`);
+        const results = await Promise.all(staleTickers.map(fetchGoogleFinance));
+
+        results.forEach(result => {
+            if (result) {
+                dbCache[result.symbol] = {
+                    data: result,
+                    timestamp: Date.now()
+                };
+            }
+        });
+
+        await persistCacheToDB(dbCache);
+        console.log(`[Cache] Background refresh complete: updated ${results.filter(Boolean).length} tickers`);
+    } catch (e) {
+        console.error('[Cache] Background refresh failed:', e.message);
+    } finally {
+        backgroundRefreshInFlight = false;
+    }
+};
+
 // ═══════════ API HANDLER ═══════════
 export async function POST(request) {
     try {
@@ -146,20 +164,20 @@ export async function POST(request) {
             return NextResponse.json({ error: 'No tickers provided' }, { status: 400 });
         }
 
-        // Hydrate cache from DB on first request
-        await hydrateFromDB();
+        // Load cache from persistent DB (survives serverless cold starts)
+        const dbCache = await loadCacheFromDB();
 
         const marketData = {};
         const staleTickers = [];
 
         // Phase 1: Collect cached data, identify stale tickers
         for (const ticker of tickers) {
-            const cached = tickerCache.get(ticker);
+            const cached = dbCache[ticker];
             if (!forceRefresh && cached && isFresh(cached)) {
                 marketData[ticker] = cached.data;
             } else {
                 staleTickers.push(ticker);
-                // If we have stale data, use it as a fallback while we refresh
+                // Return stale data immediately (SWR pattern)
                 if (cached?.data) {
                     marketData[ticker] = cached.data;
                 }
@@ -168,31 +186,63 @@ export async function POST(request) {
 
         const cachedCount = tickers.length - staleTickers.length;
 
-        // Phase 2: Scrape only the stale/missing tickers
-        if (staleTickers.length > 0) {
-            console.log(`[Cache] Scraping ${staleTickers.length} stale tickers (${cachedCount} cached)`);
-
+        // Phase 2: Handle stale tickers
+        if (staleTickers.length > 0 && forceRefresh) {
+            // Force refresh: scrape synchronously and wait for results
+            console.log(`[Cache] Force refresh: scraping ${staleTickers.length} tickers`);
             const results = await Promise.all(staleTickers.map(fetchGoogleFinance));
 
             results.forEach(result => {
                 if (result) {
                     marketData[result.symbol] = result;
-                    tickerCache.set(result.symbol, {
+                    dbCache[result.symbol] = {
                         data: result,
                         timestamp: Date.now()
-                    });
+                    };
                 }
             });
 
-            // Persist updated cache to DB
-            await persistToDB();
+            await persistCacheToDB(dbCache);
+        } else if (staleTickers.length > 0) {
+            // SWR: return stale data immediately, refresh in background
+            const hasStaleData = staleTickers.every(t => dbCache[t]?.data);
+            if (hasStaleData) {
+                // All stale tickers have cached data — return immediately, refresh in background
+                console.log(`[Cache] SWR: returning stale data for ${staleTickers.length} tickers, refreshing in background`);
+                backgroundRefresh(staleTickers, { ...dbCache });
+            } else {
+                // Some tickers have no cached data at all — must scrape synchronously
+                const missingTickers = staleTickers.filter(t => !dbCache[t]?.data);
+                const staleOnlyTickers = staleTickers.filter(t => dbCache[t]?.data);
+
+                console.log(`[Cache] Scraping ${missingTickers.length} missing tickers (${staleOnlyTickers.length} served stale)`);
+
+                // Scrape only the truly missing tickers synchronously
+                const results = await Promise.all(missingTickers.map(fetchGoogleFinance));
+                results.forEach(result => {
+                    if (result) {
+                        marketData[result.symbol] = result;
+                        dbCache[result.symbol] = {
+                            data: result,
+                            timestamp: Date.now()
+                        };
+                    }
+                });
+
+                await persistCacheToDB(dbCache);
+
+                // Background refresh the stale-but-present tickers
+                if (staleOnlyTickers.length > 0) {
+                    backgroundRefresh(staleOnlyTickers, { ...dbCache });
+                }
+            }
         } else {
             console.log(`[Cache] All ${cachedCount} tickers served from cache`);
         }
 
         // Add cache metadata for transparency
         const oldestEntry = staleTickers.length === 0
-            ? Math.min(...tickers.map(t => tickerCache.get(t)?.timestamp || Date.now()))
+            ? Math.min(...tickers.map(t => dbCache[t]?.timestamp || Date.now()))
             : Date.now();
 
         marketData._cacheInfo = {

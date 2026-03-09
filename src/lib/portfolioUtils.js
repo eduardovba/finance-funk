@@ -988,6 +988,60 @@ export const getMasterMixData = (
 
     const totalCalculated = masterEquity + masterFI + masterRE + masterCrypto + masterCash;
 
+    // --- Currency Exposure Aggregation (in GBP equivalents) ---
+    let masterGBP = 0;
+    let masterUSD = 0;
+    let masterBRL = 0;
+
+    const accumulateCurrency = (data) => {
+        if (!data || !data.individualHoldings) return;
+        data.individualHoldings.forEach(h => {
+            const assetCur = h.nativeCurrency || assetClasses[h.name]?.currency || 'GBP';
+            if (assetCur === 'BRL') masterBRL += h.gbp;
+            else if (assetCur === 'USD') masterUSD += h.gbp;
+            else masterGBP += h.gbp;
+        });
+    };
+
+    accumulateCurrency(fiData);
+    accumulateCurrency(reData);
+    accumulateCurrency(cryptoData);
+    accumulateCurrency(equityData);
+
+    // Pension Currency Exposure (mostly GBP or USD based on map)
+    Object.values(pensionHoldings).filter(h => Math.abs(h.qty) > 0.01).forEach(h => {
+        const mapEntry = pensionMapInput.find(m => m.asset === h.asset);
+        const cur = BROKER_CURRENCY[h.broker] || 'GBP';
+        let assetCurrency = cur;
+
+        let rawPrice = 0;
+        if (h.asset === 'Cash') rawPrice = 1.0;
+        else if (mapEntry && mapEntry.ticker && marketData[mapEntry.ticker]) {
+            rawPrice = marketData[mapEntry.ticker].price;
+            assetCurrency = marketData[mapEntry.ticker].currency || 'USD';
+        } else if (pensionPrices && pensionPrices[h.asset]) {
+            rawPrice = pensionPrices[h.asset].price;
+            assetCurrency = pensionPrices[h.asset].currency;
+        } else if (currentPrices && currentPrices[h.asset]) {
+            rawPrice = currentPrices[h.asset];
+            if (mapEntry && mapEntry.currency) assetCurrency = mapEntry.currency;
+        }
+
+        let priceInGBP = rawPrice;
+        if (assetCurrency !== 'GBP' && rawPrice > 0 && rates) {
+            const toGBP = (v, c) => c === 'GBP' ? v : (c === 'BRL' ? v / rates.BRL : v / rates.USD);
+            priceInGBP = toGBP(rawPrice, assetCurrency);
+        }
+
+        const valGBP = priceInGBP * h.qty;
+
+        // Add to exposure
+        const finalCur = assetClasses[h.asset]?.currency || assetCurrency;
+        if (finalCur === 'BRL') masterBRL += valGBP;
+        else if (finalCur === 'USD') masterUSD += valGBP;
+        else masterGBP += valGBP; // Default GBP
+    });
+
     return {
         buckets: {
             Equity: masterEquity,
@@ -1002,6 +1056,11 @@ export const getMasterMixData = (
             RealEstate: totalCalculated > 0 ? (masterRE / totalCalculated) * 100 : 0,
             Crypto: totalCalculated > 0 ? (masterCrypto / totalCalculated) * 100 : 0,
             Cash: totalCalculated > 0 ? (masterCash / totalCalculated) * 100 : 0,
+        },
+        byCurrency: {
+            GBP: masterGBP,
+            USD: masterUSD,
+            BRL: masterBRL
         },
         total: totalCalculated
     };

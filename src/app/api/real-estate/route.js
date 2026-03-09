@@ -6,57 +6,9 @@ export async function GET(request) {
     try {
         const user = await requireAuth();
 
-        // ONE-TIME INLINE MIGRATION: Seed sold properties & Ink Court config
-        try {
-            // Helper to get or create a property asset
-            const getOrCreateAsset = async (name, currency) => {
-                let rows = await query("SELECT id FROM assets WHERE name = ? AND user_id = ?", [name, user.id]);
-                if (!rows.length) {
-                    await run("INSERT INTO assets (name, asset_class, broker, currency, sync_status, user_id) VALUES (?, 'Real Estate', 'Manual', ?, 'ACTIVE', ?)", [name, currency, user.id]);
-                    rows = await query("SELECT id FROM assets WHERE name = ? AND user_id = ?", [name, user.id]);
-                }
-                return rows.length ? rows[0].id : null;
-            };
 
-            // Helper to check if a ledger entry of a given type exists for an asset
-            const hasLedgerEntry = async (assetId, type) => {
-                const rows = await query("SELECT id FROM ledger WHERE asset_id = ? AND type = ? AND user_id = ?", [assetId, type, user.id]);
-                return rows.length > 0;
-            };
+        // Note: Property seed data migration is handled by db.js runMigrations()
 
-            // --- Andyara 1 (Sold) ---
-            const a1Id = await getOrCreateAsset('Andyara 1', 'BRL');
-            if (a1Id && !(await hasLedgerEntry(a1Id, 'Purchase'))) {
-                await run("INSERT INTO ledger (date, type, asset_id, amount, price, currency, notes, user_id) VALUES ('2015-01-01', 'Purchase', ?, 237000, 237000, 'BRL', 'Initial investment', ?)", [a1Id, user.id]);
-                await run("INSERT INTO ledger (date, type, asset_id, amount, price, currency, notes, user_id) VALUES ('2023-01-01', 'Stamp Duty', ?, -9074, 0, 'BRL', 'Stamp Duty', ?)", [a1Id, user.id]);
-                await run("INSERT INTO ledger (date, type, asset_id, amount, price, currency, notes, user_id) VALUES ('2023-06-01', 'Sale', ?, -360000, 360000, 'BRL', 'Property sold', ?)", [a1Id, user.id]);
-                console.log('Migration: Seeded Andyara 1 ledger entries');
-            }
-
-            // --- Rua Montes Claros (Sold) ---
-            const mcId = await getOrCreateAsset('Rua Montes Claros', 'BRL');
-            if (mcId && !(await hasLedgerEntry(mcId, 'Purchase'))) {
-                await run("INSERT INTO ledger (date, type, asset_id, amount, price, currency, notes, user_id) VALUES ('2018-01-01', 'Purchase', ?, 681000, 681000, 'BRL', 'Initial investment', ?)", [mcId, user.id]);
-                await run("INSERT INTO ledger (date, type, asset_id, amount, price, currency, notes, user_id) VALUES ('2024-01-01', 'Stamp Duty', ?, -29748, 0, 'BRL', 'Stamp Duty', ?)", [mcId, user.id]);
-                await run("INSERT INTO ledger (date, type, asset_id, amount, price, currency, notes, user_id) VALUES ('2024-06-01', 'Sale', ?, -822920, 822920, 'BRL', 'Property sold', ?)", [mcId, user.id]);
-                console.log('Migration: Seeded Rua Montes Claros ledger entries');
-            }
-
-            // --- Ink Court: mortgage config and valuation ---
-            const inkId = await getOrCreateAsset('Ink Court', 'GBP');
-            if (inkId) {
-                if (!(await hasLedgerEntry(inkId, 'Mortgage Setup'))) {
-                    const config = JSON.stringify({ originalAmount: 541000, deposit: 60000, durationMonths: 408, interestRate: 6.24 });
-                    await run("INSERT INTO ledger (date, type, asset_id, amount, price, currency, notes, user_id) VALUES ('2024-03-01', 'Mortgage Setup', ?, 0, 0, 'GBP', ?, ?)", [inkId, config, user.id]);
-                    console.log('Migration: Seeded Ink Court mortgage setup');
-                }
-                const valCheck = await query("SELECT id FROM ledger WHERE asset_id = ? AND price > 0 AND user_id = ?", [inkId, user.id]);
-                if (!valCheck.length) {
-                    await run("INSERT INTO ledger (date, type, asset_id, amount, price, currency, notes, user_id) VALUES ('2026-02-19', 'Valuation Update', ?, 0, 620000, 'GBP', 'Initial valuation', ?)", [inkId, user.id]);
-                    console.log('Migration: Seeded Ink Court valuation');
-                }
-            }
-        } catch (migErr) { console.error('Inline migration error:', migErr); }
 
         // 1. Fetch Properties (Manual assets)
         const propertiesRows = await query(`

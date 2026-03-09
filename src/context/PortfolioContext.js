@@ -147,30 +147,43 @@ export function PortfolioProvider({ children }) {
     };
 
     // ═══════════ FETCHERS ═══════════
-    const fetchRealEstate = useCallback(() => {
-        fetch('/api/real-estate')
-            .then(res => res.json())
-            .then(data => setRealEstate(data))
-            .catch(err => console.error('Failed to load real estate:', err));
+    const fetchRealEstate = useCallback(async () => {
+        try {
+            const res = await fetch('/api/real-estate');
+            const data = await res.json();
+            setRealEstate(data);
+            return data;
+        } catch (err) {
+            console.error('Failed to load real estate:', err);
+            return null;
+        }
     }, []);
 
-    const fetchMarketData = useCallback(async (forceRefresh = false) => {
+    const fetchMarketData = useCallback(async (forceRefresh = false, prefetched = {}) => {
         try {
             if (forceRefresh) setIsRefreshingMarketData(true);
 
-            const [assetsRes, eqRes, reRes, cryptoRes] = await Promise.all([
-                fetch('/api/live-assets'),
-                fetch('/api/equity-transactions'),
-                fetch('/api/real-estate'),
-                fetch('/api/crypto-transactions')
-            ]);
+            // Use pre-fetched data when available (from refreshAllData), otherwise fetch fresh
+            let assets, eqData, reData, cryptoData;
 
-            const [assets, eqData, reData, cryptoData] = await Promise.all([
-                assetsRes.json(),
-                eqRes.json(),
-                reRes.json(),
-                cryptoRes.json()
-            ]);
+            if (!forceRefresh && prefetched.equity && prefetched.realEstate && prefetched.crypto) {
+                // Reuse data already fetched by refreshAllData — avoids 3 duplicate requests
+                eqData = prefetched.equity;
+                reData = prefetched.realEstate;
+                cryptoData = prefetched.crypto;
+                const assetsRes = await fetch('/api/live-assets');
+                assets = await assetsRes.json();
+            } else {
+                const [assetsRes, eqRes, reRes, cryptoRes] = await Promise.all([
+                    fetch('/api/live-assets'),
+                    fetch('/api/equity-transactions'),
+                    fetch('/api/real-estate'),
+                    fetch('/api/crypto-transactions')
+                ]);
+                [assets, eqData, reData, cryptoData] = await Promise.all([
+                    assetsRes.json(), eqRes.json(), reRes.json(), cryptoRes.json()
+                ]);
+            }
 
             const tickerSet = new Set(assets && assets.length > 0 ? assets.map(a => a.ticker).filter(t => t !== 'CASH') : []);
 
@@ -225,7 +238,6 @@ export function PortfolioProvider({ children }) {
             }
 
             // Also update rates for all supported currencies from fallback
-            // (market-data API may not have all FX pairs)
             const fallback = getFallbackRates();
             setRates(prev => {
                 const updated = { ...prev };
@@ -251,10 +263,16 @@ export function PortfolioProvider({ children }) {
         return fetchMarketData(true);
     }, [fetchMarketData]);
 
-    const refreshAllData = useCallback(() => {
+    const refreshAllData = useCallback(async () => {
+        // Fire all independent fetches in parallel
+        const [eqRes, cryptoRes, reData] = await Promise.all([
+            fetch('/api/equity-transactions').then(res => res.json()).then(data => { const arr = Array.isArray(data) ? data : []; setEquityTransactions(arr); return arr; }),
+            fetch('/api/crypto-transactions').then(res => res.json()).then(data => { const arr = Array.isArray(data) ? data : []; setCryptoTransactions(arr); return arr; }),
+            fetchRealEstate(),
+        ]);
+
+        // Fire remaining independent fetches (no need to await these)
         fetch('/api/transactions').then(res => res.json()).then(data => setTransactions(Array.isArray(data) ? data : []));
-        fetch('/api/equity-transactions').then(res => res.json()).then(data => setEquityTransactions(Array.isArray(data) ? data : []));
-        fetch('/api/crypto-transactions').then(res => res.json()).then(data => setCryptoTransactions(Array.isArray(data) ? data : []));
         fetch('/api/fixed-income').then(res => res.json()).then(data => setFixedIncomeTransactions(Array.isArray(data) ? data : []));
         fetch('/api/pensions').then(res => res.json()).then(data => setPensionTransactions(Array.isArray(data) ? data : []));
         fetch('/api/debt-transactions').then(res => res.json()).then(data => setDebtTransactions(Array.isArray(data) ? data : []));
@@ -264,13 +282,18 @@ export function PortfolioProvider({ children }) {
         fetch('/api/allocation-targets').then(res => res.json()).then(setAllocationTargets);
         fetch('/api/asset-classes').then(res => res.json()).then(setAssetClasses);
         fetch('/api/app-settings').then(res => res.json()).then(setAppSettings);
-        fetchRealEstate();
-        fetchMarketData();
+        fetch('/api/forecast-settings').then(res => res.json()).then(setForecastSettings).catch(err => console.error("Failed to load settings", err));
+        fetch('/api/dashboard-config').then(res => res.json()).then(setDashboardConfig).catch(e => console.error("Failed to load dashboard config", e));
 
+        // Pass pre-fetched data to fetchMarketData to avoid 3 duplicate requests
+        fetchMarketData(false, { equity: eqRes, realEstate: reData, crypto: cryptoRes });
+
+        // Pension prices: fetch cached immediately, refresh in background (non-blocking)
         fetch('/api/pension-prices')
             .then(res => res.json())
             .then(data => {
                 setPensionPrices(data);
+                // Background refresh — don't chain/block
                 fetch('/api/pension-prices?refresh=true')
                     .then(res => res.json())
                     .then(newData => setPensionPrices(prev => ({ ...prev, ...newData })))
@@ -283,27 +306,6 @@ export function PortfolioProvider({ children }) {
     useEffect(() => {
         refreshAllData();
     }, [refreshAllData]);
-
-    useEffect(() => {
-        fetch('/api/forecast-settings')
-            .then(res => res.json())
-            .then(data => setForecastSettings(data))
-            .catch(err => console.error("Failed to load settings", err));
-    }, []);
-
-    useEffect(() => {
-        fetch('/api/allocation-targets')
-            .then(res => res.json())
-            .then(data => setAllocationTargets(data))
-            .catch(e => console.error("Failed to load targets", e));
-    }, []);
-
-    useEffect(() => {
-        fetch('/api/dashboard-config')
-            .then(res => res.json())
-            .then(data => setDashboardConfig(data))
-            .catch(e => console.error("Failed to load dashboard config", e));
-    }, []);
 
     // ═══════════ MEMOIZED SELECTORS ═══════════
     const fixedIncomeData = useMemo(() => getFixedIncomeSummary(fixedIncomeTransactions, rates, null, assetClasses), [fixedIncomeTransactions, rates, assetClasses]);

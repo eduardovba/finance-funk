@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SlidersHorizontal, LayoutDashboard, BookOpen, TrendingUp, Landmark, Home as HomeIcon, LineChart, Bitcoin, Wallet, CreditCard, Target, LogOut, Settings } from 'lucide-react';
+import { SlidersHorizontal, LayoutDashboard, BookOpen, TrendingUp, Landmark, Home as HomeIcon, LineChart, Bitcoin, Wallet, CreditCard, Target, LogOut, Settings, Scale } from 'lucide-react';
 import CurrencyPill from '@/components/CurrencyPill';
 import { usePortfolio } from '@/context/PortfolioContext';
 import { useSession, signOut } from 'next-auth/react';
@@ -13,13 +13,19 @@ export default function TopConsole() {
     const { rates, loadingRates, lastUpdated, isInspectorOpen, setIsInspectorOpen } = usePortfolio();
     const pathname = usePathname();
     const [isAssetsDropdownOpen, setIsAssetsDropdownOpen] = useState(false);
+    const [isPlanningDropdownOpen, setIsPlanningDropdownOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const { data: session } = useSession();
 
     const trackingTabs = [
         { id: 'dashboard', href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { id: 'general-ledger', href: '/general-ledger', label: 'Ledger', icon: BookOpen },
-        { id: 'planning', href: '/planning', label: 'Planning', icon: TrendingUp },
+    ];
+
+    const planningTabs = [
+        { id: 'targets', href: '/planning/targets', label: 'Allocation', icon: Target },
+        { id: 'forecast', href: '/planning/forecast', label: 'Forecast', icon: TrendingUp },
+        { id: 'advisor', href: '/planning/advisor', label: 'Advisor', icon: Scale },
     ];
 
     const assetTabs = [
@@ -33,6 +39,9 @@ export default function TopConsole() {
 
     const activeAssetTab = assetTabs.find(t => pathname.startsWith(t.href));
     const isAssetRoute = !!activeAssetTab;
+
+    const activePlanningTab = planningTabs.find(t => pathname.startsWith(t.href));
+    const isPlanningRoute = !!activePlanningTab;
 
     return (
         <header className="h-12 md:h-16 w-full flex items-center justify-between px-3 md:px-4 lg:px-6 bg-[#1A0F2E]/90 backdrop-blur-md border-b border-[#D4AF37]/20 z-40 flex-shrink-0">
@@ -153,6 +162,87 @@ export default function TopConsole() {
                         )}
                     </AnimatePresence>
                 </div>
+
+                {/* PLANNING DROPDOWN */}
+                <div className="relative ml-2">
+                    <button
+                        onClick={() => setIsPlanningDropdownOpen(!isPlanningDropdownOpen)}
+                        className={`
+              flex items-center gap-1.5 px-3 py-2 text-xs font-space font-medium tracking-wide uppercase whitespace-nowrap
+              rounded-none border-b-2 transition-all duration-200 bg-transparent
+              ${isPlanningRoute
+                                ? 'border-[#D4AF37] text-[#D4AF37] drop-shadow-[0_0_6px_rgba(212,175,55,0.5)]'
+                                : 'border-transparent text-gray-400 hover:text-white hover:border-white/20'
+                            }
+            `}
+                    >
+                        <TrendingUp size={14} strokeWidth={isPlanningRoute ? 2.5 : 1.5} />
+                        <span>Planning</span>
+                        {activePlanningTab && (() => {
+                            const ActiveIcon = activePlanningTab.icon;
+                            return (
+                                <>
+                                    <span className="opacity-50 mx-0.5 font-bold">&gt;</span>
+                                    <ActiveIcon size={13} strokeWidth={2.5} />
+                                    <span>{activePlanningTab.label}</span>
+                                </>
+                            );
+                        })()}
+                        <motion.span
+                            animate={{ rotate: isPlanningDropdownOpen ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="ml-1"
+                        >
+                            ▼
+                        </motion.span>
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    <AnimatePresence>
+                        {isPlanningDropdownOpen && (
+                            <>
+                                <div
+                                    className="fixed inset-0 z-10"
+                                    onClick={() => setIsPlanningDropdownOpen(false)}
+                                />
+
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    transition={{ duration: 0.2, ease: "easeOut" }}
+                                    className="absolute top-full left-0 mt-2 w-48 bg-[#1A0F2E] border border-[#D4AF37]/20 shadow-2xl rounded-xl overflow-hidden z-20 backdrop-blur-xl"
+                                >
+                                    <div className="p-2 grid grid-cols-1 gap-1">
+                                        {planningTabs.map(tab => {
+                                            const Icon = tab.icon;
+                                            const isActive = pathname === tab.href;
+                                            return (
+                                                <Link
+                                                    key={tab.id}
+                                                    href={tab.href}
+                                                    onClick={() => setIsPlanningDropdownOpen(false)}
+                                                    className={`
+                             flex items-center gap-3 px-3 py-2.5 text-[11px] font-space font-bold tracking-widest uppercase
+                             rounded-lg transition-all duration-200 text-left border-none no-underline
+                             ${isActive
+                                                            ? 'bg-[#D4AF37]/20 text-[#D4AF37]'
+                                                            : 'bg-transparent text-gray-400 hover:bg-white/5 hover:text-white'
+                                                        }
+                           `}
+                                                >
+                                                    <Icon size={14} strokeWidth={isActive ? 2.5 : 1.5} />
+                                                    {tab.label}
+                                                </Link>
+                                            );
+                                        })}
+                                    </div>
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
+                </div>
+
             </nav>
 
             {/* Right: Controls */}

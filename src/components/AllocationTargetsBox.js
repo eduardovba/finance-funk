@@ -1,265 +1,390 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Home, LineChart, Landmark, Bitcoin, PiggyBank } from 'lucide-react';
+import { Home, LineChart, Landmark, Bitcoin, PiggyBank, Globe, DollarSign, Target, Activity, Save } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 import StatusModal from './StatusModal';
 import { usePortfolio } from '../context/PortfolioContext';
 
+const ASSET_COLORS = {
+    Equity: '#3b82f6',
+    FixedIncome: '#10b981',
+    RealEstate: '#ef4444',
+    Crypto: '#f59e0b',
+    Cash: '#94a3b8'
+};
+
+const CURRENCY_COLORS = {
+    GBP: '#8b5cf6',
+    BRL: '#22c55e',
+    USD: '#3b82f6'
+};
+
 export default function AllocationTargetsBox({ masterMixData, allocationTargets, onTargetsSaved }) {
-    const { formatPrimary } = usePortfolio();
-    // 1. Safe defaults
-    const actuals = masterMixData?.percentages || {
-        Equity: 0, FixedIncome: 0, RealEstate: 0, Crypto: 0, Cash: 0
+    const { formatPrimary, rates, dashboardData } = usePortfolio();
+
+    // Default structure matching new KV schema
+    const defaultTargets = {
+        assetClasses: { Equity: 50, FixedIncome: 30, RealEstate: 15, Crypto: 5, Cash: 0 },
+        currencies: { GBP: 50, BRL: 40, USD: 10 }
     };
 
-    const targets = allocationTargets || {
-        Equity: 50,
-        FixedIncome: 30,
-        RealEstate: 15,
-        Crypto: 5,
-        Cash: 0
-    };
+    const targets = allocationTargets || defaultTargets;
+    const safeAssetTargets = targets.assetClasses || { ...defaultTargets.assetClasses, ...targets };
+    const safeCurrencyTargets = targets.currencies || defaultTargets.currencies;
 
-    const totalNW = masterMixData?.total || 0;
+    const actualsAssets = masterMixData?.percentages || { Equity: 0, FixedIncome: 0, RealEstate: 0, Crypto: 0, Cash: 0 };
+    const totalNW_GBP = masterMixData?.total || 0;
 
-    // State for Inline Editing
-    const [editTargets, setEditTargets] = useState({ ...targets });
+    // --- Currency Exposure: use the SAME source as Dashboard's "Currency Exposure (Net)" chart ---
+    const actualsCurrencies = React.useMemo(() => {
+        const currencyTotals = { GBP: 0, BRL: 0, USD: 0 };
+        if (dashboardData && dashboardData.categories) {
+            dashboardData.categories.forEach(cat => {
+                if (cat.assets) {
+                    cat.assets.forEach(asset => {
+                        if (!asset.isTotal && !asset.isRealisedPnL && asset.name !== 'Total') {
+                            const cur = asset.nativeCurrency || asset.currency || 'GBP';
+                            let val = asset.gbp || 0;
+                            if (cat.id === 'debt') val = -val;
+
+                            if (cur === 'GBP') currencyTotals.GBP += val;
+                            else if (cur === 'BRL') currencyTotals.BRL += val;
+                            else if (cur === 'USD') currencyTotals.USD += val;
+                            else currencyTotals.GBP += val; // default fallback
+                        }
+                    });
+                }
+            });
+        }
+        const total = currencyTotals.GBP + currencyTotals.BRL + currencyTotals.USD;
+        return {
+            GBP: total > 0 ? (currencyTotals.GBP / total) * 100 : 0,
+            BRL: total > 0 ? (currencyTotals.BRL / total) * 100 : 0,
+            USD: total > 0 ? (currencyTotals.USD / total) * 100 : 0,
+        };
+    }, [dashboardData]);
+
+    const [editAssetTargets, setEditAssetTargets] = useState({ ...safeAssetTargets });
+    const [editCurrencyTargets, setEditCurrencyTargets] = useState({ ...safeCurrencyTargets });
     const [isSaving, setIsSaving] = useState(false);
-
-    // Status Modal State
     const [statusModal, setStatusModal] = useState({ isOpen: false, title: '', message: '', type: 'success' });
 
-    // Sync if props change
     useEffect(() => {
-        setEditTargets({ ...targets });
+        setEditAssetTargets(targets.assetClasses || targets);
+        if (targets.currencies) setEditCurrencyTargets(targets.currencies);
     }, [targets]);
 
-    const handleTargetChange = (key, val) => {
+    const handleAssetTargetChange = (key, val) => {
         let num = parseFloat(val);
         if (isNaN(num)) num = 0;
-        setEditTargets(prev => ({
-            ...prev,
-            [key]: num
-        }));
+        setEditAssetTargets(prev => ({ ...prev, [key]: num }));
     };
 
-    // Fader Configs
-    const faders = [
-        { id: 'Equity', label: 'Equity', icon: LineChart, actual: actuals.Equity, target: editTargets.Equity || 0 },
-        { id: 'FixedIncome', label: 'Fixed Income', icon: Landmark, actual: actuals.FixedIncome, target: editTargets.FixedIncome || 0 },
-        { id: 'RealEstate', label: 'Real Estate', icon: Home, actual: actuals.RealEstate, target: editTargets.RealEstate || 0 },
-        { id: 'Crypto', label: 'Crypto', icon: Bitcoin, actual: actuals.Crypto, target: editTargets.Crypto || 0 },
-        { id: 'Cash', label: 'Cash', icon: PiggyBank, actual: actuals.Cash, target: editTargets.Cash || 0 }
+    const handleCurrencyTargetChange = (key, val) => {
+        let num = parseFloat(val);
+        if (isNaN(num)) num = 0;
+        setEditCurrencyTargets(prev => ({ ...prev, [key]: num }));
+    };
+
+    const assetFaders = [
+        { id: 'Equity', label: 'Equity', icon: LineChart, actual: actualsAssets.Equity, target: editAssetTargets.Equity || 0 },
+        { id: 'FixedIncome', label: 'Fixed Income', icon: Landmark, actual: actualsAssets.FixedIncome, target: editAssetTargets.FixedIncome || 0 },
+        { id: 'RealEstate', label: 'Real Estate', icon: Home, actual: actualsAssets.RealEstate, target: editAssetTargets.RealEstate || 0 },
+        { id: 'Crypto', label: 'Crypto', icon: Bitcoin, actual: actualsAssets.Crypto, target: editAssetTargets.Crypto || 0 },
+        { id: 'Cash', label: 'Cash', icon: PiggyBank, actual: actualsAssets.Cash, target: editAssetTargets.Cash || 0 }
     ];
 
-    // Helper to calculate Deviation
-    const calculateDeviation = () => {
-        let dev = 0;
-        faders.forEach(f => {
-            dev += Math.abs(f.actual - f.target);
-        });
-        return dev; // Total % points off
-    };
+    const FlagGBP = () => <span className="text-base leading-none">🇬🇧</span>;
+    const FlagBRL = () => <span className="text-base leading-none">🇧🇷</span>;
+    const FlagUSD = () => <span className="text-base leading-none">🇺🇸</span>;
 
-    const deviation = calculateDeviation();
-    const totalEdit = Object.values(editTargets).reduce((a, b) => a + b, 0);
-    const isValid = Math.abs(totalEdit - 100) < 0.01; // Allow floating point tolerance
+    const currencyFaders = [
+        { id: 'GBP', label: 'British Pound', icon: FlagGBP, actual: actualsCurrencies.GBP, target: editCurrencyTargets.GBP || 0 },
+        { id: 'BRL', label: 'Brazilian Real', icon: FlagBRL, actual: actualsCurrencies.BRL, target: editCurrencyTargets.BRL || 0 },
+        { id: 'USD', label: 'US Dollar', icon: FlagUSD, actual: actualsCurrencies.USD, target: editCurrencyTargets.USD || 0 }
+    ];
+
+    const calculateDeviation = (faderList) => faderList.reduce((acc, f) => acc + Math.abs(f.actual - f.target), 0);
+
+    const assetDeviation = calculateDeviation(assetFaders);
+    const totalAssetEdit = Object.values(editAssetTargets).reduce((a, b) => a + b, 0);
+    const isValidAssets = Math.abs(totalAssetEdit - 100) < 0.01;
+
+    const currencyDeviation = calculateDeviation(currencyFaders);
+    const totalCurrencyEdit = Object.values(editCurrencyTargets).reduce((a, b) => a + b, 0);
+    const isValidCurrencies = Math.abs(totalCurrencyEdit - 100) < 0.01;
+
+    const isFullyValid = isValidAssets && isValidCurrencies;
+
+    const hasChanges = JSON.stringify(editAssetTargets) !== JSON.stringify(safeAssetTargets) ||
+        JSON.stringify(editCurrencyTargets) !== JSON.stringify(safeCurrencyTargets);
 
     const handleSaveTargets = async () => {
         setIsSaving(true);
         try {
+            const payload = { assetClasses: editAssetTargets, currencies: editCurrencyTargets };
             const res = await fetch('/api/allocation-targets', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(editTargets)
+                body: JSON.stringify(payload)
             });
             if (res.ok) {
-                if (onTargetsSaved) onTargetsSaved(editTargets);
-                setStatusModal({
-                    isOpen: true,
-                    title: 'Targets Updated',
-                    message: 'Your new portfolio allocation targets have been successfully saved.',
-                    type: 'success'
-                });
-            } else {
-                setStatusModal({
-                    isOpen: true,
-                    title: 'Save Failed',
-                    message: 'Could not save the targets. Please check your connection.',
-                    type: 'error'
-                });
-            }
+                if (onTargetsSaved) onTargetsSaved(payload);
+                setStatusModal({ isOpen: true, title: 'Targets Updated', message: 'Your new portfolio allocation targets have been saved.', type: 'success' });
+            } else throw new Error("Save failed");
         } catch (e) {
-            console.error("Failed to save targets", e);
-            setStatusModal({
-                isOpen: true,
-                title: 'Error',
-                message: 'An error occurred while saving. Please try again.',
-                type: 'error'
-            });
+            setStatusModal({ isOpen: true, title: 'Error', message: 'An error occurred while saving.', type: 'error' });
         }
         setIsSaving(false);
     };
 
-    const formatCurrency = (val) => {
-        return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(val);
+    // Prepare data for Recharts
+    const assetPieData = assetFaders.filter(f => f.target > 0).map(f => ({ name: f.label, value: f.target, fill: ASSET_COLORS[f.id] }));
+    const currencyPieData = currencyFaders.filter(f => f.target > 0).map(f => ({ name: f.id, value: f.target, fill: CURRENCY_COLORS[f.id] }));
+
+    const CustomPieTooltip = ({ active, payload }) => {
+        if (active && payload && payload.length) {
+            const data = payload[0].payload;
+            return (
+                <div className="bg-black/90 border border-white/10 rounded px-3 py-2 text-xs font-mono shadow-xl backdrop-blur-md">
+                    <span style={{ color: data.fill }}>{data.name}</span>: {data.value.toFixed(1)}%
+                </div>
+            );
+        }
+        return null;
+    };
+
+    const renderInputRow = (fader, onChange) => (
+        <div key={fader.id} className="flex justify-between items-center py-2.5 border-b border-white/5 last:border-0 group">
+            <div className="flex items-center gap-3">
+                <div className="p-1.5 rounded-md text-white/50 bg-white/5 group-hover:bg-white/10 group-hover:text-white/80 transition-colors">
+                    <fader.icon size={14} strokeWidth={2} />
+                </div>
+                <span className="font-mono text-sm tracking-wide text-white/80">{fader.label}</span>
+            </div>
+            <div className="relative flex items-center justify-end">
+                <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={fader.target === 0 ? '' : fader.target}
+                    onChange={(e) => onChange(fader.id, e.target.value)}
+                    placeholder="0"
+                    className="w-16 bg-black/40 border border-white/10 rounded px-2 py-1.5 text-right font-mono text-sm text-[#D4AF37] focus:border-[#D4AF37] outline-none transition-colors"
+                />
+                <span className="ml-1.5 text-white/40 font-mono text-xs">%</span>
+            </div>
+        </div>
+    );
+
+    const renderDriftRow = (fader) => {
+        const diff = fader.actual - fader.target;
+        const absDiff = Math.abs(diff);
+        const MAX_DEV = 20; // 20% cap for visual scaling
+        const devMagnitude = Math.min(absDiff, MAX_DEV);
+        const barWidthPercent = (devMagnitude / MAX_DEV) * 50;
+
+        // Traffic light: ≤5% green, 5-10% amber, >10% red
+        const barColor = absDiff <= 5 ? 'bg-emerald-500' : (absDiff <= 10 ? 'bg-amber-500' : 'bg-red-500');
+        const textColor = absDiff < 0.1 ? 'text-white/40' : (absDiff <= 5 ? 'text-emerald-400' : (absDiff <= 10 ? 'text-amber-400' : 'text-red-400'));
+
+        return (
+            <div key={`drift-${fader.id}`} className="py-3 border-b border-white/5 last:border-0 group">
+                <div className="flex justify-between items-end mb-2">
+                    <div className="flex items-center gap-2">
+                        <fader.icon size={12} className="text-white/40" />
+                        <span className="font-mono text-xs text-white/70 uppercase tracking-widest">{fader.label}</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <div className="flex flex-col items-end">
+                            <span className="text-[9px] text-white/30 uppercase tracking-widest">Target</span>
+                            <span className="font-mono text-xs text-white/80">{fader.target.toFixed(1)}%</span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                            <span className="text-[9px] text-white/30 uppercase tracking-widest">Actual</span>
+                            <span className="font-mono text-xs text-[#D4AF37] font-bold">{fader.actual.toFixed(1)}%</span>
+                        </div>
+                        <div className="w-16 text-right">
+                            <span className={`font-mono text-xs font-bold ${textColor}`}>
+                                {diff > 0 ? '+' : ''}{diff.toFixed(1)}%
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {/* Visual Drift Bar */}
+                <div className="h-[4px] w-full bg-black/40 rounded border border-white/5 relative flex items-center justify-center overflow-hidden">
+                    <div className="absolute top-0 bottom-0 w-px bg-white/40 z-10" />
+                    {Math.abs(diff) > 0.1 && (
+                        <div
+                            className={`absolute h-full ${barColor}`}
+                            style={{
+                                width: `${barWidthPercent}%`,
+                                left: diff < 0 ? `${50 - barWidthPercent}%` : '50%',
+                                opacity: 0.8,
+                                borderRadius: diff < 0 ? '4px 0 0 4px' : '0 4px 4px 0'
+                            }}
+                        />
+                    )}
+                </div>
+                <div className="mt-1.5 flex justify-end">
+                    <span className="text-[10px] font-mono text-white/40">
+                        {formatPrimary((fader.actual / 100) * totalNW_GBP)}
+                    </span>
+                </div>
+            </div>
+        );
     };
 
     return (
-        <div className="relative rounded-2xl p-6 lg:p-8 shadow-[0_20px_40px_rgba(0,0,0,0.6),inset_0_1px_2px_rgba(255,255,255,0.1)] overflow-hidden mb-8"
-            style={{
-                background: '#130a21',
-                border: '1px solid rgba(212, 175, 55, 0.2)',
-            }}>
+        <div className="mb-8">
+            <StatusModal isOpen={statusModal.isOpen} onClose={() => setStatusModal(prev => ({ ...prev, isOpen: false }))} title={statusModal.title} message={statusModal.message} type={statusModal.type} />
 
-            <StatusModal
-                isOpen={statusModal.isOpen}
-                onClose={() => setStatusModal(prev => ({ ...prev, isOpen: false }))}
-                title={statusModal.title}
-                message={statusModal.message}
-                type={statusModal.type}
-            />
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                <h2 className="text-[#D4AF37] text-2xl m-0 font-bebas tracking-widest drop-shadow-[0_0_8px_rgba(212,175,55,0.3)] uppercase">
+                    Allocation Strategy
+                </h2>
 
-            {/* Header / Top Row */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-4 border-b border-white/10 relative z-10">
-                <div className="flex items-center gap-4 mb-4 sm:mb-0">
-                    <h2 className="text-[#D4AF37] text-2xl m-0 font-bebas tracking-widest drop-shadow-[0_0_8px_rgba(212,175,55,0.3)] uppercase">
-                        Portfolio Targets
-                    </h2>
+                {/* Desktop Save CTA */}
+                <div className="hidden sm:block">
+                    <button
+                        onClick={handleSaveTargets}
+                        disabled={!isFullyValid || isSaving || !hasChanges}
+                        className="relative group bg-gradient-to-b from-[#333] to-[#111] border border-white/10 rounded-lg px-6 py-2 overflow-hidden shadow-xl transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-2"
+                    >
+                        <Save size={14} className="text-[#D4AF37] group-disabled:text-white/30 relative z-10" />
+                        <span className="relative font-mono font-bold tracking-[0.1em] text-[#D4AF37] group-disabled:text-white/30 text-sm">
+                            {isSaving ? 'SAVING...' : 'SAVE TARGETS'}
+                        </span>
+                    </button>
                 </div>
             </div>
 
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
 
+                {/* LEFT COLUMN: GOAL SETTING (TARGETS) */}
+                <div className="glass-card flex flex-col gap-6 lg:gap-8 relative">
+                    <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                        <h3 className="font-bebas text-xl text-white/90 tracking-widest flex items-center gap-2">
+                            <Target size={18} className="text-[#D4AF37]" />
+                            Target Goals
+                        </h3>
+                    </div>
 
-            {/* Data Grid */}
-            <div className="flex flex-col gap-3 relative z-10">
-                {/* Desktop Header Row */}
-                <div className="hidden sm:grid grid-cols-[2fr_1.5fr_1.5fr_2fr_1.5fr] gap-4 px-4 pb-2 border-b border-white/5 text-[10px] font-mono uppercase tracking-[0.2em] text-parchment/40">
-                    <div className="text-left">Asset Class</div>
-                    <div className="text-right">Actual</div>
-                    <div className="text-right pr-6">Target</div>
-                    <div className="text-center">Alignment</div>
-                    <div className="text-right">Value</div>
-                </div>
-
-                {/* Rows */}
-                {faders.map((fader) => {
-                    // Alignment Bar Calculation
-                    const diff = fader.actual - fader.target;
-
-                    // Cap the visual bar at a max deviation (+/- 20%)
-                    const MAX_DEV = 20;
-                    const devMagnitude = Math.min(Math.abs(diff), MAX_DEV);
-                    const barWidthPercent = (devMagnitude / MAX_DEV) * 50; // 50% max width in either direction from center
-
-                    // Binary Coloring: Positive (Overweight) is Green, Negative (Underweight) is Red
-                    const barColor = diff > 0 ? 'bg-[#10b981]' : (diff < 0 ? 'bg-[#ef4444]' : 'bg-transparent');
-
-                    return (
-                        <div key={fader.id} className="grid grid-cols-1 sm:grid-cols-[2fr_1.5fr_1.5fr_2fr_1.5fr] gap-2 sm:gap-4 items-center bg-black/30 hover:bg-black/50 border border-white/5 rounded-lg p-3 sm:px-4 transition-colors">
-                            {/* Icon + Label */}
-                            <div className="flex items-center gap-3">
-                                <div className="p-1.5 rounded-md text-[#D4AF37] shadow-sm bg-[#D4AF37]/10">
-                                    <fader.icon size={16} strokeWidth={2} />
-                                </div>
-                                <span className="font-bebas text-lg tracking-wider text-parchment/90">{fader.label}</span>
-                            </div>
-
-                            {/* Actual % */}
-                            <div className="flex justify-between sm:justify-end items-center sm:text-right">
-                                <span className="sm:hidden text-[10px] font-mono text-parchment/40 uppercase">Actual</span>
-                                <div className="font-mono text-sm font-bold text-parchment drop-shadow-md">
-                                    {fader.actual.toFixed(1)}%
-                                </div>
-                            </div>
-
-                            {/* Target % - Inline Input */}
-                            <div className="flex justify-between sm:justify-end items-center sm:text-right">
-                                <span className="sm:hidden text-[10px] font-mono text-parchment/40 uppercase">Target</span>
-                                <div className="relative flex items-center justify-end">
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        max="100"
-                                        value={editTargets[fader.id] === 0 ? '' : editTargets[fader.id]}
-                                        onChange={(e) => handleTargetChange(fader.id, e.target.value)}
-                                        placeholder="0"
-                                        className="w-16 bg-black/40 border border-white/10 rounded px-2 py-1 text-right font-mono text-sm text-[#D4AF37] focus:border-[#D4AF37] outline-none transition-colors"
-                                    />
-                                    <span className="ml-1 text-parchment/50 font-mono text-sm">%</span>
-                                </div>
-                            </div>
-
-                            {/* Center-Aligned Deviation Bar */}
-                            <div className="w-full mt-2 sm:mt-0 px-2 flex flex-col items-center">
-                                <span className="sm:hidden text-[10px] font-mono text-parchment/40 uppercase mb-1 self-start">Alignment</span>
-                                <div className="h-[20px] w-full bg-black/40 rounded border border-white/5 relative flex items-center justify-center overflow-hidden">
-                                    {/* Middle Zero Line */}
-                                    <div className="absolute top-0 bottom-0 w-px bg-white/40 z-10" />
-
-                                    {/* Deviation Bar */}
-                                    {Math.abs(diff) > 0.1 && (
-                                        <div
-                                            className={`absolute h-full ${barColor} shadow-[0_0_8px_currentColor] transition-all duration-500`}
-                                            style={{
-                                                width: `${barWidthPercent}%`,
-                                                left: diff < 0 ? `${50 - barWidthPercent}%` : '50%',
-                                                opacity: 0.9,
-                                                borderRadius: diff < 0 ? '4px 0 0 4px' : '0 4px 4px 0'
-                                            }}
-                                        />
-                                    )}
-
-                                    {/* Tooltip on Hover showing exactly how far off */}
-                                    <div className="absolute inset-0 opacity-0 hover:opacity-100 flex items-center justify-center bg-black/80 backdrop-blur-[2px] transition-opacity z-20 cursor-help">
-                                        <span className={`font-mono text-xs font-bold ${barColor.replace('bg-', 'text-')}`}>
-                                            {diff > 0 ? '+' : ''}{diff.toFixed(1)}%
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Value £ */}
-                            <div className="flex justify-between sm:justify-end items-center sm:text-right mt-2 sm:mt-0">
-                                <span className="sm:hidden text-[10px] font-mono text-parchment/40 uppercase">Value</span>
-                                <div className="font-mono text-sm text-parchment/60">
-                                    {formatPrimary((fader.actual / 100) * totalNW)}
-                                </div>
+                    {/* Donut Charts Row */}
+                    <div className="grid grid-cols-2 gap-4 h-36">
+                        <div className="relative h-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie data={assetPieData} innerRadius="65%" outerRadius="90%" paddingAngle={2} dataKey="value" stroke="none">
+                                        {assetPieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
+                                    </Pie>
+                                    <RechartsTooltip content={<CustomPieTooltip />} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <span className="font-bebas text-white/40 tracking-widest text-xs">ASSETS</span>
                             </div>
                         </div>
-                    );
-                })}
-            </div>
-
-            {/* Editing Footer - Totals & Save */}
-            <div className="mt-8 pt-6 border-t border-white/5 flex flex-col sm:flex-row justify-between items-end gap-6">
-
-                {/* Statistics Group - Aligned roughly under targets column in desktop */}
-                <div className="flex flex-col gap-2 min-w-[200px]">
-                    {/* Total Mix (The targets themselves) */}
-                    <div className={`font-mono text-[11px] tracking-wide px-3 py-1.5 rounded-md border flex items-center justify-between gap-4 ${isValid ? 'text-vu-green bg-vu-green/5 border-vu-green/20' : 'text-red-400 bg-red-400/5 border-red-400/20'}`}>
-                        <span className="uppercase tracking-widest opacity-60">Total Mix:</span>
-                        <span className="font-bold">{totalEdit.toFixed(1)}%</span>
+                        <div className="relative h-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie data={currencyPieData} innerRadius="65%" outerRadius="90%" paddingAngle={2} dataKey="value" stroke="none">
+                                        {currencyPieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
+                                    </Pie>
+                                    <RechartsTooltip content={<CustomPieTooltip />} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <span className="font-bebas text-white/40 tracking-widest text-xs">FX</span>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Total Drift (Actual vs Target) */}
-                    <div className={`font-mono text-[11px] tracking-wide px-3 py-1.5 rounded-md border border-white/10 bg-black/40 flex items-center justify-between gap-4`}>
-                        <span className="uppercase tracking-widest text-parchment/40">Total Drift:</span>
-                        <span className={`font-bold ${deviation > 0.1 ? 'text-red-400' : 'text-vu-green'}`}>
-                            {deviation.toFixed(1)}%
-                        </span>
+                    {/* Targets Inputs */}
+                    <div className="flex flex-col gap-6">
+                        {/* Asset Classes */}
+                        <div>
+                            <div className="flex justify-between items-center mb-2 px-1">
+                                <span className="text-[10px] font-mono uppercase text-white/50 tracking-widest">Asset Classes</span>
+                                <div className={`px-1.5 py-0.5 rounded text-[9px] font-mono tracking-wider ${isValidAssets ? 'text-emerald-400 bg-emerald-400/10' : 'text-red-400 bg-red-400/10'}`}>
+                                    {totalAssetEdit.toFixed(1)}% / 100%
+                                </div>
+                            </div>
+                            <div className="bg-black/20 border border-white/5 rounded-xl px-4 py-2">
+                                {assetFaders.map(f => renderInputRow(f, handleAssetTargetChange))}
+                            </div>
+                        </div>
+
+                        {/* Currencies */}
+                        <div>
+                            <div className="flex justify-between items-center mb-2 px-1">
+                                <span className="text-[10px] font-mono uppercase text-white/50 tracking-widest">Currency Exposure</span>
+                                <div className={`px-1.5 py-0.5 rounded text-[9px] font-mono tracking-wider ${isValidCurrencies ? 'text-emerald-400 bg-emerald-400/10' : 'text-red-400 bg-red-400/10'}`}>
+                                    {totalCurrencyEdit.toFixed(1)}% / 100%
+                                </div>
+                            </div>
+                            <div className="bg-black/20 border border-white/5 rounded-xl px-4 py-2">
+                                {currencyFaders.map(f => renderInputRow(f, handleCurrencyTargetChange))}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <button
-                    onClick={handleSaveTargets}
-                    disabled={!isValid || isSaving}
-                    className="relative group bg-gradient-to-b from-[#333] to-[#111] border border-white/10 rounded-lg px-10 py-3 overflow-hidden shadow-xl transition-all hover:scale-105 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
-                >
-                    <div className="absolute inset-0 bg-[#D4AF37]/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <span className="relative font-bebas tracking-[0.2em] text-[#D4AF37] text-xl">
-                        {isSaving ? 'CONSOLIDATING...' : 'SAVE TARGETS'}
-                    </span>
-                </button>
+                {/* RIGHT COLUMN: DRIFT ANALYSIS (ACTUALS) */}
+                <div className="glass-card flex flex-col gap-6 lg:gap-8">
+                    <div className="flex justify-between items-center border-b border-white/5 pb-3">
+                        <h3 className="font-bebas text-xl text-white/90 tracking-widest flex items-center gap-2">
+                            <Activity size={18} className="text-[#D4AF37]" />
+                            Execution Drift
+                        </h3>
+                        <div className="flex gap-3">
+                            <span className="font-mono text-[10px] tracking-wide text-white/40">
+                                ASSET DRIFT: <strong className={assetDeviation > 0.1 ? 'text-red-400' : 'text-emerald-400'}>{assetDeviation.toFixed(1)}%</strong>
+                            </span>
+                            <span className="font-mono text-[10px] tracking-wide text-white/40">
+                                FX DRIFT: <strong className={currencyDeviation > 0.1 ? 'text-red-400' : 'text-emerald-400'}>{currencyDeviation.toFixed(1)}%</strong>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col gap-6">
+                        {/* Asset Class Drift */}
+                        <div>
+                            <span className="text-[10px] font-mono uppercase text-white/50 tracking-widest block mb-2 px-1">Asset Misalignment</span>
+                            <div className="px-1">
+                                {assetFaders.map(renderDriftRow)}
+                            </div>
+                        </div>
+
+                        {/* Currency Drift */}
+                        <div>
+                            <span className="text-[10px] font-mono uppercase text-white/50 tracking-widest block mb-2 px-1">Currency Misalignment</span>
+                            <div className="px-1">
+                                {currencyFaders.map(renderDriftRow)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            {/* Mobile Sticky Save CTA */}
+            <div className="sm:hidden fixed bottom-[72px] inset-x-4 z-50 transition-transform duration-300">
+                {hasChanges && (
+                    <motion.div
+                        initial={{ y: 50, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        className="bg-black/80 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-2xl"
+                    >
+                        <button
+                            onClick={handleSaveTargets}
+                            disabled={!isFullyValid || isSaving}
+                            className="w-full bg-[#D4AF37] text-black rounded-xl py-3 font-bebas text-xl tracking-widest disabled:opacity-50 transition-opacity"
+                        >
+                            {isSaving ? 'SAVING...' : 'SAVE ALL TARGETS'}
+                        </button>
+                    </motion.div>
+                )}
             </div>
         </div>
     );

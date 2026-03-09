@@ -4,7 +4,6 @@ import { normalizeTransactions, parseLedgerCSV, calculateMonthlyIncome, calculat
 import { calculateTWRHistory } from '@/lib/roiUtils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, ComposedChart, ReferenceLine, ReferenceArea } from 'recharts';
 import ConfirmationModal from './ConfirmationModal';
-import AssetsClassificationTab from './AssetsClassificationTab';
 
 export default function GeneralLedgerTab({
     equityTransactions,
@@ -30,7 +29,7 @@ export default function GeneralLedgerTab({
     onUpdateAppSettings,
     setIsMonthlyCloseModalOpen
 }) {
-    const [view, setView] = useState('income'); // 'income', 'investments', 'historicals', 'assets'
+    const [view, setView] = useState('income'); // 'income', 'investments', 'historicals'
     const [showExtraordinary, setShowExtraordinary] = useState(false);
     const [incomeData, setIncomeData] = useState([]);
     const [investmentData, setInvestmentData] = useState([]);
@@ -361,21 +360,7 @@ export default function GeneralLedgerTab({
                         >
                             Investments
                         </button>
-                        <button
-                            onClick={() => setView('assets')}
-                            style={{
-                                padding: '8px 24px',
-                                borderRadius: '8px',
-                                border: 'none',
-                                background: view === 'assets' ? 'var(--accent-color)' : 'transparent',
-                                color: view === 'assets' ? '#000' : 'var(--fg-secondary)',
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                transition: 'all 0.2s'
-                            }}
-                        >
-                            Assets
-                        </button>
+
                         <button
                             onClick={() => setView('historicals')}
                             style={{
@@ -707,18 +692,7 @@ export default function GeneralLedgerTab({
                 </div>
             )}
 
-            {view === 'assets' && (
-                <AssetsClassificationTab
-                    assetClasses={assetClasses}
-                    onSave={onSaveAssetClasses}
-                    equityTransactions={equityTransactions}
-                    cryptoTransactions={cryptoTransactions}
-                    pensionTransactions={pensionTransactions}
-                    debtTransactions={debtTransactions}
-                    transactions={transactions}
-                    realEstate={realEstate}
-                />
-            )}
+
 
             {/* Edit Modal */}
             {editingRow && (

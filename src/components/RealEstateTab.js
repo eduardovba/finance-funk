@@ -71,6 +71,23 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
         } catch (e) { console.error('Failed to delete broker', e); }
     };
 
+    // Keep selectedAsset in sync with fresh data after onRefresh()
+    useEffect(() => {
+        if (!selectedAsset || !data) return;
+        if (selectedAsset.type === 'property') {
+            const freshProp = data.properties?.find(p => p.name === selectedAsset.name || p.id === selectedAsset.id);
+            if (freshProp) {
+                setSelectedAsset(prev => ({ ...prev, ...freshProp, type: 'property' }));
+            }
+        } else if (selectedAsset.type === 'fund') {
+            const allFunds = Object.values(data.funds || {}).flat();
+            const freshFund = allFunds.find(f => f.ticker === selectedAsset.ticker);
+            if (freshFund) {
+                setSelectedAsset(prev => ({ ...prev, ...freshFund, type: 'fund' }));
+            }
+        }
+    }, [data]);
+
     // Sell property
     const [sellPropertyData, setSellPropertyData] = useState(null);
 
