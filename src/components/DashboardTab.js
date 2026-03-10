@@ -16,6 +16,10 @@ export default function DashboardTab({
     monthlyInvestments,
     diffPrevMonth,
     diffPrevMonthGBP,
+    fxEffectBRL,
+    assetEffectBRL,
+    fxEffectGBP,
+    assetEffectGBP,
     diffTarget,
     diffTargetGBP,
     assetDiffs,
@@ -39,7 +43,7 @@ export default function DashboardTab({
     const secondaryMeta = SUPPORTED_CURRENCIES[secondaryCurrency];
 
     // Tick every 30s so the "X min ago" label stays live
-    const [, setTick] = useState(0);
+    const [tick, setTick] = useState(0);
     useEffect(() => {
         const id = setInterval(() => setTick(t => t + 1), 30000);
         return () => clearInterval(id);
@@ -51,7 +55,7 @@ export default function DashboardTab({
         if (mins < 1) return 'just now';
         if (mins === 1) return '1m ago';
         return `${mins}m ago`;
-    }, [lastUpdated, /* tick forces recompute */]);
+    }, [lastUpdated, tick]);
 
     // Calculate current ROI for the Hero badge
     const currentROI = useMemo(() => {
@@ -344,6 +348,38 @@ export default function DashboardTab({
                                                 </div>
                                             </div>
 
+                                            {/* FX Attribution Sub-Pills (BRL) */}
+                                            {(Math.abs(fxEffectBRL?.percentage || 0) > 0.05 || Math.abs(assetEffectBRL?.percentage || 0) > 0.05) && (
+                                                <div className="flex flex-col gap-1 pl-3 border-l border-white/[0.06] ml-2">
+                                                    <div className="flex items-center justify-between w-full">
+                                                        <span className="text-[9px] font-space text-[#F5F5DC]/30 flex items-center gap-1">
+                                                            <span className="text-[8px]">↳</span> Asset Prices
+                                                        </span>
+                                                        <div className={`flex items-center gap-1.5 ${(assetEffectBRL?.amount || 0) >= 0 ? 'text-vu-green/80' : 'text-red-400/80'}`}>
+                                                            <span className="font-mono text-[10px]">
+                                                                {(assetEffectBRL?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(assetEffectBRL?.amount || 0, 'BRL'))}
+                                                            </span>
+                                                            <span className="font-space text-[9px] opacity-70">
+                                                                {Math.abs(assetEffectBRL?.percentage || 0).toFixed(1)}%
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center justify-between w-full">
+                                                        <span className="text-[9px] font-space text-[#F5F5DC]/30 flex items-center gap-1">
+                                                            <span className="text-[8px]">↳</span> FX Effect <span className="text-[7px] opacity-50">↔</span>
+                                                        </span>
+                                                        <div className={`flex items-center gap-1.5 ${(fxEffectBRL?.amount || 0) >= 0 ? 'text-vu-green/80' : 'text-red-400/80'}`}>
+                                                            <span className="font-mono text-[10px]">
+                                                                {(fxEffectBRL?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(fxEffectBRL?.amount || 0, 'BRL'))}
+                                                            </span>
+                                                            <span className="font-space text-[9px] opacity-70">
+                                                                {Math.abs(fxEffectBRL?.percentage || 0).toFixed(1)}%
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+
                                             {/* Target Variance Pill */}
                                             {Math.abs(diffTarget?.amount || 0) > 1 && (
                                                 <div className="flex items-center justify-between w-full bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-2 shadow-sm backdrop-blur-sm">
@@ -412,6 +448,38 @@ export default function DashboardTab({
                                                     </span>
                                                 </div>
                                             </div>
+
+                                            {/* FX Attribution Sub-Pills (GBP) */}
+                                            {(Math.abs(fxEffectGBP?.percentage || 0) > 0.05 || Math.abs(assetEffectGBP?.percentage || 0) > 0.05) && (
+                                                <div className="flex flex-col gap-1 pl-3 border-l border-white/[0.06] ml-2">
+                                                    <div className="flex items-center justify-between w-full">
+                                                        <span className="text-[9px] font-space text-[#F5F5DC]/30 flex items-center gap-1">
+                                                            <span className="text-[8px]">↳</span> Asset Prices
+                                                        </span>
+                                                        <div className={`flex items-center gap-1.5 ${(assetEffectGBP?.amount || 0) >= 0 ? 'text-[#CC5500]/80' : 'text-red-400/80'}`}>
+                                                            <span className="font-mono text-[10px]">
+                                                                {(assetEffectGBP?.amount || 0) >= 0 ? '+' : '-'}{formatSecondaryNoDecimals(Math.abs(assetEffectGBP?.amount || 0))}
+                                                            </span>
+                                                            <span className="font-space text-[9px] opacity-70">
+                                                                {Math.abs(assetEffectGBP?.percentage || 0).toFixed(1)}%
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center justify-between w-full">
+                                                        <span className="text-[9px] font-space text-[#F5F5DC]/30 flex items-center gap-1">
+                                                            <span className="text-[8px]">↳</span> FX Effect <span className="text-[7px] opacity-50">↔</span>
+                                                        </span>
+                                                        <div className={`flex items-center gap-1.5 ${(fxEffectGBP?.amount || 0) >= 0 ? 'text-[#CC5500]/80' : 'text-red-400/80'}`}>
+                                                            <span className="font-mono text-[10px]">
+                                                                {(fxEffectGBP?.amount || 0) >= 0 ? '+' : '-'}{formatSecondaryNoDecimals(Math.abs(fxEffectGBP?.amount || 0))}
+                                                            </span>
+                                                            <span className="font-space text-[9px] opacity-70">
+                                                                {Math.abs(fxEffectGBP?.percentage || 0).toFixed(1)}%
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
 
                                             {/* Target Variance Pill */}
                                             {Math.abs(diffTargetGBP?.amount || 0) > 1 && (
@@ -513,6 +581,7 @@ export default function DashboardTab({
                         onCustomizeClick={() => setIsCustomizing(true)}
                         forecastSettings={forecastSettings}
                         dashboardConfig={dashboardConfig} // Added dashboardConfig prop
+                        onNavigate={onNavigate}
                     />
                 )
             }

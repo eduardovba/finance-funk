@@ -122,27 +122,39 @@ export const normalizeTransactions = (
 
     // 5. Fixed Income / Funds
     fixedIncome.forEach(tr => {
+        // Skip entries that belong to other categories (they're handled by their own sections)
+        if (tr.category && tr.category !== 'Fixed Income') return;
+        
         const dateISO = parseDate(tr.date);
-        const rate = getRate(tr.currency, dateISO);
+        const currency = tr.currency || 'GBP';
+        const rate = getRate(currency, dateISO);
 
-        // JSON: XP (-14904) -> User wants Negative Result (Withdrawal).
-        // val = -flow. So we need flow = 14904.
-        // So flow = -tr.investment.
+        // Support both legacy format (investment/account/notes) and new API format (amount/description/type)
+        const investmentVal = tr.investment !== undefined ? tr.investment : (tr.amount || 0);
+        const accountName = tr.account || tr.description || '';
+        const notesVal = tr.notes || '';
+
+        // Determine type from the data
+        let flowType;
+        if (tr.type === 'Investment' || tr.type === 'Expense') {
+            flowType = investmentVal > 0 ? 'Investment' : 'Withdrawal';
+        } else if (tr.type === 'Income') {
+            flowType = 'Withdrawal'; // Income/divestment
+        } else {
+            flowType = investmentVal > 0 ? 'Investment' : 'Withdrawal';
+        }
 
         all.push({
             id: tr.id || `fi-${Math.random()}`,
             originalDate: tr.date,
             date: dateISO,
-            type: tr.investment > 0 ? 'Investment' : 'Withdrawal', // Positive JSON = Investment, Negative JSON = Withdrawal? 
-            // Wait, Inter (+2609) -> User says "positive... 2.6k". And "total should be negative".
-            // So Inter (+2k) -> Positive Result. XP (-15k) -> Negative Result.
-            // So Type aligns with JSON sign.
-            category: 'Fixed Income',
-            description: `${tr.account} (${tr.notes || ''})`,
-            flow: -(tr.investment) / rate, // XP (-14k) -> Flow +14k -> Val -14k.
+            type: flowType,
+            category: tr.category || 'Fixed Income',
+            description: `${accountName} (${notesVal})`,
+            flow: -(investmentVal) / rate,
             currency: 'GBP',
             isSalaryContribution: tr.isSalaryContribution || false,
-            tags: [tr.account]
+            tags: [accountName]
         });
     });
 

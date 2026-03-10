@@ -24,7 +24,7 @@ export default function Sidebar({ activeItem, onNavigate }) {
 
     const trackingItems = [
         { id: 'dashboard', label: 'Dashboard' },
-        { id: 'general-ledger', label: 'General Ledger' },
+        { id: 'general-ledger', label: 'General Ledger', href: '/ledger/income' },
         { id: 'forecast', label: 'Targets' },
         { id: 'long-term-forecast', label: 'Long-Term Forecast' },
     ];

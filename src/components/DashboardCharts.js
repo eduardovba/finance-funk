@@ -91,7 +91,7 @@ const CustomTooltip = ({ active, payload, label, primaryCurrency, secondaryCurre
     return null;
 };
 
-export default function DashboardCharts({ historicalData, currentMonthData, rates, monthlyInvestments, masterMixData, allocationTargets, forecastSettings, dashboardConfig, onCustomizeClick }) {
+export default function DashboardCharts({ historicalData, currentMonthData, rates, monthlyInvestments, masterMixData, allocationTargets, forecastSettings, dashboardConfig, onCustomizeClick, onNavigate }) {
     const { primaryCurrency, secondaryCurrency, toPrimary, toSecondary, formatPrimary, formatSecondary } = usePortfolio();
     const primaryMeta = SUPPORTED_CURRENCIES[primaryCurrency];
     const secondaryMeta = SUPPORTED_CURRENCIES[secondaryCurrency];
@@ -314,11 +314,11 @@ export default function DashboardCharts({ historicalData, currentMonthData, rate
         const monthStr = `${currentY}-${mmStr}`;
 
         const d = investmentsDataMap.get(monthStr) || {};
-        const netFlowRaw = (d.equity || 0) + (d.fixedIncome || 0) + (d.realEstate || 0) + (d.crypto || 0) + (d.pensions || 0) + (d.debt || 0);
+        const netFlowRaw = d.total !== undefined ? d.total : ((d.equity || 0) + (d.fixedIncome || 0) + (d.realEstate || 0) + (d.crypto || 0) + (d.pensions || 0) + (d.debt || 0));
 
         investmentsData.push({
             month: monthStr,
-            Net: netFlowRaw // Retaining raw absolute values which are intrinsically GBP
+            Net: netFlowRaw // Capital injection for the month
         });
 
         currentM++;
@@ -441,7 +441,7 @@ export default function DashboardCharts({ historicalData, currentMonthData, rate
             <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(500px,1fr))] gap-4 md:gap-6 mb-8">
                 {chartsToRender.map((cfg, index) => (
                     <div key={cfg.id} className={`${!showAllCharts && index >= 2 ? 'hidden md:block' : ''}`}>
-                        <GenericChart config={cfg} dataRegistry={dataRegistry} meta={meta} onCustomizeClick={onCustomizeClick} />
+                        <GenericChart config={cfg} dataRegistry={dataRegistry} meta={meta} onCustomizeClick={onCustomizeClick} onNavigate={onNavigate} />
                     </div>
                 ))}
             </div>
@@ -457,7 +457,7 @@ export default function DashboardCharts({ historicalData, currentMonthData, rate
     );
 }
 
-function GenericChart({ config, dataRegistry, meta, onCustomizeClick }) {
+function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate }) {
     const { chartType, dataSources, series, title, options } = config;
     const { primaryCurrency, secondaryCurrency, primaryMeta, secondaryMeta, formatPrimary, formatSecondary, domainPrimary, domainSecondary, totalCurrencyTokensPrimary, totalDrift } = meta;
 
@@ -707,8 +707,14 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick }) {
     // For donut charts, the chart handles its own ResponsiveContainer
     const isDonut = chartType === 'donut';
 
+        const isClickable = mainSource === 'net-flow-history';
+
     return (
-        <div className="bg-[#1A0F2E] border border-[#D4AF37]/30 rounded-xl p-6 shadow-lg shadow-black/20 flex flex-col h-full" data-chart-id={config.id}>
+        <div
+            className={`bg-[#1A0F2E] border border-[#D4AF37]/30 rounded-xl p-6 shadow-lg shadow-black/20 flex flex-col h-full ${isClickable ? 'cursor-pointer hover:border-[#D4AF37]/50 transition-colors' : ''}`}
+            data-chart-id={config.id}
+            onClick={isClickable ? () => { window.location.href = '/ledger/investments'; } : undefined}
+        >
             <div className="flex justify-between items-center mb-5 shrink-0">
                 <div className="flex items-center gap-3">
                     <h3 className="text-[#D4AF37] m-0 text-xl font-normal font-bebas tracking-wide">{title}</h3>

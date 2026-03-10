@@ -11,6 +11,10 @@ export default function DashboardPage() {
         monthlyInvestments,
         diffPrevMonth,
         diffPrevMonthGBP,
+        fxEffectBRL,
+        assetEffectBRL,
+        fxEffectGBP,
+        assetEffectGBP,
         diffTarget,
         diffTargetGBP,
         assetDiffs,
@@ -29,6 +33,10 @@ export default function DashboardPage() {
             monthlyInvestments={monthlyInvestments}
             diffPrevMonth={diffPrevMonth}
             diffPrevMonthGBP={diffPrevMonthGBP}
+            fxEffectBRL={fxEffectBRL}
+            assetEffectBRL={assetEffectBRL}
+            fxEffectGBP={fxEffectGBP}
+            assetEffectGBP={assetEffectGBP}
             diffTarget={diffTarget}
             diffTargetGBP={diffTargetGBP}
             assetDiffs={assetDiffs}
@@ -47,7 +55,7 @@ export default function DashboardPage() {
                     'pensions': '/assets/pensions',
                     'debt': '/assets/debt',
                     'dashboard': '/dashboard',
-                    'general-ledger': '/general-ledger',
+                    'general-ledger': '/ledger/income',
                     'forecast': '/targets',
                     'long-term-forecast': '/forecast',
                     'live-tracking': '/live-tracking',

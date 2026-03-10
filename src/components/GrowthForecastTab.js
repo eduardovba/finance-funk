@@ -869,7 +869,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
                                     </div>
                                 </div>
 
-                                {index > 0 && (
+                                {index > 0 ? (
                                     <button
                                         onClick={() => handleRemovePhase(phase.id)}
                                         className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-red-400 hover:bg-red-400/10 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
@@ -877,6 +877,8 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
                                     >
                                         <Trash2 size={14} />
                                     </button>
+                                ) : (
+                                    <div className="w-8 h-8 shrink-0" />
                                 )}
                             </div>
                         </div>

@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SlidersHorizontal, LayoutDashboard, BookOpen, TrendingUp, Landmark, Home as HomeIcon, LineChart, Bitcoin, Wallet, CreditCard, Target, LogOut, Settings, Scale } from 'lucide-react';
+import { SlidersHorizontal, LayoutDashboard, BookOpen, TrendingUp, Landmark, Home as HomeIcon, LineChart, Bitcoin, Wallet, CreditCard, Target, LogOut, Settings, Scale, DollarSign, ArrowUpDown } from 'lucide-react';
 import CurrencyPill from '@/components/CurrencyPill';
 import { usePortfolio } from '@/context/PortfolioContext';
 import { useSession, signOut } from 'next-auth/react';
@@ -14,12 +14,21 @@ export default function TopConsole() {
     const pathname = usePathname();
     const [isAssetsDropdownOpen, setIsAssetsDropdownOpen] = useState(false);
     const [isPlanningDropdownOpen, setIsPlanningDropdownOpen] = useState(false);
+    const [isLedgerDropdownOpen, setIsLedgerDropdownOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const [isAssetsHovered, setIsAssetsHovered] = useState(false);
+    const [isPlanningHovered, setIsPlanningHovered] = useState(false);
+    const [isLedgerHovered, setIsLedgerHovered] = useState(false);
     const { data: session } = useSession();
 
     const trackingTabs = [
         { id: 'dashboard', href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { id: 'general-ledger', href: '/general-ledger', label: 'Ledger', icon: BookOpen },
+    ];
+
+    const ledgerTabs = [
+        { id: 'income', href: '/ledger/income', label: 'Income', icon: DollarSign },
+        { id: 'investments', href: '/ledger/investments', label: 'Investments', icon: ArrowUpDown },
+        { id: 'totals', href: '/ledger/totals', label: 'General Ledger', icon: BookOpen },
     ];
 
     const planningTabs = [
@@ -43,6 +52,19 @@ export default function TopConsole() {
     const activePlanningTab = planningTabs.find(t => pathname.startsWith(t.href));
     const isPlanningRoute = !!activePlanningTab;
 
+    const activeLedgerTab = ledgerTabs.find(t => pathname.startsWith(t.href));
+    const isLedgerRoute = !!activeLedgerTab;
+
+    // Reset hover/dropdown states on navigation
+    useEffect(() => {
+        setIsAssetsDropdownOpen(false);
+        setIsPlanningDropdownOpen(false);
+        setIsLedgerDropdownOpen(false);
+        setIsAssetsHovered(false);
+        setIsPlanningHovered(false);
+        setIsLedgerHovered(false);
+    }, [pathname]);
+
     return (
         <header className="h-12 md:h-16 w-full flex items-center justify-between px-3 md:px-4 lg:px-6 bg-[#1A0F2E]/90 backdrop-blur-md border-b border-[#D4AF37]/20 z-40 flex-shrink-0">
 
@@ -57,7 +79,8 @@ export default function TopConsole() {
             </Link>
 
             {/* Center: Navigation Tabs — hidden on mobile (BottomNav handles it) */}
-            <nav className="hidden md:flex items-center gap-1 mx-4">
+            <nav className="hidden md:flex items-center gap-0 mx-4">
+                {/* DASHBOARD */}
                 {trackingTabs.map(tab => {
                     const Icon = tab.icon;
                     const isActive = pathname === tab.href || (tab.href === '/dashboard' && pathname === '/');
@@ -66,55 +89,57 @@ export default function TopConsole() {
                             key={tab.id}
                             href={tab.href}
                             className={`
-                flex items-center gap-1.5 px-3 py-2 text-xs font-space font-medium tracking-wide uppercase whitespace-nowrap
-                rounded-none border-b-2 transition-all duration-200 bg-transparent no-underline
+                flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-space font-medium tracking-widest uppercase whitespace-nowrap
+                transition-all duration-200 bg-transparent no-underline
                 ${isActive
-                                    ? 'border-[#D4AF37] text-[#D4AF37] drop-shadow-[0_0_6px_rgba(212,175,55,0.5)]'
-                                    : 'border-transparent text-gray-400 hover:text-white hover:border-white/20'
+                                    ? 'text-[#D4AF37]'
+                                    : 'text-[#F5F5DC]/40 hover:text-[#F5F5DC]/70'
                                 }
               `}
                         >
-                            <Icon size={14} strokeWidth={isActive ? 2.5 : 1.5} />
-                            <span className="hidden md:inline">{tab.label}</span>
+                            <Icon size={13} strokeWidth={isActive ? 2 : 1.5} />
+                            <span>{tab.label}</span>
                         </Link>
                     );
                 })}
 
-                {/* Divider */}
-                <div className="w-px h-6 bg-white/10 mx-2 flex-shrink-0" />
-
                 {/* ASSETS DROPDOWN */}
-                <div className="relative">
+                <div className="relative" onMouseEnter={() => setIsAssetsHovered(true)} onMouseLeave={() => setIsAssetsHovered(false)}>
                     <button
                         onClick={() => setIsAssetsDropdownOpen(!isAssetsDropdownOpen)}
                         className={`
-              flex items-center gap-1.5 px-3 py-2 text-xs font-space font-medium tracking-wide uppercase whitespace-nowrap
-              rounded-none border-b-2 transition-all duration-200 bg-transparent
+              group flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-space font-medium tracking-widest uppercase whitespace-nowrap
+              transition-all duration-200 bg-transparent
               ${isAssetRoute
-                                ? 'border-[#CC5500] text-[#CC5500] drop-shadow-[0_0_6px_rgba(204,85,0,0.5)]'
-                                : 'border-transparent text-gray-400 hover:text-white hover:border-white/20'
+                                ? 'text-[#CC5500]'
+                                : 'text-[#F5F5DC]/40 hover:text-[#F5F5DC]/70'
                             }
             `}
                     >
-                        <LayoutDashboard size={14} strokeWidth={isAssetRoute ? 2.5 : 1.5} />
-                        <span>Assets</span>
+                        <LayoutDashboard size={13} strokeWidth={isAssetRoute ? 2 : 1.5} />
+                        <span className="opacity-70 font-normal">Assets</span>
                         {activeAssetTab && (() => {
                             const ActiveIcon = activeAssetTab.icon;
                             return (
                                 <>
-                                    <span className="opacity-50 mx-0.5 font-bold">&gt;</span>
-                                    <ActiveIcon size={13} strokeWidth={2.5} />
-                                    <span>{activeAssetTab.label}</span>
+                                    <span className="opacity-30 mx-0.5">/</span>
+                                    <span className="font-semibold">{activeAssetTab.label}</span>
                                 </>
                             );
                         })()}
-                        <motion.span
-                            animate={{ rotate: isAssetsDropdownOpen ? 180 : 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="ml-1"
-                        >
-                            ▼
-                        </motion.span>
+                        <AnimatePresence>
+                            {(isAssetsHovered || isAssetsDropdownOpen) && (
+                                <motion.span
+                                    initial={{ width: 0, opacity: 0 }}
+                                    animate={{ width: 'auto', opacity: 0.5, rotate: isAssetsDropdownOpen ? 180 : 0 }}
+                                    exit={{ width: 0, opacity: 0 }}
+                                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                                    className="text-[7px] overflow-hidden inline-flex items-center justify-center ml-0.5"
+                                >
+                                    ▼
+                                </motion.span>
+                            )}
+                        </AnimatePresence>
                     </button>
 
                     {/* Dropdown Menu */}
@@ -164,37 +189,42 @@ export default function TopConsole() {
                 </div>
 
                 {/* PLANNING DROPDOWN */}
-                <div className="relative ml-2">
+                <div className="relative" onMouseEnter={() => setIsPlanningHovered(true)} onMouseLeave={() => setIsPlanningHovered(false)}>
                     <button
                         onClick={() => setIsPlanningDropdownOpen(!isPlanningDropdownOpen)}
                         className={`
-              flex items-center gap-1.5 px-3 py-2 text-xs font-space font-medium tracking-wide uppercase whitespace-nowrap
-              rounded-none border-b-2 transition-all duration-200 bg-transparent
+              group flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-space font-medium tracking-widest uppercase whitespace-nowrap
+              transition-all duration-200 bg-transparent
               ${isPlanningRoute
-                                ? 'border-[#D4AF37] text-[#D4AF37] drop-shadow-[0_0_6px_rgba(212,175,55,0.5)]'
-                                : 'border-transparent text-gray-400 hover:text-white hover:border-white/20'
+                                ? 'text-[#A78BFA]'
+                                : 'text-[#F5F5DC]/40 hover:text-[#F5F5DC]/70'
                             }
             `}
                     >
-                        <TrendingUp size={14} strokeWidth={isPlanningRoute ? 2.5 : 1.5} />
-                        <span>Planning</span>
+                        <TrendingUp size={13} strokeWidth={isPlanningRoute ? 2 : 1.5} />
+                        <span className="opacity-70 font-normal">Planning</span>
                         {activePlanningTab && (() => {
                             const ActiveIcon = activePlanningTab.icon;
                             return (
                                 <>
-                                    <span className="opacity-50 mx-0.5 font-bold">&gt;</span>
-                                    <ActiveIcon size={13} strokeWidth={2.5} />
-                                    <span>{activePlanningTab.label}</span>
+                                    <span className="opacity-30 mx-0.5">/</span>
+                                    <span className="font-semibold">{activePlanningTab.label}</span>
                                 </>
                             );
                         })()}
-                        <motion.span
-                            animate={{ rotate: isPlanningDropdownOpen ? 180 : 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="ml-1"
-                        >
-                            ▼
-                        </motion.span>
+                        <AnimatePresence>
+                            {(isPlanningHovered || isPlanningDropdownOpen) && (
+                                <motion.span
+                                    initial={{ width: 0, opacity: 0 }}
+                                    animate={{ width: 'auto', opacity: 0.5, rotate: isPlanningDropdownOpen ? 180 : 0 }}
+                                    exit={{ width: 0, opacity: 0 }}
+                                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                                    className="text-[7px] overflow-hidden inline-flex items-center justify-center ml-0.5"
+                                >
+                                    ▼
+                                </motion.span>
+                            )}
+                        </AnimatePresence>
                     </button>
 
                     {/* Dropdown Menu */}
@@ -211,7 +241,7 @@ export default function TopConsole() {
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                     transition={{ duration: 0.2, ease: "easeOut" }}
-                                    className="absolute top-full left-0 mt-2 w-48 bg-[#1A0F2E] border border-[#D4AF37]/20 shadow-2xl rounded-xl overflow-hidden z-20 backdrop-blur-xl"
+                                    className="absolute top-full left-0 mt-2 w-48 bg-[#1A0F2E] border border-[#A78BFA]/20 shadow-2xl rounded-xl overflow-hidden z-20 backdrop-blur-xl"
                                 >
                                     <div className="p-2 grid grid-cols-1 gap-1">
                                         {planningTabs.map(tab => {
@@ -226,10 +256,95 @@ export default function TopConsole() {
                              flex items-center gap-3 px-3 py-2.5 text-[11px] font-space font-bold tracking-widest uppercase
                              rounded-lg transition-all duration-200 text-left border-none no-underline
                              ${isActive
-                                                            ? 'bg-[#D4AF37]/20 text-[#D4AF37]'
+                                                            ? 'bg-[#A78BFA]/20 text-[#A78BFA]'
                                                             : 'bg-transparent text-gray-400 hover:bg-white/5 hover:text-white'
                                                         }
                            `}
+                                                >
+                                                    <Icon size={14} strokeWidth={isActive ? 2.5 : 1.5} />
+                                                    {tab.label}
+                                                </Link>
+                                            );
+                                        })}
+                                    </div>
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
+                </div>
+
+                {/* LEDGER DROPDOWN */}
+                <div className="relative" onMouseEnter={() => setIsLedgerHovered(true)} onMouseLeave={() => setIsLedgerHovered(false)}>
+                    <button
+                        onClick={() => setIsLedgerDropdownOpen(!isLedgerDropdownOpen)}
+                        className={`
+              group flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-space font-medium tracking-widest uppercase whitespace-nowrap
+              transition-all duration-200 bg-transparent
+              ${isLedgerRoute
+                                ? 'text-[#D4AF37]'
+                                : 'text-[#F5F5DC]/40 hover:text-[#F5F5DC]/70'
+                            }
+            `}
+                    >
+                        <BookOpen size={13} strokeWidth={isLedgerRoute ? 2 : 1.5} />
+                        <span className="opacity-70 font-normal">Ledger</span>
+                        {activeLedgerTab && (() => {
+                            const ActiveIcon = activeLedgerTab.icon;
+                            return (
+                                <>
+                                    <span className="opacity-30 mx-0.5">/</span>
+                                    <span className="font-semibold">{activeLedgerTab.label}</span>
+                                </>
+                            );
+                        })()}
+                        <AnimatePresence>
+                            {(isLedgerHovered || isLedgerDropdownOpen) && (
+                                <motion.span
+                                    initial={{ width: 0, opacity: 0 }}
+                                    animate={{ width: 'auto', opacity: 0.5, rotate: isLedgerDropdownOpen ? 180 : 0 }}
+                                    exit={{ width: 0, opacity: 0 }}
+                                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                                    className="text-[7px] overflow-hidden inline-flex items-center justify-center ml-0.5"
+                                >
+                                    ▼
+                                </motion.span>
+                            )}
+                        </AnimatePresence>
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    <AnimatePresence>
+                        {isLedgerDropdownOpen && (
+                            <>
+                                <div
+                                    className="fixed inset-0 z-10"
+                                    onClick={() => setIsLedgerDropdownOpen(false)}
+                                />
+
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    transition={{ duration: 0.2, ease: "easeOut" }}
+                                    className="absolute top-full left-0 mt-2 w-48 bg-[#1A0F2E] border border-[#D4AF37]/20 shadow-2xl rounded-xl overflow-hidden z-20 backdrop-blur-xl"
+                                >
+                                    <div className="p-2 grid grid-cols-1 gap-1">
+                                        {ledgerTabs.map(tab => {
+                                            const Icon = tab.icon;
+                                            const isActive = pathname === tab.href;
+                                            return (
+                                                <Link
+                                                    key={tab.id}
+                                                    href={tab.href}
+                                                    onClick={() => setIsLedgerDropdownOpen(false)}
+                                                    className={`
+                            flex items-center gap-3 px-3 py-2.5 text-[11px] font-space font-bold tracking-widest uppercase
+                            rounded-lg transition-all duration-200 text-left border-none no-underline
+                            ${isActive
+                                                            ? 'bg-[#D4AF37]/20 text-[#D4AF37]'
+                                                            : 'bg-transparent text-gray-400 hover:bg-white/5 hover:text-white'
+                                                        }
+                          `}
                                                 >
                                                     <Icon size={14} strokeWidth={isActive ? 2.5 : 1.5} />
                                                     {tab.label}

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
-export default function GeneralLedgerRedirect() {
+export default function LedgerIndex() {
     redirect('/ledger/income');
 }

@@ -331,6 +331,12 @@ export function PortfolioProvider({ children }) {
     const monthlyInvestments = useMemo(() => {
         if (!ledgerData || !ledgerData.investments) return [];
 
+        const now = new Date();
+        const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+        // Filter out current month so it always recalculates live (matches GeneralLedgerTab behavior)
+        const filteredHistorical = ledgerData.investments.filter(h => h.month !== currentMonth);
+
         const allLive = normalizeTransactions({
             equity: equityTransactions,
             crypto: cryptoTransactions,
@@ -340,7 +346,7 @@ export function PortfolioProvider({ children }) {
             realEstate: realEstate
         }, rates, fxHistory);
 
-        return calculateMonthlyInvestments(allLive, ledgerData.investments);
+        return calculateMonthlyInvestments(allLive, filteredHistorical);
     }, [equityTransactions, cryptoTransactions, pensionTransactions, debtTransactions, transactions, realEstate, ledgerData, rates, fxHistory]);
 
     const masterMixData = useMemo(() => {
@@ -385,11 +391,15 @@ export function PortfolioProvider({ children }) {
     const diffs = useMemo(() => {
         let diffPrevMonth = { amount: 0, percentage: 0 };
         let diffPrevMonthGBP = { amount: 0, percentage: 0 };
+        let fxEffectBRL = { amount: 0, percentage: 0 };
+        let assetEffectBRL = { amount: 0, percentage: 0 };
+        let fxEffectGBP = { amount: 0, percentage: 0 };
+        let assetEffectGBP = { amount: 0, percentage: 0 };
         let diffTarget = { amount: 0, percentage: 0 };
         let diffTargetGBP = { amount: 0, percentage: 0 };
         let assetDiffs = {};
         let assetDiffsGBP = {};
-        let categoryAssetDiffs = {}; // { catId: { assetName: { amount, percentage } } }
+        let categoryAssetDiffs = {};
 
         const now = new Date();
         const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -411,6 +421,28 @@ export function PortfolioProvider({ children }) {
                     const currentNetWorthGBP = totalNetWorthBRL / rates.BRL;
                     diffPrevMonthGBP.amount = currentNetWorthGBP - prevNetWorthGBP;
                     diffPrevMonthGBP.percentage = ((currentNetWorthGBP - prevNetWorthGBP) / prevNetWorthGBP) * 100;
+
+                    // FX Attribution (BRL perspective):
+                    // "If asset prices stayed the same, how much did FX alone change the BRL value?"
+                    // prevNW was prevNetWorthGBP * impliedPrevRate in BRL.
+                    // At today's rate, same GBP assets would be prevNetWorthGBP * rates.BRL
+                    const fxAmountBRL = prevNetWorthGBP * (rates.BRL - impliedPrevRate);
+                    fxEffectBRL.amount = fxAmountBRL;
+                    fxEffectBRL.percentage = prevNetWorth > 0 ? (fxAmountBRL / prevNetWorth) * 100 : 0;
+                    assetEffectBRL.amount = diffPrevMonth.amount - fxAmountBRL;
+                    assetEffectBRL.percentage = prevNetWorth > 0 ? (assetEffectBRL.amount / prevNetWorth) * 100 : 0;
+
+                    // FX Attribution (GBP perspective):
+                    // "If asset prices stayed the same, how much did FX alone change the GBP value?"
+                    // Current GBP = totalNetWorthBRL / rates.BRL
+                    // If rate hadn't changed: totalNetWorthBRL / impliedPrevRate
+                    // FX effect in GBP = prevNW_BRL/impliedPrevRate - prevNW_BRL/rates.BRL
+                    //   = prevNetWorth * (1/impliedPrevRate - 1/rates.BRL)
+                    const fxAmountGBP = prevNetWorth * (1 / rates.BRL - 1 / impliedPrevRate);
+                    fxEffectGBP.amount = fxAmountGBP;
+                    fxEffectGBP.percentage = prevNetWorthGBP > 0 ? (fxAmountGBP / prevNetWorthGBP) * 100 : 0;
+                    assetEffectGBP.amount = diffPrevMonthGBP.amount - fxAmountGBP;
+                    assetEffectGBP.percentage = prevNetWorthGBP > 0 ? (assetEffectGBP.amount / prevNetWorthGBP) * 100 : 0;
                 }
 
                 const snapshotCats = prevSnapshot.categories || {};
@@ -501,7 +533,7 @@ export function PortfolioProvider({ children }) {
             }
         }
 
-        return { diffPrevMonth, diffPrevMonthGBP, diffTarget, diffTargetGBP, assetDiffs, assetDiffsGBP, categoryAssetDiffs };
+        return { diffPrevMonth, diffPrevMonthGBP, fxEffectBRL, assetEffectBRL, fxEffectGBP, assetEffectGBP, diffTarget, diffTargetGBP, assetDiffs, assetDiffsGBP, categoryAssetDiffs };
     }, [historicalSnapshots, totalNetWorthBRL, totalFixedIncomeBRL, totalEquityBRL, totalRealEstateBRL, totalCryptoBRL, totalPensionBRL, totalDebtBRL, rates, forecastSettings]);
 
     // ═══════════ TRANSACTION HANDLERS ═══════════

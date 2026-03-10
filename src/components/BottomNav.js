@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     LayoutDashboard, BookOpen, PieChart, Menu, X,
     Landmark, HomeIcon, LineChart, Bitcoin, Wallet, CreditCard,
-    TrendingUp, Target, LogOut, Settings, Scale
+    TrendingUp, Target, LogOut, Settings, Scale, DollarSign, ArrowUpDown
 } from 'lucide-react';
 import { usePortfolio } from '@/context/PortfolioContext';
 import { useSession, signOut } from 'next-auth/react';
@@ -26,6 +26,12 @@ const PLANNING_ITEMS = [
     { id: 'targets', href: '/planning/targets', label: 'Allocation', icon: Target },
     { id: 'forecast', href: '/planning/forecast', label: 'Forecast', icon: TrendingUp },
     { id: 'advisor', href: '/planning/advisor', label: 'Advisor', icon: Scale },
+];
+
+const LEDGER_ITEMS = [
+    { id: 'income', href: '/ledger/income', label: 'Income', icon: DollarSign },
+    { id: 'investments', href: '/ledger/investments', label: 'Investments', icon: ArrowUpDown },
+    { id: 'totals', href: '/ledger/totals', label: 'General Ledger', icon: BookOpen },
 ];
 
 /* ─── Assets Bottom Sheet ─── */
@@ -186,26 +192,79 @@ function MoreSheet({ isOpen, onClose }) {
     );
 }
 
+/* ─── Ledger Bottom Sheet ─── */
+function LedgerSheet({ isOpen, onClose }) {
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <>
+                    <motion.div
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[998]"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={onClose}
+                    />
+                    <motion.div
+                        className="fixed bottom-0 left-0 right-0 bg-[#0B0611] border-t border-[#D4AF37]/20 rounded-t-3xl z-[999] pb-safe"
+                        initial={{ y: '100%' }}
+                        animate={{ y: 0 }}
+                        exit={{ y: '100%' }}
+                        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                    >
+                        <div className="flex justify-center pt-3 pb-2">
+                            <div className="w-10 h-1 bg-white/20 rounded-full" />
+                        </div>
+
+                        <div className="px-5 pb-2">
+                            <h3 className="text-[#D4AF37] font-bebas text-xl tracking-wide">Ledger</h3>
+                        </div>
+
+                        <div className="flex flex-col gap-1 px-5 pb-6">
+                            {LEDGER_ITEMS.map(item => {
+                                const Icon = item.icon;
+                                return (
+                                    <Link
+                                        key={item.id}
+                                        href={item.href}
+                                        onClick={onClose}
+                                        className="flex items-center gap-4 px-3 py-3 rounded-xl text-parchment/80 hover:bg-white/5 active:bg-white/5 active:scale-[0.98] transition-all no-underline"
+                                    >
+                                        <Icon size={18} className="text-[#D4AF37]/60" />
+                                        <span className="text-sm font-space font-medium">{item.label}</span>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    </motion.div>
+                </>
+            )}
+        </AnimatePresence>
+    );
+}
+
 /* ─── Bottom Navigation Bar ─── */
 export default function BottomNav() {
     const pathname = usePathname();
     const [assetsOpen, setAssetsOpen] = useState(false);
     const [moreOpen, setMoreOpen] = useState(false);
+    const [ledgerOpen, setLedgerOpen] = useState(false);
 
     const isAssetRoute = ASSET_TABS.some(t => pathname.startsWith(t.href));
+    const isLedgerRoute = LEDGER_ITEMS.some(t => pathname.startsWith(t.href));
 
     const tabs = [
         { id: 'home', href: '/dashboard', label: 'Home', icon: LayoutDashboard },
-        { id: 'assets', href: null, label: 'Assets', icon: PieChart, action: () => { setMoreOpen(false); setAssetsOpen(true); } },
-        { id: 'activity', href: '/general-ledger', label: 'Activity', icon: BookOpen },
-        { id: 'more', href: null, label: 'More', icon: Menu, action: () => { setAssetsOpen(false); setMoreOpen(true); } },
+        { id: 'assets', href: null, label: 'Assets', icon: PieChart, action: () => { setMoreOpen(false); setLedgerOpen(false); setAssetsOpen(true); } },
+        { id: 'activity', href: null, label: 'Activity', icon: BookOpen, action: () => { setAssetsOpen(false); setMoreOpen(false); setLedgerOpen(true); } },
+        { id: 'more', href: null, label: 'More', icon: Menu, action: () => { setAssetsOpen(false); setLedgerOpen(false); setMoreOpen(true); } },
     ];
 
     const isActive = (tab) => {
         if (tab.id === 'home') return pathname === '/dashboard' || pathname === '/';
         if (tab.id === 'assets') return isAssetRoute || assetsOpen;
-        if (tab.id === 'activity') return pathname === '/general-ledger';
-        if (tab.id === 'more') return moreOpen || pathname === '/planning';
+        if (tab.id === 'activity') return isLedgerRoute || ledgerOpen;
+        if (tab.id === 'more') return moreOpen || pathname.startsWith('/planning');
         return false;
     };
 
@@ -251,6 +310,7 @@ export default function BottomNav() {
             </nav>
 
             <AssetsSheet isOpen={assetsOpen} onClose={() => setAssetsOpen(false)} />
+            <LedgerSheet isOpen={ledgerOpen} onClose={() => setLedgerOpen(false)} />
             <MoreSheet isOpen={moreOpen} onClose={() => setMoreOpen(false)} />
         </>
     );
