@@ -16,6 +16,7 @@ const AVAILABLE_DATA_SOURCES = [
 const AVAILABLE_CHART_TYPES = [
     { id: 'area', label: 'Area Chart', icon: '⛰️' },
     { id: 'line', label: 'Line Chart', icon: '📈' },
+    { id: 'stacked-area', label: 'Stacked Area', icon: '📊' },
     { id: 'stacked-bar', label: 'Stacked Bar', icon: '📊' },
     { id: 'horizontal-bar', label: 'Horizontal Bar', icon: '▤' },
     { id: 'donut', label: 'Donut Chart', icon: '🍩' }
@@ -192,6 +193,7 @@ export default function DashboardCustomizer({ initialConfig, onClose, onSave }) 
         const dsId = {
             'area': 'networth-history',
             'line': 'roi-history',
+            'stacked-area': 'category-history',
             'stacked-bar': 'category-history',
             'horizontal-bar': 'allocation-current',
             'donut': 'currency-exposure'

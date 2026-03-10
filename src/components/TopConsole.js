@@ -78,8 +78,8 @@ export default function TopConsole() {
                 />
             </Link>
 
-            {/* Center: Navigation Tabs — hidden on mobile (BottomNav handles it) */}
-            <nav className="hidden md:flex items-center gap-0 mx-4">
+            {/* Navigation Tabs — left-aligned beside logo, hidden on mobile (BottomNav handles it) */}
+            <nav className="hidden md:flex items-center gap-0 mr-auto ml-2">
                 {/* DASHBOARD */}
                 {trackingTabs.map(tab => {
                     const Icon = tab.icon;

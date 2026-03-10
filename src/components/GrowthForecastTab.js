@@ -160,27 +160,19 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
     ]);
     const [phasesReady, setPhasesReady] = useState(false);
 
-    // Load from localStorage ONCE on client mount
+    // Auto-save phases to DB whenever they change (after initial API load)
     useEffect(() => {
-        try {
-            const saved = localStorage.getItem('financeFunk_forecastPhases');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                    setForecastPhases(parsed);
-                }
-            }
-        } catch (e) { /* ignore */ }
-        // Mark as ready AFTER we've loaded
-        setPhasesReady(true);
-    }, []);
-
-    // Save to localStorage only after initial load has completed
-    useEffect(() => {
-        if (phasesReady) {
-            localStorage.setItem('financeFunk_forecastPhases', JSON.stringify(forecastPhases));
-        }
+        if (!phasesReady) return;
+        const timer = setTimeout(() => {
+            fetch('/api/forecast-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ forecastPhases })
+            }).catch(err => console.error('Failed to auto-save phases:', err));
+        }, 500); // debounce 500ms
+        return () => clearTimeout(timer);
     }, [forecastPhases, phasesReady]);
+
 
     const [forecastData, setForecastData] = useState([]);
 
@@ -209,12 +201,13 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
                         setTarget2031(data.yearlyGoals[2031]);
                     }
                     if (data.startMonth) setStartMonth(data.startMonth);
-                    // Only apply API phases if localStorage doesn't have saved phases
-                    const localPhases = localStorage.getItem('financeFunk_forecastPhases');
-                    if (!localPhases) {
-                        if (data.forecastPhases) setForecastPhases(data.forecastPhases);
-                        else setForecastPhases([{ id: 1, startMonth: null, contribution: data.monthlyContribution || 12000, yield: data.annualInterestRate || 10 }]);
+                    // Use API phases as source of truth
+                    if (data.forecastPhases && Array.isArray(data.forecastPhases) && data.forecastPhases.length > 0) {
+                        setForecastPhases(data.forecastPhases);
+                    } else {
+                        setForecastPhases([{ id: 1, startMonth: null, contribution: data.monthlyContribution || 12000, yield: data.annualInterestRate || 10 }]);
                     }
+                    setPhasesReady(true);
                     // Restore lock state
                     if (data.lockedAt && data.lockedPlan) {
                         setIsLocked(true);
@@ -872,10 +865,10 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
                                 {index > 0 ? (
                                     <button
                                         onClick={() => handleRemovePhase(phase.id)}
-                                        className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-red-400 hover:bg-red-400/10 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                                        className="w-8 h-8 flex items-center justify-center rounded-lg text-white/30 hover:text-red-400 hover:bg-red-400/10 transition-colors shrink-0"
                                         title="Remove Phase"
                                     >
-                                        <Trash2 size={14} />
+                                        <svg className="w-3.5 h-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                                     </button>
                                 ) : (
                                     <div className="w-8 h-8 shrink-0" />

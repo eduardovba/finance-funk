@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    LayoutDashboard, BookOpen, PieChart, Menu, X,
+    LayoutDashboard, BookOpen, PieChart,
     Landmark, HomeIcon, LineChart, Bitcoin, Wallet, CreditCard,
     TrendingUp, Target, LogOut, Settings, Scale, DollarSign, ArrowUpDown
 } from 'lucide-react';
@@ -56,7 +56,7 @@ function AssetsSheet({ isOpen, onClose }) {
                         onClick={onClose}
                     />
                     <motion.div
-                        className="fixed bottom-0 left-0 right-0 bg-[#0B0611] border-t border-[#D4AF37]/20 rounded-t-3xl z-[999] pb-safe"
+                        className="fixed bottom-0 left-0 right-0 bg-[#0B0611] border-t border-[#CC5500]/20 rounded-t-3xl z-[999] pb-safe"
                         initial={{ y: '100%' }}
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
@@ -68,7 +68,7 @@ function AssetsSheet({ isOpen, onClose }) {
                         </div>
 
                         <div className="px-5 pb-2">
-                            <h3 className="text-[#D4AF37] font-bebas text-xl tracking-wide">Asset Classes</h3>
+                            <h3 className="text-[#CC5500] font-bebas text-xl tracking-wide">Asset Classes</h3>
                         </div>
 
                         {/* 2×3 Grid */}
@@ -108,8 +108,8 @@ function AssetsSheet({ isOpen, onClose }) {
     );
 }
 
-/* ─── More Drawer (Bottom Sheet) ─── */
-function MoreSheet({ isOpen, onClose }) {
+/* ─── Planning Bottom Sheet ─── */
+function PlanningSheet({ isOpen, onClose }) {
     const { data: session } = useSession();
 
     return (
@@ -124,7 +124,7 @@ function MoreSheet({ isOpen, onClose }) {
                         onClick={onClose}
                     />
                     <motion.div
-                        className="fixed bottom-0 left-0 right-0 bg-[#0B0611] border-t border-[#D4AF37]/20 rounded-t-3xl z-[999] pb-safe"
+                        className="fixed bottom-0 left-0 right-0 bg-[#0B0611] border-t border-[#A78BFA]/20 rounded-t-3xl z-[999] pb-safe"
                         initial={{ y: '100%' }}
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
@@ -134,40 +134,41 @@ function MoreSheet({ isOpen, onClose }) {
                             <div className="w-10 h-1 bg-white/20 rounded-full" />
                         </div>
 
-                        <div className="px-5 pb-6 flex flex-col gap-1">
-                            <div className="px-4 py-2 mt-2">
-                                <h4 className="font-bebas text-lg tracking-widest text-[#D4AF37] mb-2">Planning</h4>
-                                <div className="flex flex-col gap-1">
-                                    {PLANNING_ITEMS.map(item => {
-                                        const Icon = item.icon;
-                                        return (
-                                            <Link
-                                                key={item.id}
-                                                href={item.href}
-                                                onClick={onClose}
-                                                className="flex items-center gap-4 px-3 py-3 rounded-xl text-parchment/80 hover:bg-white/5 active:bg-white/5 active:scale-[0.98] transition-all no-underline"
-                                            >
-                                                <Icon size={18} className="text-[#D4AF37]/60" />
-                                                <span className="text-sm font-space font-medium">{item.label}</span>
-                                            </Link>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+                        <div className="px-5 pb-2">
+                            <h3 className="text-[#A78BFA] font-bebas text-xl tracking-wide">Planning</h3>
+                        </div>
 
-                            <div className="h-px bg-white/5 my-2" />
+                        <div className="flex flex-col gap-1 px-5 pb-6">
+                            {PLANNING_ITEMS.map(item => {
+                                const Icon = item.icon;
+                                return (
+                                    <Link
+                                        key={item.id}
+                                        href={item.href}
+                                        onClick={onClose}
+                                        className="flex items-center gap-4 px-3 py-3 rounded-xl text-parchment/80 hover:bg-white/5 active:bg-white/5 active:scale-[0.98] transition-all no-underline"
+                                    >
+                                        <Icon size={18} className="text-[#A78BFA]/60" />
+                                        <span className="text-sm font-space font-medium">{item.label}</span>
+                                    </Link>
+                                );
+                            })}
+                        </div>
 
-                            {session?.user && (
-                                <div className="flex items-center justify-between px-4 py-3">
+                        {/* User section at the bottom of Planning */}
+                        {session?.user && (
+                            <>
+                                <div className="h-px bg-white/5 mx-5" />
+                                <div className="flex items-center justify-between px-5 py-4">
                                     <Link
                                         href="/profile"
                                         onClick={onClose}
                                         className="flex items-center gap-3 no-underline flex-1 min-w-0 active:scale-[0.98] transition-transform"
                                     >
                                         {session.user.image ? (
-                                            <img src={session.user.image} alt={session.user.name} className="w-8 h-8 rounded-full object-cover border border-[#D4AF37]/20 flex-shrink-0" />
+                                            <img src={session.user.image} alt={session.user.name} className="w-8 h-8 rounded-full object-cover border border-[#A78BFA]/20 flex-shrink-0" />
                                         ) : (
-                                            <div className="w-8 h-8 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37] text-xs font-bold flex-shrink-0">
+                                            <div className="w-8 h-8 rounded-full bg-[#A78BFA]/10 flex items-center justify-center text-[#A78BFA] text-xs font-bold flex-shrink-0">
                                                 {(session.user.name || session.user.email)?.[0]?.toUpperCase()}
                                             </div>
                                         )}
@@ -183,8 +184,8 @@ function MoreSheet({ isOpen, onClose }) {
                                         Sign Out
                                     </button>
                                 </div>
-                            )}
-                        </div>
+                            </>
+                        )}
                     </motion.div>
                 </>
             )}
@@ -247,24 +248,25 @@ function LedgerSheet({ isOpen, onClose }) {
 export default function BottomNav() {
     const pathname = usePathname();
     const [assetsOpen, setAssetsOpen] = useState(false);
-    const [moreOpen, setMoreOpen] = useState(false);
+    const [planningOpen, setPlanningOpen] = useState(false);
     const [ledgerOpen, setLedgerOpen] = useState(false);
 
     const isAssetRoute = ASSET_TABS.some(t => pathname.startsWith(t.href));
+    const isPlanningRoute = PLANNING_ITEMS.some(t => pathname.startsWith(t.href));
     const isLedgerRoute = LEDGER_ITEMS.some(t => pathname.startsWith(t.href));
 
     const tabs = [
-        { id: 'home', href: '/dashboard', label: 'Home', icon: LayoutDashboard },
-        { id: 'assets', href: null, label: 'Assets', icon: PieChart, action: () => { setMoreOpen(false); setLedgerOpen(false); setAssetsOpen(true); } },
-        { id: 'activity', href: null, label: 'Activity', icon: BookOpen, action: () => { setAssetsOpen(false); setMoreOpen(false); setLedgerOpen(true); } },
-        { id: 'more', href: null, label: 'More', icon: Menu, action: () => { setAssetsOpen(false); setLedgerOpen(false); setMoreOpen(true); } },
+        { id: 'home', href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, color: '#D4AF37' },
+        { id: 'assets', href: null, label: 'Assets', icon: PieChart, color: '#CC5500', action: () => { setPlanningOpen(false); setLedgerOpen(false); setAssetsOpen(true); } },
+        { id: 'planning', href: null, label: 'Planning', icon: TrendingUp, color: '#A78BFA', action: () => { setAssetsOpen(false); setLedgerOpen(false); setPlanningOpen(true); } },
+        { id: 'ledger', href: null, label: 'Ledger', icon: BookOpen, color: '#D4AF37', action: () => { setAssetsOpen(false); setPlanningOpen(false); setLedgerOpen(true); } },
     ];
 
     const isActive = (tab) => {
         if (tab.id === 'home') return pathname === '/dashboard' || pathname === '/';
         if (tab.id === 'assets') return isAssetRoute || assetsOpen;
-        if (tab.id === 'activity') return isLedgerRoute || ledgerOpen;
-        if (tab.id === 'more') return moreOpen || pathname.startsWith('/planning');
+        if (tab.id === 'planning') return isPlanningRoute || planningOpen;
+        if (tab.id === 'ledger') return isLedgerRoute || ledgerOpen;
         return false;
     };
 
@@ -277,6 +279,7 @@ export default function BottomNav() {
                     {tabs.map(tab => {
                         const Icon = tab.icon;
                         const active = isActive(tab);
+                        const activeColor = tab.color;
 
                         if (tab.action) {
                             return (
@@ -285,8 +288,8 @@ export default function BottomNav() {
                                     onClick={tab.action}
                                     className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full bg-transparent border-none active:scale-[0.9] transition-transform"
                                 >
-                                    <Icon size={22} className={active ? 'text-[#D4AF37]' : 'text-parchment/40'} strokeWidth={active ? 2.5 : 1.5} />
-                                    <span className={`text-[10px] font-space tracking-wider ${active ? 'text-[#D4AF37] font-bold' : 'text-parchment/40'}`}>
+                                    <Icon size={22} style={active ? { color: activeColor } : {}} className={active ? '' : 'text-parchment/40'} strokeWidth={active ? 2.5 : 1.5} />
+                                    <span className={`text-[10px] font-space tracking-wider ${active ? 'font-bold' : 'text-parchment/40'}`} style={active ? { color: activeColor } : {}}>
                                         {tab.label}
                                     </span>
                                 </button>
@@ -299,8 +302,8 @@ export default function BottomNav() {
                                 href={tab.href}
                                 className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full no-underline active:scale-[0.9] transition-transform"
                             >
-                                <Icon size={22} className={active ? 'text-[#D4AF37]' : 'text-parchment/40'} strokeWidth={active ? 2.5 : 1.5} />
-                                <span className={`text-[10px] font-space tracking-wider ${active ? 'text-[#D4AF37] font-bold' : 'text-parchment/40'}`}>
+                                <Icon size={22} style={active ? { color: activeColor } : {}} className={active ? '' : 'text-parchment/40'} strokeWidth={active ? 2.5 : 1.5} />
+                                <span className={`text-[10px] font-space tracking-wider ${active ? 'font-bold' : 'text-parchment/40'}`} style={active ? { color: activeColor } : {}}>
                                     {tab.label}
                                 </span>
                             </Link>
@@ -310,8 +313,8 @@ export default function BottomNav() {
             </nav>
 
             <AssetsSheet isOpen={assetsOpen} onClose={() => setAssetsOpen(false)} />
+            <PlanningSheet isOpen={planningOpen} onClose={() => setPlanningOpen(false)} />
             <LedgerSheet isOpen={ledgerOpen} onClose={() => setLedgerOpen(false)} />
-            <MoreSheet isOpen={moreOpen} onClose={() => setMoreOpen(false)} />
         </>
     );
 }

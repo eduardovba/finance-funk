@@ -45,18 +45,33 @@ export function PortfolioProvider({ children }) {
     const [dashboardConfig, setDashboardConfig] = useState(null);
 
     // ═══════════ LAYOUT MODE ═══════════
-    const [layoutMode, setLayoutMode] = useState('modern');
+    const [layoutMode, setLayoutModeState] = useState('modern');
+    const [layoutLoaded, setLayoutLoaded] = useState(false);
+
+    // Wrap setLayoutMode to persist to DB
+    const setLayoutMode = useCallback((newMode) => {
+        setLayoutModeState(newMode);
+        // Instant localStorage cache
+        if (typeof window !== 'undefined') localStorage.setItem('ff_layoutMode', newMode);
+        // Background persist to DB
+        setAppSettings(prev => {
+            const updated = { ...prev, layoutMode: newMode };
+            fetch('/api/app-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updated)
+            }).catch(() => {});
+            return updated;
+        });
+    }, []);
+
+    // Load from localStorage instantly for fast paint, DB will override if available
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('ff_layoutMode');
-            if (saved === 'legacy' || saved === 'modern') setLayoutMode(saved);
+            if (saved === 'legacy' || saved === 'modern') setLayoutModeState(saved);
         }
     }, []);
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('ff_layoutMode', layoutMode);
-        }
-    }, [layoutMode]);
 
     // ═══════════ UI STATE ═══════════
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -85,10 +100,8 @@ export function PortfolioProvider({ children }) {
                     if (!cancelled && data.currencyPreferences) {
                         setPrimaryCurrency(data.currencyPreferences.primary || 'BRL');
                         setSecondaryCurrency(data.currencyPreferences.secondary || 'GBP');
-                        // rateFlipped is not stored in DB, always read from localStorage
-                        if (typeof window !== 'undefined') {
-                            const savedFlipped = localStorage.getItem('ff_rateFlipped');
-                            if (savedFlipped !== null) setRateFlipped(savedFlipped === 'true');
+                        if (data.currencyPreferences.rateFlipped !== undefined) {
+                            setRateFlipped(data.currencyPreferences.rateFlipped);
                         }
                         setCurrencyLoaded(true);
                         return;
@@ -122,7 +135,7 @@ export function PortfolioProvider({ children }) {
         fetch('/api/user/profile', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ primaryCurrency, secondaryCurrency }),
+            body: JSON.stringify({ primaryCurrency, secondaryCurrency, rateFlipped }),
         }).catch(() => { /* ignore – localStorage is the instant fallback */ });
     }, [primaryCurrency, secondaryCurrency, rateFlipped, currencyLoaded]);
 
@@ -281,7 +294,13 @@ export function PortfolioProvider({ children }) {
         fetch('/api/fx-rates').then(res => res.json()).then(setFxHistory);
         fetch('/api/allocation-targets').then(res => res.json()).then(setAllocationTargets);
         fetch('/api/asset-classes').then(res => res.json()).then(setAssetClasses);
-        fetch('/api/app-settings').then(res => res.json()).then(setAppSettings);
+        fetch('/api/app-settings').then(res => res.json()).then(data => {
+            setAppSettings(data);
+            if (data.layoutMode === 'legacy' || data.layoutMode === 'modern') {
+                setLayoutModeState(data.layoutMode);
+                setLayoutLoaded(true);
+            }
+        });
         fetch('/api/forecast-settings').then(res => res.json()).then(setForecastSettings).catch(err => console.error("Failed to load settings", err));
         fetch('/api/dashboard-config').then(res => res.json()).then(setDashboardConfig).catch(e => console.error("Failed to load dashboard config", e));
 

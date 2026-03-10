@@ -25,9 +25,12 @@ export async function GET() {
 export async function POST(request) {
     try {
         const user = await requireAuth();
-        const settings = await request.json();
-        await kvSet(KEY, settings, user.id);
-        return NextResponse.json({ success: true, settings });
+        const incoming = await request.json();
+        // Merge with existing settings so partial updates don't wipe other fields
+        const existing = await kvGet(KEY, DEFAULTS, user.id);
+        const merged = { ...existing, ...incoming };
+        await kvSet(KEY, merged, user.id);
+        return NextResponse.json({ success: true, settings: merged });
     } catch (error) {
         if (error instanceof Response) return error;
         console.error('Error saving forecast settings:', error);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { usePortfolio } from '@/context/PortfolioContext';
 import { SUPPORTED_CURRENCIES } from '@/lib/currency';
 import { calculateTWRHistory } from '@/lib/roiUtils';
@@ -519,6 +519,9 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
                 </div>
             );
         }
+        if (mainSource === 'category-history') {
+            return null; // Legend is rendered below the chart for stacked-area
+        }
         if (mainSource === 'allocation-current') {
             return (
                 <div className="flex items-center gap-2 bg-black/40 border border-white/10 rounded-full px-3 py-1">
@@ -585,24 +588,109 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
             );
         }
 
-        if (chartType === 'stacked-bar') {
+        if (chartType === 'stacked-bar' || chartType === 'stacked-area') {
+            const COMP_COLORS = {
+                FixedIncome: '#10b981',
+                Equity: '#3b82f6',
+                RealEstate: '#ef4444',
+                Crypto: '#f59e0b',
+                Pensions: '#8b5cf6',
+                Debt: '#ec4899',
+            };
+            const COMP_LABELS = {
+                FixedIncome: 'Fixed Income',
+                Equity: 'Equity',
+                RealEstate: 'Real Estate',
+                Crypto: 'Crypto',
+                Pensions: 'Pensions',
+                Debt: 'Debt',
+            };
+            const areaKeys = ['FixedIncome', 'Equity', 'RealEstate', 'Crypto', 'Pensions'].filter(k => series.includes(k));
+            // Sort by latest value: largest at bottom of stack (rendered first)
+            const lastDataPoint = data.length > 0 ? data[data.length - 1] : {};
+            areaKeys.sort((a, b) => {
+                const valA = lastDataPoint?.categories?.[a] || 0;
+                const valB = lastDataPoint?.categories?.[b] || 0;
+                return valB - valA; // Largest first = bottom of stack
+            });
+            // Compute gross assets (before debt reduction) for the debt gap line
+            const showDebt = series.includes('Debt');
+            const chartData = showDebt ? (() => {
+                const mapped = data.map(d => {
+                    const acts = d.actuals || {};
+                    const debt = acts.Debt || 0;
+                    const gross = (acts.RealEstate || 0) + (acts.Equity || 0) + (acts.FixedIncome || 0) + (acts.Crypto || 0) + (acts.Pensions || 0);
+                    return { ...d, grossAssets: debt > 0 && gross > 0 ? gross : null };
+                });
+                // Find first month with debt and show line starting one month before
+                const firstDebtIdx = mapped.findIndex(d => d.grossAssets !== null);
+                if (firstDebtIdx > 0) {
+                    const prevPt = mapped[firstDebtIdx - 1];
+                    const cats = prevPt.categories || {};
+                    const netWorth = (cats.RealEstate || 0) + (cats.Equity || 0) + (cats.FixedIncome || 0) + (cats.Crypto || 0) + (cats.Pensions || 0);
+                    mapped[firstDebtIdx - 1] = { ...prevPt, grossAssets: netWorth > 0 ? netWorth : null };
+                }
+                return mapped;
+            })() : data;
             return (
-                <BarChart data={data} stackOffset="sign">
-                    <CartesianGrid strokeOpacity={0.1} vertical={false} stroke="#F5F5DC" />
-                    <XAxis {...commonXAxis} />
-                    <YAxis stroke="#F5F5DC" tick={{ fill: '#F5F5DC', fontSize: 11, opacity: 0.5, fontFamily: 'var(--font-space)' }} axisLine={{ stroke: 'rgba(212,175,55,0.1)' }} tickFormatter={(val) => `${primaryMeta?.symbol || ''}${(val / 1000).toFixed(0)}k`} />
+                <ComposedChart data={chartData}>
+                    <defs>
+                        {Object.entries(COMP_COLORS).map(([key, color]) => (
+                            <linearGradient key={key} id={`comp-grad-dash-${key}`} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor={color} stopOpacity={0.7} />
+                                <stop offset="100%" stopColor={color} stopOpacity={0.15} />
+                            </linearGradient>
+                        ))}
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                    <XAxis
+                        dataKey="month"
+                        stroke="transparent"
+                        tick={{ fill: 'rgba(245,245,220,0.3)', fontSize: 10, fontFamily: 'var(--font-space)' }}
+                        tickFormatter={formatMonthYear}
+                        tickLine={false}
+                        axisLine={false}
+                        interval="preserveStartEnd"
+                        minTickGap={30}
+                    />
+                    <YAxis
+                        stroke="transparent"
+                        tick={{ fill: 'rgba(245,245,220,0.25)', fontSize: 10, fontFamily: 'var(--font-space)' }}
+                        tickFormatter={(val) => {
+                            if (Math.abs(val) >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
+                            if (Math.abs(val) >= 1000) return `${(val / 1000).toFixed(0)}k`;
+                            return val.toLocaleString('en-GB');
+                        }}
+                        tickLine={false}
+                        axisLine={false}
+                        width={45}
+                    />
                     <Tooltip content={<CustomTooltip {...customTooltipProps} />} />
-
-                    <Legend wrapperStyle={{ color: '#F5F5DC', fontSize: '0.75rem', opacity: 0.7 }} />
-                    <ReferenceLine y={0} stroke="#F5F5DC" strokeOpacity={0.2} />
-
-                    {series.includes('RealEstate') && <Bar dataKey="categories.RealEstate" name="Real Estate" stackId="a" fill="#D4AF37" />}
-                    {series.includes('Equity') && <Bar dataKey="categories.Equity" name="Equity" stackId="a" fill="#CC5500" />}
-                    {series.includes('Pensions') && <Bar dataKey="categories.Pensions" name="Pensions" stackId="a" fill="#4A2B70" />}
-                    {series.includes('FixedIncome') && <Bar dataKey="categories.FixedIncome" name="Fixed Income" stackId="a" fill="#F5F5DC" />}
-                    {series.includes('Crypto') && <Bar dataKey="categories.Crypto" name="Crypto" stackId="a" fill="#8b5cf6" />}
-                    {series.includes('Debt') && <Bar dataKey="categories.Debt" name="Debt (Liability)" stackId="a" fill="none" stroke="#ec4899" strokeWidth={2} strokeDasharray="4 4" />}
-                </BarChart>
+                    {areaKeys.map(key => (
+                        <Area
+                            key={key}
+                            type="monotone"
+                            dataKey={`categories.${key}`}
+                            name={COMP_LABELS[key]}
+                            stackId="1"
+                            fill={`url(#comp-grad-dash-${key})`}
+                            stroke={COMP_COLORS[key]}
+                            strokeWidth={0.5}
+                        />
+                    ))}
+                    {showDebt && (
+                        <Line
+                            type="monotone"
+                            dataKey="grossAssets"
+                            name="Gross Assets (excl. Debt)"
+                            stroke="#ec4899"
+                            strokeWidth={1.5}
+                            strokeDasharray="6 3"
+                            dot={false}
+                            connectNulls
+                        />
+                    )}
+                </ComposedChart>
             );
         }
 
@@ -747,6 +835,50 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
                     ))}
                 </div>
             )}
+            {(chartType === 'stacked-bar' || chartType === 'stacked-area') && (() => {
+                const COMP_COLORS_LEGEND = {
+                    FixedIncome: '#10b981',
+                    Equity: '#3b82f6',
+                    RealEstate: '#ef4444',
+                    Crypto: '#f59e0b',
+                    Pensions: '#8b5cf6',
+                };
+                const COMP_LABELS_LEGEND = {
+                    FixedIncome: 'Fixed Inc',
+                    Equity: 'Equity',
+                    RealEstate: 'Real Est',
+                    Crypto: 'Crypto',
+                    Pensions: 'Pensions',
+                };
+                const lastDP = data.length > 0 ? data[data.length - 1] : {};
+                const sortedKeys = Object.keys(COMP_COLORS_LEGEND)
+                    .filter(k => series.includes(k))
+                    .sort((a, b) => {
+                        const valA = lastDP?.categories?.[a] || 0;
+                        const valB = lastDP?.categories?.[b] || 0;
+                        return valB - valA; // Largest first
+                    });
+                return (
+                    <div className="mt-3 flex justify-center gap-3 shrink-0 flex-wrap">
+                        {sortedKeys.map(key => (
+                            <div key={key} className="flex items-center gap-1">
+                                <div className="w-2 h-2 rounded-sm" style={{ background: COMP_COLORS_LEGEND[key], boxShadow: `0 0 6px ${COMP_COLORS_LEGEND[key]}50` }} />
+                                <span className="text-[9px] font-space" style={{ color: 'rgba(245,245,220,0.4)', fontWeight: 500 }}>
+                                    {COMP_LABELS_LEGEND[key]}
+                                </span>
+                            </div>
+                        ))}
+                        {series.includes('Debt') && (
+                            <div className="flex items-center gap-1">
+                                <div className="w-3 h-0 border-t-[2px] border-dashed border-[#ec4899]" />
+                                <span className="text-[9px] font-space" style={{ color: 'rgba(245,245,220,0.4)', fontWeight: 500 }}>
+                                    Debt
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                );
+            })()}
         </div>
     );
 }

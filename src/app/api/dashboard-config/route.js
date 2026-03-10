@@ -17,8 +17,8 @@ const defaultDashboardConfig = {
         },
         {
             id: "aah-1",
-            title: "Asset Allocation History",
-            chartType: "stacked-bar",
+            title: "Portfolio Composition",
+            chartType: "stacked-area",
             dataSources: ["category-history"],
             series: ["RealEstate", "Equity", "Pensions", "FixedIncome", "Crypto", "Debt"],
             order: 1,

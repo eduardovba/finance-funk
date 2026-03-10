@@ -16,7 +16,7 @@ export async function GET() {
 
         return NextResponse.json({
             ...user,
-            currencyPreferences: currencyPreferences || { primary: 'BRL', secondary: 'GBP' },
+            currencyPreferences: currencyPreferences || { primary: 'BRL', secondary: 'GBP', rateFlipped: false },
         });
     } catch (error) {
         if (error instanceof Response) return error;
@@ -46,11 +46,12 @@ export async function PATCH(request) {
         }
 
         // ── Currency preferences ──
-        if (body.primaryCurrency || body.secondaryCurrency) {
-            const current = await kvGet('currency_preferences', { primary: 'BRL', secondary: 'GBP' }, sessionUser.id);
+        if (body.primaryCurrency || body.secondaryCurrency || body.rateFlipped !== undefined) {
+            const current = await kvGet('currency_preferences', { primary: 'BRL', secondary: 'GBP', rateFlipped: false }, sessionUser.id);
             const updated = {
                 primary: body.primaryCurrency || current.primary,
                 secondary: body.secondaryCurrency || current.secondary,
+                rateFlipped: body.rateFlipped !== undefined ? body.rateFlipped : (current.rateFlipped || false),
             };
             await kvSet('currency_preferences', updated, sessionUser.id);
 

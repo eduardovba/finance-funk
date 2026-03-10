@@ -28,9 +28,9 @@ export default function MetricCard({ id, title, amount, percentage, diffAmount, 
         return (
             <motion.div
                 className={`
-                    glass-card p-3 xl:p-4
+                    glass-card p-1.5 xl:p-2
                     flex flex-col
-                    relative overflow-hidden
+                    relative overflow-visible
                     ${onNavigate ? 'cursor-pointer' : 'cursor-default'}
                     ${className}
                 `}
@@ -40,40 +40,25 @@ export default function MetricCard({ id, title, amount, percentage, diffAmount, 
                 initial={false}
                 whileTap={{ scale: 0.98 }}
             >
-                {/* Shimmer effect on hover */}
-                <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-parchment/[0.05] to-transparent -translate-x-full pointer-events-none"
-                    animate={{ x: isExpanded ? '200%' : '-100%' }}
-                    transition={{ duration: 1.5, repeat: isExpanded ? Infinity : 0, ease: "linear" }}
-                />
+
+
 
                 <div className="flex items-center justify-between gap-2 relative z-10 w-full">
                     <div className="flex flex-col min-w-0 pr-2">
-                        <h3 className="text-[#F5F5DC]/60 text-[8px] xl:text-[10px] tracking-[2px] uppercase font-space mb-1 truncate" title={title}>{title}</h3>
-                        <p className={`text-3xl xl:text-4xl font-normal text-[#D4AF37] drop-shadow-[0_0_10px_rgba(212,175,55,0.4)] font-bebas truncate ${isLoading ? 'opacity-30' : 'opacity-100'}`}>
+                        <h3 className="text-[#F5F5DC]/60 text-[7px] xl:text-[8px] tracking-[2px] uppercase font-space mb-0 truncate" title={title}>{title}</h3>
+                        <p className={`text-lg xl:text-xl font-normal text-[#D4AF37] drop-shadow-[0_0_10px_rgba(212,175,55,0.4)] font-bebas truncate ${isLoading ? 'opacity-30' : 'opacity-100'}`}>
                             {isLoading ? '---' : formatCurrency(amount, currency, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                         </p>
                     </div>
-                    <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                        <p className={`text-[12px] xl:text-[13px] font-mono text-[#CC5500] opacity-80 ${isLoading ? 'opacity-20' : ''} leading-none`}>
+                    <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                        <p className={`text-[10px] xl:text-[11px] font-mono text-[#CC5500] opacity-80 ${isLoading ? 'opacity-20' : ''} leading-none`}>
                             {isLoading ? '---' : formatCurrency(secondaryValue, secondaryCurrency, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                         </p>
-                        <div className={`
-                            px-2 py-0.5 rounded-xl font-medium text-[10px] flex items-center gap-1.5 leading-none shadow-sm
-                            ${isPositiveForColor
-                                ? 'text-vu-green bg-vu-green/[0.08] border border-vu-green/20'
-                                : 'text-red-400 bg-red-400/[0.08] border border-red-400/20'
-                            }
-                        `}>
-                            <span className="font-mono tracking-tight opacity-90 text-[9px]">
-                                {(diffAmount || 0) > 0 ? '+' : ''}{formatCurrency(diffAmount || 0, primaryCurrency, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                            </span>
-                            <div className="w-px h-2.5 bg-current opacity-30"></div>
-                            <span className="flex items-center gap-0.5">
-                                {Math.abs(percentage || 0).toFixed(1)}%
-                                <span className="text-[7px] opacity-70 mb-[1px]">{isActuallyPositive ? '▲' : '▼'}</span>
-                            </span>
-                        </div>
+                        <span className={`text-[9px] font-mono leading-none ${isPositiveForColor ? 'text-vu-green' : 'text-red-400'}`}>
+                            {(diffAmount || 0) > 0 ? '+' : ''}{formatCurrency(diffAmount || 0, primaryCurrency, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                            {' '}{Math.abs(percentage || 0).toFixed(1)}%
+                            <span className="text-[7px] opacity-70 ml-0.5">{isActuallyPositive ? '▲' : '▼'}</span>
+                        </span>
                     </div>
                 </div>
 
