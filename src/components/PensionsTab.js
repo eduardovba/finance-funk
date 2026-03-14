@@ -1012,7 +1012,7 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                     ))}
                 </div>
 
-                <HeroDetailDrawer categoryId="pensions" effectiveCurrency={effectiveCurrency} totalCurrentValue={totalBase} />
+                <HeroDetailDrawer categoryId="pensions" effectiveCurrency={effectiveCurrency} totalCurrentValue={totalGBP} />
             </div>
         );
     };
