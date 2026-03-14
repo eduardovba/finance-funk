@@ -201,7 +201,7 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
 
     // Dynamic broker list
     const brokers_from_transactions = [...new Set(activeHoldings.map(h => h.broker))];
-    const combined_brokers = [...new Set([...brokers_from_transactions, ...explicitDbBrokers, ...Object.keys(brokerDict)])]
+    const combined_brokers = [...new Set([...brokers_from_transactions, ...explicitDbBrokers])]
         .filter(b => !deletedBrokerNames.includes(b));
     // Sort by total value (largest first)
     const brokerValueMap = {};
@@ -248,15 +248,14 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
     };
 
     // 2. Actions
-    const handleAddClick = (brokerName) => {
+    const handleAddClick = (brokerName, assetName) => {
         const cur = brokerDict[brokerName] || BASE_BROKER_CURRENCY[brokerName] || 'BRL';
         setAddData({
             date: new Date().toISOString().split('T')[0],
-            asset: '', broker: brokerName, investment: '', interest: '',
+            asset: assetName || '', broker: brokerName, investment: '', interest: '',
             type: 'Investment', currency: cur, notes: ''
         });
         setRightPaneMode('add-transaction');
-        setSelectedAsset(null);
     };
 
     const handleSaveAdd = async () => {
@@ -275,7 +274,6 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
     const handleEditClick = (tr) => {
         setEditingTr({ ...tr });
         setRightPaneMode('edit-transaction');
-        setSelectedAsset(null);
     };
 
     const handleSaveEdit = async () => {
@@ -307,7 +305,6 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
         setUpdateTarget(item);
         setUpdateNewValue('');
         setRightPaneMode('update-value');
-        setSelectedAsset(null);
     };
 
     const handleSaveUpdate = async () => {
@@ -587,6 +584,24 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
     };
 
     // Add Transaction Form (ContextPane)
+    const handleRenameAsset = async (oldName, newName, broker) => {
+        try {
+            const res = await fetch('/api/assets/rename', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldName, newName, broker, assetClass: 'Fixed Income' })
+            });
+            const data = await res.json();
+            if (!res.ok) return { error: data.error || 'Failed to rename' };
+            onRefresh();
+            setSelectedAsset(null);
+            return { success: true };
+        } catch (e) {
+            console.error('Rename failed:', e);
+            return { error: 'Network error' };
+        }
+    };
+
     const renderAddForm = () => (
         <div className="w-full h-full p-6 text-left relative flex flex-col z-10 overflow-y-auto custom-scrollbar">
             <div className="flex justify-between items-center mb-6 shrink-0">
@@ -784,7 +799,7 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
                     <span className="absolute left-8 top-1/2 -translate-y-1/2 text-white/40">🔍</span>
                 </div>
 
-                {brokers_list.length > 0 ? (
+                {(activeHoldings.length > 0 || transactions.length > 0) ? (
                     <div className="lg:flex lg:gap-8 lg:items-start">
                         <div className="flex-1 min-w-0">
                             {renderConsolidated()}
@@ -807,46 +822,56 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
                                 selectedAsset={selectedAsset}
                                 rightPaneMode={rightPaneMode}
                                 onClose={() => { setSelectedAsset(null); setRightPaneMode('default'); }}
+                                onRename={handleRenameAsset}
                                 maxHeight={contextPaneMaxHeight}
-                                renderHeader={(asset) => (
+                                renderHeader={(asset, nameHandledByContextPane) => (
                                     <div className="flex flex-col">
-                                        <h3 className="text-xl font-bold text-white/90 tracking-tight">{asset.name}</h3>
+                                        {!nameHandledByContextPane && <h3 className="text-xl font-bold text-white/90 tracking-tight">{asset.name}</h3>}
                                         <div className="flex items-center gap-2 mt-2">
                                             <span className="px-2 py-0.5 rounded bg-white/10 text-white/70 text-[10px] font-mono tracking-wider">{asset.broker}</span>
                                         </div>
                                     </div>
                                 )}
-                                renderDetails={(asset) => (
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                                            <span className="block text-[10px] text-white/40 uppercase tracking-widest mb-1.5">Principal</span>
-                                            <span className="text-sm font-medium text-white/90 font-mono">{formatCurrency(asset.investment, asset.currency || 'BRL')}</span>
+                                renderDetails={(asset) => {
+                                    if (rightPaneMode === 'add-transaction' && addData) return renderAddForm();
+                                    if (rightPaneMode === 'edit-transaction' && editingTr) return renderEditForm();
+                                    if (rightPaneMode === 'update-value' && updateTarget) return renderUpdateForm();
+                                    return (
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
+                                                <span className="block text-[10px] text-white/40 uppercase tracking-widest mb-1.5">Principal</span>
+                                                <span className="text-sm font-medium text-white/90 font-mono">{formatCurrency(asset.investment, asset.currency || 'BRL')}</span>
+                                            </div>
+                                            <div className="bg-[#D4AF37]/5 border border-[#D4AF37]/20 rounded-xl p-3">
+                                                <span className="block text-[10px] text-[#D4AF37]/60 uppercase tracking-widest mb-1.5">Current Value</span>
+                                                <span className="text-sm font-bold text-[#D4AF37] font-mono drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">{formatCurrency(asset.currentValue, asset.currency || 'BRL')}</span>
+                                            </div>
+                                            <div className="col-span-2 bg-white/[0.02] border border-white/5 rounded-xl p-3 flex justify-between items-center">
+                                                <span className="text-[10px] text-white/40 uppercase tracking-widest">Accrued Interest</span>
+                                                <span className={`text-sm font-bold tracking-wider rounded-md font-mono ${asset.interest >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                    {asset.interest >= 0 ? '+' : ''}{formatCurrency(asset.interest, asset.currency || 'BRL')} ({asset.roi >= 0 ? '+' : ''}{asset.roi.toFixed(1)}%)
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div className="bg-[#D4AF37]/5 border border-[#D4AF37]/20 rounded-xl p-3">
-                                            <span className="block text-[10px] text-[#D4AF37]/60 uppercase tracking-widest mb-1.5">Current Value</span>
-                                            <span className="text-sm font-bold text-[#D4AF37] font-mono drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">{formatCurrency(asset.currentValue, asset.currency || 'BRL')}</span>
-                                        </div>
-                                        <div className="col-span-2 bg-white/[0.02] border border-white/5 rounded-xl p-3 flex justify-between items-center">
-                                            <span className="text-[10px] text-white/40 uppercase tracking-widest">Accrued Interest</span>
-                                            <span className={`text-sm font-bold tracking-wider rounded-md font-mono ${asset.interest >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                                {asset.interest >= 0 ? '+' : ''}{formatCurrency(asset.interest, asset.currency || 'BRL')} ({asset.roi >= 0 ? '+' : ''}{asset.roi.toFixed(1)}%)
-                                            </span>
-                                        </div>
-                                    </div>
-                                )}
-                                renderActions={(asset) => (
+                                    );
+                                }}
+                                renderActions={(asset) => {
+                                    if (rightPaneMode !== 'default') return null;
+                                    return (
                                     <div className="flex gap-3">
                                         <button onClick={() => handleUpdateClick(asset)}
                                             className="flex-1 py-3 bg-[#10b981]/10 hover:bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/20 rounded-xl text-xs font-semibold tracking-wide uppercase transition-colors">
                                             Update Value
                                         </button>
-                                        <button onClick={() => handleAddClick(asset.broker)}
+                                        <button onClick={() => handleAddClick(asset.broker, asset.name)}
                                             className="flex-1 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold tracking-wide uppercase transition-colors">
                                             Add Transaction
                                         </button>
                                     </div>
-                                )}
+                                    );
+                                }}
                                 renderTimeline={(asset) => {
+                                    if (rightPaneMode !== 'default') return null;
                                     const assetHistory = transactions.filter(t => t.asset === asset.name && t.broker === asset.broker).sort((a, b) => b.date.localeCompare(a.date));
                                     return (
                                         <TransactionTimeline

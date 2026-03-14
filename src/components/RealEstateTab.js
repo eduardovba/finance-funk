@@ -565,6 +565,24 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
         return cards;
     };
 
+    const handleRenameAsset = async (oldName, newName, broker) => {
+        try {
+            const res = await fetch('/api/assets/rename', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldName, newName, broker: broker || 'Properties', assetClass: 'Real Estate' })
+            });
+            const data = await res.json();
+            if (!res.ok) return { error: data.error || 'Failed to rename' };
+            onRefresh();
+            setSelectedAsset(null);
+            return { success: true };
+        } catch (e) {
+            console.error('Rename failed:', e);
+            return { error: 'Network error' };
+        }
+    };
+
     const renderConsolidated = () => {
         const summaryCards = buildSummaryCards();
         return (
@@ -1659,6 +1677,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                             selectedAsset={selectedAsset}
                             rightPaneMode={rightPaneMode}
                             onClose={() => { setSelectedAsset(null); setRightPaneMode('default'); }}
+                            onRename={handleRenameAsset}
                             maxHeight={contextPaneMaxHeight}
                             renderEmptyState={() => {
                                 // --- Add Broker Form ---
@@ -1966,11 +1985,11 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                                     </div>
                                 );
                             }}
-                            renderHeader={(asset) => (
+                            renderHeader={(asset, nameHandledByContextPane) => (
                                 <div className="flex flex-col">
-                                    <h3 className="text-xl font-bold text-white/90 tracking-tight">
+                                    {!nameHandledByContextPane && <h3 className="text-xl font-bold text-white/90 tracking-tight">
                                         {asset.type === 'fund' ? asset.fund : asset.name}
-                                    </h3>
+                                    </h3>}
                                     <div className="flex items-center gap-2 mt-2">
                                         <span className="px-2 py-0.5 rounded bg-white/10 text-white/60 text-[10px] font-mono tracking-wider">
                                             {asset.type === 'fund' ? asset.ticker : asset.currency}

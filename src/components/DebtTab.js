@@ -302,6 +302,24 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
         grandTotal += convertCurrency(data.total, cur, effectiveCurrency, rates);
     });
 
+    const handleRenameAsset = async (oldName, newName, broker) => {
+        try {
+            const res = await fetch('/api/assets/rename', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldName, newName, broker: broker || oldName, assetClass: 'Debt' })
+            });
+            const data = await res.json();
+            if (!res.ok) return { error: data.error || 'Failed to rename' };
+            onRefresh();
+            setSelectedAsset(null);
+            return { success: true };
+        } catch (e) {
+            console.error('Rename failed:', e);
+            return { error: 'Network error' };
+        }
+    };
+
     // Render consolidated hero card
     const renderConsolidated = () => {
         const lenderCards = combinedLenders
@@ -597,10 +615,11 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
                                 selectedAsset={selectedAsset}
                                 rightPaneMode={rightPaneMode}
                                 onClose={() => setSelectedAsset(null)}
+                                onRename={handleRenameAsset}
                                 maxHeight={contextPaneMaxHeight}
-                                renderHeader={(asset) => (
+                                renderHeader={(asset, nameHandledByContextPane) => (
                                     <div className="flex flex-col">
-                                        <h3 className="text-xl font-bold text-white/90 tracking-tight">{asset.lenderName || asset.lender}</h3>
+                                        {!nameHandledByContextPane && <h3 className="text-xl font-bold text-white/90 tracking-tight">{asset.lenderName || asset.lender}</h3>}
                                         <div className="flex items-center gap-2 mt-2">
                                             <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 text-[10px] uppercase font-mono tracking-wider">Debt</span>
                                             <span className="text-white/40 text-[10px] font-mono">{asset.date}</span>

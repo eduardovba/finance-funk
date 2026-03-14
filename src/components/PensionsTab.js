@@ -523,7 +523,7 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
 
     // Dynamic broker list: combine hardcoded, DB-fetched, and transaction-derived
     const brokers_with_transactions = [...new Set(transactions.map(t => t.broker))].filter(Boolean);
-    const combined_brokers = [...new Set([...brokers_with_transactions, ...explicitDbBrokers, ...Object.keys(brokerDict)])]
+    const combined_brokers = [...new Set([...brokers_with_transactions, ...explicitDbBrokers])]
         .filter(b => !deletedBrokerNames.includes(b));
     // Sort by total value (largest first)
     const brokerValueMap = {};
@@ -874,6 +874,24 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
         });
     };
 
+    const handleRenameAsset = async (oldName, newName, broker) => {
+        try {
+            const res = await fetch('/api/assets/rename', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldName, newName, broker, assetClass: 'Pensions' })
+            });
+            const data = await res.json();
+            if (!res.ok) return { error: data.error || 'Failed to rename' };
+            onRefresh();
+            setSelectedAsset(null);
+            return { success: true };
+        } catch (e) {
+            console.error('Rename failed:', e);
+            return { error: 'Network error' };
+        }
+    };
+
     const renderConsolidated = () => {
         let totalGBP = 0;
         let totalCostGBP = 0;
@@ -1032,7 +1050,7 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                     <span className="absolute left-8 lg:left-4 top-1/2 -translate-y-1/2 text-white/40">🔍</span>
                 </div>
 
-                {combined_brokers.length > 0 ? (
+                {(activeHoldings.length > 0 || transactions.length > 0) ? (
                     <div className="lg:flex lg:gap-8 lg:items-start">
                         <div className="flex-1 min-w-0">
                             {renderConsolidated()}
@@ -1058,10 +1076,11 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                                 selectedAsset={selectedAsset}
                                 rightPaneMode={rightPaneMode}
                                 onClose={() => setSelectedAsset(null)}
+                                onRename={handleRenameAsset}
                                 maxHeight={contextPaneMaxHeight}
-                                renderHeader={(asset) => (
+                                renderHeader={(asset, nameHandledByContextPane) => (
                                     <div className="flex flex-col">
-                                        <h3 className="text-xl font-bold text-white/90 tracking-tight">{asset.asset}</h3>
+                                        {!nameHandledByContextPane && <h3 className="text-xl font-bold text-white/90 tracking-tight">{asset.asset}</h3>}
                                         <div className="flex items-center gap-2 mt-2">
                                             <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] uppercase font-mono tracking-wider">{asset.broker}</span>
                                             {asset.ticker && <span className="px-2 py-0.5 rounded bg-white/10 text-white/70 text-[10px] font-mono tracking-wider">{asset.ticker}</span>}
