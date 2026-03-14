@@ -25,7 +25,7 @@ const DEBT_TUTORIAL_STEPS = [
     // Empty state
     { type: 'spotlight', targetId: 'ftue-debt-empty', title: 'Debt Free!', message: "No debts tracked yet. Use the + button to add a lender if you want to track mortgages, loans, or credit.", position: 'top' },
     // Always visible
-    { type: 'spotlight', targetId: 'ftue-debt-fab', title: 'Add a Lender', message: "Use the + button to add a lender and start logging debts and repayments.", position: 'top' },
+    { type: 'spotlight', targetId: 'global-fab', title: 'Add a Lender', message: "Use the + button to add a lender and start logging debts and repayments.", position: 'top', shape: 'circle', padding: 8 },
 ];
 
 const BASE_LENDER_CURRENCY = {};
@@ -493,7 +493,7 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
                 <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] uppercase">
                     {addFormData.transactionType === 'payback' ? 'Log Payback' : 'Log New Debt'}
                 </h3>
-                <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors hidden lg:block ml-auto"><X size={16} /></button>
+                <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors ml-auto"><X size={16} /></button>
             </div>
 
             <div className="flex flex-col gap-5 flex-1 pb-4">
@@ -589,9 +589,10 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
                     <span className="absolute left-8 lg:left-4 top-1/2 -translate-y-1/2 text-white/40">🔍</span>
                 </div>
 
-                {combinedLenders.length > 0 ? (
-                    <div className="lg:flex lg:gap-8 lg:items-start">
-                        <div className="flex-1 min-w-0">
+                <div className="lg:flex lg:gap-8 lg:items-start">
+                    <div className="flex-1 min-w-0">
+                    {combinedLenders.length > 0 ? (
+                        <>
                             {renderConsolidated()}
 
                             <div id="ftue-debt-lender-section">
@@ -608,13 +609,25 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
 
                             {displayLenders.map(l => renderLenderTable(l))}
                             </div>
+                        </>
+                    ) : (
+                        <div id="ftue-debt-empty">
+                        <EmptyState
+                            icon="🪶"
+                            title="Debt Free"
+                            message="You have no outstanding debts tracked. Add a lender to start tracking mortgages, loans, or credit."
+                            actionLabel="Add Lender"
+                            onAction={() => setRightPaneMode('add-lender')}
+                        />
                         </div>
+                    )}
+                    </div>
 
-                        <div className="hidden lg:block sticky top-8 h-fit">
+                        <div className={`${(selectedAsset || rightPaneMode !== 'default') ? 'block fixed inset-0 z-50 bg-[#0A0612] lg:bg-transparent lg:static lg:block' : 'hidden lg:block'} lg:sticky top-8 h-[100dvh] lg:h-fit overflow-hidden`}>
                             <ContextPane
                                 selectedAsset={selectedAsset}
                                 rightPaneMode={rightPaneMode}
-                                onClose={() => setSelectedAsset(null)}
+                                onClose={() => { setSelectedAsset(null); setRightPaneMode('default'); }}
                                 onRename={handleRenameAsset}
                                 maxHeight={contextPaneMaxHeight}
                                 renderHeader={(asset, nameHandledByContextPane) => (
@@ -727,17 +740,6 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
                             />
                         </div>
                     </div>
-                ) : (
-                    <div id="ftue-debt-empty">
-                    <EmptyState
-                        icon="🪶"
-                        title="Debt Free"
-                        message="You have no outstanding debts tracked. Add a lender to start tracking mortgages, loans, or credit."
-                        actionLabel="Add Lender"
-                        onAction={() => setRightPaneMode('add-lender')}
-                    />
-                    </div>
-                )}
 
                 {/* Transaction Ledger / Activity History */}
                 <section id="ftue-debt-ledger" className="max-w-3xl mx-auto mb-10 mt-12">
@@ -781,7 +783,6 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
                     )}
                 </section>
 
-                <div id="ftue-debt-fab">
                 <FloatingActionButton
                     onAddBroker={() => {
                         setRightPaneMode('add-lender');
@@ -792,7 +793,6 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
                     }}
                     brokerLabel="Add Lender"
                 />
-                </div>
 
                 <ConfirmationModal
                     isOpen={isDeleteModalOpen}

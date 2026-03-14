@@ -27,7 +27,7 @@ const PENSIONS_TUTORIAL_STEPS = [
     // Empty state
     { type: 'spotlight', targetId: 'ftue-pensions-empty', title: 'Get Started', message: "No pension accounts yet. Use the + button to add a provider and start tracking your retirement funds.", position: 'top' },
     // Always visible
-    { type: 'spotlight', targetId: 'ftue-pensions-fab', title: 'Buy, Sell & Add Provider', message: "Use the + button to add a provider, buy into funds, or sell positions. Contributions vs. growth are tracked automatically.", position: 'top' },
+    { type: 'spotlight', targetId: 'global-fab', title: 'Buy, Sell & Add Provider', message: "Use the + button to add a provider, buy into funds, or sell positions. Contributions vs. growth are tracked automatically.", position: 'top', shape: 'circle', padding: 8 },
 ];
 
 // Added dynamic brokers to base dictionary map
@@ -1050,9 +1050,10 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                     <span className="absolute left-8 lg:left-4 top-1/2 -translate-y-1/2 text-white/40">🔍</span>
                 </div>
 
-                {(activeHoldings.length > 0 || transactions.length > 0) ? (
-                    <div className="lg:flex lg:gap-8 lg:items-start">
-                        <div className="flex-1 min-w-0">
+                <div className="lg:flex lg:gap-8 lg:items-start">
+                    <div className="flex-1 min-w-0">
+                    {(activeHoldings.length > 0 || transactions.length > 0) ? (
+                        <>
                             {renderConsolidated()}
 
                             <div id="ftue-pensions-provider-section">
@@ -1069,13 +1070,25 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
 
                             {combined_brokers.map(b => renderBrokerTable(b, groupBroker(b)))}
                             </div>
+                        </>
+                    ) : (
+                        <div id="ftue-pensions-empty">
+                        <EmptyState
+                            icon="🛡️"
+                            title="No Pension Accounts"
+                            message="You have no pension accounts yet. Add a provider to start tracking your retirement funds."
+                            actionLabel="Add Pension Provider"
+                            onAction={() => setRightPaneMode('add-broker')}
+                        />
                         </div>
+                    )}
+                    </div>
 
-                        <div className="hidden lg:block sticky top-8 h-fit">
+                        <div className={`${(selectedAsset || rightPaneMode !== 'default') ? 'block fixed inset-0 z-50 bg-[#0A0612] lg:bg-transparent lg:static lg:block' : 'hidden lg:block'} lg:sticky top-8 h-[100dvh] lg:h-fit overflow-hidden`}>
                             <ContextPane
                                 selectedAsset={selectedAsset}
                                 rightPaneMode={rightPaneMode}
-                                onClose={() => setSelectedAsset(null)}
+                                onClose={() => { setSelectedAsset(null); setRightPaneMode('default'); }}
                                 onRename={handleRenameAsset}
                                 maxHeight={contextPaneMaxHeight}
                                 renderHeader={(asset, nameHandledByContextPane) => (
@@ -1478,17 +1491,6 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                             />
                         </div>
                     </div>
-                ) : (
-                    <div id="ftue-pensions-empty">
-                    <EmptyState
-                        icon="🛡️"
-                        title="No Pension Accounts"
-                        message="You have no pension accounts yet. Add a provider to start tracking your retirement funds."
-                        actionLabel="Add Pension Provider"
-                        onAction={() => setRightPaneMode('add-broker')}
-                    />
-                    </div>
-                )}
 
                 {/* Transaction Ledger */}
                 <section className="max-w-3xl mx-auto mb-10 mt-12">
@@ -1565,7 +1567,6 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                     )}
                 </section>
 
-                <div id="ftue-pensions-fab">
                 <FloatingActionButton
                     onAddBroker={() => {
                         setRightPaneMode('add-broker');
@@ -1573,7 +1574,6 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                     }}
                     brokerLabel="Add Broker"
                 />
-                </div>
 
                 {/* Edit and Delete Modals to be fully implemented or confirmation modal used */}
                 <ConfirmationModal

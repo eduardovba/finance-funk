@@ -24,7 +24,7 @@ const FIXEDINCOME_TUTORIAL_STEPS = [
     // Empty state
     { type: 'spotlight', targetId: 'ftue-fi-empty', title: 'Get Started', message: "No fixed income accounts yet. Use the + button to add a savings account, bond, or treasury product.", position: 'top' },
     // Always visible
-    { type: 'spotlight', targetId: 'ftue-fi-fab', title: 'Add Account', message: "Use the + button to create a new account and start tracking deposits and interest.", position: 'top' },
+    { type: 'spotlight', targetId: 'global-fab', title: 'Add Account', message: "Use the + button to create a new account and start tracking deposits and interest.", position: 'top', shape: 'circle', padding: 8 },
 ];
 
 const BASE_BROKER_CURRENCY = {
@@ -606,7 +606,7 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
         <div className="w-full h-full p-6 text-left relative flex flex-col z-10 overflow-y-auto custom-scrollbar">
             <div className="flex justify-between items-center mb-6 shrink-0">
                 <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] uppercase">Add Transaction</h3>
-                <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors hidden lg:block ml-auto"><X size={16} /></button>
+                <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors ml-auto"><X size={16} /></button>
             </div>
             <div className="flex flex-col gap-5 flex-1 pb-4">
                 {/* Type toggle */}
@@ -675,7 +675,7 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
         <div className="w-full h-full p-6 text-left relative flex flex-col z-10 overflow-y-auto custom-scrollbar">
             <div className="flex justify-between items-center mb-6 shrink-0">
                 <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] uppercase">Edit Transaction</h3>
-                <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors hidden lg:block ml-auto"><X size={16} /></button>
+                <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors ml-auto"><X size={16} /></button>
             </div>
             <div className="flex flex-col gap-5 flex-1 pb-4">
                 <div className="flex rounded-xl border border-white/10 overflow-hidden">
@@ -732,7 +732,7 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
             <div className="w-full h-full p-6 text-left relative flex flex-col z-10 overflow-y-auto custom-scrollbar">
                 <div className="flex justify-between items-center mb-6 shrink-0">
                     <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] uppercase">Update Value</h3>
-                    <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors hidden lg:block ml-auto"><X size={16} /></button>
+                    <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors ml-auto"><X size={16} /></button>
                 </div>
 
                 <div className="flex flex-col gap-5 flex-1 pb-4">
@@ -799,9 +799,10 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
                     <span className="absolute left-8 top-1/2 -translate-y-1/2 text-white/40">🔍</span>
                 </div>
 
-                {(activeHoldings.length > 0 || transactions.length > 0) ? (
-                    <div className="lg:flex lg:gap-8 lg:items-start">
-                        <div className="flex-1 min-w-0">
+                <div className="lg:flex lg:gap-8 lg:items-start">
+                    <div className="flex-1 min-w-0">
+                    {(activeHoldings.length > 0 || transactions.length > 0) ? (
+                        <>
                             {renderConsolidated()}
 
                             <div id="ftue-fi-account-section">
@@ -815,9 +816,21 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
 
                             {brokers_list.map(b => renderBrokerTable(b))}
                             </div>
+                        </>
+                    ) : (
+                        <div id="ftue-fi-empty">
+                        <EmptyState
+                            icon="🏦"
+                            title="No Fixed Income Assets"
+                            message="You have no fixed income accounts yet. Add an account to start tracking deposits, bonds, and interest."
+                            actionLabel="Add Account"
+                            onAction={() => setRightPaneMode('add-broker')}
+                        />
                         </div>
+                    )}
+                    </div>
 
-                        <div className="hidden lg:block sticky top-8 h-fit">
+                        <div className={`${(selectedAsset || rightPaneMode !== 'default') ? 'block fixed inset-0 z-50 bg-[#0A0612] lg:bg-transparent lg:static lg:block' : 'hidden lg:block'} lg:sticky top-8 h-[100dvh] lg:h-fit overflow-hidden`}>
                             <ContextPane
                                 selectedAsset={selectedAsset}
                                 rightPaneMode={rightPaneMode}
@@ -940,17 +953,6 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
                             />
                         </div>
                     </div>
-                ) : (
-                    <div id="ftue-fi-empty">
-                    <EmptyState
-                        icon="🏦"
-                        title="No Fixed Income Assets"
-                        message="You have no fixed income accounts yet. Add an account to start tracking deposits, bonds, and interest."
-                        actionLabel="Add Account"
-                        onAction={() => setRightPaneMode('add-broker')}
-                    />
-                    </div>
-                )}
 
                 {/* Transaction Ledger */}
                 <section id="ftue-fi-ledger" className="max-w-3xl mx-auto mb-10 mt-12">
@@ -998,12 +1000,10 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
                     )}
                 </section>
 
-                <div id="ftue-fi-fab">
                 <FloatingActionButton
                     onAddBroker={() => { setRightPaneMode('add-broker'); setSelectedAsset(null); }}
                     onAddTransaction={() => { handleAddClick(brokers_list[0] || ''); }}
                 />
-                </div>
 
                 <ConfirmationModal
                     isOpen={isDeleteModalOpen}

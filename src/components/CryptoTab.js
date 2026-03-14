@@ -33,7 +33,7 @@ const CRYPTO_TUTORIAL_STEPS = [
     // Empty state
     { type: 'spotlight', targetId: 'ftue-crypto-empty', title: 'Get Started', message: "Your crypto portfolio is empty. Use the + button to add an exchange like Binance or Coinbase.", position: 'top' },
     // Always visible
-    { type: 'spotlight', targetId: 'ftue-crypto-fab', title: 'Add Exchange or Buy', message: "Use the + button to add a new exchange, buy crypto, or record a sale.", position: 'top' },
+    { type: 'spotlight', targetId: 'global-fab', title: 'Add Exchange or Buy', message: "Use the + button to add a new exchange, buy crypto, or record a sale.", position: 'top', shape: 'circle', padding: 8 },
 ];
 
 export default function CryptoTab({ transactions = [], marketData, rates, onRefresh }) {
@@ -908,7 +908,7 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
                     <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] uppercase">
                         {buyData.asset ? `Buy More ${buyData.asset}` : 'New Purchase'}
                     </h3>
-                    <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors hidden lg:block ml-auto"><X size={16} /></button>
+                    <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors ml-auto"><X size={16} /></button>
                 </div>
 
                 <div className="flex flex-col gap-5 flex-1 pb-4">
@@ -1087,9 +1087,10 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
                     <span className="absolute left-8 lg:left-4 top-1/2 -translate-y-1/2 text-white/40">🔍</span>
                 </div>
 
-                {(activeHoldings.length > 0 || transactions.length > 0) ? (
-                    <div className="lg:flex lg:gap-8 lg:items-start">
-                        <div className="flex-1 min-w-0">
+                <div className="lg:flex lg:gap-8 lg:items-start">
+                    <div className="flex-1 min-w-0">
+                    {(activeHoldings.length > 0 || transactions.length > 0) ? (
+                        <>
                             {renderConsolidated()}
 
                             <div id="ftue-crypto-exchange-section">
@@ -1106,12 +1107,27 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
 
                             {brokers.map(b => renderBrokerTable(b, brokerGroups[b]))}
                             </div>
-                        </div>
-                        <div className="hidden lg:block sticky top-8 h-fit">
+                        </>
+                    ) : (
+                        <>
+                            <h2 className="text-xl font-bold font-bebas tracking-widest text-[#D4AF37]">CRYPTO PORTFOLIO</h2>
+                            <div id="ftue-crypto-empty">
+                            <EmptyState
+                                icon="💎"
+                                title="No Crypto Assets"
+                                message="You have no crypto assets yet. Add an exchange to log your first transaction."
+                                actionLabel="Add Exchange"
+                                onAction={() => setRightPaneMode('add-broker')}
+                            />
+                            </div>
+                        </>
+                    )}
+                    </div>
+                        <div className={`${(selectedAsset || rightPaneMode !== 'default') ? 'block fixed inset-0 z-50 bg-[#0A0612] lg:bg-transparent lg:static lg:block' : 'hidden lg:block'} lg:sticky top-8 h-[100dvh] lg:h-fit overflow-hidden`}>
                             <ContextPane
                                 selectedAsset={selectedAsset}
                                 rightPaneMode={rightPaneMode}
-                                onClose={() => setSelectedAsset(null)}
+                                onClose={() => { setSelectedAsset(null); setRightPaneMode('default'); }}
                                 onRename={handleRenameAsset}
                                 maxHeight={contextPaneMaxHeight}
                                 renderEmptyState={() => {
@@ -1119,7 +1135,7 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
                                         return (
                                             <div className="w-full h-full p-8 text-left relative flex flex-col z-10">
                                                 <div className="flex justify-between items-center mb-6">
-                                                    <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors hidden lg:block ml-auto"><X size={16} /></button>
+                                                    <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors ml-auto"><X size={16} /></button>
                                                 </div>
                                                 <div className="flex-1">
                                                     <BrokerForm assetClass="Crypto" onSave={() => { setRightPaneMode('default'); fetchBrokers(); }} onCancel={() => setRightPaneMode('default')} />
@@ -1297,23 +1313,6 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
                             />
                         </div>
                     </div>
-                ) : (
-                    <>
-                        <h2 className="text-xl font-bold font-bebas tracking-widest text-[#D4AF37]">CRYPTO PORTFOLIO</h2>
-                        <div className="flex gap-2">
-                            {/* Optional top-level actions could go here */}
-                        </div>
-                        <div id="ftue-crypto-empty">
-                        <EmptyState
-                            icon="💎"
-                            title="No Crypto Assets"
-                            message="You have no crypto assets yet. Add an exchange to log your first transaction."
-                            actionLabel="Add Exchange"
-                            onAction={() => setRightPaneMode('add-broker')}
-                        />
-                        </div>
-                    </>
-                )}
 
                 {/* Transaction Ledger */}
                 <section id="ftue-crypto-ledger" className="max-w-3xl mx-auto mb-10 mt-12">
@@ -1371,7 +1370,6 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
 
                 {/* Context-Aware FAB */}
                 {/* New Expandable FAB */}
-                <div id="ftue-crypto-fab">
                 <FloatingActionButton
                     brokerLabel="Add Exchange"
                     onAddBroker={() => {
@@ -1382,7 +1380,6 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
                         handleNewBuyClick('');
                     }}
                 />
-                </div>
 
                 <ConfirmationModal
                     isOpen={isDeleteModalOpen}

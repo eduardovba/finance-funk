@@ -104,6 +104,7 @@ export default function FloatingActionButton({
             </AnimatePresence>
 
             <motion.button
+                id="global-fab"
                 onClick={(e) => handleTap(e, 'toggle')}
                 animate={{ rotate: isOpen ? 45 : 0 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}

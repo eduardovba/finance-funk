@@ -272,7 +272,7 @@ export default function BottomNav() {
 
     return (
         <>
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[997] bg-[#0B0611]/95 backdrop-blur-xl border-t border-white/10"
+            <nav id="ftue-nav-mobile" className="md:hidden fixed bottom-0 left-0 right-0 z-[997] bg-[#0B0611]/95 backdrop-blur-xl border-t border-white/10"
                 style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
             >
                 <div className="flex items-center justify-around h-16">
@@ -285,6 +285,10 @@ export default function BottomNav() {
                             return (
                                 <button
                                     key={tab.id}
+                                    id={
+                                        tab.id === 'assets' ? 'ftue-sidebar-mobile' :
+                                        tab.id === 'planning' ? 'ftue-settings-mobile' : undefined
+                                    }
                                     onClick={tab.action}
                                     className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full bg-transparent border-none active:scale-[0.9] transition-transform"
                                 >

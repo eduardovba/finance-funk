@@ -1685,7 +1685,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                                     return (
                                         <div className="w-full h-full p-8 text-left relative flex flex-col z-10">
                                             <div className="flex justify-between items-center mb-6">
-                                                <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors hidden lg:block ml-auto"><X size={16} /></button>
+                                                <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors ml-auto"><X size={16} /></button>
                                             </div>
                                             <div className="flex-1">
                                                 <BrokerForm assetClass="Real Estate" onSave={(savedBroker) => {
@@ -2164,13 +2164,11 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                 </section>
 
                 {/* FAB */}
-                <div id="ftue-re-fab">
                 <FloatingActionButton
                     onAddBroker={() => { setSelectedAsset(null); setRightPaneMode('add-broker'); }}
                     onAddProperty={() => { setSelectedAsset(null); setRightPaneMode('add-property'); }}
                     onAddTransaction={() => { setSelectedAsset(null); setFundBuyData({ date: new Date().toISOString().split('T')[0], qtyToBuy: '', buyPricePerShare: '', totalInvestment: 0 }); setRightPaneMode('add-transaction'); }}
                 />
-                </div>
 
                 {/* Delete Confirmation */}
                 <ConfirmationModal

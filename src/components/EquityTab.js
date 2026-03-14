@@ -893,7 +893,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                     <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] uppercase">
                         {buyData.asset ? `Buy More ${buyData.asset}` : 'New Purchase'}
                     </h3>
-                    <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors hidden lg:block ml-auto"><X size={16} /></button>
+                    <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors ml-auto"><X size={16} /></button>
                 </div>
 
                 <div className="flex flex-col gap-5 flex-1 pb-4">
@@ -1072,9 +1072,10 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                     <span className="absolute left-8 lg:left-4 top-1/2 -translate-y-1/2 text-white/40">🔍</span>
                 </div>
 
-                {(activeHoldings.length > 0 || transactions.length > 0) ? (
-                    <div className="lg:flex lg:gap-8 lg:items-start">
-                        <div className="flex-1 min-w-0">
+                <div className="lg:flex lg:gap-8 lg:items-start">
+                    <div className="flex-1 min-w-0">
+                    {(activeHoldings.length > 0 || transactions.length > 0) ? (
+                        <>
                             {renderConsolidated()}
 
                             <div id="ftue-equity-broker-section">
@@ -1091,12 +1092,24 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
 
                             {brokers.map(b => renderBrokerTable(b, brokerGroups[b]))}
                             </div>
+                        </>
+                    ) : (
+                        <div id="ftue-equity-empty">
+                        <EmptyState
+                            icon="📈"
+                            title="No Equity Assets"
+                            message="You have no equity assets yet. Add a broker to log your first stock or ETF transaction."
+                            actionLabel="Add Broker"
+                            onAction={() => setRightPaneMode('add-broker')}
+                        />
                         </div>
-                        <div className="hidden lg:block sticky top-8 h-fit">
+                    )}
+                    </div>
+                        <div className={`${(selectedAsset || rightPaneMode !== 'default') ? 'block fixed inset-0 z-50 bg-[#0A0612] lg:bg-transparent lg:static lg:block' : 'hidden lg:block'} lg:sticky top-8 h-[100dvh] lg:h-fit overflow-hidden`}>
                             <ContextPane
                                 selectedAsset={selectedAsset}
                                 rightPaneMode={rightPaneMode}
-                                onClose={() => setSelectedAsset(null)}
+                                onClose={() => { setSelectedAsset(null); setRightPaneMode('default'); }}
                                 onRename={handleRenameAsset}
                                 maxHeight={contextPaneMaxHeight}
                                 renderEmptyState={() => {
@@ -1104,7 +1117,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                                         return (
                                             <div className="w-full h-full p-8 text-left relative flex flex-col z-10">
                                                 <div className="flex justify-between items-center mb-6">
-                                                    <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors hidden lg:block ml-auto"><X size={16} /></button>
+                                                    <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors ml-auto"><X size={16} /></button>
                                                 </div>
                                                 <div className="flex-1">
                                                     <BrokerForm assetClass="Equity" onSave={() => { setRightPaneMode('default'); fetchBrokers(); }} onCancel={() => setRightPaneMode('default')} />
@@ -1282,17 +1295,6 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                             />
                         </div>
                     </div>
-                ) : (
-                    <div id="ftue-equity-empty">
-                    <EmptyState
-                        icon="📈"
-                        title="No Equity Assets"
-                        message="You have no equity assets yet. Add a broker to log your first stock or ETF transaction."
-                        actionLabel="Add Broker"
-                        onAction={() => setRightPaneMode('add-broker')}
-                    />
-                    </div>
-                )}
 
                 {/* Transaction Ledger */}
                 <section id="ftue-equity-ledger" className="max-w-3xl mx-auto mb-10 mt-12">
@@ -1350,7 +1352,6 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
 
                 {/* Context-Aware FAB */}
                 {/* New Expandable FAB */}
-                <div id="ftue-equity-fab">
                 <FloatingActionButton
                     onAddBroker={() => {
                         setRightPaneMode('add-broker');
@@ -1360,7 +1361,6 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                         handleNewBuyClick('');
                     }}
                 />
-                </div>
 
                 <ConfirmationModal
                     isOpen={isDeleteModalOpen}

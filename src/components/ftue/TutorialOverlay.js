@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { usePortfolio } from '@/context/PortfolioContext';
 
@@ -14,6 +15,7 @@ const TUTORIAL_STEPS = [
     },
     {
         targetId: 'ftue-sidebar',
+        mobileTargetId: 'ftue-sidebar-mobile',
         title: 'Asset Breakdown',
         message: "Each asset class gets its own card — equities, fixed income, real estate, crypto, pensions, and debt. Tap any card to drill into that category.",
         position: 'left',
@@ -38,12 +40,14 @@ const TUTORIAL_STEPS = [
     },
     {
         targetId: 'ftue-nav',
+        mobileTargetId: 'ftue-nav-mobile',
         title: 'Navigation',
         message: "Use the menu to jump to specific asset pages, planning tools, forecasts, or the general ledger.",
         position: 'bottom',
     },
     {
         targetId: 'ftue-settings',
+        mobileTargetId: 'ftue-settings-mobile',
         title: 'Profile & Settings',
         message: "Manage your profile, preferences, and account settings right here.",
         position: 'bottom-end',
@@ -59,18 +63,57 @@ export default function TutorialOverlay() {
     const [currentStep, setCurrentStep] = useState(ftueState?.tutorialStep || 0);
     const [targetRect, setTargetRect] = useState(null);
     const [isTransitioning, setIsTransitioning] = useState(false);
+    const [activeSteps, setActiveSteps] = useState([]);
+    
+    // Check if mobile (< 1024px)
+    const [isMobile, setIsMobile] = useState(false);
+    const [mounted, setMounted] = useState(false);
+    
+    useEffect(() => {
+        setMounted(true);
+        const check = () => setIsMobile(window.innerWidth < 1024);
+        check();
+        window.addEventListener('resize', check);
+        return () => window.removeEventListener('resize', check);
+    }, []);
+
+    // Filter steps to those valid in the current viewport DOM
+    useEffect(() => {
+        if (!mounted || ftueState?.wizardCompleted !== true) return;
+        
+        // Short delay to let the page render properly
+        const timer = setTimeout(() => {
+            const isMob = window.innerWidth < 1024;
+            const validSteps = TUTORIAL_STEPS.filter(step => {
+                const elId = (isMob && step.mobileTargetId) ? step.mobileTargetId : step.targetId;
+                const el = document.getElementById(elId);
+                if (!el) return false;
+                const rect = el.getBoundingClientRect();
+                return rect.width > 0 && rect.height > 0;
+            });
+            setActiveSteps(validSteps);
+            if (currentStep > validSteps.length) {
+                setCurrentStep(validSteps.length); // clamp to end screen if bound exceeded
+            }
+        }, 800);
+        return () => clearTimeout(timer);
+    }, [mounted, ftueState?.wizardCompleted, currentStep]);
+
     const observerRef = useRef(null);
-    const totalSteps = TUTORIAL_STEPS.length;
-    const isLastTutorialStep = currentStep >= totalSteps;
+    const totalSteps = activeSteps.length;
+    // Show end screen only when we legitimately reach the end of the loaded step array
+    const isLastTutorialStep = totalSteps > 0 && currentStep === totalSteps;
 
     // Measure the target element
     const measureTarget = useCallback((stepIndex) => {
-        if (stepIndex >= totalSteps) {
+        if (stepIndex >= totalSteps || activeSteps.length === 0) {
             setTargetRect(null);
             return;
         }
-        const step = TUTORIAL_STEPS[stepIndex];
-        const el = document.getElementById(step.targetId);
+        const step = activeSteps[stepIndex];
+        const isMob = window.innerWidth < 1024;
+        const elId = (isMob && step.mobileTargetId) ? step.mobileTargetId : step.targetId;
+        const el = document.getElementById(elId);
         if (el) {
             // Scroll into view smoothly
             el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
@@ -87,29 +130,36 @@ export default function TutorialOverlay() {
         } else {
             setTargetRect(null);
         }
-    }, [totalSteps]);
+    }, [totalSteps, activeSteps]);
 
-    // Measure on step change and on resize
     useEffect(() => {
-        measureTarget(currentStep);
+        if (mounted && ftueState?.wizardCompleted === true) {
+            measureTarget(currentStep);
 
-        const handleResize = () => measureTarget(currentStep);
-        window.addEventListener('resize', handleResize);
-        window.addEventListener('scroll', handleResize, true);
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            window.removeEventListener('scroll', handleResize, true);
-        };
-    }, [currentStep, measureTarget]);
+            const handleResize = () => measureTarget(currentStep);
+            window.addEventListener('resize', handleResize);
+            window.addEventListener('scroll', handleResize, true);
+            return () => {
+                window.removeEventListener('resize', handleResize);
+                window.removeEventListener('scroll', handleResize, true);
+            };
+        }
+    }, [currentStep, measureTarget, mounted, ftueState?.wizardCompleted]);
 
     const goNext = useCallback(async () => {
         setIsTransitioning(true);
         const nextStep = currentStep + 1;
+        if (nextStep >= totalSteps) {
+            // They clicked "Next" on the very last step
+            setCurrentStep(nextStep);
+            await updateFtueProgress({ tutorialStep: nextStep });
+            return;
+        }
         setCurrentStep(nextStep);
         // Persist step
         await updateFtueProgress({ tutorialStep: nextStep });
         setTimeout(() => setIsTransitioning(false), 100);
-    }, [currentStep, updateFtueProgress]);
+    }, [currentStep, totalSteps, updateFtueProgress]);
 
     const skipTour = useCallback(async () => {
         // Jump to the end screen
@@ -142,9 +192,8 @@ export default function TutorialOverlay() {
     const VIEWPORT_MARGIN = 16;
 
     const getTooltipStyle = () => {
-        if (!targetRect) return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
-
-        const step = TUTORIAL_STEPS[currentStep];
+        if (!targetRect || activeSteps.length === 0) return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
+        const step = activeSteps[currentStep];
         if (!step) return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
 
         const pos = step.position || 'bottom';
@@ -179,16 +228,38 @@ export default function TutorialOverlay() {
                 break;
         }
 
+        // --- Mobile Specific Positioning ---
+        if (window.innerWidth < 1024) {
+            // Check if target is in the top half of the screen
+            const isTargetTopHalf = targetRect.y + (targetRect.height / 2) < vh / 2;
+            
+            return {
+                position: 'fixed',
+                left: VIEWPORT_MARGIN,
+                right: VIEWPORT_MARGIN,
+                width: 'auto',
+                maxWidth: 'none',
+                ...(isTargetTopHalf 
+                    ? { bottom: VIEWPORT_MARGIN + 64, top: 'auto', transform: 'none' } // Bottom sheet (above nav)
+                    : { top: VIEWPORT_MARGIN + 64, bottom: 'auto', transform: 'none' } // Top sheet
+                )
+            };
+        }
+
+        // --- Desktop Positioning ---
         // Clamp to viewport
         left = Math.max(VIEWPORT_MARGIN, Math.min(left, vw - TOOLTIP_WIDTH - VIEWPORT_MARGIN));
         top = Math.max(VIEWPORT_MARGIN, Math.min(top, vh - 200)); // 200 ~ tooltip height
 
-        return { top, left };
+        return { top, left, width: TOOLTIP_WIDTH };
     };
 
     // ─── END SCREEN: Import Data / Keep Exploring ───
+    // Don't render until client mounts or if wizard isn't completed
+    if (!mounted || ftueState?.wizardCompleted !== true) return null;
+
     if (isLastTutorialStep) {
-        return (
+        return createPortal((
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -254,13 +325,15 @@ export default function TutorialOverlay() {
                     </div>
                 </motion.div>
             </motion.div>
-        );
+        ), document.body);
     }
 
-    const step = TUTORIAL_STEPS[currentStep];
+    const step = activeSteps[currentStep];
+    if (!step) return null;
+
     const tooltipStyle = getTooltipStyle();
 
-    return (
+    const content = (
         <div className="fixed inset-0 z-[9998] pointer-events-none">
             {/* SVG Mask Overlay */}
             <svg
@@ -329,11 +402,7 @@ export default function TutorialOverlay() {
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
                         className="absolute z-10 pointer-events-auto"
-                        style={{
-                            ...tooltipStyle,
-                            maxWidth: 360,
-                            minWidth: 280,
-                        }}
+                        style={tooltipStyle}
                     >
                         <div className="bg-gradient-to-br from-[#1A0F2E] to-[#0B0611] border border-[#D4AF37]/30 rounded-2xl p-5 shadow-2xl shadow-black/50">
                             {/* Professor F mini avatar + step title */}
@@ -401,4 +470,6 @@ export default function TutorialOverlay() {
             </AnimatePresence>
         </div>
     );
+
+    return createPortal(content, document.body);
 }

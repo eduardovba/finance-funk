@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { usePortfolio } from '@/context/PortfolioContext';
 
@@ -33,10 +34,12 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
     const [actionCompleted, setActionCompleted] = useState(false);
     const [activeSteps, setActiveSteps] = useState([]);
 
-    // Don't render on mobile (< 1024px)
-    const [isDesktop, setIsDesktop] = useState(false);
+    // Check if mobile (< 1024px)
+    const [isMobile, setIsMobile] = useState(false);
+    const [mounted, setMounted] = useState(false);
     useEffect(() => {
-        const check = () => setIsDesktop(window.innerWidth >= 1024);
+        setMounted(true);
+        const check = () => setIsMobile(window.innerWidth < 1024);
         check();
         window.addEventListener('resize', check);
         return () => window.removeEventListener('resize', check);
@@ -48,7 +51,7 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
     // Filter steps to only those whose target element exists in the DOM.
     // Run after a delay to let the page fully render.
     useEffect(() => {
-        if (alreadySeen || !isDesktop || steps.length === 0) return;
+        if (alreadySeen || steps.length === 0) return;
 
         const timer = setTimeout(() => {
             const available = steps.filter(s => document.getElementById(s.targetId));
@@ -59,7 +62,7 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
             }
         }, 800);
         return () => clearTimeout(timer);
-    }, [alreadySeen, isDesktop, steps]);
+    }, [alreadySeen, isMobile, steps]);
 
     const totalSteps = activeSteps.length;
 
@@ -75,11 +78,13 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
             el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
             setTimeout(() => {
                 const rect = el.getBoundingClientRect();
+                const padding = step.padding !== undefined ? step.padding : SPOTLIGHT_PADDING;
                 setTargetRect({
-                    x: rect.x - SPOTLIGHT_PADDING,
-                    y: rect.y - SPOTLIGHT_PADDING,
-                    width: rect.width + SPOTLIGHT_PADDING * 2,
-                    height: rect.height + SPOTLIGHT_PADDING * 2,
+                    x: rect.x - padding,
+                    y: rect.y - padding,
+                    width: rect.width + padding * 2,
+                    height: rect.height + padding * 2,
+                    shape: step.shape || 'rect'
                 });
             }, 400);
         } else {
@@ -206,15 +211,34 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
             }
         }
 
-        // Final viewport clamp (safety net)
+        // --- Mobile Specific Positioning ---
+        if (window.innerWidth < 1024) {
+            // Check if target is in the top half of the screen
+            const isTargetTopHalf = targetRect.y + (targetRect.height / 2) < vh / 2;
+            
+            return {
+                position: 'fixed',
+                left: VIEWPORT_MARGIN,
+                right: VIEWPORT_MARGIN,
+                width: 'auto',
+                maxWidth: 'none',
+                ...(isTargetTopHalf 
+                    ? { bottom: VIEWPORT_MARGIN + 64, top: 'auto', transform: 'none' } // Bottom sheet (above nav)
+                    : { top: VIEWPORT_MARGIN + 64, bottom: 'auto', transform: 'none' } // Top sheet
+                )
+            };
+        }
+
+        // --- Desktop Positioning ---
+        // Clamp to viewport
         left = Math.max(VIEWPORT_MARGIN, Math.min(left, vw - TOOLTIP_WIDTH - VIEWPORT_MARGIN));
         top = Math.max(VIEWPORT_MARGIN, Math.min(top, vh - TOOLTIP_HEIGHT_ESTIMATE - VIEWPORT_MARGIN));
 
-        return { top, left };
+        return { top, left, width: TOOLTIP_WIDTH };
     };
 
-    // Don't render if already seen, not desktop, not visible, or no active steps
-    if (alreadySeen || !isDesktop || !isVisible || activeSteps.length === 0) return null;
+    // Don't render if already seen, not visible, or no active steps
+    if (!mounted || alreadySeen || !isVisible || activeSteps.length === 0) return null;
 
     const step = activeSteps[currentStep];
     const tooltipStyle = getTooltipStyle();
@@ -222,7 +246,7 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
     const canProceed = !isActionStep || actionCompleted;
     const isLastStep = currentStep === totalSteps - 1;
 
-    return (
+    const content = (
         <div className="fixed inset-0 z-[9998] pointer-events-none">
             {/* SVG Mask Overlay */}
             <svg
@@ -243,8 +267,8 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
                                     opacity: 1,
                                 }}
                                 transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
-                                rx={SPOTLIGHT_RADIUS}
-                                ry={SPOTLIGHT_RADIUS}
+                                rx={targetRect.shape === 'circle' ? targetRect.width / 2 : SPOTLIGHT_RADIUS}
+                                ry={targetRect.shape === 'circle' ? targetRect.height / 2 : SPOTLIGHT_RADIUS}
                                 fill="black"
                             />
                         )}
@@ -273,7 +297,7 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
                     transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
                     style={{
                         boxShadow: '0 0 0 2px rgba(212,175,55,0.4), 0 0 30px rgba(212,175,55,0.15)',
-                        borderRadius: SPOTLIGHT_RADIUS,
+                        borderRadius: targetRect.shape === 'circle' ? '50%' : SPOTLIGHT_RADIUS,
                     }}
                 />
             )}
@@ -288,11 +312,7 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
                         className="absolute z-10 pointer-events-auto"
-                        style={{
-                            ...tooltipStyle,
-                            maxWidth: 380,
-                            minWidth: 280,
-                        }}
+                        style={tooltipStyle}
                     >
                         <div className="bg-gradient-to-br from-[#1A0F2E] to-[#0B0611] border border-[#D4AF37]/30 rounded-2xl p-5 shadow-2xl shadow-black/50">
                             {/* Professor F mini avatar + step title */}
@@ -383,4 +403,6 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
             </AnimatePresence>
         </div>
     );
+
+    return createPortal(content, document.body);
 }
