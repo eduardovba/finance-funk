@@ -8,6 +8,13 @@ import GlowingIncomePods from './GlowingIncomePods';
 import GlowingInvestmentPods from './GlowingInvestmentPods';
 import LedgerHeroPods from './LedgerHeroPods';
 import forecastActuals from '../data/forecast_actuals.json';
+import PageTutorialOverlay from './ftue/PageTutorialOverlay';
+
+const LEDGER_TUTORIAL_STEPS = [
+    { type: 'spotlight', targetId: 'ftue-ledger-container', title: 'Income & Investments', message: "The Ledger tracks your monthly income (salary, dividends, rent) and investment flows. They are calculated automatically from transactions.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-ledger-container', title: 'Automatic Tracking', message: "Income from dividends, interest, and rent is calculated automatically from your asset pages \u2014 no double entry needed!", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-ledger-container', title: 'Monthly Snapshots', message: "The Totals tab lets you record monthly snapshots and track net worth growth, TWR returns, and MoM changes over time.", position: 'bottom' },
+];
 
 export default function GeneralLedgerTab({
     activeTab = 'income',
@@ -506,7 +513,8 @@ export default function GeneralLedgerTab({
     }
 
     return (
-        <div className="w-full max-w-[1800px] mx-auto pb-4 lg:pb-0">
+        <>
+        <div id="ftue-ledger-container" className="w-full max-w-[1800px] mx-auto pb-4 lg:pb-0">
             {/* Toolbar: Monthly Close + Auto-Close toggle — only on General Ledger/Totals view */}
             {view === 'historicals' && (
                 <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
@@ -1148,5 +1156,7 @@ export default function GeneralLedgerTab({
                     onCancel={() => setDeleteLedgerMonth(null)}
                 />
             </div>
+            <PageTutorialOverlay pageId="general-ledger" steps={LEDGER_TUTORIAL_STEPS} />
+        </>
             );
 }

@@ -27,7 +27,7 @@ export const metadata = {
     title: "Finance Funk",
   },
   icons: {
-    icon: "/icon-512x512.png",
+    icon: "/FF.png",
     apple: "/apple-touch-icon.png",
   },
 };

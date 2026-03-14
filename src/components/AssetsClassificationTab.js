@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { formatCurrency } from '@/lib/currency';
 import pensionMap from '../data/pension_fund_map.json';
-import AssetsClassificationTabLegacy from './AssetsClassificationTabLegacy';
+
 import { usePortfolio } from '@/context/PortfolioContext';
 
 export default function AssetsClassificationTab({
@@ -14,8 +14,7 @@ export default function AssetsClassificationTab({
     transactions, // fixed income
     realEstate
 }) {
-    const { layoutMode } = usePortfolio();
-    if (layoutMode === 'legacy') return <AssetsClassificationTabLegacy assetClasses={assetClasses} onSave={onSave} equityTransactions={equityTransactions} cryptoTransactions={cryptoTransactions} pensionTransactions={pensionTransactions} debtTransactions={debtTransactions} transactions={transactions} realEstate={realEstate} />;
+
 
     const [localOverrides, setLocalOverrides] = useState(assetClasses || {});
     const [isSaving, setIsSaving] = useState(false);

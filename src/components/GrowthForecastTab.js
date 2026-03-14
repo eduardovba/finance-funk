@@ -11,6 +11,13 @@ import GoalProgressRing from './GoalProgressRing';
 import GrowthWaterfall from './GrowthWaterfall';
 import SmartInsights from './SmartInsights';
 import { Lock, Unlock, Save, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, MapPin, Calendar, Plus, Trash2 } from 'lucide-react';
+import PageTutorialOverlay from './ftue/PageTutorialOverlay';
+
+const FORECAST_TUTORIAL_STEPS = [
+    { type: 'spotlight', targetId: 'ftue-forecast-projection', title: 'Growth Projections', message: "Your goal progress ring and projected net worth. See how you're tracking against your target — current vs projected vs goal.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-forecast-scenario', title: 'Scenario Builder', message: "Tweak monthly contributions, expected returns, and time horizon. The projection updates instantly. Lock a plan to save a snapshot.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-forecast-container', title: 'Plan vs Reality', message: "Compare locked plans against actual performance over time. Stay on track by revisiting and adjusting your plan.", position: 'top' },
+];
 
 // ─── Inline editable value ───
 function EditableValue({ value, onChange, min = 0, max = 100000000, step = 1, formatDisplay, suffix = '' }) {
@@ -146,8 +153,15 @@ function MonthCombobox({ value, onChange, placeholder = "Select month..." }) {
 }
 
 export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPortfolioValueGbp, liveContributionBrl, liveContributionGbp }) {
-    const { formatPrimary, toPrimary, primaryCurrency } = usePortfolio();
+    const { formatPrimary, toPrimary, primaryCurrency, ftueState, updateFtueProgress } = usePortfolio();
     const primaryMeta = SUPPORTED_CURRENCIES[primaryCurrency];
+
+    // Mark "exploreForecast" checklist item as done on first visit
+    useEffect(() => {
+        if (ftueState && !ftueState.checklistItems?.exploreForecast && updateFtueProgress) {
+            updateFtueProgress({ checklistItems: { exploreForecast: true } });
+        }
+    }, [ftueState, updateFtueProgress]);
 
     // ═══════════ STATE ═══════════
     const [monthlyContribution, setMonthlyContribution] = useState(12000);
@@ -558,10 +572,11 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
     // ═══════════ RENDER ═══════════
 
     return (
-        <div className="w-full mx-auto pb-12 space-y-6">
+        <>
+        <div id="ftue-forecast-container" className="w-full mx-auto pb-12 space-y-6">
 
             {/* ─── FORECAST & PROJECTIONS ─── */}
-            <div className="glass-card !p-6 lg:!p-8 relative overflow-hidden">
+            <div id="ftue-forecast-projection" className="glass-card !p-6 lg:!p-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-[#D4AF37]/5 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3" />
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-center relative z-10">
                     {/* Left: Progress Ring */}
@@ -637,7 +652,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
 
 
             {/* ─── SCENARIO BUILDER ─── */}
-            <div className="glass-card">
+            <div id="ftue-forecast-scenario" className="glass-card">
                 <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center gap-3">
                         <h3 className="font-bebas text-xl tracking-widest text-parchment m-0">
@@ -1097,5 +1112,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
                 onClose={() => setStatusModal(prev => ({ ...prev, isOpen: false }))}
             />
         </div>
+        <PageTutorialOverlay pageId="growth-forecast" steps={FORECAST_TUTORIAL_STEPS} />
+        </>
     );
 }

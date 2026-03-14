@@ -2,6 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Scale, TrendingUp, AlertTriangle, ArrowRight, Wallet, Percent, PoundSterling } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
+import PageTutorialOverlay from './ftue/PageTutorialOverlay';
+
+const REBALANCE_TUTORIAL_STEPS = [
+    { type: 'spotlight', targetId: 'ftue-rebalance-input', title: 'Enter Your Capital', message: "Input how much you plan to invest this month. The engine will show the optimal way to distribute it based on your allocation targets.", position: 'right' },
+    { type: 'spotlight', targetId: 'ftue-rebalance-actions', title: 'Smart Routing', message: "Buy orders show where to deploy capital. If any asset is severely over-allocated (>5%), you'll see a divestment alert.", position: 'left' },
+];
 
 export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }) {
     const { formatPrimary } = usePortfolio();
@@ -111,6 +117,7 @@ export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }
     const hasSignificantSells = advisorData.sellActions.length > 0;
 
     return (
+        <>
         <div className="w-full mx-auto pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
             {/* Header Area */}
@@ -129,7 +136,7 @@ export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
                 {/* ─── LEFT COLUMN: The "What-If" Capital Slider ─── */}
-                <div className="lg:col-span-5 flex flex-col gap-6">
+                <div id="ftue-rebalance-input" className="lg:col-span-5 flex flex-col gap-6">
                     <div className="glass-card flex flex-col items-center justify-center text-center p-8 lg:p-12 relative overflow-hidden h-full min-h-[400px]">
                         {/* Background flourish */}
                         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px] -mr-32 -mt-32"></div>
@@ -172,7 +179,7 @@ export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }
                 </div>
 
                 {/* ─── RIGHT COLUMN: Advisor Routing Actions ─── */}
-                <div className="lg:col-span-7 flex flex-col gap-6">
+                <div id="ftue-rebalance-actions" className="lg:col-span-7 flex flex-col gap-6">
 
                     {/* SECTION 1: BUY ACTIONS (Routing New Capital) */}
                     <div className="glass-card relative overflow-hidden">
@@ -286,5 +293,7 @@ export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }
                 </div>
             </div>
         </div>
+            <PageTutorialOverlay pageId="rebalance-advisor" steps={REBALANCE_TUTORIAL_STEPS} />
+        </>
     );
 }

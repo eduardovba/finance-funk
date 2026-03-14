@@ -4,6 +4,13 @@ import { Home, LineChart, Landmark, Bitcoin, PiggyBank, Globe, DollarSign, Targe
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 import StatusModal from './StatusModal';
 import { usePortfolio } from '../context/PortfolioContext';
+import PageTutorialOverlay from './ftue/PageTutorialOverlay';
+
+const ALLOCATION_TUTORIAL_STEPS = [
+    { type: 'spotlight', targetId: 'ftue-alloc-targets', title: 'Set Your Targets', message: "Define target allocations for asset classes and currency exposure. Both must sum to 100%. Save when ready.", position: 'right' },
+    { type: 'spotlight', targetId: 'ftue-alloc-drift', title: 'Execution Drift', message: "See how your current portfolio compares to your targets. Green means aligned, amber/red means drifting \u2014 time to rebalance!", position: 'left' },
+    { type: 'spotlight', targetId: 'ftue-alloc-targets', title: 'FX Exposure', message: "Track currency exposure across GBP, BRL, and USD. Targets help you stay aware of geographic concentration.", position: 'right' },
+];
 
 const ASSET_COLORS = {
     Equity: '#3b82f6',
@@ -236,6 +243,7 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
     };
 
     return (
+        <>
         <div className="mb-8">
             <StatusModal isOpen={statusModal.isOpen} onClose={() => setStatusModal(prev => ({ ...prev, isOpen: false }))} title={statusModal.title} message={statusModal.message} type={statusModal.type} />
 
@@ -262,7 +270,7 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
 
                 {/* LEFT COLUMN: GOAL SETTING (TARGETS) */}
-                <div className="glass-card flex flex-col gap-6 lg:gap-8 relative">
+                <div id="ftue-alloc-targets" className="glass-card flex flex-col gap-6 lg:gap-8 relative">
                     <div className="flex items-center justify-between border-b border-white/5 pb-3">
                         <h3 className="font-bebas text-xl text-white/90 tracking-widest flex items-center gap-2">
                             <Target size={18} className="text-[#D4AF37]" />
@@ -331,7 +339,7 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
                 </div>
 
                 {/* RIGHT COLUMN: DRIFT ANALYSIS (ACTUALS) */}
-                <div className="glass-card flex flex-col gap-6 lg:gap-8">
+                <div id="ftue-alloc-drift" className="glass-card flex flex-col gap-6 lg:gap-8">
                     <div className="flex justify-between items-center border-b border-white/5 pb-3">
                         <h3 className="font-bebas text-xl text-white/90 tracking-widest flex items-center gap-2">
                             <Activity size={18} className="text-[#D4AF37]" />
@@ -387,5 +395,7 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
                 )}
             </div>
         </div>
+            <PageTutorialOverlay pageId="allocation-targets" steps={ALLOCATION_TUTORIAL_STEPS} />
+        </>
     );
 }

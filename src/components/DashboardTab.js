@@ -8,6 +8,7 @@ import { calculateTWRHistory } from '@/lib/roiUtils';
 import { usePortfolio } from '@/context/PortfolioContext';
 import { SUPPORTED_CURRENCIES } from '@/lib/currency';
 import DashboardCustomizer from './DashboardCustomizer';
+import TutorialOverlay from './ftue/TutorialOverlay';
 
 export default function DashboardTab({
     data,
@@ -32,7 +33,8 @@ export default function DashboardTab({
 }) {
     const { primaryCurrency, secondaryCurrency, toPrimary, toSecondary, formatPrimary, formatSecondary,
         forceRefreshMarketData, isRefreshingMarketData, lastUpdated,
-        appSettings, handleUpdateAppSettings, dashboardConfig, setDashboardConfig, forecastSettings
+        appSettings, handleUpdateAppSettings, dashboardConfig, setDashboardConfig, forecastSettings,
+        ftueState
     } = usePortfolio();
 
     const formatPrimaryNoDecimals = useCallback((val) => formatPrimary(val, { minimumFractionDigits: 0, maximumFractionDigits: 0 }), [formatPrimary]);
@@ -259,7 +261,7 @@ export default function DashboardTab({
             <div className="hidden md:block mb-8">
                 <div className="lg:grid lg:grid-cols-12 lg:gap-5">
                     {/* ═══ Hero Card (col-span-8) — Frosted Glass ═══ */}
-                    <div className="col-span-12 lg:col-span-8 rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] mb-8 lg:mb-0 relative overflow-hidden flex flex-col">
+                    <div id="ftue-hero" className="col-span-12 lg:col-span-8 rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] mb-8 lg:mb-0 relative overflow-hidden flex flex-col">
 
                         {/* Subtle shimmer */}
                         <motion.div
@@ -315,41 +317,41 @@ export default function DashboardTab({
                             <div className="grid grid-cols-4 relative z-10">
                                 {/* ROI */}
                                 <div className="flex flex-col items-center py-4 xl:py-5 border-r border-white/[0.04]">
-                                    <span className="text-[11px] xl:text-xs text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">ROI</span>
-                                    <span className={`text-base xl:text-lg font-bold font-space ${currentROI.percentage >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
+                                    <span className="text-xs xl:text-sm text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">ROI</span>
+                                    <span className={`text-xl xl:text-2xl font-bold font-space ${currentROI.percentage >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                                         {currentROI.percentage >= 0 ? '+' : ''}{currentROI.percentage.toFixed(1)}%
                                     </span>
-                                    <span className={`text-[10px] xl:text-[11px] font-mono mt-0.5 opacity-60 ${currentROI.percentage >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
+                                    <span className={`text-xs xl:text-sm font-mono mt-0.5 opacity-60 ${currentROI.percentage >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                                         {currentROI.absolute >= 0 ? '+' : '-'}{currentROI.formattedAbsolute}
                                     </span>
                                 </div>
                                 {/* MoM */}
                                 <div className="flex flex-col items-center py-4 xl:py-5 border-r border-white/[0.04]">
-                                    <span className="text-[11px] xl:text-xs text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">MoM</span>
-                                    <span className={`text-base xl:text-lg font-bold font-space ${(diffPrevMonth?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
+                                    <span className="text-xs xl:text-sm text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">MoM</span>
+                                    <span className={`text-xl xl:text-2xl font-bold font-space ${(diffPrevMonth?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                                         {(diffPrevMonth?.amount || 0) >= 0 ? '+' : ''}{Math.abs(diffPrevMonth?.percentage || 0).toFixed(1)}%
                                     </span>
-                                    <span className={`text-[10px] xl:text-[11px] font-mono mt-0.5 opacity-60 ${(diffPrevMonth?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
+                                    <span className={`text-xs xl:text-sm font-mono mt-0.5 opacity-60 ${(diffPrevMonth?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                                         {(diffPrevMonth?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(diffPrevMonth?.amount || 0, 'BRL'))}
                                     </span>
                                 </div>
                                 {/* vs Target */}
                                 <div className="flex flex-col items-center py-4 xl:py-5 border-r border-white/[0.04]">
-                                    <span className="text-[11px] xl:text-xs text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">vs Target</span>
-                                    <span className={`text-base xl:text-lg font-bold font-space ${(diffTarget?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
+                                    <span className="text-xs xl:text-sm text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">vs Target</span>
+                                    <span className={`text-xl xl:text-2xl font-bold font-space ${(diffTarget?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                                         {(diffTarget?.amount || 0) >= 0 ? '+' : ''}{Math.abs(diffTarget?.percentage || 0).toFixed(1)}%
                                     </span>
-                                    <span className={`text-[10px] xl:text-[11px] font-mono mt-0.5 opacity-60 ${(diffTarget?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
+                                    <span className={`text-xs xl:text-sm font-mono mt-0.5 opacity-60 ${(diffTarget?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                                         {(diffTarget?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(diffTarget?.amount || 0, 'BRL'))}
                                     </span>
                                 </div>
                                 {/* FX Impact */}
                                 <div className="flex flex-col items-center py-4 xl:py-5">
-                                    <span className="text-[11px] xl:text-xs text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">FX Impact</span>
-                                    <span className={`text-base xl:text-lg font-bold font-space ${(fxEffectBRL?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
+                                    <span className="text-xs xl:text-sm text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">FX Impact</span>
+                                    <span className={`text-xl xl:text-2xl font-bold font-space ${(fxEffectBRL?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                                         {(fxEffectBRL?.amount || 0) >= 0 ? '+' : ''}{Math.abs(fxEffectBRL?.percentage || 0).toFixed(1)}%
                                     </span>
-                                    <span className={`text-[10px] xl:text-[11px] font-mono mt-0.5 opacity-60 ${(fxEffectBRL?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
+                                    <span className={`text-xs xl:text-sm font-mono mt-0.5 opacity-60 ${(fxEffectBRL?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                                         {(fxEffectBRL?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(fxEffectBRL?.amount || 0, 'BRL'))}
                                     </span>
                                 </div>
@@ -378,38 +380,38 @@ export default function DashboardTab({
                                     transition={{ duration: 0.35, ease: 'easeInOut' }}
                                     className="overflow-hidden relative z-10"
                                 >
-                                    <div className="px-6 xl:px-8 pb-6 pt-2 border-t border-white/[0.04]">
-                                        <div className="grid grid-cols-2 gap-6">
+                                    <div className="px-6 xl:px-8 pb-8 pt-4 border-t border-white/[0.04]">
+                                        <div className="grid grid-cols-2 gap-8">
                                             {/* ─ Primary Currency Details ─ */}
-                                            <div className="flex flex-col gap-3">
-                                                <span className="text-[9px] text-[#D4AF37]/50 uppercase tracking-[2px] font-space">{primaryCurrency} Details</span>
+                                            <div className="flex flex-col gap-4">
+                                                <span className="text-xs text-[#D4AF37]/50 uppercase tracking-[2px] font-space">{primaryCurrency} Details</span>
 
                                                 {/* MoM Variance */}
-                                                <div className="flex items-center justify-between bg-white/[0.02] border border-white/[0.05] rounded-xl px-3 py-2">
-                                                    <span className="text-[9px] uppercase font-space tracking-[1.5px] text-[#F5F5DC]/30">MoM</span>
-                                                    <div className={`flex items-center gap-1.5 ${(diffPrevMonth?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
-                                                        <span className="font-mono text-[11px] font-medium">
+                                                <div className="flex items-center justify-between bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3">
+                                                    <span className="text-[11px] uppercase font-space tracking-[1.5px] text-[#F5F5DC]/40">MoM</span>
+                                                    <div className={`flex items-center gap-2 ${(diffPrevMonth?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
+                                                        <span className="font-mono text-[13px] xl:text-sm font-medium">
                                                             {(diffPrevMonth?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(diffPrevMonth?.amount || 0, 'BRL'))}
                                                         </span>
-                                                        <span className="text-[9px] font-space opacity-60">{Math.abs(diffPrevMonth?.percentage || 0).toFixed(1)}%</span>
+                                                        <span className="text-[11px] font-space opacity-70">{Math.abs(diffPrevMonth?.percentage || 0).toFixed(1)}%</span>
                                                     </div>
                                                 </div>
 
                                                 {/* FX Attribution */}
                                                 {(Math.abs(fxEffectBRL?.percentage || 0) > 0.05 || Math.abs(assetEffectBRL?.percentage || 0) > 0.05) && (
-                                                    <div className="flex flex-col gap-1 pl-3 border-l border-white/[0.06] ml-1">
+                                                    <div className="flex flex-col gap-1.5 pl-4 border-l-2 border-white/[0.06] ml-2">
                                                         <div className="flex items-center justify-between">
-                                                            <span className="text-[8px] font-space text-[#F5F5DC]/25 flex items-center gap-1"><span className="text-[7px]">↳</span> Asset Prices</span>
-                                                            <div className={`flex items-center gap-1 ${(assetEffectBRL?.amount || 0) >= 0 ? 'text-vu-green/70' : 'text-red-400/70'}`}>
-                                                                <span className="font-mono text-[9px]">{(assetEffectBRL?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(assetEffectBRL?.amount || 0, 'BRL'))}</span>
-                                                                <span className="font-space text-[8px] opacity-60">{Math.abs(assetEffectBRL?.percentage || 0).toFixed(1)}%</span>
+                                                            <span className="text-[10px] font-space text-[#F5F5DC]/40 flex items-center gap-1.5"><span className="text-[9px]">↳</span> Asset Prices</span>
+                                                            <div className={`flex items-center gap-1.5 ${(assetEffectBRL?.amount || 0) >= 0 ? 'text-vu-green/80' : 'text-red-400/80'}`}>
+                                                                <span className="font-mono text-[11px]">{(assetEffectBRL?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(assetEffectBRL?.amount || 0, 'BRL'))}</span>
+                                                                <span className="font-space text-[10px] opacity-70">{Math.abs(assetEffectBRL?.percentage || 0).toFixed(1)}%</span>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center justify-between">
-                                                            <span className="text-[8px] font-space text-[#F5F5DC]/25 flex items-center gap-1"><span className="text-[7px]">↳</span> FX Effect</span>
-                                                            <div className={`flex items-center gap-1 ${(fxEffectBRL?.amount || 0) >= 0 ? 'text-vu-green/70' : 'text-red-400/70'}`}>
-                                                                <span className="font-mono text-[9px]">{(fxEffectBRL?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(fxEffectBRL?.amount || 0, 'BRL'))}</span>
-                                                                <span className="font-space text-[8px] opacity-60">{Math.abs(fxEffectBRL?.percentage || 0).toFixed(1)}%</span>
+                                                            <span className="text-[10px] font-space text-[#F5F5DC]/40 flex items-center gap-1.5"><span className="text-[9px]">↳</span> FX Effect</span>
+                                                            <div className={`flex items-center gap-1.5 ${(fxEffectBRL?.amount || 0) >= 0 ? 'text-vu-green/80' : 'text-red-400/80'}`}>
+                                                                <span className="font-mono text-[11px]">{(fxEffectBRL?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(fxEffectBRL?.amount || 0, 'BRL'))}</span>
+                                                                <span className="font-space text-[10px] opacity-70">{Math.abs(fxEffectBRL?.percentage || 0).toFixed(1)}%</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -417,24 +419,24 @@ export default function DashboardTab({
 
                                                 {/* Target Variance */}
                                                 {Math.abs(diffTarget?.amount || 0) > 1 && (
-                                                    <div className="flex items-center justify-between bg-white/[0.02] border border-white/[0.05] rounded-xl px-3 py-2">
-                                                        <span className="text-[9px] uppercase font-space tracking-[1.5px] text-[#F5F5DC]/30">Target</span>
-                                                        <div className={`flex items-center gap-1.5 ${(diffTarget?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
-                                                            <span className="font-mono text-[11px] font-medium">{(diffTarget?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(diffTarget?.amount || 0, 'BRL'))}</span>
-                                                            <span className="text-[9px] font-space opacity-60">{Math.abs(diffTarget?.percentage || 0).toFixed(1)}%</span>
+                                                    <div className="flex items-center justify-between bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3">
+                                                        <span className="text-[11px] uppercase font-space tracking-[1.5px] text-[#F5F5DC]/40">Target</span>
+                                                        <div className={`flex items-center gap-2 ${(diffTarget?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
+                                                            <span className="font-mono text-[13px] xl:text-sm font-medium">{(diffTarget?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(diffTarget?.amount || 0, 'BRL'))}</span>
+                                                            <span className="text-[11px] font-space opacity-70">{Math.abs(diffTarget?.percentage || 0).toFixed(1)}%</span>
                                                         </div>
                                                     </div>
                                                 )}
 
                                                 {/* Top Contributors Primary */}
                                                 {topContributors.length > 0 && (
-                                                    <div className="flex flex-col gap-1.5 mt-1">
-                                                        <span className="text-[8px] text-[#F5F5DC]/20 uppercase tracking-widest font-space">Top Contributors</span>
+                                                    <div className="flex flex-col gap-2 mt-2">
+                                                        <span className="text-[10px] text-[#F5F5DC]/30 uppercase tracking-[1.5px] font-space">Top Contributors</span>
                                                         {topContributors.map(c => (
-                                                            <div key={`drawer-pri-${c.id}`} className="flex justify-between items-center text-[9px]">
-                                                                <span className="text-[#F5F5DC]/40 font-space truncate max-w-[130px]">{c.name}</span>
-                                                                <span className={`font-mono ${c.amount >= 0 ? 'text-vu-green/80' : 'text-red-400/80'}`}>
-                                                                    {c.amount >= 0 ? '+' : ''}{formatPrimaryNoDecimals(Math.abs(c.amount))}
+                                                            <div key={`drawer-pri-${c.id}`} className="flex justify-between items-center text-[11px]">
+                                                                <span className="text-[#F5F5DC]/60 font-space truncate max-w-[180px]">{c.name}</span>
+                                                                <span className={`font-mono ${c.amount >= 0 ? 'text-vu-green/90' : 'text-red-400/90'}`}>
+                                                                    {c.amount >= 0 ? '+' : '-'}{formatPrimaryNoDecimals(Math.abs(c.amount))}
                                                                 </span>
                                                             </div>
                                                         ))}
@@ -443,34 +445,34 @@ export default function DashboardTab({
                                             </div>
 
                                             {/* ─ Secondary Currency Details ─ */}
-                                            <div className="flex flex-col gap-3">
-                                                <span className="text-[9px] text-[#CC5500]/50 uppercase tracking-[2px] font-space">{secondaryCurrency} Details</span>
+                                            <div className="flex flex-col gap-4">
+                                                <span className="text-xs text-[#CC5500]/70 uppercase tracking-[2px] font-space">{secondaryCurrency} Details</span>
 
 
                                                 {/* MoM */}
-                                                <div className="flex items-center justify-between bg-white/[0.02] border border-white/[0.05] rounded-xl px-3 py-2">
-                                                    <span className="text-[9px] uppercase font-space tracking-[1.5px] text-[#F5F5DC]/30">MoM</span>
-                                                    <div className={`flex items-center gap-1.5 ${(diffPrevMonthGBP?.amount || 0) >= 0 ? 'text-[#CC5500]' : 'text-red-400'}`}>
-                                                        <span className="font-mono text-[11px] font-medium">{(diffPrevMonthGBP?.amount || 0) >= 0 ? '+' : ''}{formatSecondaryNoDecimals(Math.abs(diffPrevMonthGBP?.amount || 0))}</span>
-                                                        <span className="text-[9px] font-space opacity-60">{Math.abs(diffPrevMonthGBP?.percentage || 0).toFixed(1)}%</span>
+                                                <div className="flex items-center justify-between bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3">
+                                                    <span className="text-[11px] uppercase font-space tracking-[1.5px] text-[#F5F5DC]/40">MoM</span>
+                                                    <div className={`flex items-center gap-2 ${(diffPrevMonthGBP?.amount || 0) >= 0 ? 'text-[#CC5500]' : 'text-red-400'}`}>
+                                                        <span className="font-mono text-[13px] xl:text-sm font-medium">{(diffPrevMonthGBP?.amount || 0) >= 0 ? '+' : '-'}{formatSecondaryNoDecimals(Math.abs(diffPrevMonthGBP?.amount || 0))}</span>
+                                                        <span className="text-[11px] font-space opacity-70">{Math.abs(diffPrevMonthGBP?.percentage || 0).toFixed(1)}%</span>
                                                     </div>
                                                 </div>
 
                                                 {/* FX Attribution GBP */}
                                                 {(Math.abs(fxEffectGBP?.percentage || 0) > 0.05 || Math.abs(assetEffectGBP?.percentage || 0) > 0.05) && (
-                                                    <div className="flex flex-col gap-1 pl-3 border-l border-white/[0.06] ml-1">
+                                                    <div className="flex flex-col gap-1.5 pl-4 border-l-2 border-white/[0.06] ml-2">
                                                         <div className="flex items-center justify-between">
-                                                            <span className="text-[8px] font-space text-[#F5F5DC]/25 flex items-center gap-1"><span className="text-[7px]">↳</span> Asset Prices</span>
-                                                            <div className={`flex items-center gap-1 ${(assetEffectGBP?.amount || 0) >= 0 ? 'text-[#CC5500]/70' : 'text-red-400/70'}`}>
-                                                                <span className="font-mono text-[9px]">{(assetEffectGBP?.amount || 0) >= 0 ? '+' : '-'}{formatSecondaryNoDecimals(Math.abs(assetEffectGBP?.amount || 0))}</span>
-                                                                <span className="font-space text-[8px] opacity-60">{Math.abs(assetEffectGBP?.percentage || 0).toFixed(1)}%</span>
+                                                            <span className="text-[10px] font-space text-[#F5F5DC]/40 flex items-center gap-1.5"><span className="text-[9px]">↳</span> Asset Prices</span>
+                                                            <div className={`flex items-center gap-1.5 ${(assetEffectGBP?.amount || 0) >= 0 ? 'text-[#CC5500]/80' : 'text-red-400/80'}`}>
+                                                                <span className="font-mono text-[11px]">{(assetEffectGBP?.amount || 0) >= 0 ? '+' : '-'}{formatSecondaryNoDecimals(Math.abs(assetEffectGBP?.amount || 0))}</span>
+                                                                <span className="font-space text-[10px] opacity-70">{Math.abs(assetEffectGBP?.percentage || 0).toFixed(1)}%</span>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center justify-between">
-                                                            <span className="text-[8px] font-space text-[#F5F5DC]/25 flex items-center gap-1"><span className="text-[7px]">↳</span> FX Effect</span>
-                                                            <div className={`flex items-center gap-1 ${(fxEffectGBP?.amount || 0) >= 0 ? 'text-[#CC5500]/70' : 'text-red-400/70'}`}>
-                                                                <span className="font-mono text-[9px]">{(fxEffectGBP?.amount || 0) >= 0 ? '+' : '-'}{formatSecondaryNoDecimals(Math.abs(fxEffectGBP?.amount || 0))}</span>
-                                                                <span className="font-space text-[8px] opacity-60">{Math.abs(fxEffectGBP?.percentage || 0).toFixed(1)}%</span>
+                                                            <span className="text-[10px] font-space text-[#F5F5DC]/40 flex items-center gap-1.5"><span className="text-[9px]">↳</span> FX Effect</span>
+                                                            <div className={`flex items-center gap-1.5 ${(fxEffectGBP?.amount || 0) >= 0 ? 'text-[#CC5500]/80' : 'text-red-400/80'}`}>
+                                                                <span className="font-mono text-[11px]">{(fxEffectGBP?.amount || 0) >= 0 ? '+' : '-'}{formatSecondaryNoDecimals(Math.abs(fxEffectGBP?.amount || 0))}</span>
+                                                                <span className="font-space text-[10px] opacity-70">{Math.abs(fxEffectGBP?.percentage || 0).toFixed(1)}%</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -478,24 +480,24 @@ export default function DashboardTab({
 
                                                 {/* Target GBP */}
                                                 {Math.abs(diffTargetGBP?.amount || 0) > 1 && (
-                                                    <div className="flex items-center justify-between bg-white/[0.02] border border-white/[0.05] rounded-xl px-3 py-2">
-                                                        <span className="text-[9px] uppercase font-space tracking-[1.5px] text-[#F5F5DC]/30">Target</span>
-                                                        <div className={`flex items-center gap-1.5 ${(diffTargetGBP?.amount || 0) >= 0 ? 'text-[#CC5500]' : 'text-red-400'}`}>
-                                                            <span className="font-mono text-[11px] font-medium">{(diffTargetGBP?.amount || 0) >= 0 ? '+' : ''}{formatSecondaryNoDecimals(Math.abs(diffTargetGBP?.amount || 0))}</span>
-                                                            <span className="text-[9px] font-space opacity-60">{Math.abs(diffTargetGBP?.percentage || 0).toFixed(1)}%</span>
+                                                    <div className="flex items-center justify-between bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3">
+                                                        <span className="text-[11px] uppercase font-space tracking-[1.5px] text-[#F5F5DC]/40">Target</span>
+                                                        <div className={`flex items-center gap-2 ${(diffTargetGBP?.amount || 0) >= 0 ? 'text-[#CC5500]' : 'text-red-400'}`}>
+                                                            <span className="font-mono text-[13px] xl:text-sm font-medium">{(diffTargetGBP?.amount || 0) >= 0 ? '+' : '-'}{formatSecondaryNoDecimals(Math.abs(diffTargetGBP?.amount || 0))}</span>
+                                                            <span className="text-[11px] font-space opacity-70">{Math.abs(diffTargetGBP?.percentage || 0).toFixed(1)}%</span>
                                                         </div>
                                                     </div>
                                                 )}
 
                                                 {/* Top Contributors Secondary */}
                                                 {topContributorsSecondary.length > 0 && (
-                                                    <div className="flex flex-col gap-1.5 mt-1">
-                                                        <span className="text-[8px] text-[#F5F5DC]/20 uppercase tracking-widest font-space">Top Contributors</span>
+                                                    <div className="flex flex-col gap-2 mt-2">
+                                                        <span className="text-[10px] text-[#F5F5DC]/30 uppercase tracking-[1.5px] font-space">Top Contributors</span>
                                                         {topContributorsSecondary.map(c => (
-                                                            <div key={`drawer-sec-${c.id}`} className="flex justify-between items-center text-[9px]">
-                                                                <span className="text-[#F5F5DC]/40 font-space truncate max-w-[130px]">{c.name}</span>
-                                                                <span className={`font-mono ${c.amount >= 0 ? 'text-[#CC5500]/80' : 'text-red-400/80'}`}>
-                                                                    {c.amount >= 0 ? '+' : ''}{formatSecondaryNoDecimals(Math.abs(c.amount))}
+                                                            <div key={`drawer-sec-${c.id}`} className="flex justify-between items-center text-[11px]">
+                                                                <span className="text-[#F5F5DC]/60 font-space truncate max-w-[180px]">{c.name}</span>
+                                                                <span className={`font-mono ${c.amount >= 0 ? 'text-[#CC5500]/90' : 'text-red-400/90'}`}>
+                                                                    {c.amount >= 0 ? '+' : '-'}{formatSecondaryNoDecimals(Math.abs(c.amount))}
                                                                 </span>
                                                             </div>
                                                         ))}
@@ -510,7 +512,7 @@ export default function DashboardTab({
                     </div>
 
                     {/* ═══ Asset Sidebar (col-span-4) — Slim Glass Bars ═══ */}
-                    <div className="col-span-4 hidden lg:flex flex-col gap-1.5 h-full">
+                    <div id="ftue-sidebar" className="col-span-4 hidden lg:flex flex-col gap-1.5 h-full">
                         {expandedSummaries.map((metric) => {
                             const contributors = categoryAssetDiffs?.[metric.id]
                                 ? Object.entries(categoryAssetDiffs[metric.id])
@@ -561,7 +563,7 @@ export default function DashboardTab({
 
             {/* Dashboard Charts */}
             {
-                dashboardConfig && dashboardConfig.charts && dashboardConfig.charts.length > 0 && (
+                dashboardConfig && dashboardConfig.charts && dashboardConfig.charts.length > 0 && (<div id="ftue-charts">
                     <DashboardCharts
                         historicalData={historicalSnapshots || []}
                         currentMonthData={data} // Changed from dashboardData to data, assuming data is the prop
@@ -574,7 +576,7 @@ export default function DashboardTab({
                         dashboardConfig={dashboardConfig} // Added dashboardConfig prop
                         onNavigate={onNavigate}
                     />
-                )
+                </div>)
             }
 
             {/* Sub-categories Grid (Mobile & Tablet) */}
@@ -610,7 +612,7 @@ export default function DashboardTab({
             </div>
 
             {/* Detailed Tables Section */}
-            <div className="grid lg:grid-cols-2 gap-5 mt-4">
+            <div id="ftue-tables" className="grid lg:grid-cols-2 gap-5 mt-4">
                 {data.categories.map((cat) => (
                     <ConsolidatedAssetTable
                         key={cat.id}
@@ -623,6 +625,8 @@ export default function DashboardTab({
                     />
                 ))}
             </div>
+            {/* Tutorial Overlay */}
+            {ftueState?.isTutorialActive && <TutorialOverlay />}
         </div >
     );
 }

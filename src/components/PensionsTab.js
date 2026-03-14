@@ -1,20 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import ConfirmationModal from './ConfirmationModal';
 import AssetSearch from './AssetSearch';
-import { formatCurrency } from '@/lib/currency';
+import { formatCurrency, convertCurrency } from '@/lib/currency';
 import pensionMap from '../data/pension_fund_map.json';
 import AssetCard from './AssetCard';
 import TransactionTimeline from './TransactionTimeline';
 import FloatingActionButton from './FloatingActionButton';
 import EmptyState from './EmptyState';
 import PullToRefresh from './PullToRefresh';
-import PensionsTabLegacy from './PensionsTabLegacy';
+
 import DesktopAssetTable from './DesktopAssetTable';
 import ContextPane from './ContextPane';
+import useContextPaneHeight from '@/hooks/useContextPaneHeight';
 import BrokerForm from './BrokerForm';
 import AssetLogo from './AssetLogo';
 import { usePortfolio } from '@/context/PortfolioContext';
+import DisplayCurrencyPicker from './DisplayCurrencyPicker';
+import PageTutorialOverlay from './ftue/PageTutorialOverlay';
+import HeroDetailDrawer from './HeroDetailDrawer';
 import { useRef } from 'react';
+
+const PENSIONS_TUTORIAL_STEPS = [
+    // Populated state
+    { type: 'spotlight', targetId: 'ftue-pensions-header', title: 'Portfolio Overview', message: "Your total pension value, contributions, growth, and a breakdown by provider. Switch currencies with the picker.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-pensions-provider-section', title: 'Provider Details', message: "Expand each provider to see fund holdings, P&L, and contribution history. Buy into funds or sell positions from here.", position: 'bottom' },
+    // Empty state
+    { type: 'spotlight', targetId: 'ftue-pensions-empty', title: 'Get Started', message: "No pension accounts yet. Use the + button to add a provider and start tracking your retirement funds.", position: 'top' },
+    // Always visible
+    { type: 'spotlight', targetId: 'ftue-pensions-fab', title: 'Buy, Sell & Add Provider', message: "Use the + button to add a provider, buy into funds, or sell positions. Contributions vs. growth are tracked automatically.", position: 'top' },
+];
 
 // Added dynamic brokers to base dictionary map
 const BASE_BROKER_CURRENCY = {
@@ -25,8 +39,7 @@ const BASE_BROKER_CURRENCY = {
 };
 
 export default function PensionsTab({ transactions = [], rates, onRefresh, marketData: globalMarketData, pensionPrices: globalPensionPrices }) {
-    const { layoutMode } = usePortfolio();
-    if (layoutMode === 'legacy') return <PensionsTabLegacy transactions={transactions} rates={rates} onRefresh={onRefresh} marketData={globalMarketData} pensionPrices={globalPensionPrices} />;
+    const { displayCurrencyOverrides } = usePortfolio();
 
     const [isLoading, setIsLoading] = useState(false);
     const [ledgerOpen, setLedgerOpen] = useState(false);
@@ -39,6 +52,7 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
     const [editingTr, setEditingTr] = useState(null);
     const [selectedAsset, setSelectedAsset] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const contextPaneMaxHeight = useContextPaneHeight('ftue-pensions-provider-section', 'ftue-pensions-header');
 
     // Dynamic Brokers
     const [brokerDict, setBrokerDict] = useState({ ...BASE_BROKER_CURRENCY });
@@ -551,6 +565,9 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
     });
     if (Object.keys(pensionCurrencyTotals).length === 0) topCurrency = 'GBP';
 
+    // Apply display currency override if set by the user
+    const effectiveCurrency = displayCurrencyOverrides?.pensions || topCurrency;
+
     const renderBrokerTable = (brokerName, items) => {
         // Ensure Cash row exists
         let rows = [...items];
@@ -910,19 +927,10 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
 
             const locked = lockedPnL[b] || 0;
 
-            // Convert Broker Summary to GBP first, then to topCurrency
+            // Convert Broker Summary to GBP first, then to effectiveCurrency
             const toBase = (amount, currency) => {
                 if (!rates) return amount;
-                // First to GBP
-                let gbpAmt = amount;
-                if (currency === 'USD') gbpAmt = amount / rates.USD;
-                else if (currency === 'BRL') gbpAmt = amount / rates.BRL;
-                else if (currency !== 'GBP') gbpAmt = amount; // fallback
-                // Then to topCurrency
-                if (topCurrency === 'GBP') return gbpAmt;
-                if (topCurrency === 'BRL') return gbpAmt * rates.BRL;
-                if (topCurrency === 'USD') return gbpAmt * rates.USD;
-                return gbpAmt;
+                return convertCurrency(amount, currency, effectiveCurrency, rates);
             };
 
             const cvBase = toBase(cv, cur);
@@ -943,26 +951,29 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
         const totalROI = totalCostGBP !== 0 ? totalPnL / totalCostGBP * 100 : 0;
 
         return (
-            <div className="glass-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '48px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+            <div id="ftue-pensions-header" className="glass-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '48px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
                 {/* Hero Total */}
-                <div style={{
+                <div id="ftue-pensions-hero" style={{
                     padding: '24px',
                     background: 'linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(255,255,255,0) 100%)',
                     borderBottom: '1px solid var(--glass-border)',
                     textAlign: 'center'
                 }}>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)', marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>🛡️ Pension Portfolio</div>
-                    <div style={{ fontSize: '2.2rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{formatCurrency(totalGBP, topCurrency)}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--fg-secondary)', marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                        🛡️ Pension Portfolio
+                        <DisplayCurrencyPicker topCurrency={topCurrency} category="pensions" />
+                    </div>
+                    <div style={{ fontSize: '2.2rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{formatCurrency(totalGBP, effectiveCurrency)}</div>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '8px' }}>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>Invested: {formatCurrency(totalCostGBP, topCurrency)}</span>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>Invested: {formatCurrency(totalCostGBP, effectiveCurrency)}</span>
                         <span style={{ fontSize: '0.9rem', fontWeight: 600, color: totalPnL >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
-                            {totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL, topCurrency)} ({totalROI >= 0 ? '+' : ''}{totalROI.toFixed(1)}%)
+                            {totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL, effectiveCurrency)} ({totalROI >= 0 ? '+' : ''}{totalROI.toFixed(1)}%)
                         </span>
                     </div>
                 </div>
 
                 {/* Broker Summary Cards */}
-                <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                <div id="ftue-pensions-providers" style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
                     {brokerSummaries.filter(s => s.currentValue > 0.01 || s.purchasePrice > 0.01).map(s => (
                         <div
                             key={s.broker}
@@ -988,18 +999,20 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                 <div>
                                     <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff', marginBottom: '4px' }}>{s.broker}</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--fg-secondary)' }}>Cost: {formatCurrency(s.purchasePrice, topCurrency)}</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--fg-secondary)' }}>Cost: {formatCurrency(s.purchasePrice, effectiveCurrency)}</div>
                                 </div>
                                 <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#fff' }}>{formatCurrency(s.currentValue, topCurrency)}</div>
+                                    <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#fff' }}>{formatCurrency(s.currentValue, effectiveCurrency)}</div>
                                     <div style={{ fontSize: '0.8rem', fontWeight: 600, color: s.pnl >= 0 ? 'var(--vu-green)' : 'var(--error)', marginTop: '2px' }}>
-                                        {s.pnl >= 0 ? '+' : ''}{formatCurrency(s.pnl, topCurrency)} ({s.roi >= 0 ? '+' : ''}{s.roi.toFixed(1)}%)
+                                        {s.pnl >= 0 ? '+' : ''}{formatCurrency(s.pnl, effectiveCurrency)} ({s.roi >= 0 ? '+' : ''}{s.roi.toFixed(1)}%)
                                     </div>
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
+
+                <HeroDetailDrawer categoryId="pensions" effectiveCurrency={effectiveCurrency} totalCurrentValue={totalBase} />
             </div>
         );
     };
@@ -1024,6 +1037,7 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                         <div className="flex-1 min-w-0">
                             {renderConsolidated()}
 
+                            <div id="ftue-pensions-provider-section">
                             {/* Brokers Header & Toggle */}
                             <div className="flex justify-between items-center mb-4 px-2">
                                 <h2 className="text-xl font-bold font-bebas tracking-widest text-white/90">Brokers</h2>
@@ -1036,6 +1050,7 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                             </div>
 
                             {combined_brokers.map(b => renderBrokerTable(b, groupBroker(b)))}
+                            </div>
                         </div>
 
                         <div className="hidden lg:block sticky top-8 h-fit">
@@ -1043,6 +1058,7 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                                 selectedAsset={selectedAsset}
                                 rightPaneMode={rightPaneMode}
                                 onClose={() => setSelectedAsset(null)}
+                                maxHeight={contextPaneMaxHeight}
                                 renderHeader={(asset) => (
                                     <div className="flex flex-col">
                                         <h3 className="text-xl font-bold text-white/90 tracking-tight">{asset.asset}</h3>
@@ -1444,13 +1460,15 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                         </div>
                     </div>
                 ) : (
+                    <div id="ftue-pensions-empty">
                     <EmptyState
                         icon="🛡️"
                         title="No Pension Accounts"
-                        message="You haven't added any pension accounts yet. Start tracking your retirement funds here."
+                        message="You have no pension accounts yet. Add a provider to start tracking your retirement funds."
                         actionLabel="Add Pension Provider"
                         onAction={() => setRightPaneMode('add-broker')}
                     />
+                    </div>
                 )}
 
                 {/* Transaction Ledger */}
@@ -1528,6 +1546,7 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                     )}
                 </section>
 
+                <div id="ftue-pensions-fab">
                 <FloatingActionButton
                     onAddBroker={() => {
                         setRightPaneMode('add-broker');
@@ -1535,6 +1554,7 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                     }}
                     brokerLabel="Add Broker"
                 />
+                </div>
 
                 {/* Edit and Delete Modals to be fully implemented or confirmation modal used */}
                 <ConfirmationModal
@@ -1554,6 +1574,7 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                     onCancel={() => setIsDeleteBrokerModalOpen(false)}
                 />
             </div >
+            <PageTutorialOverlay pageId="pensions" steps={PENSIONS_TUTORIAL_STEPS} />
         </PullToRefresh>
     );
 }

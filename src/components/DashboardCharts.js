@@ -110,7 +110,7 @@ export default function DashboardCharts({ historicalData, currentMonthData, rate
         month: currentMonth,
         networthBRL: liveNetWorthBRL,
         networthGBP: liveNetWorthGBP,
-        impliedRate: rates.BRL
+        impliedRate: (rates[primaryCurrency] || 1) / (rates[secondaryCurrency] || 1)
     };
 
     // 2. Calculate TWR History
@@ -181,7 +181,16 @@ export default function DashboardCharts({ historicalData, currentMonthData, rate
 
             return {
                 ...d,
-                impliedRate: d.impliedRate || (d.totalminuspensionsGBP ? d.totalminuspensionsBRL / d.totalminuspensionsGBP : 0),
+                impliedRate: (() => {
+                    // Derive primary/secondary cross rate from historical BRL/GBP rate
+                    const historicalBrlGbp = d.impliedRate || (d.totalminuspensionsGBP ? d.totalminuspensionsBRL / d.totalminuspensionsGBP : 0);
+                    if (!historicalBrlGbp) return 0;
+                    // Historical rate is BRL per 1 GBP. Convert to primary/secondary.
+                    // Assume FX relationships between non-BRL/GBP currencies are roughly stable.
+                    const currentBrlGbp = rates.BRL || 1;
+                    const scaleFactor = historicalBrlGbp / currentBrlGbp;
+                    return ((rates[primaryCurrency] || 1) / (rates[secondaryCurrency] || 1)) * scaleFactor;
+                })(),
                 networthBRL: nwBrl,
                 networthPrimary: nwPrimary,
                 networthSecondary: nwSecondary,
@@ -217,7 +226,7 @@ export default function DashboardCharts({ historicalData, currentMonthData, rate
             networthPrimary: liveNetWorthPrimary,
             networthSecondary: liveNetWorthSecondary,
             roi: twrHistoryMap[currentMonth],
-            impliedRate: rates.BRL,
+            impliedRate: (rates[primaryCurrency] || 1) / (rates[secondaryCurrency] || 1),
             actuals: {
                 FixedIncome: toPrimary(currentMonthData.summaries.find(s => s.id === 'fixed-income')?.amount || 0, 'BRL'),
                 Equity: toPrimary(currentMonthData.summaries.find(s => s.id === 'equity')?.amount || 0, 'BRL'),
@@ -302,9 +311,11 @@ export default function DashboardCharts({ historicalData, currentMonthData, rate
     }
 
     const investmentsData = [];
-    // Start strictly at Feb 2021.
-    let currentY = 2021;
-    let currentM = 2; // 1-indexed
+    // Start from earliest month with data (instead of hardcoded Feb 2021)
+    const sortedMonths = monthlyInvestments ? [...monthlyInvestments].map(d => d.month).sort() : [];
+    const firstMonth = sortedMonths.length > 0 ? sortedMonths[0] : currentMonth;
+    let currentY = parseInt(firstMonth.split('-')[0]);
+    let currentM = parseInt(firstMonth.split('-')[1]);
 
     const endY = parseInt(currentMonth.split('-')[0]);
     const endM = parseInt(currentMonth.split('-')[1]);
@@ -363,13 +374,15 @@ export default function DashboardCharts({ historicalData, currentMonthData, rate
 
     // Calculate Allocation vs Targets Data
     const actuals = masterMixData?.percentages || { Equity: 0, FixedIncome: 0, RealEstate: 0, Crypto: 0, Cash: 0 };
-    const targets = allocationTargets || { Equity: 50, FixedIncome: 30, RealEstate: 15, Crypto: 5, Cash: 0 };
+    const rawTargets = allocationTargets?.assetClasses || allocationTargets || { Equity: 50, FixedIncome: 30, RealEstate: 15, Crypto: 5, Cash: 0 };
+    const targets = rawTargets;
 
     const allocationData = [
         { name: 'Equity', actual: actuals.Equity || 0, target: targets.Equity || 0 },
-        { name: 'Fixed Inc.', actual: actuals.FixedIncome || 0, target: targets.FixedIncome || 0 },
-        { name: 'Real Est.', actual: actuals.RealEstate || 0, target: targets.RealEstate || 0 },
+        { name: 'Fixed Inc.', actual: actuals.FixedIncome || 0, target: targets.FixedIncome || targets['Fixed Income'] || 0 },
+        { name: 'Real Est.', actual: actuals.RealEstate || 0, target: targets.RealEstate || targets['Real Estate'] || 0 },
         { name: 'Crypto', actual: actuals.Crypto || 0, target: targets.Crypto || 0 },
+        { name: 'Pensions', actual: actuals.Pensions || 0, target: targets.Pensions || 0 },
         { name: 'Cash', actual: actuals.Cash || 0, target: targets.Cash || 0 }
     ].sort((a, b) => b.actual - a.actual);
 

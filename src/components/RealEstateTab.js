@@ -6,18 +6,32 @@ import TransactionTimeline from './TransactionTimeline';
 import FloatingActionButton from './FloatingActionButton';
 import PullToRefresh from './PullToRefresh';
 import ContextPane from './ContextPane';
+import EmptyState from './EmptyState';
+import useContextPaneHeight from '@/hooks/useContextPaneHeight';
 import BrokerForm from './BrokerForm';
 import CurrencySelector from './CurrencySelector';
 import NumberInput from './NumberInput';
-import { formatCurrency } from '@/lib/currency';
+import { formatCurrency, convertCurrency } from '@/lib/currency';
 import { X } from 'lucide-react';
+import { usePortfolio } from '@/context/PortfolioContext';
+import DisplayCurrencyPicker from './DisplayCurrencyPicker';
+import PageTutorialOverlay from './ftue/PageTutorialOverlay';
+import HeroDetailDrawer from './HeroDetailDrawer';
+
+const REALESTATE_TUTORIAL_STEPS = [
+    { type: 'spotlight', targetId: 'ftue-re-header', title: 'Portfolio Overview', message: "Total real estate value, invested capital, and appreciation — all in one card. Rental income and mortgage repayments can be linked to each property.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-re-property-section', title: 'Property Details', message: "Expand each property or fund to see valuations, rental income, mortgage links, and transaction history.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-re-fab', title: 'Add Property or Fund', message: "Use the + button to add a new property, log a purchase, or record a sale. Mortgage payments flow to the Debt page automatically.", position: 'top' },
+];
 
 export default function RealEstateTab({ data, rates, onRefresh, marketData = {} }) {
+    const { displayCurrencyOverrides } = usePortfolio();
     // --- State ---
     const [expandedAccordions, setExpandedAccordions] = useState({});
     const [selectedAsset, setSelectedAsset] = useState(null);
     const [rightPaneMode, setRightPaneMode] = useState('default');
     const [searchTerm, setSearchTerm] = useState('');
+    const contextPaneMaxHeight = useContextPaneHeight('ftue-re-property-section', 'ftue-re-header');
     const [contextTab, setContextTab] = useState('overview');
 
     // Delete
@@ -215,18 +229,13 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
     });
     const topCurrency = Object.entries(currencyCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'BRL';
 
-    // Convert any amount to the top currency
+    // Apply display currency override if set by the user
+    const effectiveCurrency = displayCurrencyOverrides?.realEstate || topCurrency;
+
+    // Convert any amount to the effective currency
     const toTopCurr = (amount, fromCurrency) => {
-        if (fromCurrency === topCurrency) return amount;
-        // First convert to GBP, then from GBP to top currency
-        let inGBP = amount;
-        if (fromCurrency === 'BRL') inGBP = amount / BRL;
-        else if (fromCurrency === 'USD') inGBP = amount / (rates?.USD || 1.28);
-        // else already GBP
-        if (topCurrency === 'GBP') return inGBP;
-        if (topCurrency === 'BRL') return inGBP * BRL;
-        if (topCurrency === 'USD') return inGBP * (rates?.USD || 1.28);
-        return inGBP;
+        if (!rates) return amount;
+        return convertCurrency(amount, fromCurrency, effectiveCurrency, rates);
     };
 
     let totalValue = 0;
@@ -559,25 +568,28 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
     const renderConsolidated = () => {
         const summaryCards = buildSummaryCards();
         return (
-            <div className="glass-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '48px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+            <div id="ftue-re-header" className="glass-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '48px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
                 {/* Hero Total */}
-                <div style={{
+                <div id="ftue-re-hero" style={{
                     padding: '24px',
                     background: 'linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(255,255,255,0) 100%)',
                     borderBottom: '1px solid var(--glass-border)',
                     textAlign: 'center'
                 }}>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)', marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>🏢 Real Estate Portfolio</div>
-                    <div style={{ fontSize: '2.2rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{formatCurrency(totalValue, topCurrency)}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--fg-secondary)', marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                        🏢 Real Estate Portfolio
+                        <DisplayCurrencyPicker topCurrency={topCurrency} category="realEstate" />
+                    </div>
+                    <div style={{ fontSize: '2.2rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{formatCurrency(totalValue, effectiveCurrency)}</div>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '8px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>Invested: {formatCurrency(totalInvestment, topCurrency)}</span>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>Invested: {formatCurrency(totalInvestment, effectiveCurrency)}</span>
                         <span style={{ fontSize: '0.9rem', fontWeight: 600, color: totalPnL >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
-                            {totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL, topCurrency)} ({totalROI >= 0 ? '+' : ''}{totalROI.toFixed(1)}%)
+                            {totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL, effectiveCurrency)} ({totalROI >= 0 ? '+' : ''}{totalROI.toFixed(1)}%)
                         </span>
                         {realisedPnL !== 0 && (
                             <span style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>
                                 Realised: <span style={{ color: realisedPnL >= 0 ? 'var(--vu-green)' : 'var(--error)', fontWeight: 600 }}>
-                                    {realisedPnL >= 0 ? '+' : ''}{formatCurrency(realisedPnL, topCurrency)}
+                                    {realisedPnL >= 0 ? '+' : ''}{formatCurrency(realisedPnL, effectiveCurrency)}
                                 </span>
                             </span>
                         )}
@@ -585,7 +597,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                 </div>
 
                 {/* Summary Cards */}
-                <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                <div id="ftue-re-cards" style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
                     {summaryCards.filter(s => s.currentValue > 0.01 || s.purchasePrice > 0.01).map(s => (
                         <div
                             key={s.name}
@@ -621,6 +633,8 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                         </div>
                     ))}
                 </div>
+
+                <HeroDetailDrawer categoryId="real-estate" effectiveCurrency={effectiveCurrency} totalCurrentValue={totalValue} />
             </div>
         );
     };
@@ -1616,9 +1630,27 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                 <div className="lg:flex lg:gap-8 lg:items-start">
                     {/* Left Pane */}
                     <div className="flex-1 min-w-0">
-                        {renderConsolidated()}
-                        {renderPropertiesAccordion()}
-                        {fundBrokers.map(b => renderFundBrokerAccordion(b))}
+                        {properties.length > 0 || fundBrokers.length > 0 ? (
+                            <>
+                                {renderConsolidated()}
+                                <div id="ftue-re-property-section">
+                                {renderPropertiesAccordion()}
+                                {fundBrokers.map(b => renderFundBrokerAccordion(b))}
+                                </div>
+                            </>
+                        ) : (
+                            <div id="ftue-re-empty">
+                            <EmptyState
+                                icon="🏠"
+                                title="No Real Estate Assets"
+                                message="You have no real estate assets yet. Add a property or fund broker to start tracking your portfolio."
+                                actionLabel="Add Property"
+                                onAction={() => setRightPaneMode('add-property')}
+                                secondaryActionLabel="Add Fund Broker"
+                                onSecondaryAction={() => setRightPaneMode('add-broker')}
+                            />
+                            </div>
+                        )}
                     </div>
 
                     {/* Right Pane - Desktop ContextPane & Mobile Overlay */}
@@ -1627,6 +1659,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                             selectedAsset={selectedAsset}
                             rightPaneMode={rightPaneMode}
                             onClose={() => { setSelectedAsset(null); setRightPaneMode('default'); }}
+                            maxHeight={contextPaneMaxHeight}
                             renderEmptyState={() => {
                                 // --- Add Broker Form ---
                                 if (rightPaneMode === 'add-broker') {
@@ -2112,11 +2145,13 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                 </section>
 
                 {/* FAB */}
+                <div id="ftue-re-fab">
                 <FloatingActionButton
                     onAddBroker={() => { setSelectedAsset(null); setRightPaneMode('add-broker'); }}
                     onAddProperty={() => { setSelectedAsset(null); setRightPaneMode('add-property'); }}
                     onAddTransaction={() => { setSelectedAsset(null); setFundBuyData({ date: new Date().toISOString().split('T')[0], qtyToBuy: '', buyPricePerShare: '', totalInvestment: 0 }); setRightPaneMode('add-transaction'); }}
                 />
+                </div>
 
                 {/* Delete Confirmation */}
                 <ConfirmationModal
@@ -2134,6 +2169,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                     onCancel={() => { setIsDeleteBrokerModalOpen(false); setBrokerToDelete(null); }}
                 />
             </div>
+            <PageTutorialOverlay pageId="real-estate" steps={REALESTATE_TUTORIAL_STEPS} />
         </PullToRefresh>
     );
 }

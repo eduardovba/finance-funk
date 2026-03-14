@@ -21,7 +21,6 @@ export default function Inspector() {
         inspectorMode, setInspectorMode,
         setIsFormOpen, setEditingTransaction,
         editingTransaction, handleSaveTransaction,
-        layoutMode, setLayoutMode,
         transactions,
         rates
     } = usePortfolio();
@@ -114,25 +113,7 @@ export default function Inspector() {
                                                     <span className="text-xs font-space text-parchment/70 uppercase tracking-wide">Currency</span>
                                                     <span className="text-xs font-space text-[#D4AF37]">BRL / GBP</span>
                                                 </div>
-                                                <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
-                                                    <div>
-                                                        <span className="text-xs font-space text-parchment/70 uppercase tracking-wide block">Asset Layout</span>
-                                                        <span className="text-[10px] font-space text-parchment/30 mt-0.5 block">Switch between card and table views</span>
-                                                    </div>
-                                                    <button
-                                                        onClick={() => setLayoutMode(layoutMode === 'modern' ? 'legacy' : 'modern')}
-                                                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-space font-semibold transition-all"
-                                                        style={{
-                                                            background: layoutMode === 'modern'
-                                                                ? 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(212,175,55,0.2))'
-                                                                : 'rgba(255,255,255,0.08)',
-                                                            color: layoutMode === 'modern' ? '#10b981' : '#D4AF37',
-                                                            border: `1px solid ${layoutMode === 'modern' ? 'rgba(16,185,129,0.3)' : 'rgba(212,175,55,0.3)'}`,
-                                                        }}
-                                                    >
-                                                        {layoutMode === 'modern' ? '✨ Modern' : '📋 Legacy'}
-                                                    </button>
-                                                </div>
+
                                             </div>
                                         </div>
 

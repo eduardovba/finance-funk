@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ConfirmationModal from './ConfirmationModal';
 import AssetSearch from './AssetSearch';
-import { formatCurrency, SUPPORTED_CURRENCIES } from '@/lib/currency';
+import { formatCurrency, convertCurrency, SUPPORTED_CURRENCIES } from '@/lib/currency';
 import CurrencySelector from './CurrencySelector';
 import AssetCard from './AssetCard';
 import TransactionTimeline from './TransactionTimeline';
@@ -9,24 +9,38 @@ import FloatingActionButton from './FloatingActionButton';
 import EmptyState from './EmptyState';
 import PullToRefresh from './PullToRefresh';
 import AssetCardSkeleton from './AssetCardSkeleton';
-import EquityTabLegacy from './EquityTabLegacy';
+
 import DesktopAssetTable from './DesktopAssetTable';
 import ContextPane from './ContextPane';
+import useContextPaneHeight from '@/hooks/useContextPaneHeight';
 import { usePortfolio } from '@/context/PortfolioContext';
+import DisplayCurrencyPicker from './DisplayCurrencyPicker';
 import { X } from 'lucide-react';
 import BrokerForm from './BrokerForm';
 import TransactionForm from './TransactionForm';
 import AssetLogo from './AssetLogo';
+import PageTutorialOverlay from './ftue/PageTutorialOverlay';
+import HeroDetailDrawer from './HeroDetailDrawer';
 
 // No more ASSET_TICKER_MAP - tickers are stored directly on transactions
+
+const EQUITY_TUTORIAL_STEPS = [
+    // Populated state steps (shown when data exists)
+    { type: 'spotlight', targetId: 'ftue-equity-header', title: 'Portfolio Overview', message: "Your total equity value, invested capital, P&L, and a breakdown by broker — all in one card. Use the currency picker to switch display currency.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-equity-broker-section', title: 'Broker Details', message: "Expand each broker to see individual holdings, P&L, and actions. Use the \u2018Show Empty\u2019 toggle to reveal brokers with no active positions.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-equity-ledger', title: 'Activity History', message: "Every buy, sell, and dividend is logged here. You can edit or delete any entry.", position: 'top' },
+    // Empty state step (shown when no data)
+    { type: 'spotlight', targetId: 'ftue-equity-empty', title: 'Get Started', message: "Your equity portfolio is empty. Use the + button below to add a broker, then buy your first stock or ETF.", position: 'top' },
+    // Always visible
+    { type: 'spotlight', targetId: 'ftue-equity-fab', title: 'Add Broker or Buy', message: "Use the + button to add a new broker, buy stocks, or record a sale. Everything starts here.", position: 'top' },
+];
 
 const BROKER_CURRENCY = {
     'Trading 212': 'GBP', 'XP': 'BRL', 'Amazon': 'USD', 'Green Gold Farms': 'USD', 'Monzo': 'GBP', 'Fidelity': 'GBP'
 };
 
 export default function EquityTab({ transactions = [], marketData, rates, onRefresh }) {
-    const { layoutMode, setIsInspectorOpen, setInspectorMode, setEditingTransaction } = usePortfolio();
-    if (layoutMode === 'legacy') return <EquityTabLegacy transactions={transactions} marketData={marketData} rates={rates} onRefresh={onRefresh} />;
+    const { setIsInspectorOpen, setInspectorMode, setEditingTransaction, displayCurrencyOverrides } = usePortfolio();
 
     const [isLoading, setIsLoading] = useState(false);
     const [ledgerOpen, setLedgerOpen] = useState(false);
@@ -36,6 +50,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
     const [expandedBrokers, setExpandedBrokers] = useState({});
     const toggleBroker = (b) => setExpandedBrokers(prev => ({ ...prev, [b]: !prev[b] }));
     const [searchTerm, setSearchTerm] = useState('');
+    const contextPaneMaxHeight = useContextPaneHeight('ftue-equity-broker-section', 'ftue-equity-header');
     const [selectedAsset, setSelectedAsset] = useState(null);
     const [rightPaneMode, setRightPaneMode] = useState('default');
     const [showEmptyBrokers, setShowEmptyBrokers] = useState(false);
@@ -377,17 +392,9 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
             }
         });
 
-        // Ensure "Cash" for "Trading 212" is always present in holdings
-        const t212CashKey = 'Cash|Trading 212';
-        if (!holdings[t212CashKey]) {
-            holdings[t212CashKey] = { asset: 'Cash', qty: 0, totalCost: 0, broker: 'Trading 212', currency: 'GBP', ticker: null };
-        }
 
-        // Filter out fully sold positions (qty ≈ 0), but KEEP "Cash" for "Trading 212"
-        const activeHoldings = Object.values(holdings).filter(h => {
-            const isT212Cash = h.asset === 'Cash' && h.broker === 'Trading 212';
-            return isT212Cash || Math.abs(h.qty) > 0.01;
-        });
+        // Filter out fully sold positions (qty ≈ 0)
+        const activeHoldings = Object.values(holdings).filter(h => Math.abs(h.qty) > 0.01);
         return { activeHoldings, lockedPnL };
     };
 
@@ -437,6 +444,9 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
         }
     });
     if (Object.keys(currencyTotals).length === 0) topCurrency = 'GBP';
+
+    // Apply display currency override if set by the user
+    const effectiveCurrency = displayCurrencyOverrides?.equity || topCurrency;
 
     const brokers = [...activeBrokers, ...dbBrokerNames]
         .sort((a, b) => {
@@ -521,7 +531,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
         const glowClass = isNewlyAdded ? 'shadow-[0_0_25px_rgba(212,175,55,0.4)] border-[#D4AF37] ring-1 ring-[#D4AF37]/50' : '';
 
         return (
-            <div key={brokerName} id={encodeURIComponent(brokerName)} className={`mb-8 rounded-2xl transition-all duration-1000 ${glowClass}`}>
+            <div key={brokerName} id={encodeURIComponent(brokerName)} data-ftue-broker className={`mb-8 rounded-2xl transition-all duration-1000 ${glowClass}`}>
                 <div
                     onClick={() => toggleBroker(brokerName)}
                     className="flex justify-between items-center mb-4 px-4 py-3 cursor-pointer bg-white/5 hover:bg-white/10 rounded-2xl transition-colors"
@@ -747,21 +757,10 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
             });
             const locked = lockedPnL[b] || 0;
 
-            // Convert to topCurrency
+            // Convert to effectiveCurrency
             const toBaseCurrency = (amount, currency) => {
                 if (!rates) return amount;
-                if (currency === topCurrency) return amount;
-
-                // Convert to GBP first (since rates are GBP based)
-                let gbpAmt = amount;
-                if (currency === 'BRL') gbpAmt = amount / rates.BRL;
-                if (currency === 'USD') gbpAmt = amount / rates.USD;
-
-                // Then convert to topCurrency
-                if (topCurrency === 'GBP') return gbpAmt;
-                if (topCurrency === 'BRL') return gbpAmt * rates.BRL;
-                if (topCurrency === 'USD') return gbpAmt * rates.USD;
-                return gbpAmt;
+                return convertCurrency(amount, currency, effectiveCurrency, rates);
             };
 
             const cvBase = toBaseCurrency(cv, cur);
@@ -782,26 +781,29 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
         const totalROI = totalCostBase !== 0 ? totalPnL / totalCostBase * 100 : 0;
 
         return (
-            <div className="glass-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '48px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+            <div id="ftue-equity-header" className="glass-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '48px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
                 {/* Hero Total */}
-                <div style={{
+                <div id="ftue-equity-hero" style={{
                     padding: '24px',
                     background: 'linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(255,255,255,0) 100%)',
                     borderBottom: '1px solid var(--glass-border)',
                     textAlign: 'center'
                 }}>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)', marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>📊 Equity Portfolio</div>
-                    <div style={{ fontSize: '2.2rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{formatCurrency(totalBase, topCurrency)}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--fg-secondary)', marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                        📊 Equity Portfolio
+                        <DisplayCurrencyPicker topCurrency={topCurrency} category="equity" />
+                    </div>
+                    <div style={{ fontSize: '2.2rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{formatCurrency(totalBase, effectiveCurrency)}</div>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '8px' }}>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>Invested: {formatCurrency(totalCostBase, topCurrency)}</span>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>Invested: {formatCurrency(totalCostBase, effectiveCurrency)}</span>
                         <span style={{ fontSize: '0.9rem', fontWeight: 600, color: totalPnL >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
-                            {totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL, topCurrency)} ({totalROI >= 0 ? '+' : ''}{totalROI.toFixed(1)}%)
+                            {totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL, effectiveCurrency)} ({totalROI >= 0 ? '+' : ''}{totalROI.toFixed(1)}%)
                         </span>
                     </div>
                 </div>
 
                 {/* Broker Summary Cards */}
-                <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                <div id="ftue-equity-brokers" style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
                     {brokerSummaries.filter(s => s.currentValue > 0.01 || s.purchasePrice > 0.01).map(s => (
                         <div
                             key={s.broker}
@@ -828,18 +830,20 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                 <div>
                                     <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff', marginBottom: '4px' }}>{s.broker}</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--fg-secondary)' }}>Cost: {formatCurrency(s.purchasePrice, 'GBP')}</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--fg-secondary)' }}>Cost: {formatCurrency(s.purchasePrice, effectiveCurrency)}</div>
                                 </div>
                                 <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#fff' }}>{formatCurrency(s.currentValue, 'GBP')}</div>
+                                    <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#fff' }}>{formatCurrency(s.currentValue, effectiveCurrency)}</div>
                                     <div style={{ fontSize: '0.8rem', fontWeight: 600, color: s.pnl >= 0 ? 'var(--vu-green)' : 'var(--error)', marginTop: '2px' }}>
-                                        {s.pnl >= 0 ? '+' : ''}{formatCurrency(s.pnl, 'GBP')} ({s.roi >= 0 ? '+' : ''}{s.roi.toFixed(1)}%)
+                                        {s.pnl >= 0 ? '+' : ''}{formatCurrency(s.pnl, effectiveCurrency)} ({s.roi >= 0 ? '+' : ''}{s.roi.toFixed(1)}%)
                                     </div>
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
+
+                <HeroDetailDrawer categoryId="equity" effectiveCurrency={effectiveCurrency} totalCurrentValue={totalBase} />
             </div>
         );
     };
@@ -1050,11 +1054,12 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                     <span className="absolute left-8 lg:left-4 top-1/2 -translate-y-1/2 text-white/40">🔍</span>
                 </div>
 
-                {activeHoldings.length > 0 ? (
+                {activeHoldings.length > 0 || dbBrokerNames.length > 0 ? (
                     <div className="lg:flex lg:gap-8 lg:items-start">
                         <div className="flex-1 min-w-0">
                             {renderConsolidated()}
 
+                            <div id="ftue-equity-broker-section">
                             {/* Brokers Header & Toggle */}
                             <div className="flex justify-between items-center mb-4 px-2">
                                 <h2 className="text-xl font-bold font-bebas tracking-widest text-white/90">Brokers</h2>
@@ -1067,12 +1072,14 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                             </div>
 
                             {brokers.map(b => renderBrokerTable(b, brokerGroups[b]))}
+                            </div>
                         </div>
                         <div className="hidden lg:block sticky top-8 h-fit">
                             <ContextPane
                                 selectedAsset={selectedAsset}
                                 rightPaneMode={rightPaneMode}
                                 onClose={() => setSelectedAsset(null)}
+                                maxHeight={contextPaneMaxHeight}
                                 renderEmptyState={() => {
                                     if (rightPaneMode === 'add-broker') {
                                         return (
@@ -1257,17 +1264,19 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                         </div>
                     </div>
                 ) : (
+                    <div id="ftue-equity-empty">
                     <EmptyState
                         icon="📈"
                         title="No Equity Assets"
-                        message="Your equity portfolio is empty. Add your first stock or ETF to get started."
-                        actionLabel="Add Equity"
-                        onAction={() => handleNewBuyClick('Trading 212')}
+                        message="You have no equity assets yet. Add a broker to log your first stock or ETF transaction."
+                        actionLabel="Add Broker"
+                        onAction={() => setRightPaneMode('add-broker')}
                     />
+                    </div>
                 )}
 
                 {/* Transaction Ledger */}
-                <section className="max-w-3xl mx-auto mb-10 mt-12">
+                <section id="ftue-equity-ledger" className="max-w-3xl mx-auto mb-10 mt-12">
                     <div className="flex justify-between items-center mb-6 px-1">
                         <h3 className="text-lg font-medium text-white/90 flex items-center gap-2">
                             Activity History
@@ -1322,6 +1331,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
 
                 {/* Context-Aware FAB */}
                 {/* New Expandable FAB */}
+                <div id="ftue-equity-fab">
                 <FloatingActionButton
                     onAddBroker={() => {
                         setRightPaneMode('add-broker');
@@ -1331,6 +1341,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                         handleNewBuyClick('');
                     }}
                 />
+                </div>
 
                 <ConfirmationModal
                     isOpen={isDeleteModalOpen}
@@ -1437,6 +1448,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                 }
 
             </div >
+            <PageTutorialOverlay pageId="equity" steps={EQUITY_TUTORIAL_STEPS} />
         </PullToRefresh >
     );
 }

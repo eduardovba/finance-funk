@@ -45,16 +45,16 @@ export default function MetricCard({ id, title, amount, percentage, diffAmount, 
 
                 <div className="flex items-center justify-between gap-2 relative z-10 w-full">
                     <div className="flex flex-col min-w-0 pr-2">
-                        <h3 className="text-[#F5F5DC]/60 text-[7px] xl:text-[8px] tracking-[2px] uppercase font-space mb-0 truncate" title={title}>{title}</h3>
-                        <p className={`text-lg xl:text-xl font-normal text-[#D4AF37] drop-shadow-[0_0_10px_rgba(212,175,55,0.4)] font-bebas truncate ${isLoading ? 'opacity-30' : 'opacity-100'}`}>
+                        <h3 className="text-[#F5F5DC]/60 text-[9px] xl:text-[10px] tracking-[2px] uppercase font-space mb-0 truncate" title={title}>{title}</h3>
+                        <p className={`text-2xl xl:text-3xl font-normal text-[#D4AF37] drop-shadow-[0_0_10px_rgba(212,175,55,0.4)] font-bebas truncate ${isLoading ? 'opacity-30' : 'opacity-100'}`}>
                             {isLoading ? '---' : formatCurrency(amount, currency, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                         </p>
                     </div>
                     <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                        <p className={`text-[10px] xl:text-[11px] font-mono text-[#CC5500] opacity-80 ${isLoading ? 'opacity-20' : ''} leading-none`}>
+                        <p className={`text-xs xl:text-sm font-mono text-[#CC5500] opacity-80 ${isLoading ? 'opacity-20' : ''} leading-none`}>
                             {isLoading ? '---' : formatCurrency(secondaryValue, secondaryCurrency, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                         </p>
-                        <span className={`text-[9px] font-mono leading-none ${isPositiveForColor ? 'text-vu-green' : 'text-red-400'}`}>
+                        <span className={`text-[11px] font-mono leading-none ${isPositiveForColor ? 'text-vu-green' : 'text-red-400'}`}>
                             {(diffAmount || 0) > 0 ? '+' : ''}{formatCurrency(diffAmount || 0, primaryCurrency, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                             {' '}{Math.abs(percentage || 0).toFixed(1)}%
                             <span className="text-[7px] opacity-70 ml-0.5">{isActuallyPositive ? '▲' : '▼'}</span>

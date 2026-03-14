@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { formatCurrency } from '@/lib/currency';
+import { formatCurrency, convertCurrency } from '@/lib/currency';
 import ConfirmationModal from './ConfirmationModal';
 import { X } from 'lucide-react';
 import AssetCard from './AssetCard';
@@ -7,11 +7,25 @@ import TransactionTimeline from './TransactionTimeline';
 import FloatingActionButton from './FloatingActionButton';
 import EmptyState from './EmptyState';
 import PullToRefresh from './PullToRefresh';
-import FixedIncomeTabLegacy from './FixedIncomeTabLegacy';
+
 
 import ContextPane from './ContextPane';
+import useContextPaneHeight from '@/hooks/useContextPaneHeight';
 import BrokerForm from './BrokerForm';
 import { usePortfolio } from '@/context/PortfolioContext';
+import DisplayCurrencyPicker from './DisplayCurrencyPicker';
+import PageTutorialOverlay from './ftue/PageTutorialOverlay';
+import HeroDetailDrawer from './HeroDetailDrawer';
+
+const FIXEDINCOME_TUTORIAL_STEPS = [
+    { type: 'spotlight', targetId: 'ftue-fi-header', title: 'Portfolio Overview', message: "Your total fixed income value, deposits, interest earned, and a breakdown by account. Switch display currency with the picker.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-fi-account-section', title: 'Account Details', message: "Expand each account to see holdings, maturity dates, and interest earned. Every deposit and interest payment is tracked.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-fi-ledger', title: 'Activity History', message: "Deposits, withdrawals, and interest payments are all logged here. Interest is tracked automatically.", position: 'top' },
+    // Empty state
+    { type: 'spotlight', targetId: 'ftue-fi-empty', title: 'Get Started', message: "No fixed income accounts yet. Use the + button to add a savings account, bond, or treasury product.", position: 'top' },
+    // Always visible
+    { type: 'spotlight', targetId: 'ftue-fi-fab', title: 'Add Account', message: "Use the + button to create a new account and start tracking deposits and interest.", position: 'top' },
+];
 
 const BASE_BROKER_CURRENCY = {
     'XP': 'BRL', 'NuBank': 'BRL', 'Inter': 'BRL', 'Santander': 'BRL', 'Monzo': 'GBP', 'Fidelity': 'GBP'
@@ -24,8 +38,7 @@ const CATEGORIES = [
 ];
 
 export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) {
-    const { layoutMode } = usePortfolio();
-    if (layoutMode === 'legacy') return <FixedIncomeTabLegacy transactions={transactions} rates={rates} onRefresh={onRefresh} />;
+    const { displayCurrencyOverrides } = usePortfolio();
 
     const [ledgerOpen, setLedgerOpen] = useState(false);
     const [expandedBrokers, setExpandedBrokers] = useState({});
@@ -34,6 +47,7 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
     const [selectedAsset, setSelectedAsset] = useState(null);
     const [rightPaneMode, setRightPaneMode] = useState('default');
     const [searchTerm, setSearchTerm] = useState('');
+    const contextPaneMaxHeight = useContextPaneHeight('ftue-fi-account-section', 'ftue-fi-header');
     const [showEmptyBrokers, setShowEmptyBrokers] = useState(false);
 
     // Dynamic broker management
@@ -225,16 +239,12 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
     });
     if (Object.keys(currencyTotals).length === 0) topCurrency = 'BRL';
 
+    // Apply display currency override if set by the user
+    const effectiveCurrency = displayCurrencyOverrides?.fixedIncome || topCurrency;
+
     const toBase = (amount, currency) => {
         if (!rates) return amount;
-        let gbpAmt = amount;
-        if (currency === 'USD') gbpAmt = amount / rates.USD;
-        else if (currency === 'BRL') gbpAmt = amount / rates.BRL;
-        else if (currency !== 'GBP') gbpAmt = amount;
-        if (topCurrency === 'GBP') return gbpAmt;
-        if (topCurrency === 'BRL') return gbpAmt * rates.BRL;
-        if (topCurrency === 'USD') return gbpAmt * rates.USD;
-        return gbpAmt;
+        return convertCurrency(amount, currency, effectiveCurrency, rates);
     };
 
     // 2. Actions
@@ -524,24 +534,27 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
         const grandROI = Math.abs(grandInv) > 0.1 ? (grandPnL / Math.abs(grandInv) * 100) : 0;
 
         return (
-            <div className="glass-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '48px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                <div style={{
+            <div id="ftue-fi-header" className="glass-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '48px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                <div id="ftue-fi-hero" style={{
                     padding: '24px',
                     background: 'linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(255,255,255,0) 100%)',
                     borderBottom: '1px solid var(--glass-border)',
                     textAlign: 'center'
                 }}>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)', marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>📊 Fixed Income Portfolio</div>
-                    <div style={{ fontSize: '2.2rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{formatCurrency(grandTotal, topCurrency)}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--fg-secondary)', marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                        📊 Fixed Income Portfolio
+                        <DisplayCurrencyPicker topCurrency={topCurrency} category="fixedIncome" />
+                    </div>
+                    <div style={{ fontSize: '2.2rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{formatCurrency(grandTotal, effectiveCurrency)}</div>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '8px' }}>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>Invested: {formatCurrency(grandInv, topCurrency)}</span>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>Invested: {formatCurrency(grandInv, effectiveCurrency)}</span>
                         <span style={{ fontSize: '0.9rem', fontWeight: 600, color: grandPnL >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
-                            {grandPnL >= 0 ? '+' : ''}{formatCurrency(grandPnL, topCurrency)} ({grandROI >= 0 ? '+' : ''}{grandROI.toFixed(1)}%)
+                            {grandPnL >= 0 ? '+' : ''}{formatCurrency(grandPnL, effectiveCurrency)} ({grandROI >= 0 ? '+' : ''}{grandROI.toFixed(1)}%)
                         </span>
                     </div>
                 </div>
 
-                <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                <div id="ftue-fi-accounts" style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
                     {brokerSummaries.map(s => (
                         <div key={s.broker}
                             onClick={() => {
@@ -558,15 +571,17 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
                                     <div style={{ fontSize: '0.8rem', color: 'var(--fg-secondary)' }}>{formatCurrency(s.nativeVal, s.nativeCur)}</div>
                                 </div>
                                 <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#fff' }}>{formatCurrency(s.currentValue, topCurrency)}</div>
+                                    <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#fff' }}>{formatCurrency(s.currentValue, effectiveCurrency)}</div>
                                     <div style={{ fontSize: '0.8rem', fontWeight: 600, color: s.pnl >= 0 ? 'var(--vu-green)' : 'var(--error)', marginTop: '2px' }}>
-                                        {s.pnl >= 0 ? '+' : ''}{formatCurrency(s.pnl, topCurrency)} ({s.roi >= 0 ? '+' : ''}{s.roi.toFixed(1)}%)
+                                        {s.pnl >= 0 ? '+' : ''}{formatCurrency(s.pnl, effectiveCurrency)} ({s.roi >= 0 ? '+' : ''}{s.roi.toFixed(1)}%)
                                     </div>
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
+
+                <HeroDetailDrawer categoryId="fixed-income" effectiveCurrency={effectiveCurrency} totalCurrentValue={grandTotal} />
             </div>
         );
     };
@@ -774,6 +789,7 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
                         <div className="flex-1 min-w-0">
                             {renderConsolidated()}
 
+                            <div id="ftue-fi-account-section">
                             <div className="flex justify-between items-center mb-4 px-2">
                                 <h2 className="text-xl font-bold font-bebas tracking-widest text-white/90">Brokers</h2>
                                 <button onClick={() => setShowEmptyBrokers(!showEmptyBrokers)}
@@ -783,6 +799,7 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
                             </div>
 
                             {brokers_list.map(b => renderBrokerTable(b))}
+                            </div>
                         </div>
 
                         <div className="hidden lg:block sticky top-8 h-fit">
@@ -790,6 +807,7 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
                                 selectedAsset={selectedAsset}
                                 rightPaneMode={rightPaneMode}
                                 onClose={() => { setSelectedAsset(null); setRightPaneMode('default'); }}
+                                maxHeight={contextPaneMaxHeight}
                                 renderHeader={(asset) => (
                                     <div className="flex flex-col">
                                         <h3 className="text-xl font-bold text-white/90 tracking-tight">{asset.name}</h3>
@@ -898,17 +916,19 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
                         </div>
                     </div>
                 ) : (
+                    <div id="ftue-fi-empty">
                     <EmptyState
                         icon="🏦"
                         title="No Fixed Income Assets"
-                        message="You don't have any fixed income investments yet. Add a CDB or Bond to get started."
-                        actionLabel="Add Fixed Income"
-                        onAction={() => handleAddClick('XP')}
+                        message="You have no fixed income accounts yet. Add an account to start tracking deposits, bonds, and interest."
+                        actionLabel="Add Account"
+                        onAction={() => setRightPaneMode('add-broker')}
                     />
+                    </div>
                 )}
 
                 {/* Transaction Ledger */}
-                <section className="max-w-3xl mx-auto mb-10 mt-12">
+                <section id="ftue-fi-ledger" className="max-w-3xl mx-auto mb-10 mt-12">
                     <div className="flex justify-between items-center mb-6 px-1">
                         <h3 className="text-lg font-medium text-white/90 flex items-center gap-2">
                             Activity History
@@ -953,10 +973,12 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
                     )}
                 </section>
 
+                <div id="ftue-fi-fab">
                 <FloatingActionButton
                     onAddBroker={() => { setRightPaneMode('add-broker'); setSelectedAsset(null); }}
                     onAddTransaction={() => { handleAddClick(brokers_list[0] || ''); }}
                 />
+                </div>
 
                 <ConfirmationModal
                     isOpen={isDeleteModalOpen}
@@ -966,6 +988,7 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }) 
                     onCancel={() => setIsDeleteModalOpen(false)}
                 />
             </div>
+            <PageTutorialOverlay pageId="fixed-income" steps={FIXEDINCOME_TUTORIAL_STEPS} />
         </PullToRefresh>
     );
 }

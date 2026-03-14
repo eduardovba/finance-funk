@@ -15,6 +15,7 @@ import {
     getDebtSummary,
     getMasterMixData
 } from "@/lib/portfolioUtils";
+import demoData from '@/lib/demoData';
 
 const PortfolioContext = createContext(null);
 
@@ -43,35 +44,7 @@ export function PortfolioProvider({ children }) {
     const [assetClasses, setAssetClasses] = useState({});
     const [appSettings, setAppSettings] = useState({ autoMonthlyCloseEnabled: true });
     const [dashboardConfig, setDashboardConfig] = useState(null);
-
-    // ═══════════ LAYOUT MODE ═══════════
-    const [layoutMode, setLayoutModeState] = useState('modern');
-    const [layoutLoaded, setLayoutLoaded] = useState(false);
-
-    // Wrap setLayoutMode to persist to DB
-    const setLayoutMode = useCallback((newMode) => {
-        setLayoutModeState(newMode);
-        // Instant localStorage cache
-        if (typeof window !== 'undefined') localStorage.setItem('ff_layoutMode', newMode);
-        // Background persist to DB
-        setAppSettings(prev => {
-            const updated = { ...prev, layoutMode: newMode };
-            fetch('/api/app-settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updated)
-            }).catch(() => {});
-            return updated;
-        });
-    }, []);
-
-    // Load from localStorage instantly for fast paint, DB will override if available
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('ff_layoutMode');
-            if (saved === 'legacy' || saved === 'modern') setLayoutModeState(saved);
-        }
-    }, []);
+    const [ftueState, setFtueState] = useState(null); // null = loading, object = loaded
 
     // ═══════════ UI STATE ═══════════
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -87,6 +60,7 @@ export function PortfolioProvider({ children }) {
     const [primaryCurrency, setPrimaryCurrency] = useState('BRL');
     const [secondaryCurrency, setSecondaryCurrency] = useState('GBP');
     const [rateFlipped, setRateFlipped] = useState(false);
+    const [displayCurrencyOverrides, setDisplayCurrencyOverridesState] = useState({}); // per-category map, e.g. { equity: 'USD', crypto: null }
     const [currencyLoaded, setCurrencyLoaded] = useState(false);
 
     // Load currency prefs: DB first, then localStorage fallback
@@ -103,6 +77,12 @@ export function PortfolioProvider({ children }) {
                         if (data.currencyPreferences.rateFlipped !== undefined) {
                             setRateFlipped(data.currencyPreferences.rateFlipped);
                         }
+                        if (data.currencyPreferences.displayCurrencyOverrides !== undefined) {
+                            setDisplayCurrencyOverridesState(data.currencyPreferences.displayCurrencyOverrides || {});
+                        } else if (data.currencyPreferences.displayCurrency !== undefined && data.currencyPreferences.displayCurrency) {
+                            // Legacy migration: single value -> apply to no category (ignore)
+                            setDisplayCurrencyOverridesState({});
+                        }
                         setCurrencyLoaded(true);
                         return;
                     }
@@ -114,9 +94,13 @@ export function PortfolioProvider({ children }) {
                 const savedPrimary = localStorage.getItem('ff_primaryCurrency');
                 const savedSecondary = localStorage.getItem('ff_secondaryCurrency');
                 const savedFlipped = localStorage.getItem('ff_rateFlipped');
+                const savedOverrides = localStorage.getItem('ff_displayCurrencyOverrides');
                 if (savedPrimary && SUPPORTED_CURRENCIES[savedPrimary]) setPrimaryCurrency(savedPrimary);
                 if (savedSecondary && SUPPORTED_CURRENCIES[savedSecondary]) setSecondaryCurrency(savedSecondary);
                 if (savedFlipped !== null) setRateFlipped(savedFlipped === 'true');
+                if (savedOverrides) {
+                    try { setDisplayCurrencyOverridesState(JSON.parse(savedOverrides)); } catch { /* ignore */ }
+                }
             }
             if (!cancelled) setCurrencyLoaded(true);
         })();
@@ -130,14 +114,20 @@ export function PortfolioProvider({ children }) {
             localStorage.setItem('ff_primaryCurrency', primaryCurrency);
             localStorage.setItem('ff_secondaryCurrency', secondaryCurrency);
             localStorage.setItem('ff_rateFlipped', rateFlipped);
+            localStorage.setItem('ff_displayCurrencyOverrides', JSON.stringify(displayCurrencyOverrides));
         }
         // Background persist to DB
         fetch('/api/user/profile', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ primaryCurrency, secondaryCurrency, rateFlipped }),
+            body: JSON.stringify({ primaryCurrency, secondaryCurrency, rateFlipped, displayCurrencyOverrides }),
         }).catch(() => { /* ignore – localStorage is the instant fallback */ });
-    }, [primaryCurrency, secondaryCurrency, rateFlipped, currencyLoaded]);
+    }, [primaryCurrency, secondaryCurrency, rateFlipped, displayCurrencyOverrides, currencyLoaded]);
+
+    // Wrapped setter for per-category displayCurrencyOverrides
+    const setDisplayCurrencyOverride = useCallback((category, value) => {
+        setDisplayCurrencyOverridesState(prev => ({ ...prev, [category]: value }));
+    }, []);
 
     // ═══════════ CURRENCY HELPERS ═══════════
     const formatPrimary = useCallback((amount, options = {}) => formatCurrency(amount, primaryCurrency, options), [primaryCurrency]);
@@ -277,6 +267,49 @@ export function PortfolioProvider({ children }) {
     }, [fetchMarketData]);
 
     const refreshAllData = useCallback(async () => {
+        // 1. Fetch FTUE state first to know if we are in demo mode
+        let ftueStateData = null;
+        try {
+            const ftueRes = await fetch('/api/ftue');
+            if (ftueRes.ok) {
+                ftueStateData = await ftueRes.json();
+                setFtueState(ftueStateData);
+            }
+        } catch (e) {
+            console.error("Failed to load FTUE state", e);
+        }
+
+        // 2. If using demo data OR wizard not yet completed (first visit — dashboard renders behind overlay),
+        //    bypass APIs and inject demo data instantly
+        if (ftueStateData?.usingDemoData || ftueStateData?.wizardCompleted === false) {
+            console.log("[FTUE] Using demo dataset instead of real APIs");
+            setTransactions(demoData.transactions);
+            setEquityTransactions(demoData.equityTransactions);
+            setCryptoTransactions(demoData.cryptoTransactions);
+            setRealEstate(demoData.realEstate);
+            setFixedIncomeTransactions(demoData.fixedIncomeTransactions);
+            setPensionTransactions(demoData.pensionTransactions);
+            setDebtTransactions(demoData.debtTransactions);
+            setHistoricalSnapshots(demoData.historicalSnapshots);
+            setLedgerData(demoData.ledgerData);
+            setFxHistory(demoData.fxHistory);
+            setAllocationTargets(demoData.allocationTargets);
+            setAssetClasses(demoData.assetClasses);
+            setAppSettings(demoData.appSettings);
+            setForecastSettings(demoData.forecastSettings);
+            setDashboardConfig(demoData.dashboardConfig);
+            
+            setMarketData(demoData.marketData);
+            setRates(demoData.rates);
+            setPensionPrices(demoData.pensionPrices);
+            
+
+            setLastUpdated(new Date());
+            setLoadingRates(false);
+            setIsInitialLoading(false);
+            return;
+        }
+
         // Fire all independent fetches in parallel
         const [eqRes, cryptoRes, reData] = await Promise.all([
             fetch('/api/equity-transactions').then(res => res.json()).then(data => { const arr = Array.isArray(data) ? data : []; setEquityTransactions(arr); return arr; }),
@@ -296,10 +329,6 @@ export function PortfolioProvider({ children }) {
         fetch('/api/asset-classes').then(res => res.json()).then(setAssetClasses);
         fetch('/api/app-settings').then(res => res.json()).then(data => {
             setAppSettings(data);
-            if (data.layoutMode === 'legacy' || data.layoutMode === 'modern') {
-                setLayoutModeState(data.layoutMode);
-                setLayoutLoaded(true);
-            }
         });
         fetch('/api/forecast-settings').then(res => res.json()).then(setForecastSettings).catch(err => console.error("Failed to load settings", err));
         fetch('/api/dashboard-config').then(res => res.json()).then(setDashboardConfig).catch(e => console.error("Failed to load dashboard config", e));
@@ -780,6 +809,39 @@ export function PortfolioProvider({ children }) {
         handleSaveTransaction, handleEditTransaction, handleDeleteClick, handleConfirmDelete, handleRecordSnapshot,
         setForecastSettings, appSettings, handleUpdateAppSettings,
 
+        // FTUE
+        ftueState, setFtueState,
+        updateFtueProgress: async (updates) => {
+            try {
+                const res = await fetch('/api/ftue', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updates)
+                });
+                if (res.ok) {
+                    const merged = await res.json();
+                    setFtueState(merged);
+                    return merged;
+                } else {
+                    console.error('FTUE update returned non-OK status:', res.status, await res.text().catch(() => ''));
+                }
+            } catch (e) { console.error('Failed to update FTUE:', e); }
+        },
+        resetFtue: async () => {
+            try {
+                const res = await fetch('/api/ftue', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'reset' })
+                });
+                if (res.ok) {
+                    const state = await res.json();
+                    setFtueState(state);
+                    refreshAllData();
+                }
+            } catch (e) { console.error('Failed to reset FTUE:', e); }
+        },
+
         // UI state
         isFormOpen, setIsFormOpen,
         editingTransaction, setEditingTransaction,
@@ -794,10 +856,10 @@ export function PortfolioProvider({ children }) {
         primaryCurrency, setPrimaryCurrency,
         secondaryCurrency, setSecondaryCurrency,
         rateFlipped, setRateFlipped,
+        displayCurrencyOverrides, setDisplayCurrencyOverride,
         formatPrimary, formatSecondary, toPrimary, toSecondary,
 
-        // Layout mode
-        layoutMode, setLayoutMode,
+
     }), [
         transactions, equityTransactions, cryptoTransactions, pensionTransactions, debtTransactions,
         fixedIncomeTransactions, realEstate, historicalSnapshots, marketData, pensionPrices,
@@ -812,9 +874,9 @@ export function PortfolioProvider({ children }) {
         isFormOpen, editingTransaction, isDeleteModalOpen, transactionToDelete,
         isInspectorOpen, inspectorMode, statusModal, isMonthlyCloseModalOpen,
         setIsFormOpen, setEditingTransaction, setIsDeleteModalOpen, setIsInspectorOpen, setInspectorMode, setStatusModal, setIsMonthlyCloseModalOpen,
-        primaryCurrency, secondaryCurrency, rateFlipped, formatPrimary, formatSecondary, toPrimary, toSecondary,
-        setPrimaryCurrency, setSecondaryCurrency, setRateFlipped,
-        layoutMode, setLayoutMode
+        primaryCurrency, secondaryCurrency, rateFlipped, displayCurrencyOverrides, formatPrimary, formatSecondary, toPrimary, toSecondary,
+        setPrimaryCurrency, setSecondaryCurrency, setRateFlipped, setDisplayCurrencyOverride, displayCurrencyOverrides,
+        ftueState, setFtueState
     ]);
 
     return (

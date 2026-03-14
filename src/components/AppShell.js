@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus } from 'lucide-react';
@@ -13,6 +13,9 @@ import InteractiveDots from '@/components/InteractiveDots';
 import Inspector from '@/components/Inspector';
 import MonthlyCloseModal from '@/components/MonthlyCloseModal';
 import BottomNav from '@/components/BottomNav';
+import FTUEWizard from '@/components/ftue/FTUEWizard';
+import FTUEChecklist from '@/components/ftue/FTUEChecklist';
+import CurrencyQuickPicker from '@/components/ftue/CurrencyQuickPicker';
 
 function AppShellInner({ children }) {
     const {
@@ -28,7 +31,10 @@ function AppShellInner({ children }) {
         isMonthlyCloseModalOpen, setIsMonthlyCloseModalOpen,
         handleRecordSnapshot,
         transactions, fixedIncomeTransactions, equityTransactions, cryptoTransactions, pensionTransactions, debtTransactions, realEstate,
-        rates, marketData, pensionPrices, ledgerData, fxHistory, historicalSnapshots, assetClasses
+        rates, marketData, pensionPrices, ledgerData, fxHistory, historicalSnapshots, assetClasses,
+        // FTUE
+        ftueState, updateFtueProgress,
+        refreshAllData
     } = usePortfolio();
 
     const pathname = usePathname();
@@ -58,6 +64,48 @@ function AppShellInner({ children }) {
     if (isAuthPage) {
         return <>{children}</>;
     }
+
+    // ═══════════ FTUE HANDLERS ═══════════
+    const handleTakeTour = useCallback(async () => {
+        try {
+            // Mark wizard completed, enable demo data + tutorial
+            await updateFtueProgress({
+                wizardCompleted: true,
+                usingDemoData: true,
+                isTutorialActive: true,
+                tutorialStep: 0,
+            });
+            await refreshAllData();
+        } catch (e) {
+            console.error('Take tour error:', e);
+        }
+    }, [updateFtueProgress, refreshAllData]);
+
+    const handleSkipTour = useCallback(async () => {
+        try {
+            // Mark wizard completed, no demo data, show currency picker
+            await updateFtueProgress({
+                wizardCompleted: true,
+                usingDemoData: false,
+                isTutorialActive: false,
+                showCurrencyPicker: true,
+            });
+            await refreshAllData();
+        } catch (e) {
+            console.error('Skip tour error:', e);
+        }
+    }, [updateFtueProgress, refreshAllData]);
+
+    const handleCurrencyPickerDone = useCallback(async () => {
+        await updateFtueProgress({
+            showCurrencyPicker: false,
+            checklistItems: { ...ftueState?.checklistItems, setCurrencies: true },
+        });
+    }, [updateFtueProgress, ftueState]);
+
+    // Determine FTUE overlays
+    const showWizardOverlay = ftueState && ftueState.wizardCompleted === false;
+    const showCurrencyPicker = ftueState?.showCurrencyPicker && !ftueState?.isTutorialActive;
 
     return (
         <PullToRefreshWrapper>
@@ -134,6 +182,19 @@ function AppShellInner({ children }) {
 
                 {/* ═══════════ MOBILE BOTTOM NAV ═══════════ */}
                 <BottomNav />
+
+                {/* ═══════════ FTUE PROGRESS CHECKLIST ═══════════ */}
+                <FTUEChecklist />
+
+                {/* ═══════════ FTUE WIZARD OVERLAY (on top of populated dashboard) ═══════════ */}
+                {showWizardOverlay && (
+                    <FTUEWizard onTakeTour={handleTakeTour} onSkipTour={handleSkipTour} />
+                )}
+
+                {/* ═══════════ CURRENCY QUICK PICKER (post-tutorial) ═══════════ */}
+                {showCurrencyPicker && (
+                    <CurrencyQuickPicker onDone={handleCurrencyPickerDone} />
+                )}
             </div>
         </PullToRefreshWrapper>
     );

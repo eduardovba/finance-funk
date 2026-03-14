@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ConfirmationModal from './ConfirmationModal';
 import AssetSearch from './AssetSearch';
-import { formatCurrency, SUPPORTED_CURRENCIES } from '@/lib/currency';
+import { formatCurrency, convertCurrency, SUPPORTED_CURRENCIES } from '@/lib/currency';
 import CurrencySelector from './CurrencySelector';
 import AssetCard from './AssetCard';
 import TransactionTimeline from './TransactionTimeline';
@@ -11,18 +11,33 @@ import PullToRefresh from './PullToRefresh';
 import AssetCardSkeleton from './AssetCardSkeleton';
 import DesktopAssetTable from './DesktopAssetTable';
 import ContextPane from './ContextPane';
+import useContextPaneHeight from '@/hooks/useContextPaneHeight';
 import { usePortfolio } from '@/context/PortfolioContext';
+import DisplayCurrencyPicker from './DisplayCurrencyPicker';
 import { X } from 'lucide-react';
 import BrokerForm from './BrokerForm';
 import TransactionForm from './TransactionForm';
 import AssetLogo from './AssetLogo';
+import PageTutorialOverlay from './ftue/PageTutorialOverlay';
+import HeroDetailDrawer from './HeroDetailDrawer';
 
 // No more ASSET_TICKER_MAP - tickers are stored directly on transactions
 
 const BROKER_CURRENCY = { "Binance": "USD", "Coinbase": "USD", "Crypto Wallet": "USD" };
 
+const CRYPTO_TUTORIAL_STEPS = [
+    // Populated state
+    { type: 'spotlight', targetId: 'ftue-crypto-header', title: 'Portfolio Overview', message: "Your total crypto value, cost basis, and P&L — with a breakdown by exchange. Switch display currency with the picker.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-crypto-exchange-section', title: 'Exchange Details', message: "Expand each exchange to see individual holdings, P&L, and actions. Wallets and cold storage are tracked separately.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-crypto-ledger', title: 'Activity History', message: "Full transaction log with cost basis tracking. Every buy and sell is recorded here.", position: 'top' },
+    // Empty state
+    { type: 'spotlight', targetId: 'ftue-crypto-empty', title: 'Get Started', message: "Your crypto portfolio is empty. Use the + button to add an exchange like Binance or Coinbase.", position: 'top' },
+    // Always visible
+    { type: 'spotlight', targetId: 'ftue-crypto-fab', title: 'Add Exchange or Buy', message: "Use the + button to add a new exchange, buy crypto, or record a sale.", position: 'top' },
+];
+
 export default function CryptoTab({ transactions = [], marketData, rates, onRefresh }) {
-    const { layoutMode, setIsInspectorOpen, setInspectorMode, setEditingTransaction } = usePortfolio();
+    const { setIsInspectorOpen, setInspectorMode, setEditingTransaction, displayCurrencyOverrides } = usePortfolio();
     const [isLoading, setIsLoading] = useState(false);
     const [ledgerOpen, setLedgerOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -31,6 +46,7 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
     const [expandedBrokers, setExpandedBrokers] = useState({});
     const toggleBroker = (b) => setExpandedBrokers(prev => ({ ...prev, [b]: !prev[b] }));
     const [searchTerm, setSearchTerm] = useState('');
+    const contextPaneMaxHeight = useContextPaneHeight('ftue-crypto-exchange-section', 'ftue-crypto-header');
     const [selectedAsset, setSelectedAsset] = useState(null);
     const [rightPaneMode, setRightPaneMode] = useState('default');
     const [showEmptyBrokers, setShowEmptyBrokers] = useState(false);
@@ -444,6 +460,9 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
     });
     if (Object.keys(currencyTotals).length === 0) topCurrency = 'USD';
 
+    // Apply display currency override if set by the user
+    const effectiveCurrency = displayCurrencyOverrides?.crypto || topCurrency;
+
     const brokers = [...activeBrokers, ...dbBrokerNames]
         .sort((a, b) => {
             const costA = brokerTotals[a] || 0;
@@ -753,21 +772,10 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
             });
             const locked = lockedPnL[b] || 0;
 
-            // Convert to topCurrency
+            // Convert to effectiveCurrency
             const toBaseCurrency = (amount, currency) => {
                 if (!rates) return amount;
-                if (currency === topCurrency) return amount;
-
-                // Convert to GBP first (since rates are GBP based)
-                let gbpAmt = amount;
-                if (currency === 'BRL') gbpAmt = amount / rates.BRL;
-                if (currency === 'USD') gbpAmt = amount / rates.USD;
-
-                // Then convert to topCurrency
-                if (topCurrency === 'GBP') return gbpAmt;
-                if (topCurrency === 'BRL') return gbpAmt * rates.BRL;
-                if (topCurrency === 'USD') return gbpAmt * rates.USD;
-                return gbpAmt;
+                return convertCurrency(amount, currency, effectiveCurrency, rates);
             };
 
             const cvBase = toBaseCurrency(cv, cur);
@@ -788,26 +796,29 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
         const totalROI = totalCostBase !== 0 ? totalPnL / totalCostBase * 100 : 0;
 
         return (
-            <div className="glass-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '48px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+            <div id="ftue-crypto-header" className="glass-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '48px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
                 {/* Hero Total */}
-                <div style={{
+                <div id="ftue-crypto-hero" style={{
                     padding: '24px',
                     background: 'linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, rgba(255,255,255,0) 100%)',
                     borderBottom: '1px solid var(--glass-border)',
                     textAlign: 'center'
                 }}>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)', marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>₿ Crypto Portfolio</div>
-                    <div style={{ fontSize: '2.2rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{formatCurrency(totalBase, topCurrency)}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--fg-secondary)', marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                        ₿ Crypto Portfolio
+                        <DisplayCurrencyPicker topCurrency={topCurrency} category="crypto" />
+                    </div>
+                    <div style={{ fontSize: '2.2rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{formatCurrency(totalBase, effectiveCurrency)}</div>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '8px' }}>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>Invested: {formatCurrency(totalCostBase, topCurrency)}</span>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>Invested: {formatCurrency(totalCostBase, effectiveCurrency)}</span>
                         <span style={{ fontSize: '0.9rem', fontWeight: 600, color: totalPnL >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
-                            {totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL, topCurrency)} ({totalROI >= 0 ? '+' : ''}{totalROI.toFixed(1)}%)
+                            {totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL, effectiveCurrency)} ({totalROI >= 0 ? '+' : ''}{totalROI.toFixed(1)}%)
                         </span>
                     </div>
                 </div>
 
                 {/* Broker Summary Cards */}
-                <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                <div id="ftue-crypto-exchanges" style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
                     {brokerSummaries.filter(s => s.currentValue > 0.01 || s.purchasePrice > 0.01).map(s => (
                         <div
                             key={s.broker}
@@ -834,18 +845,20 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                 <div>
                                     <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff', marginBottom: '4px' }}>{s.broker}</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--fg-secondary)' }}>Cost: {formatCurrency(s.purchasePrice, 'GBP')}</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--fg-secondary)' }}>Cost: {formatCurrency(s.purchasePrice, effectiveCurrency)}</div>
                                 </div>
                                 <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#fff' }}>{formatCurrency(s.currentValue, 'GBP')}</div>
+                                    <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#fff' }}>{formatCurrency(s.currentValue, effectiveCurrency)}</div>
                                     <div style={{ fontSize: '0.8rem', fontWeight: 600, color: s.pnl >= 0 ? 'var(--vu-green)' : 'var(--error)', marginTop: '2px' }}>
-                                        {s.pnl >= 0 ? '+' : ''}{formatCurrency(s.pnl, 'GBP')} ({s.roi >= 0 ? '+' : ''}{s.roi.toFixed(1)}%)
+                                        {s.pnl >= 0 ? '+' : ''}{formatCurrency(s.pnl, effectiveCurrency)} ({s.roi >= 0 ? '+' : ''}{s.roi.toFixed(1)}%)
                                     </div>
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
+
+                <HeroDetailDrawer categoryId="crypto" effectiveCurrency={effectiveCurrency} totalCurrentValue={totalBase} />
             </div>
         );
     };
@@ -1061,6 +1074,7 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
                         <div className="flex-1 min-w-0">
                             {renderConsolidated()}
 
+                            <div id="ftue-crypto-exchange-section">
                             {/* Brokers Header & Toggle */}
                             <div className="flex justify-between items-center mb-4 px-2">
                                 <h3 className="font-bebas text-2xl tracking-widest text-parchment/60 mb-6 px-1">Crypto Exchanges & Wallets</h3>
@@ -1073,12 +1087,14 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
                             </div>
 
                             {brokers.map(b => renderBrokerTable(b, brokerGroups[b]))}
+                            </div>
                         </div>
                         <div className="hidden lg:block sticky top-8 h-fit">
                             <ContextPane
                                 selectedAsset={selectedAsset}
                                 rightPaneMode={rightPaneMode}
                                 onClose={() => setSelectedAsset(null)}
+                                maxHeight={contextPaneMaxHeight}
                                 renderEmptyState={() => {
                                     if (rightPaneMode === 'add-broker') {
                                         return (
@@ -1268,18 +1284,20 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
                         <div className="flex gap-2">
                             {/* Optional top-level actions could go here */}
                         </div>
+                        <div id="ftue-crypto-empty">
                         <EmptyState
                             icon="💎"
                             title="No Crypto Assets"
-                            message="Your crypto portfolio is empty. Add an exchange to start tracking your digital assets."
+                            message="You have no crypto assets yet. Add an exchange to log your first transaction."
                             actionLabel="Add Exchange"
                             onAction={() => setRightPaneMode('add-broker')}
                         />
+                        </div>
                     </>
                 )}
 
                 {/* Transaction Ledger */}
-                <section className="max-w-3xl mx-auto mb-10 mt-12">
+                <section id="ftue-crypto-ledger" className="max-w-3xl mx-auto mb-10 mt-12">
                     <div className="flex justify-between items-center mb-6 px-1">
                         <h3 className="text-lg font-medium text-white/90 flex items-center gap-2">
                             Activity History
@@ -1334,6 +1352,7 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
 
                 {/* Context-Aware FAB */}
                 {/* New Expandable FAB */}
+                <div id="ftue-crypto-fab">
                 <FloatingActionButton
                     brokerLabel="Add Exchange"
                     onAddBroker={() => {
@@ -1344,6 +1363,7 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
                         handleNewBuyClick('');
                     }}
                 />
+                </div>
 
                 <ConfirmationModal
                     isOpen={isDeleteModalOpen}
@@ -1450,6 +1470,7 @@ export default function CryptoTab({ transactions = [], marketData, rates, onRefr
                 }
 
             </div >
+            <PageTutorialOverlay pageId="crypto" steps={CRYPTO_TUTORIAL_STEPS} />
         </PullToRefresh >
     );
 }

@@ -7,17 +7,31 @@ import TransactionTimeline from './TransactionTimeline';
 import FloatingActionButton from './FloatingActionButton';
 import EmptyState from './EmptyState';
 import PullToRefresh from './PullToRefresh';
-import DebtTabLegacy from './DebtTabLegacy';
+
 import ContextPane from './ContextPane';
+import useContextPaneHeight from '@/hooks/useContextPaneHeight';
 import BrokerForm from './BrokerForm';
 import { usePortfolio } from '@/context/PortfolioContext';
+import DisplayCurrencyPicker from './DisplayCurrencyPicker';
 import { X } from 'lucide-react';
+import PageTutorialOverlay from './ftue/PageTutorialOverlay';
+import HeroDetailDrawer from './HeroDetailDrawer';
+
+const DEBT_TUTORIAL_STEPS = [
+    // Populated state
+    { type: 'spotlight', targetId: 'ftue-debt-header', title: 'Debt Overview', message: "Your total outstanding debt across all lenders, with a breakdown by lender. Track mortgages, personal loans, and credit lines.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-debt-lender-section', title: 'Lender Details', message: "Expand each lender to see individual debt lines, balances, and repayment schedules.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-debt-ledger', title: 'Repayment History', message: "Every payment is logged here. Track how your debt reduces over time.", position: 'top' },
+    // Empty state
+    { type: 'spotlight', targetId: 'ftue-debt-empty', title: 'Debt Free!', message: "No debts tracked yet. Use the + button to add a lender if you want to track mortgages, loans, or credit.", position: 'top' },
+    // Always visible
+    { type: 'spotlight', targetId: 'ftue-debt-fab', title: 'Add a Lender', message: "Use the + button to add a lender and start logging debts and repayments.", position: 'top' },
+];
 
 const BASE_LENDER_CURRENCY = {};
 
 export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20 }, onRefresh }) {
-    const { layoutMode, primaryCurrency } = usePortfolio();
-    if (layoutMode === 'legacy') return <DebtTabLegacy transactions={transactions} rates={rates} onRefresh={onRefresh} />;
+    const { primaryCurrency, displayCurrencyOverrides } = usePortfolio();
 
     const [isLoading, setIsLoading] = useState(false);
     const [ledgerOpen, setLedgerOpen] = useState(false);
@@ -28,6 +42,7 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
     const [editingTr, setEditingTr] = useState(null);
     const [selectedAsset, setSelectedAsset] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const contextPaneMaxHeight = useContextPaneHeight('ftue-debt-lender-section', 'ftue-debt-header');
 
     // Dynamic Lenders
     const [lenderDict, setLenderDict] = useState({ ...BASE_LENDER_CURRENCY });
@@ -275,13 +290,16 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
     });
     if (Object.keys(currencyTotals).length === 0) topCurrency = 'BRL';
 
-    // Compute grand totals in topCurrency
+    // Apply display currency override if set by the user
+    const effectiveCurrency = displayCurrencyOverrides?.debt || topCurrency;
+
+    // Compute grand totals in effectiveCurrency
     let grandTotal = 0;
     combinedLenders.forEach(l => {
         const cur = lenderDict[l] || 'BRL';
         const data = lenderSummary[l];
         if (!data) return;
-        grandTotal += convertCurrency(data.total, cur, topCurrency, rates);
+        grandTotal += convertCurrency(data.total, cur, effectiveCurrency, rates);
     });
 
     // Render consolidated hero card
@@ -291,25 +309,28 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
             .map(l => {
                 const s = lenderSummary[l];
                 const cur = lenderDict[l] || 'BRL';
-                const totalInTop = convertCurrency(s.total, cur, topCurrency, rates);
+                const totalInTop = convertCurrency(s.total, cur, effectiveCurrency, rates);
                 return { lender: l, totalInTop, cur, rawTotal: s.total };
             })
             .sort((a, b) => Math.abs(b.totalInTop) - Math.abs(a.totalInTop));
 
         return (
-            <div className="glass-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '48px', border: '1px solid rgba(244, 63, 94, 0.2)' }}>
-                <div style={{
+            <div id="ftue-debt-header" className="glass-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '48px', border: '1px solid rgba(244, 63, 94, 0.2)' }}>
+                <div id="ftue-debt-hero" style={{
                     padding: '24px',
                     background: 'linear-gradient(180deg, rgba(244, 63, 94, 0.08) 0%, rgba(255,255,255,0) 100%)',
                     borderBottom: '1px solid var(--glass-border)',
                     textAlign: 'center'
                 }}>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)', marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>💳 Debt Portfolio</div>
-                    <div style={{ fontSize: '2.2rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{formatCurrency(grandTotal, topCurrency)}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--fg-secondary)', marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                        💳 Debt Portfolio
+                        <DisplayCurrencyPicker topCurrency={topCurrency} category="debt" />
+                    </div>
+                    <div style={{ fontSize: '2.2rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{formatCurrency(grandTotal, effectiveCurrency)}</div>
                 </div>
 
                 {lenderCards.length > 0 && (
-                    <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
+                    <div id="ftue-debt-lenders" style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
                         {lenderCards.map(item => (
                             <div key={item.lender} className="bg-white/[0.03] border border-white/5 rounded-xl p-4 hover:bg-white/[0.06] transition-colors cursor-pointer"
                                 onClick={() => {
@@ -321,15 +342,17 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
                                 }}>
                                 <div className="flex justify-between items-start mb-2">
                                     <span className="text-white/80 text-sm font-semibold">{item.lender}</span>
-                                    <span className="text-rose-400 text-sm font-bold">{formatCurrency(item.totalInTop, topCurrency)}</span>
+                                    <span className="text-rose-400 text-sm font-bold">{formatCurrency(item.totalInTop, effectiveCurrency)}</span>
                                 </div>
-                                {item.cur !== topCurrency && (
+                                {item.cur !== effectiveCurrency && (
                                     <div className="text-white/40 text-xs">≈ {formatCurrency(item.rawTotal, item.cur)}</div>
                                 )}
                             </div>
                         ))}
                     </div>
                 )}
+
+                <HeroDetailDrawer categoryId="debt" effectiveCurrency={effectiveCurrency} totalCurrentValue={grandTotal} />
             </div>
         );
     };
@@ -338,7 +361,7 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
     const renderLenderTable = (lenderName) => {
         const data = lenderSummary[lenderName] || { total: 0, transactions: [] };
         const lenderCur = lenderDict[lenderName] || 'BRL';
-        const totalInTop = convertCurrency(data.total, lenderCur, topCurrency, rates);
+        const totalInTop = convertCurrency(data.total, lenderCur, effectiveCurrency, rates);
         const isNewlyAdded = newlyAddedLenders.includes(lenderName);
 
         if (!showEmptyLenders && !isNewlyAdded && data.transactions.length === 0) return null;
@@ -359,14 +382,14 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
                         <div className="flex flex-col">
                             <span className="text-white font-semibold">{lenderName}</span>
                             <span className={`text-xs font-medium ${data.total !== 0 ? 'text-rose-400' : 'text-white/40'}`}>
-                                {formatCurrency(data.total, lenderCur)}{lenderCur !== topCurrency ? ` · ≈ ${formatCurrency(totalInTop, topCurrency)}` : ''}
+                                {formatCurrency(data.total, lenderCur)}{lenderCur !== effectiveCurrency ? ` · ≈ ${formatCurrency(totalInTop, effectiveCurrency)}` : ''}
                             </span>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
                         <div className="flex flex-col items-end">
                             <span className="text-xl font-bold text-white tracking-tight">{formatCurrency(data.total, lenderCur)}</span>
-                            {lenderCur !== topCurrency && <span className="text-xs text-white/40 mt-0.5">≈ {formatCurrency(totalInTop, topCurrency)}</span>}
+                            {lenderCur !== effectiveCurrency && <span className="text-xs text-white/40 mt-0.5">≈ {formatCurrency(totalInTop, effectiveCurrency)}</span>}
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -553,6 +576,7 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
                         <div className="flex-1 min-w-0">
                             {renderConsolidated()}
 
+                            <div id="ftue-debt-lender-section">
                             {/* Lenders Header & Toggle */}
                             <div className="flex justify-between items-center mb-4 px-2">
                                 <h2 className="text-xl font-bold font-bebas tracking-widest text-white/90">Lenders</h2>
@@ -565,6 +589,7 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
                             </div>
 
                             {displayLenders.map(l => renderLenderTable(l))}
+                            </div>
                         </div>
 
                         <div className="hidden lg:block sticky top-8 h-fit">
@@ -572,6 +597,7 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
                                 selectedAsset={selectedAsset}
                                 rightPaneMode={rightPaneMode}
                                 onClose={() => setSelectedAsset(null)}
+                                maxHeight={contextPaneMaxHeight}
                                 renderHeader={(asset) => (
                                     <div className="flex flex-col">
                                         <h3 className="text-xl font-bold text-white/90 tracking-tight">{asset.lenderName || asset.lender}</h3>
@@ -683,17 +709,19 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
                         </div>
                     </div>
                 ) : (
+                    <div id="ftue-debt-empty">
                     <EmptyState
                         icon="🪶"
                         title="Debt Free"
-                        message="Congratulations, you have no outstanding debts! Add a lender to start tracking liabilities."
+                        message="You have no outstanding debts tracked. Add a lender to start tracking mortgages, loans, or credit."
                         actionLabel="Add Lender"
                         onAction={() => setRightPaneMode('add-lender')}
                     />
+                    </div>
                 )}
 
                 {/* Transaction Ledger / Activity History */}
-                <section className="max-w-3xl mx-auto mb-10 mt-12">
+                <section id="ftue-debt-ledger" className="max-w-3xl mx-auto mb-10 mt-12">
                     <div className="flex justify-between items-center mb-6 px-1">
                         <h3 className="text-lg font-medium text-white/90 flex items-center gap-2">
                             Activity History
@@ -734,6 +762,7 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
                     )}
                 </section>
 
+                <div id="ftue-debt-fab">
                 <FloatingActionButton
                     onAddBroker={() => {
                         setRightPaneMode('add-lender');
@@ -744,6 +773,7 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
                     }}
                     brokerLabel="Add Lender"
                 />
+                </div>
 
                 <ConfirmationModal
                     isOpen={isDeleteModalOpen}
@@ -760,6 +790,7 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
                     onConfirm={handleConfirmDeleteLender}
                 />
             </div>
+            <PageTutorialOverlay pageId="debt" steps={DEBT_TUTORIAL_STEPS} />
         </PullToRefresh>
     );
 }

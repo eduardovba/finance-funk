@@ -10,7 +10,7 @@ import { usePortfolio } from '@/context/PortfolioContext';
 import { useSession, signOut } from 'next-auth/react';
 
 export default function TopConsole() {
-    const { rates, loadingRates, lastUpdated, isInspectorOpen, setIsInspectorOpen } = usePortfolio();
+    const { rates, loadingRates, lastUpdated, isInspectorOpen, setIsInspectorOpen, resetFtue } = usePortfolio();
     const pathname = usePathname();
     const [isAssetsDropdownOpen, setIsAssetsDropdownOpen] = useState(false);
     const [isPlanningDropdownOpen, setIsPlanningDropdownOpen] = useState(false);
@@ -65,6 +65,16 @@ export default function TopConsole() {
         setIsLedgerHovered(false);
     }, [pathname]);
 
+    const handleResetFtue = async () => {
+        setIsUserMenuOpen(false);
+        try {
+            await resetFtue();
+            window.location.href = '/dashboard';
+        } catch(e) {
+            console.error(e);
+        }
+    };
+
     return (
         <header className="h-12 md:h-16 w-full flex items-center justify-between px-3 md:px-4 lg:px-6 bg-[#1A0F2E]/90 backdrop-blur-md border-b border-[#D4AF37]/20 z-40 flex-shrink-0">
 
@@ -79,7 +89,7 @@ export default function TopConsole() {
             </Link>
 
             {/* Navigation Tabs — left-aligned beside logo, hidden on mobile (BottomNav handles it) */}
-            <nav className="hidden md:flex items-center gap-0 mr-auto ml-2">
+            <nav id="ftue-nav" className="hidden md:flex items-center gap-0 mr-auto ml-2">
                 {/* DASHBOARD */}
                 {trackingTabs.map(tab => {
                     const Icon = tab.icon;
@@ -362,7 +372,9 @@ export default function TopConsole() {
 
             {/* Right: Controls */}
             <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
-                <CurrencyPill />
+                <div id="ftue-currency-pill">
+                    <CurrencyPill />
+                </div>
                 <button
                     onClick={() => setIsInspectorOpen(!isInspectorOpen)}
                     className={`
@@ -381,6 +393,7 @@ export default function TopConsole() {
                 {session?.user && (
                     <div className="hidden md:block relative">
                         <button
+                            id="ftue-settings"
                             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                             className="w-8 h-8 rounded-full overflow-hidden border-2 border-white/10 hover:border-[#D4AF37]/50 transition-all duration-200 bg-[#D4AF37]/10 flex items-center justify-center p-0 cursor-pointer"
                             title={session.user.name || session.user.email}
@@ -422,6 +435,13 @@ export default function TopConsole() {
                                                 <Settings size={14} className="text-[#D4AF37]/60" />
                                                 Profile & Settings
                                             </Link>
+                                            <button
+                                                onClick={handleResetFtue}
+                                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[11px] font-space font-medium tracking-wide rounded-lg text-parchment/60 hover:text-parchment hover:bg-white/5 transition-all bg-transparent border-none text-left"
+                                            >
+                                                <LayoutDashboard size={14} className="text-[#D4AF37]/60" />
+                                                Reset FTUE (Test)
+                                            </button>
                                             <button
                                                 onClick={() => { setIsUserMenuOpen(false); signOut({ callbackUrl: '/login' }); }}
                                                 className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[11px] font-space font-medium tracking-wide rounded-lg text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all bg-transparent border-none text-left"
