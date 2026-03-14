@@ -1,4 +1,5 @@
 import { Bebas_Neue, Space_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import AppShell from "@/components/AppShell";
 import Providers from "@/components/Providers";
@@ -47,6 +48,11 @@ export default function RootLayout({ children }) {
         <Providers>
           <AppShell>{children}</AppShell>
         </Providers>
+        <Script id="sw-register" strategy="afterInteractive">
+          {`if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+          }`}
+        </Script>
       </body>
     </html>
   );

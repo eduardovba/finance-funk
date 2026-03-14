@@ -61,7 +61,7 @@ export async function verifyPassword(password, hash) {
  * Get a user by their ID.
  */
 export async function getUserById(id) {
-    return get('SELECT id, name, email, provider, avatar_url, created_at FROM users WHERE id = ?', [id]);
+    return get('SELECT id, name, email, provider, avatar_url, is_admin, created_at FROM users WHERE id = ?', [id]);
 }
 
 /**
@@ -112,5 +112,34 @@ export async function deleteUserAndData(id) {
     }
     // Finally delete the user record
     await run('DELETE FROM users WHERE id = ?', [id]);
+    return { success: true };
+}
+
+/**
+ * List all users (for admin dashboard). Excludes soft-deleted users.
+ */
+export async function getAllUsers() {
+    return query(
+        'SELECT id, name, email, provider, avatar_url, is_admin, created_at, deleted_at FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC'
+    );
+}
+
+/**
+ * Set or revoke admin status for a user.
+ */
+export async function setUserAdmin(userId, isAdmin) {
+    await run('UPDATE users SET is_admin = ? WHERE id = ?', [isAdmin ? 1 : 0, userId]);
+    return getUserById(userId);
+}
+
+/**
+ * Soft-delete a user: flag with deleted_at timestamp, revoke admin.
+ * Does NOT destroy data — can be reversed.
+ */
+export async function softDeleteUser(userId) {
+    await run(
+        'UPDATE users SET deleted_at = CURRENT_TIMESTAMP, is_admin = 0 WHERE id = ?',
+        [userId]
+    );
     return { success: true };
 }

@@ -1,11 +1,15 @@
 {
+    "id": "/dashboard",
     "name": "Finance Funk",
     "short_name": "FinanceFunk",
     "description": "Personal finance dashboard — track, plan, and grow your wealth.",
     "start_url": "/dashboard",
+    "scope": "/",
     "display": "standalone",
+    "orientation": "any",
     "background_color": "#0B0611",
     "theme_color": "#0B0611",
+    "categories": ["finance"],
     "icons": [
         {
             "src": "/icon-192x192.png",
@@ -16,6 +20,12 @@
             "src": "/icon-512x512.png",
             "sizes": "512x512",
             "type": "image/png"
+        },
+        {
+            "src": "/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
         }
     ]
 }

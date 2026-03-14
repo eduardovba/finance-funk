@@ -155,37 +155,6 @@ function PlanningSheet({ isOpen, onClose }) {
                             })}
                         </div>
 
-                        {/* User section at the bottom of Planning */}
-                        {session?.user && (
-                            <>
-                                <div className="h-px bg-white/5 mx-5" />
-                                <div className="flex items-center justify-between px-5 py-4">
-                                    <Link
-                                        href="/profile"
-                                        onClick={onClose}
-                                        className="flex items-center gap-3 no-underline flex-1 min-w-0 active:scale-[0.98] transition-transform"
-                                    >
-                                        {session.user.image ? (
-                                            <img src={session.user.image} alt={session.user.name} className="w-8 h-8 rounded-full object-cover border border-[#A78BFA]/20 flex-shrink-0" />
-                                        ) : (
-                                            <div className="w-8 h-8 rounded-full bg-[#A78BFA]/10 flex items-center justify-center text-[#A78BFA] text-xs font-bold flex-shrink-0">
-                                                {(session.user.name || session.user.email)?.[0]?.toUpperCase()}
-                                            </div>
-                                        )}
-                                        <span className="text-xs text-parchment/50 font-space truncate max-w-[180px]">
-                                            {session.user.name || session.user.email}
-                                        </span>
-                                    </Link>
-                                    <button
-                                        onClick={() => signOut({ callbackUrl: '/login' })}
-                                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-space active:scale-[0.95] transition-all flex-shrink-0"
-                                    >
-                                        <LogOut size={14} />
-                                        Sign Out
-                                    </button>
-                                </div>
-                            </>
-                        )}
                     </motion.div>
                 </>
             )}

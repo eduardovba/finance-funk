@@ -54,6 +54,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         email: user.email,
                         provider: "google",
                     });
+                    // Block soft-deleted users
+                    if (dbUser.deleted_at) return false;
                     user.id = String(dbUser.id);
                     // Persist Google avatar to our DB
                     if (user.image) {
@@ -64,6 +66,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     return false;
                 }
             }
+            // For credentials, block soft-deleted users
+            if (account?.provider === "credentials") {
+                try {
+                    const dbUser = await getUserById(user.id);
+                    if (dbUser?.deleted_at) return false;
+                } catch (e) { /* allow sign in if check fails */ }
+            }
             return true;
         },
         async jwt({ token, user }) {
@@ -71,11 +80,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 token.id = user.id;
                 token.picture = user.image || null;
             }
-            // Refresh avatar from DB on every token refresh
-            if (token.id && !token.picture) {
+            // Refresh avatar + admin flag from DB
+            if (token.id) {
                 try {
                     const dbUser = await getUserById(token.id);
                     if (dbUser?.avatar_url) token.picture = dbUser.avatar_url;
+                    token.is_admin = !!dbUser?.is_admin;
                 } catch (e) { /* ignore */ }
             }
             return token;
@@ -87,6 +97,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             if (token?.picture) {
                 session.user.image = token.picture;
             }
+            session.user.is_admin = !!token?.is_admin;
             return session;
         },
     },

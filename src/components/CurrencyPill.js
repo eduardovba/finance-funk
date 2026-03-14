@@ -161,16 +161,18 @@ export default function CurrencyPill() {
         <div className="relative" ref={menuRef}>
             {/* Minimal Pill (Collapsed) */}
             <div
-                className="bg-[#0B0611] backdrop-blur-md border border-[#D4AF37]/30 rounded-full px-3 py-2.5 md:py-1.5 flex items-center gap-2 cursor-pointer hover:border-[#D4AF37]/50 active:scale-[0.97] transition-all duration-300 shadow-lg shadow-black/40 group"
+                className="bg-[#0B0611] backdrop-blur-md border border-[#D4AF37]/30 rounded-full px-2.5 md:px-3 py-2 md:py-1.5 flex items-center gap-1.5 md:gap-2 cursor-pointer hover:border-[#D4AF37]/50 active:scale-[0.97] transition-all duration-300 shadow-lg shadow-black/40 group"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
                 {/* Left Side: Primary Flag + Code */}
                 <div className="flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
-                    <span className="text-sm">{primaryMeta?.flag}</span>
-                    <span className="text-[10px] font-space font-bold text-parchment/60 group-hover:text-[#D4AF37] transition-colors">{primaryCurrency}</span>
+                    <span className="text-[14px] md:text-sm">{primaryMeta?.flag}</span>
+                    <span className="text-[11px] md:text-[10px] font-space font-bold text-parchment/80 group-hover:text-[#D4AF37] transition-colors">{primaryCurrency}</span>
                 </div>
 
-                <div className="w-px h-3 bg-white/10" />
+                <div className="hidden md:block w-px h-3 bg-white/10" />
+
+                <div className="md:hidden text-[9px] text-parchment/50 group-hover:text-[#D4AF37] pl-0.5 transition-colors">▼</div>
 
                 {/* Center: Flip Rate Button */}
                 <button
@@ -178,7 +180,7 @@ export default function CurrencyPill() {
                         e.stopPropagation();
                         setRateFlipped(!rateFlipped);
                     }}
-                    className="bg-transparent border-none p-0 flex items-center gap-1 cursor-pointer"
+                    className="hidden md:flex bg-transparent border-none p-0 flex items-center gap-1 cursor-pointer"
                 >
                     <span className="text-xs font-mono font-bold text-[#D4AF37] drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">
                         {loadingRates ? '...' : liveRate.toFixed(2)}
@@ -186,10 +188,10 @@ export default function CurrencyPill() {
                     <span className="text-[8px] text-parchment/30 group-hover:text-parchment/50">⇅</span>
                 </button>
 
-                <div className="w-px h-3 bg-white/10" />
+                <div className="hidden md:block w-px h-3 bg-white/10" />
 
                 {/* Right Side: Secondary Code + Flag */}
-                <div className="flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                <div className="hidden md:flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
                     <span className="text-[10px] font-space font-bold text-parchment/60 group-hover:text-[#D4AF37] transition-colors">{secondaryCurrency}</span>
                     <span className="text-sm">{secondaryMeta?.flag}</span>
                 </div>

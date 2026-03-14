@@ -13,6 +13,7 @@ import InteractiveDots from '@/components/InteractiveDots';
 import Inspector from '@/components/Inspector';
 import MonthlyCloseModal from '@/components/MonthlyCloseModal';
 import BottomNav from '@/components/BottomNav';
+import InstallPrompt from '@/components/InstallPrompt';
 import FTUEWizard from '@/components/ftue/FTUEWizard';
 import FTUEChecklist from '@/components/ftue/FTUEChecklist';
 import CurrencyQuickPicker from '@/components/ftue/CurrencyQuickPicker';
@@ -182,6 +183,9 @@ function AppShellInner({ children }) {
 
                 {/* ═══════════ MOBILE BOTTOM NAV ═══════════ */}
                 <BottomNav />
+
+                {/* ═══════════ PWA INSTALL PROMPT ═══════════ */}
+                <InstallPrompt />
 
                 {/* ═══════════ FTUE PROGRESS CHECKLIST ═══════════ */}
                 <FTUEChecklist />

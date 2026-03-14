@@ -1,0 +1,332 @@
+.adminContainer {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px;
+}
+
+.header {
+    margin-bottom: 32px;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #F5F5DC 30%, #D4AF37 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 4px;
+}
+
+.subtitle {
+    font-size: 0.8rem;
+    color: rgba(245, 245, 220, 0.4);
+    font-family: var(--font-space), monospace;
+}
+
+.statsRow {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.statCard {
+    background: rgba(13, 8, 20, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    border-radius: 12px;
+    padding: 16px 20px;
+    flex: 1;
+    min-width: 0;
+}
+
+.statLabel {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(245, 245, 220, 0.35);
+    font-family: var(--font-space), monospace;
+    margin-bottom: 4px;
+}
+
+.statValue {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #D4AF37;
+}
+
+.tableWrapper {
+    background: rgba(13, 8, 20, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    text-align: left;
+    padding: 14px 20px;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(245, 245, 220, 0.35);
+    font-family: var(--font-space), monospace;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.08);
+    font-weight: 600;
+}
+
+.table td {
+    padding: 14px 20px;
+    font-size: 0.82rem;
+    color: rgba(245, 245, 220, 0.75);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    vertical-align: middle;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tr:hover {
+    background: rgba(212, 175, 55, 0.03);
+}
+
+.userCell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(212, 175, 55, 0.15);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #D4AF37;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.userName {
+    font-weight: 600;
+    color: rgba(245, 245, 220, 0.9);
+}
+
+.userEmail {
+    font-size: 0.7rem;
+    color: rgba(245, 245, 220, 0.35);
+    margin-top: 1px;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    font-family: var(--font-space), monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badgeAdmin {
+    background: rgba(212, 175, 55, 0.15);
+    color: #D4AF37;
+    border: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+.badgeUser {
+    background: rgba(245, 245, 220, 0.05);
+    color: rgba(245, 245, 220, 0.4);
+    border: 1px solid rgba(245, 245, 220, 0.08);
+}
+
+.badgeGoogle {
+    background: rgba(66, 133, 244, 0.12);
+    color: #8ab4f8;
+    border: 1px solid rgba(66, 133, 244, 0.2);
+}
+
+.badgeCredentials {
+    background: rgba(245, 245, 220, 0.05);
+    color: rgba(245, 245, 220, 0.4);
+    border: 1px solid rgba(245, 245, 220, 0.08);
+}
+
+.actionsCell {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.btnAction {
+    padding: 5px 12px;
+    font-size: 0.68rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 600;
+    font-family: var(--font-space), monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+.table tr:hover .btnAction {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.btnPromote {
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    color: #D4AF37;
+}
+
+.btnPromote:hover {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: rgba(212, 175, 55, 0.5);
+}
+
+.btnDemote {
+    background: rgba(204, 85, 0, 0.1);
+    border: 1px solid rgba(204, 85, 0, 0.25);
+    color: #CC5500;
+}
+
+.btnDemote:hover {
+    background: rgba(204, 85, 0, 0.2);
+    border-color: rgba(204, 85, 0, 0.5);
+}
+
+.btnRemove {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.btnRemove:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+.selfBadge {
+    font-size: 0.6rem;
+    color: rgba(245, 245, 220, 0.25);
+    font-style: italic;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 60px 20px;
+    color: rgba(245, 245, 220, 0.3);
+    font-size: 0.85rem;
+}
+
+/* Confirmation overlay */
+.confirmOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.confirmCard {
+    background: #1A0F2E;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.confirmTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #F5F5DC;
+    margin-bottom: 8px;
+}
+
+.confirmDesc {
+    font-size: 0.8rem;
+    color: rgba(245, 245, 220, 0.5);
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.confirmActions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.btnCancel {
+    padding: 8px 20px;
+    font-size: 0.75rem;
+    border-radius: 8px;
+    background: rgba(245, 245, 220, 0.05);
+    border: 1px solid rgba(245, 245, 220, 0.1);
+    color: rgba(245, 245, 220, 0.6);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btnCancel:hover {
+    background: rgba(245, 245, 220, 0.1);
+    color: #F5F5DC;
+}
+
+.btnConfirmDanger {
+    padding: 8px 20px;
+    font-size: 0.75rem;
+    border-radius: 8px;
+    background: #ef4444;
+    border: 1px solid #ef4444;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btnConfirmDanger:hover {
+    background: #dc2626;
+}
+
+.btnConfirmPromote {
+    padding: 8px 20px;
+    font-size: 0.75rem;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #CC5500, #D4AF37);
+    border: none;
+    color: #1A0F2E;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.btnConfirmPromote:hover {
+    filter: brightness(1.1);
+}

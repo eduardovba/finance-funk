@@ -84,10 +84,27 @@ async function runMigrations() {
             source TEXT,
             fetched_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`,
+        // ── Admin role ──
+        'ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT 0',
+        // ── Soft-delete support ──
+        'ALTER TABLE users ADD COLUMN deleted_at DATETIME',
     ];
 
     for (const sql of migrations) {
         try { await db.execute(sql); } catch (e) { /* already applied */ }
+    }
+
+    // ── Auto-promote ADMIN_EMAIL to admin (only if user already exists) ──
+    try {
+        const adminEmail = process.env.ADMIN_EMAIL;
+        if (adminEmail) {
+            await db.execute({
+                sql: 'UPDATE users SET is_admin = 1 WHERE email = ? AND is_admin = 0',
+                args: [adminEmail.toLowerCase()],
+            });
+        }
+    } catch (e) {
+        console.error('Admin promotion migration failed:', e);
     }
 
     // Drop watchlist table (feature removed) to fix FK constraint on assets
