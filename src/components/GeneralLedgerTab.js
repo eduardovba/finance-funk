@@ -10,10 +10,21 @@ import LedgerHeroPods from './LedgerHeroPods';
 import forecastActuals from '../data/forecast_actuals.json';
 import PageTutorialOverlay from './ftue/PageTutorialOverlay';
 
-const LEDGER_TUTORIAL_STEPS = [
-    { type: 'spotlight', targetId: 'ftue-ledger-container', title: 'Income & Investments', message: "The Ledger tracks your monthly income (salary, dividends, rent) and investment flows. They are calculated automatically from transactions.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-ledger-container', title: 'Automatic Tracking', message: "Income from dividends, interest, and rent is calculated automatically from your asset pages \u2014 no double entry needed!", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-ledger-container', title: 'Monthly Snapshots', message: "The Totals tab lets you record monthly snapshots and track net worth growth, TWR returns, and MoM changes over time.", position: 'bottom' },
+const INCOME_TUTORIAL_STEPS = [
+    { type: 'spotlight', targetId: 'ftue-income-pods', title: 'Revenue Pulse', message: "Track your top-level income metrics. We isolate organic income (like salary) from investment yield (like dividends) for clarity.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-income-chart', title: 'Income Breakdown', message: "Visualize your revenue streams over time. Investment yield is calculated automatically from your asset pages \u2014 no double entry needed!", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-income-table', title: 'Revenue Ledger', message: "The detailed monthly breakdown of all your income sources, automatically compiled and ready to review.", position: 'top' },
+];
+
+const INVESTMENT_TUTORIAL_STEPS = [
+    { type: 'spotlight', targetId: 'ftue-investment-pods', title: 'Capital Injection Pulse', message: "Monitor how much new capital you are deploying into your portfolio each month across all asset classes.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-investment-chart', title: 'Deployment Trends', message: "See exactly where your money is going. The net monthly line shows your total fresh capital invested minus any withdrawals or debt.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-investment-table', title: 'Investment Ledger', message: "A complete history of your monthly capital deployments, giving you a clear view of your saving habits.", position: 'top' },
+];
+
+const TOTALS_TUTORIAL_STEPS = [
+    { type: 'spotlight', targetId: 'ftue-totals-pods', title: 'Portfolio Performance', message: "The ultimate truth of your portfolio. Track your true net worth, overall ROI, and progress against your financial goals.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-totals-table', title: 'Monthly Snapshots', message: "Record your net worth at the end of each month to build a historical track record. This is where you see your wealth compound over time.", position: 'top' },
 ];
 
 export default function GeneralLedgerTab({
@@ -562,16 +573,18 @@ export default function GeneralLedgerTab({
             {view === 'income' && (
                 <div className="flex flex-col w-full">
                     {/* Glowing Pods Hero Section */}
-                    <GlowingIncomePods
-                        data={currentMonthData}
-                        historicalData={historicalData}
-                        currency="GBP"
-                    />
+                    <div id="ftue-income-pods">
+                        <GlowingIncomePods
+                            data={currentMonthData}
+                            historicalData={historicalData}
+                            currency="GBP"
+                        />
+                    </div>
 
                     <div className="flex flex-col gap-8 w-full mt-2">
 
                         {/* Chart — premium styled */}
-                        <div className="rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/5 p-6" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+                        <div id="ftue-income-chart" className="rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/5 p-6" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                                 <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'rgba(245,245,220,0.8)', fontWeight: 600, letterSpacing: '0.3px' }}>Monthly Income</h3>
 
@@ -677,7 +690,7 @@ export default function GeneralLedgerTab({
                         </div>
 
                         {/* Revenue Ledger Accordion */}
-                        <div className="rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/5" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)', overflow: 'hidden' }}>
+                        <div id="ftue-income-table" className="rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/5" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)', overflow: 'hidden' }}>
                             {/* Accordion Header */}
                             <button
                                 onClick={() => setShowLedgerTable(!showLedgerTable)}
@@ -777,15 +790,17 @@ export default function GeneralLedgerTab({
                 {view === 'historicals' && (
                     <div className="flex flex-col w-full">
                         {/* Hero Pods */}
-                        <LedgerHeroPods
-                            snapshots={combinedSnapshots}
-                            forecastActuals={forecastActuals}
-                            targetROI={forecastSettings.targetROI}
-                            targetContribution={forecastSettings.targetContribution}
-                        />
+                        <div id="ftue-totals-pods">
+                            <LedgerHeroPods
+                                snapshots={combinedSnapshots}
+                                forecastActuals={forecastActuals}
+                                targetROI={forecastSettings.targetROI}
+                                targetContribution={forecastSettings.targetContribution}
+                            />
+                        </div>
 
                         {/* Snapshot Ledger Accordion */}
-                        <div className="rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/5" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)', overflow: 'hidden' }}>
+                        <div id="ftue-totals-table" className="rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/5" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)', overflow: 'hidden' }}>
                             {/* Accordion Header */}
                             <button
                                 onClick={() => setShowHistoricalsLedger(!showHistoricalsLedger)}
@@ -881,16 +896,18 @@ export default function GeneralLedgerTab({
                 {view === 'investments' && (
                     <div className="flex flex-col w-full">
                         {/* Glowing Investment Pods */}
-                        <GlowingInvestmentPods
-                            data={currentInvestmentData}
-                            historicalData={investmentHistoricalData}
-                            currency="GBP"
-                        />
+                        <div id="ftue-investment-pods">
+                            <GlowingInvestmentPods
+                                data={currentInvestmentData}
+                                historicalData={investmentHistoricalData}
+                                currency="GBP"
+                            />
+                        </div>
 
                         <div className="flex flex-col gap-8 w-full mt-2">
 
                             {/* Chart — full width */}
-                            <div className="rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/5 p-6" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+                            <div id="ftue-investment-chart" className="rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/5 p-6" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                                     <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'rgba(245,245,220,0.8)', fontWeight: 600 }}>Monthly Investments (Capital Injection)</h3>
                                 </div>
@@ -996,7 +1013,7 @@ export default function GeneralLedgerTab({
                             </div>
 
                             {/* Investment Ledger Accordion */}
-                            <div className="rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/5" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)', overflow: 'hidden' }}>
+                            <div id="ftue-investment-table" className="rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/5" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)', overflow: 'hidden' }}>
                                 {/* Accordion Header */}
                                 <button
                                     onClick={() => setShowInvestmentLedgerTable(!showInvestmentLedgerTable)}
@@ -1156,7 +1173,9 @@ export default function GeneralLedgerTab({
                     onCancel={() => setDeleteLedgerMonth(null)}
                 />
             </div>
-            <PageTutorialOverlay pageId="general-ledger" steps={LEDGER_TUTORIAL_STEPS} />
+            {view === 'income' && <PageTutorialOverlay pageId="ledger-income" steps={INCOME_TUTORIAL_STEPS} />}
+            {view === 'investments' && <PageTutorialOverlay pageId="ledger-investments" steps={INVESTMENT_TUTORIAL_STEPS} />}
+            {view === 'historicals' && <PageTutorialOverlay pageId="ledger-totals" steps={TOTALS_TUTORIAL_STEPS} />}
         </>
             );
 }

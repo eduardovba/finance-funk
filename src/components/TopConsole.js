@@ -389,9 +389,9 @@ export default function TopConsole() {
                     <SlidersHorizontal size={16} />
                 </button>
 
-                {/* User Avatar Dropdown — hidden on mobile (More sheet handles it) */}
+                {/* User Avatar Dropdown */}
                 {session?.user && (
-                    <div className="relative">
+                    <div className="relative" id="ftue-settings-mobile">
                         <button
                             id="ftue-settings"
                             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}

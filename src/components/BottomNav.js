@@ -255,8 +255,7 @@ export default function BottomNav() {
                                 <button
                                     key={tab.id}
                                     id={
-                                        tab.id === 'assets' ? 'ftue-sidebar-mobile' :
-                                        tab.id === 'planning' ? 'ftue-settings-mobile' : undefined
+                                        tab.id === 'assets' ? 'ftue-sidebar-mobile' : undefined
                                     }
                                     onClick={tab.action}
                                     className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full bg-transparent border-none active:scale-[0.9] transition-transform"
