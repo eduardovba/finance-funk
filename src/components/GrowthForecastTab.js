@@ -14,9 +14,9 @@ import { Lock, Unlock, Save, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, 
 import PageTutorialOverlay from './ftue/PageTutorialOverlay';
 
 const FORECAST_TUTORIAL_STEPS = [
-    { type: 'spotlight', targetId: 'ftue-forecast-projection', title: 'Growth Projections', message: "Your goal progress ring and projected net worth. See how you're tracking against your target — current vs projected vs goal.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-forecast-scenario', title: 'Scenario Builder', message: "Tweak monthly contributions, expected returns, and time horizon. The projection updates instantly. Lock a plan to save a snapshot.", position: 'top' },
-    { type: 'spotlight', targetId: 'ftue-forecast-container', title: 'Plan vs Reality', message: "Compare locked plans against actual performance over time. Stay on track by revisiting and adjusting your plan.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-forecast-projection', title: 'Growth Outlook', message: "Goal progress, projected net worth. Current vs projected vs goal.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-forecast-scenario', title: 'Scenario Builder', message: "Adjust contributions, returns, time. Updates instantly. Lock plans.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-forecast-container', title: 'Plan vs Reality', message: "Compare locked plans to actual performance. Adjust and stay on track.", position: 'top' },
 ];
 
 // ─── Inline editable value ───

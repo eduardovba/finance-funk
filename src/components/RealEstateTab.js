@@ -19,9 +19,9 @@ import PageTutorialOverlay from './ftue/PageTutorialOverlay';
 import HeroDetailDrawer from './HeroDetailDrawer';
 
 const REALESTATE_TUTORIAL_STEPS = [
-    { type: 'spotlight', targetId: 'ftue-re-header', title: 'Portfolio Overview', message: "Total real estate value, invested capital, and appreciation — all in one card. Rental income and mortgage repayments can be linked to each property.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-re-property-section', title: 'Property Details', message: "Expand each property or fund to see valuations, rental income, mortgage links, and transaction history.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-re-fab', title: 'Add Property or Fund', message: "Use the + button to add a new property, log a purchase, or record a sale. Mortgage payments flow to the Debt page automatically.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-re-header', title: 'Property Value', message: "Total property value, capital, appreciation. Link income/mortgage per entry.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-re-property-section', title: 'Details & History', message: "Specific property/fund info: valuations, income, transactions, mortgage links.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-re-fab', title: 'Action Required', message: "Add properties/funds, buy/sell. Mortgage links automatically flow to Debt.", position: 'top' },
 ];
 
 export default function RealEstateTab({ data, rates, onRefresh, marketData = {} }) {

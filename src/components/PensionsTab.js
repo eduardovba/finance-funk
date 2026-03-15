@@ -22,12 +22,12 @@ import { useRef } from 'react';
 
 const PENSIONS_TUTORIAL_STEPS = [
     // Populated state
-    { type: 'spotlight', targetId: 'ftue-pensions-header', title: 'Portfolio Overview', message: "Your total pension value, contributions, growth, and a breakdown by provider. Switch currencies with the picker.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-pensions-provider-section', title: 'Provider Details', message: "Expand each provider to see fund holdings, P&L, and contribution history. Buy into funds or sell positions from here.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-pensions-header', title: 'Future View', message: "Total pension value, contributions, growth, providers. Choose display currency.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-pensions-provider-section', title: 'Provider Details', message: "Holdings, P&L, contribution history. Buy/sell funds.", position: 'bottom' },
     // Empty state
-    { type: 'spotlight', targetId: 'ftue-pensions-empty', title: 'Get Started', message: "No pension accounts yet. Use the + button to add a provider and start tracking your retirement funds.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-pensions-empty', title: 'Plan Ahead', message: "No pensions accounts yet. Use + to add a provider and track retirement.", position: 'top' },
     // Always visible
-    { type: 'spotlight', targetId: 'global-fab', title: 'Buy, Sell & Add Provider', message: "Use the + button to add a provider, buy into funds, or sell positions. Contributions vs. growth are tracked automatically.", position: 'top', shape: 'circle', padding: 8 },
+    { type: 'spotlight', targetId: 'global-fab', title: 'Action Required', message: "Add provider, buy/sell funds. Automatic contribution/growth tracking.", position: 'top', shape: 'circle', padding: 8 },
 ];
 
 // Added dynamic brokers to base dictionary map

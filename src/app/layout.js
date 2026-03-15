@@ -21,7 +21,7 @@ const spaceMono = Space_Mono({
 export const metadata = {
   title: "Finance Funk | Personal Finance Dashboard",
   description: "Motown-inspired personal finance tracking for the modern DJ of money.",
-  manifest: "/manifest.json?v=2",
+  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

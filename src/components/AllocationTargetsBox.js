@@ -7,9 +7,9 @@ import { usePortfolio } from '../context/PortfolioContext';
 import PageTutorialOverlay from './ftue/PageTutorialOverlay';
 
 const ALLOCATION_TUTORIAL_STEPS = [
-    { type: 'spotlight', targetId: 'ftue-alloc-targets', title: 'Set Your Targets', message: "Define target allocations for asset classes and currency exposure. Both must sum to 100%. Save when ready.", position: 'right' },
-    { type: 'spotlight', targetId: 'ftue-alloc-drift', title: 'Execution Drift', message: "See how your current portfolio compares to your targets. Green means aligned, amber/red means drifting \u2014 time to rebalance!", position: 'left' },
-    { type: 'spotlight', targetId: 'ftue-alloc-targets', title: 'FX Exposure', message: "Track currency exposure across GBP, BRL, and USD. Targets help you stay aware of geographic concentration.", position: 'right' },
+    { type: 'spotlight', targetId: 'ftue-alloc-targets', title: 'Define Your Vibes', message: "Set asset/currency targets (sum to 100%). Save when ready.", position: 'right' },
+    { type: 'spotlight', targetId: 'ftue-alloc-drift', title: 'Portfolio Drift', message: "Current portfolio vs targets. Green = aligned, Amber/Red = rebalance!", position: 'left' },
+    { type: 'spotlight', targetId: 'ftue-alloc-targets', title: 'FX Monitor', message: "Track GBP, BRL, USD exposure. Be aware of geographic concentration.", position: 'right' },
 ];
 
 const ASSET_COLORS = {

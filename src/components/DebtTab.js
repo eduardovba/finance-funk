@@ -19,13 +19,13 @@ import HeroDetailDrawer from './HeroDetailDrawer';
 
 const DEBT_TUTORIAL_STEPS = [
     // Populated state
-    { type: 'spotlight', targetId: 'ftue-debt-header', title: 'Debt Overview', message: "Your total outstanding debt across all lenders, with a breakdown by lender. Track mortgages, personal loans, and credit lines.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-debt-lender-section', title: 'Lender Details', message: "Expand each lender to see individual debt lines, balances, and repayment schedules.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-debt-ledger', title: 'Repayment History', message: "Every payment is logged here. Track how your debt reduces over time.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-debt-header', title: 'Debt Picture', message: "Total outstanding debt across all lenders. Mortgages, loans, credit lines.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-debt-lender-section', title: 'Lender Details', message: "Debt lines, balances, schedules per lender. Expand for details.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-debt-ledger', title: 'Activity Stream', message: "Every payment \u2013 see your debt reduce over time.", position: 'top' },
     // Empty state
-    { type: 'spotlight', targetId: 'ftue-debt-empty', title: 'Debt Free!', message: "No debts tracked yet. Use the + button to add a lender if you want to track mortgages, loans, or credit.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-debt-empty', title: 'Debt Free!', message: "No debts currently tracked. Use + to add lenders for mortgages, loans, credit.", position: 'top' },
     // Always visible
-    { type: 'spotlight', targetId: 'global-fab', title: 'Add a Lender', message: "Use the + button to add a lender and start logging debts and repayments.", position: 'top', shape: 'circle', padding: 8 },
+    { type: 'spotlight', targetId: 'global-fab', title: 'Action Required', message: "Add lenders, log debts and repayments seamlessly.", position: 'top', shape: 'circle', padding: 8 },
 ];
 
 const BASE_LENDER_CURRENCY = {};
