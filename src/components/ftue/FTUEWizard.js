@@ -23,14 +23,14 @@ export default function FTUEWizard({ onTakeTour, onSkipTour }) {
                 className="relative z-10 flex flex-col items-center text-center max-w-md mx-4"
             >
                 {/* Logo */}
-                <motion.h1
+                <motion.img
+                    src="/ff-logo.png"
+                    alt="Finance Funk"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="text-5xl md:text-6xl font-bebas tracking-wider text-[#D4AF37] drop-shadow-[0_0_30px_rgba(212,175,55,0.4)] mb-1"
-                >
-                    Finance Funk
-                </motion.h1>
+                    className="h-28 w-auto mb-1 drop-shadow-[0_0_30px_rgba(212,175,55,0.4)]"
+                />
                 <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -44,7 +44,7 @@ export default function FTUEWizard({ onTakeTour, onSkipTour }) {
                 <ProfessorF
                     pose="welcome"
                     size="lg"
-                    message="Welcome to Finance Funk! Forget the boring spreadsheets - you've just stepped into a smarter and groovier way to manage your money. I can get you oriented with a quick tour of the dashboard. Shall we sync up?"
+                    message="Welcome to Finance Funk! Forget boring spreadsheets - you've just stepped into a smarter and groovier way to manage your money. Shall we do a quick tour?"
                 />
 
                 {/* CTA Buttons */}
