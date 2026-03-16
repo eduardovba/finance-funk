@@ -11,20 +11,20 @@ import forecastActuals from '../data/forecast_actuals.json';
 import PageTutorialOverlay from './ftue/PageTutorialOverlay';
 
 const INCOME_TUTORIAL_STEPS = [
-    { type: 'spotlight', targetId: 'ftue-income-pods', title: 'Income Flow', message: "High-level income metrics. Organics vs investment yield \u2013 kept crystal clear.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-income-chart', title: 'Revenue Visuals', message: "Visualize your revenue over time. Investment yield pulls automatically.", position: 'top' },
-    { type: 'spotlight', targetId: 'ftue-income-table', title: 'Revenue Records', message: "Detailed monthly breakdown of all income sources \u2013 automatically compiled.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-income-pods', title: 'Income Performance', message: "Monitor your top-level income performance. We\u2019ve separated organic income (like your salary) from investment yield (like dividends) for absolute clarity.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-income-chart', title: 'Revenue Stream Analysis', message: "Visualize exactly how your income sources are performing over time. We calculate your investment yield automatically based on your asset pages.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-income-table', title: 'Unified Revenue Ledger', message: "A detailed monthly breakdown of all your income sources, consolidated and automatically compiled for your convenience.", position: 'top' },
 ];
 
 const INVESTMENT_TUTORIAL_STEPS = [
-    { type: 'spotlight', targetId: 'ftue-investment-pods', title: 'Investment Pulse', message: "Monthly new capital deployed across asset classes.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-investment-chart', title: 'Deployment Trends', message: "Where your money goes. Net line shows fresh capital invested minus withdrawals/debt.", position: 'top' },
-    { type: 'spotlight', targetId: 'ftue-investment-table', title: 'Investment Records', message: "Complete monthly deployment history \u2013 clear view of saving habits.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-investment-pods', title: 'Capital Deployment Pulse', message: "Keep a finger on the pulse of how much fresh capital you are injecting into your portfolio across all asset classes each month.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-investment-chart', title: 'Investment Trends Analysis', message: "See precisely where your capital is being deployed. The net monthly line calculates your fresh capital invested minus any withdrawals or debt.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-investment-table', title: 'Investment Records', message: "Access a comprehensive history of your monthly capital deployments, giving you an unambiguous view of your saving and investment habits.", position: 'top' },
 ];
 
 const TOTALS_TUTORIAL_STEPS = [
-    { type: 'spotlight', targetId: 'ftue-totals-pods', title: 'Portfolio Truth', message: "Your definitive portfolio metrics: true net worth, overall ROI, goal progress.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-totals-table', title: 'Historical Snapshots', message: "Record end-of-month net worth. See your wealth compound over time.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-totals-pods', title: 'Definitive Portfolio Pulse', message: "This is the ultimate perspective on your finances. Track your true net worth, overall ROI, and progress against your core financial goals.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-totals-table', title: 'Monthly Wealth Records', message: "Record your final net worth each month to construct a robust historical track record. This is where you see your wealth truly compound.", position: 'top' },
 ];
 
 export default function GeneralLedgerTab({

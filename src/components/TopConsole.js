@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SlidersHorizontal, LayoutDashboard, BookOpen, TrendingUp, Landmark, Home as HomeIcon, LineChart, Bitcoin, Wallet, CreditCard, Target, LogOut, Settings, Scale, DollarSign, ArrowUpDown, Shield } from 'lucide-react';
+import { SlidersHorizontal, LayoutDashboard, BookOpen, TrendingUp, Landmark, Home as HomeIcon, LineChart, Bitcoin, Wallet, CreditCard, Target, LogOut, Settings, Scale, DollarSign, ArrowUpDown, Shield, FileSpreadsheet } from 'lucide-react';
 import CurrencyPill from '@/components/CurrencyPill';
 import { usePortfolio } from '@/context/PortfolioContext';
 import { useSession, signOut } from 'next-auth/react';
@@ -434,6 +434,14 @@ export default function TopConsole() {
                                             >
                                                 <Settings size={14} className="text-[#D4AF37]/60" />
                                                 Profile & Settings
+                                            </Link>
+                                            <Link
+                                                href="/import"
+                                                onClick={() => setIsUserMenuOpen(false)}
+                                                className="flex items-center gap-2.5 px-3 py-2.5 text-[11px] font-space font-medium tracking-wide rounded-lg text-parchment/60 hover:text-parchment hover:bg-white/5 transition-all no-underline"
+                                            >
+                                                <FileSpreadsheet size={14} className="text-[#D4AF37]/60" />
+                                                Import Spreadsheet
                                             </Link>
                                             {session.user.is_admin && (
                                                 <Link

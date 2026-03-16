@@ -18,13 +18,13 @@ import PageTutorialOverlay from './ftue/PageTutorialOverlay';
 import HeroDetailDrawer from './HeroDetailDrawer';
 
 const FIXEDINCOME_TUTORIAL_STEPS = [
-    { type: 'spotlight', targetId: 'ftue-fi-header', title: 'Value & Accounts', message: "Total fixed income, deposits, interest \u2013 detailed by account. Choose display currency.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-fi-account-section', title: 'Account Specifics', message: "See holdings, maturity dates, and interest for each account. Automatic tracking.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-fi-ledger', title: 'Activity Stream', message: "Deposits, withdrawals, and automatic interest \u2013 all logged here. Interest tracked seamlessly.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-fi-header', title: 'Performance & Yield', message: "Your total fixed income valuation, total deposits, and cumulative interest earned, broken down by individual account. Switch your display currency easily.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-fi-account-section', title: 'Detailed Account View', message: "Expand any account to see precise holdings, maturity dates, and exact interest figures. Every transaction and interest payment is tracked.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-fi-ledger', title: 'Fixed Income Stream', message: "Your detailed transaction log, recording all deposits, withdrawals, and automatic interest payments. We handle the interest calculations seamlessly.", position: 'top' },
     // Empty state
-    { type: 'spotlight', targetId: 'ftue-fi-empty', title: 'Start Earning', message: "No fixed income accounts yet. Use + to add savings, bonds, treasury products.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-fi-empty', title: 'Ready to Grow?', message: "No fixed income accounts in the mix just yet. Add your first savings account, bond, or treasury product using the \u2018+\u2019 button.", position: 'top' },
     // Always visible
-    { type: 'spotlight', targetId: 'global-fab', title: 'Action Required', message: "Create accounts, track deposits and interest easily.", position: 'top', shape: 'circle', padding: 8 },
+    { type: 'spotlight', targetId: 'global-fab', title: 'Add an Account', message: "Create a new account and start automatically tracking deposits, withdrawals, and interest. This is your foundation for safe growth.", position: 'top', shape: 'circle', padding: 8 },
 ];
 
 const BASE_BROKER_CURRENCY = {

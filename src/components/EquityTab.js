@@ -26,13 +26,13 @@ import HeroDetailDrawer from './HeroDetailDrawer';
 
 const EQUITY_TUTORIAL_STEPS = [
     // Populated state steps (shown when data exists)
-    { type: 'spotlight', targetId: 'ftue-equity-header', title: 'Strategic View', message: "Equity value, P&L, brokers \u2013 all right here. Switch display currency effortlessly.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-equity-broker-section', title: 'Broker Details', message: "Deep dive into each broker: holdings, P&L, actions. Toggle empty brokers on/off.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-equity-ledger', title: 'Activity Stream', message: "Purchases, sales, dividends \u2013 logged for clarity. Edit or remove entries.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-equity-header', title: 'Portfolio Pulse', message: "Get a high-level view of your total equity value, invested capital, P&L, and broker breakdown, all in a single interface. Use the currency picker to instantly adjust your display.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-equity-broker-section', title: 'Broker Insights', message: "Each broker expands to reveal individual holdings, precise P&L, and available actions. Toggle \u2018Show Empty\u2019 to see brokers with no current positions.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-equity-ledger', title: 'Transparent Activity Stream', message: "Every buy, sell, and dividend payment is meticulously logged for your review. You have full edit and deletion control over any entry.", position: 'top' },
     // Empty state step (shown when no data)
-    { type: 'spotlight', targetId: 'ftue-equity-empty', title: 'Get Invested', message: "Your equity portfolio is currently empty. Make your first move with the + button below.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-equity-empty', title: 'Ready to Invest?', message: "It seems your equity portfolio is a blank slate. Let\u2019s get you started. Make your first move with the \u2018+\u2019 button.", position: 'top' },
     // Always visible
-    { type: 'spotlight', targetId: 'ftue-equity-fab', title: 'Action Required', message: "Add brokers, buy stocks/ETFs, or record sales. Everything kicks off here.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-equity-fab', title: 'Action Required', message: "Click \u2018+\u2019 to add your first broker, execute your first stock or ETF buy, or record a sale. This is where your equity journey begins.", position: 'top' },
 ];
 
 const BROKER_CURRENCY = {

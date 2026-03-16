@@ -6,8 +6,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     User, Mail, Shield, LogOut, Pencil, Check, X,
     Landmark, Calendar, ChevronRight, Settings,
-    Lock, Download, Trash2, AlertTriangle, Eye, EyeOff, ChevronDown
+    Lock, Download, Upload, Trash2, AlertTriangle, Eye, EyeOff, ChevronDown
 } from 'lucide-react';
+import Link from 'next/link';
 import ConnectedInstitutionsList from '@/components/ConnectedInstitutionsList';
 import BankConnectButton from '@/components/BankConnectButton';
 import { SUPPORTED_CURRENCIES } from '@/lib/currency';
@@ -611,12 +612,19 @@ export default function ProfilePage() {
                     <SectionCard title="Data Management" icon={Download}>
                         <div className="space-y-3">
                             <p className="text-sm text-parchment/50 font-space m-0">
-                                Download a full export of your portfolio data as a JSON file.
+                                Import data from spreadsheets or export your portfolio.
                             </p>
+                            <Link
+                                href="/import"
+                                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] text-sm font-space hover:bg-[#D4AF37]/20 active:scale-[0.98] transition-all no-underline"
+                            >
+                                <Upload size={16} />
+                                Import Spreadsheet
+                            </Link>
                             <button
                                 onClick={handleExport}
                                 disabled={exporting}
-                                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] text-sm font-space hover:bg-[#D4AF37]/20 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+                                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-parchment/60 text-sm font-space hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
                             >
                                 <Download size={16} />
                                 {exporting ? 'Exporting...' : 'Export All Data'}

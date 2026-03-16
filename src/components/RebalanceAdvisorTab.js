@@ -5,8 +5,8 @@ import { usePortfolio } from '../context/PortfolioContext';
 import PageTutorialOverlay from './ftue/PageTutorialOverlay';
 
 const REBALANCE_TUTORIAL_STEPS = [
-    { type: 'spotlight', targetId: 'ftue-rebalance-input', title: 'Capital Input', message: "Monthly investment amount. Optimal distribution based on your targets.", position: 'right' },
-    { type: 'spotlight', targetId: 'ftue-rebalance-actions', title: 'Strategic Moves', message: "Buy orders show deployment. Divestment alert for severe over-allocation (>5%).", position: 'left' },
+    { type: 'spotlight', targetId: 'ftue-rebalance-input', title: 'Allocate New Capital', message: "Specify how much new capital you intend to invest this month. Our advisor will suggest an optimal distribution based on your allocation targets.", position: 'right' },
+    { type: 'spotlight', targetId: 'ftue-rebalance-actions', title: 'Strategic Trade Execution', message: "Recommended buy orders reveal where to deploy capital. If any asset is severely over-allocated (>5%), you will receive a divestment alert.", position: 'left' },
 ];
 
 export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }) {

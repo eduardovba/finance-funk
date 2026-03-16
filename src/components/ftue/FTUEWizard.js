@@ -44,7 +44,7 @@ export default function FTUEWizard({ onTakeTour, onSkipTour }) {
                 <ProfessorF
                     pose="welcome"
                     size="lg"
-                    message="Hey there! 👋 I'm Professor F, your financial guide. Want me to give you a quick tour of the dashboard?"
+                    message="Welcome to Finance Funk! Forget the boring spreadsheets - you've just stepped into a smarter and groovier way to manage your money. I can get you oriented with a quick tour of the dashboard. Shall we sync up?"
                 />
 
                 {/* CTA Buttons */}

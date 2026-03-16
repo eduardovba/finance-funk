@@ -19,9 +19,9 @@ import PageTutorialOverlay from './ftue/PageTutorialOverlay';
 import HeroDetailDrawer from './HeroDetailDrawer';
 
 const REALESTATE_TUTORIAL_STEPS = [
-    { type: 'spotlight', targetId: 'ftue-re-header', title: 'Property Value', message: "Total property value, capital, appreciation. Link income/mortgage per entry.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-re-property-section', title: 'Details & History', message: "Specific property/fund info: valuations, income, transactions, mortgage links.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-re-fab', title: 'Action Required', message: "Add properties/funds, buy/sell. Mortgage links automatically flow to Debt.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-re-header', title: 'Real Estate Overview', message: "Total real estate value, invested capital, and appreciation at your fingertips. Link rental income and mortgage payments directly to each property for full context.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-re-property-section', title: 'Property-Specific Details', message: "Access granular details for every property or fund: precise valuations, rental income history, linked mortgages, and complete transaction records.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-re-fab', title: 'Property Action', message: "Use \u2018+\u2019 to add your first property, log a purchase, or record a sale. All linked mortgage payments will automatically flow to your Debt page for consolidated tracking.", position: 'top' },
 ];
 
 export default function RealEstateTab({ data, rates, onRefresh, marketData = {} }) {

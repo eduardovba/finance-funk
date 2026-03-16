@@ -22,12 +22,12 @@ import { useRef } from 'react';
 
 const PENSIONS_TUTORIAL_STEPS = [
     // Populated state
-    { type: 'spotlight', targetId: 'ftue-pensions-header', title: 'Future View', message: "Total pension value, contributions, growth, providers. Choose display currency.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-pensions-provider-section', title: 'Provider Details', message: "Holdings, P&L, contribution history. Buy/sell funds.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-pensions-header', title: 'Your Retirement Overview', message: "Visualize your total pension value, all contributions, precise growth figures, and a breakdown by provider. Select your preferred display currency.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-pensions-provider-section', title: 'Provider-Level Insights', message: "Expand a provider to review specific fund holdings, detailed P&L, and a complete history of contributions. Make buy/sell decisions directly.", position: 'bottom' },
     // Empty state
-    { type: 'spotlight', targetId: 'ftue-pensions-empty', title: 'Plan Ahead', message: "No pensions accounts yet. Use + to add a provider and track retirement.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-pensions-empty', title: 'Retirement Planning Start', message: "It looks like you haven\u2019t added any pension accounts. Secure your future by adding a provider to start tracking your retirement funds.", position: 'top' },
     // Always visible
-    { type: 'spotlight', targetId: 'global-fab', title: 'Action Required', message: "Add provider, buy/sell funds. Automatic contribution/growth tracking.", position: 'top', shape: 'circle', padding: 8 },
+    { type: 'spotlight', targetId: 'global-fab', title: 'Build Your Legacy', message: "Use \u2018+\u2019 to add a pension provider, buy into funds, or sell positions. We automatically track contributions versus growth for clear insight.", position: 'top', shape: 'circle', padding: 8 },
 ];
 
 // Added dynamic brokers to base dictionary map

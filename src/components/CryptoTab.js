@@ -27,13 +27,13 @@ const BROKER_CURRENCY = { "Binance": "USD", "Coinbase": "USD", "Crypto Wallet": 
 
 const CRYPTO_TUTORIAL_STEPS = [
     // Populated state
-    { type: 'spotlight', targetId: 'ftue-crypto-header', title: 'Digital Worth', message: "Crypto value, cost basis, P&L, exchange breakdown. Pick display currency.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-crypto-exchange-section', title: 'Exchange Details', message: "Holdings, P&L, actions per exchange. Wallets and cold storage tracked separately.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-crypto-ledger', title: 'Activity Stream', message: "Purchases, sales, cost basis \u2013 full transaction log here. Every move recorded.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-crypto-header', title: 'Digital Wealth Snap', message: "Your total crypto value, cost basis, and detailed P&L \u2013 including a clear breakdown by exchange. Pick your display currency.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-crypto-exchange-section', title: 'Exchange-Specific Views', message: "Drill down into any exchange to review holdings, P&L, and specific wallet/cold storage entries. Your assets, tracked individually.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-crypto-ledger', title: 'Crypto Activity Ledger', message: "A complete transaction history with automated cost basis tracking. We record every buy and sell for absolute transparency.", position: 'top' },
     // Empty state
-    { type: 'spotlight', targetId: 'ftue-crypto-empty', title: 'Jump In', message: "Empty crypto portfolio. Use + to add an exchange (Binance, Coinbase, etc.).", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-crypto-empty', title: 'Entering the Market?', message: "Your crypto portfolio is currently a clean slate. Tap the \u2018+\u2019 button to integrate your first exchange, such as Binance or Coinbase.", position: 'top' },
     // Always visible
-    { type: 'spotlight', targetId: 'global-fab', title: 'Action Required', message: "Add exchanges, buy crypto, record sales easily.", position: 'top', shape: 'circle', padding: 8 },
+    { type: 'spotlight', targetId: 'global-fab', title: 'Add Exchange or Buy', message: "Link your crypto world with \u2018+\u2019. Add an exchange, record your first crypto buy, or log a sale. Start building your digital position.", position: 'top', shape: 'circle', padding: 8 },
 ];
 
 export default function CryptoTab({ transactions = [], marketData, rates, onRefresh }) {
