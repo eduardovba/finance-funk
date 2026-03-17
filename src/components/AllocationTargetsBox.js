@@ -270,7 +270,7 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
 
                 {/* LEFT COLUMN: GOAL SETTING (TARGETS) */}
-                <div id="ftue-alloc-targets" className="glass-card flex flex-col gap-6 lg:gap-8 relative">
+                <div id="ftue-alloc-targets" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-6 lg:p-8 flex flex-col gap-6 lg:gap-8 relative">
                     <div className="flex items-center justify-between border-b border-white/5 pb-3">
                         <h3 className="font-bebas text-xl text-white/90 tracking-widest flex items-center gap-2">
                             <Target size={18} className="text-[#D4AF37]" />
@@ -318,7 +318,7 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
                                     {totalAssetEdit.toFixed(1)}% / 100%
                                 </div>
                             </div>
-                            <div className="bg-black/20 border border-white/5 rounded-xl px-4 py-2">
+                            <div className="bg-[#121418]/50 backdrop-blur-lg border border-white/[0.06] rounded-xl px-4 py-2">
                                 {assetFaders.map(f => renderInputRow(f, handleAssetTargetChange))}
                             </div>
                         </div>
@@ -331,7 +331,7 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
                                     {totalCurrencyEdit.toFixed(1)}% / 100%
                                 </div>
                             </div>
-                            <div className="bg-black/20 border border-white/5 rounded-xl px-4 py-2">
+                            <div className="bg-[#121418]/50 backdrop-blur-lg border border-white/[0.06] rounded-xl px-4 py-2">
                                 {currencyFaders.map(f => renderInputRow(f, handleCurrencyTargetChange))}
                             </div>
                         </div>
@@ -339,7 +339,7 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
                 </div>
 
                 {/* RIGHT COLUMN: DRIFT ANALYSIS (ACTUALS) */}
-                <div id="ftue-alloc-drift" className="glass-card flex flex-col gap-6 lg:gap-8">
+                <div id="ftue-alloc-drift" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-6 lg:p-8 flex flex-col gap-6 lg:gap-8">
                     <div className="flex justify-between items-center border-b border-white/5 pb-3">
                         <h3 className="font-bebas text-xl text-white/90 tracking-widest flex items-center gap-2">
                             <Activity size={18} className="text-[#D4AF37]" />
@@ -382,7 +382,7 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
                     <motion.div
                         initial={{ y: 50, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        className="bg-black/80 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-2xl"
+                        className="bg-[#121418]/90 backdrop-blur-xl border border-white/[0.06] p-4 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
                     >
                         <button
                             onClick={handleSaveTargets}

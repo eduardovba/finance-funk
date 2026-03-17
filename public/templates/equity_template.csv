@@ -1,0 +1,4 @@
+Date,Asset Name,Ticker,Type,Quantity,Price,Total Amount,Currency,Broker,Notes
+2024-01-15,Apple Inc,AAPL,Buy,10,185.50,1855.00,USD,Trading 212,First purchase
+2024-03-20,Microsoft Corp,MSFT,Buy,5,425.00,2125.00,GBP,Vanguard,ISA contribution
+2024-06-10,Apple Inc,AAPL,Sell,5,210.00,1050.00,USD,Trading 212,Partial exit

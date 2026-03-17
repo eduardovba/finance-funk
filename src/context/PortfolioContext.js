@@ -42,7 +42,7 @@ export function PortfolioProvider({ children }) {
     const [forecastSettings, setForecastSettings] = useState({});
     const [allocationTargets, setAllocationTargets] = useState({});
     const [assetClasses, setAssetClasses] = useState({});
-    const [appSettings, setAppSettings] = useState({ autoMonthlyCloseEnabled: true });
+    const [appSettings, setAppSettings] = useState({ autoMonthlyCloseEnabled: true, backgroundSelection: 'leather' });
     const [dashboardConfig, setDashboardConfig] = useState(null);
     const [ftueState, setFtueState] = useState(null); // null = loading, object = loaded
 
@@ -295,7 +295,14 @@ export function PortfolioProvider({ children }) {
             setFxHistory(demoData.fxHistory);
             setAllocationTargets(demoData.allocationTargets);
             setAssetClasses(demoData.assetClasses);
-            setAppSettings(demoData.appSettings);
+            // Still load user's app settings (background, preferences) even in demo mode
+            try {
+                const settingsRes = await fetch('/api/app-settings');
+                const savedSettings = await settingsRes.json();
+                setAppSettings(prev => ({ ...prev, ...demoData.appSettings, ...savedSettings }));
+            } catch {
+                setAppSettings(prev => ({ ...prev, ...demoData.appSettings }));
+            }
             setForecastSettings(demoData.forecastSettings);
             setDashboardConfig(demoData.dashboardConfig);
             
@@ -328,7 +335,7 @@ export function PortfolioProvider({ children }) {
         fetch('/api/allocation-targets').then(res => res.json()).then(setAllocationTargets);
         fetch('/api/asset-classes').then(res => res.json()).then(setAssetClasses);
         fetch('/api/app-settings').then(res => res.json()).then(data => {
-            setAppSettings(data);
+            setAppSettings(prev => ({ ...prev, ...data }));
         });
         fetch('/api/forecast-settings').then(res => res.json()).then(setForecastSettings).catch(err => console.error("Failed to load settings", err));
         fetch('/api/dashboard-config').then(res => res.json()).then(setDashboardConfig).catch(e => console.error("Failed to load dashboard config", e));
@@ -743,16 +750,13 @@ export function PortfolioProvider({ children }) {
     }, [totalNetWorthBRL, totalPensionBRL, totalFixedIncomeBRL, totalEquityBRL, totalRealEstateBRL, totalCryptoBRL, totalDebtBRL, rates, refreshAllData]);
 
     const handleUpdateAppSettings = useCallback(async (newSettings) => {
+        setAppSettings(newSettings);
         try {
-            const res = await fetch('/api/app-settings', {
+            await fetch('/api/app-settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newSettings)
             });
-            if (res.ok) {
-                const data = await res.json();
-                setAppSettings(data.settings);
-            }
         } catch (error) {
             console.error('Failed to update app settings:', error);
         }
@@ -786,6 +790,12 @@ export function PortfolioProvider({ children }) {
             }
         }
     }, [appSettings.autoMonthlyCloseEnabled, isInitialLoading, historicalSnapshots]); // Removed handleRecordSnapshot as we just open the modal
+
+    // ═══════════ BACKGROUND SYNC ═══════════
+    useEffect(() => {
+        const bg = appSettings?.backgroundSelection || 'leather';
+        document.body.setAttribute('data-bg', bg);
+    }, [appSettings?.backgroundSelection]);
 
     // ═══════════ CONTEXT VALUE ═══════════
     const value = useMemo(() => ({
@@ -876,7 +886,8 @@ export function PortfolioProvider({ children }) {
         setIsFormOpen, setEditingTransaction, setIsDeleteModalOpen, setIsInspectorOpen, setInspectorMode, setStatusModal, setIsMonthlyCloseModalOpen,
         primaryCurrency, secondaryCurrency, rateFlipped, displayCurrencyOverrides, formatPrimary, formatSecondary, toPrimary, toSecondary,
         setPrimaryCurrency, setSecondaryCurrency, setRateFlipped, setDisplayCurrencyOverride, displayCurrencyOverrides,
-        ftueState, setFtueState
+        ftueState, setFtueState,
+        appSettings, handleUpdateAppSettings
     ]);
 
     return (

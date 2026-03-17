@@ -60,7 +60,7 @@ export default function ContextPane({
 
     if (!showDetails) {
         return (
-            <div className={`${rightPaneMode !== 'default' ? 'flex' : 'hidden'} lg:flex w-full lg:w-[400px] xl:w-[450px] flex-col shrink-0 rounded-2xl border border-white/10 bg-gradient-to-br from-black/60 to-[#1A0F2E]/60 backdrop-blur-xl shadow-2xl relative transition-[height] duration-300 ease-in-out overflow-hidden`} style={{ height: maxHeight || 500 }}>
+            <div className={`${rightPaneMode !== 'default' ? 'flex' : 'hidden'} lg:flex w-full lg:w-[400px] xl:w-[450px] flex-col shrink-0 rounded-2xl border border-white/[0.06] bg-[#121418]/60 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative transition-[height] duration-300 ease-in-out overflow-hidden`} style={{ height: maxHeight || 500 }}>
                 {/* Subtle glow effect behind content */}
                 <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-[#D4AF37]/[0.02] to-transparent z-0 rounded-2xl"></div>
 
@@ -80,7 +80,7 @@ export default function ContextPane({
     const assetDisplayName = selectedAsset.name || selectedAsset.asset || selectedAsset.fund || selectedAsset.lenderName || selectedAsset.lender || 'Unknown';
 
     return (
-        <div className="flex w-full lg:w-[400px] xl:w-[450px] flex-col max-h-[calc(100vh-10rem)] shrink-0 rounded-2xl border border-white/10 bg-gradient-to-br from-black/60 to-[#1A0F2E]/60 backdrop-blur-xl shadow-2xl overflow-hidden relative">
+        <div className="flex w-full lg:w-[400px] xl:w-[450px] flex-col max-h-[calc(100vh-10rem)] shrink-0 rounded-2xl border border-white/[0.06] bg-[#121418]/60 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden relative">
             {/* Subtle glow effect behind content */}
             <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-[#D4AF37]/[0.02] to-transparent z-0"></div>
 

@@ -10,6 +10,7 @@ import TransactionForm from '@/components/TransactionForm';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import StatusModal from '@/components/StatusModal';
 import InteractiveDots from '@/components/InteractiveDots';
+import AnimatedBackground from '@/components/AnimatedBackground';
 import Inspector from '@/components/Inspector';
 import MonthlyCloseModal from '@/components/MonthlyCloseModal';
 import BottomNav from '@/components/BottomNav';
@@ -17,11 +18,11 @@ import InstallPrompt from '@/components/InstallPrompt';
 import FTUEWizard from '@/components/ftue/FTUEWizard';
 import FTUEChecklist from '@/components/ftue/FTUEChecklist';
 import CurrencyQuickPicker from '@/components/ftue/CurrencyQuickPicker';
+import FTUEImportBubble from '@/components/ftue/FTUEImportBubble';
 
 function AppShellInner({ children }) {
     const {
         isFormOpen, setIsFormOpen,
-        inspectorMode, // Import inspectorMode here
         editingTransaction, setEditingTransaction,
         isDeleteModalOpen, setIsDeleteModalOpen,
         isInspectorOpen, setIsInspectorOpen,
@@ -111,6 +112,8 @@ function AppShellInner({ children }) {
     return (
         <PullToRefreshWrapper>
             <div className="flex flex-col h-screen bg-transparent overflow-hidden relative">
+                {/* Animated background shapes */}
+                <AnimatedBackground />
                 {/* InteractiveDots — hidden on mobile for performance */}
                 <div className="hidden md:block">
                     <InteractiveDots />
@@ -121,7 +124,7 @@ function AppShellInner({ children }) {
                 <main id="main-scroll" className="flex-1 overflow-y-auto p-3 md:p-6 lg:p-8 pb-24 md:pb-8 w-full">
                     {children}
 
-                    {isFormOpen && inspectorMode !== 'add-transaction' && (
+                    {isFormOpen && (
                         <div style={{ position: 'fixed', inset: 0, zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <div
                                 style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
@@ -189,6 +192,9 @@ function AppShellInner({ children }) {
 
                 {/* ═══════════ FTUE PROGRESS CHECKLIST ═══════════ */}
                 <FTUEChecklist />
+
+                {/* ═══════════ FTUE IMPORT DATA BUBBLE ═══════════ */}
+                <FTUEImportBubble />
 
                 {/* ═══════════ FTUE WIZARD OVERLAY (on top of populated dashboard) ═══════════ */}
                 {showWizardOverlay && (

@@ -24,7 +24,7 @@ export default function FTUEWizard({ onTakeTour, onSkipTour }) {
             >
                 {/* Logo */}
                 <motion.img
-                    src="/ff-logo.png"
+                    src="/logos/ff-logo.png"
                     alt="Finance Funk"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

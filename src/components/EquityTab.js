@@ -534,7 +534,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
             <div key={brokerName} id={encodeURIComponent(brokerName)} data-ftue-broker className={`mb-8 rounded-2xl transition-all duration-1000 ${glowClass}`}>
                 <div
                     onClick={() => toggleBroker(brokerName)}
-                    className="flex justify-between items-center mb-4 px-4 py-3 cursor-pointer bg-white/5 hover:bg-white/10 rounded-2xl transition-colors"
+                    className="flex justify-between items-center mb-4 px-4 py-3 cursor-pointer bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] hover:bg-[#121418]/70 rounded-2xl transition-colors shadow-[0_4px_16px_rgba(0,0,0,0.3)]"
                 >
                     <div className="flex items-center gap-3">
                         <span className="text-white/40 transform transition-transform duration-300 text-xs" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
@@ -640,7 +640,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
 
                         {/* Desktop List View — Trading 212 Style */}
                         <div className="hidden lg:block">
-                            <div className="overflow-hidden rounded-xl border border-white/5 bg-black/40 backdrop-blur-sm shadow-xl divide-y divide-white/[0.04]">
+                            <div className="overflow-hidden rounded-xl border border-white/[0.06] bg-[#121418]/50 backdrop-blur-lg shadow-[0_4px_16px_rgba(0,0,0,0.3)] divide-y divide-white/[0.04]">
                                 {rows.map(r => {
                                     const isCash = r.asset === 'Cash';
                                     const isSelected = selectedAsset && selectedAsset.asset === r.asset;
@@ -799,7 +799,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
         const totalROI = totalCostBase !== 0 ? totalPnL / totalCostBase * 100 : 0;
 
         return (
-            <div id="ftue-equity-header" className="glass-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '48px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+            <div id="ftue-equity-header" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden mb-12">
                 {/* Hero Total */}
                 <div id="ftue-equity-hero" style={{
                     padding: '24px',

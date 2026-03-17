@@ -56,9 +56,9 @@ export default function PlanningTab({
                 {activeTab === 'targets' && (
                     <motion.div
                         key="tab-allocation"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
                         className="flex flex-col gap-8 w-full"
                     >
@@ -91,9 +91,9 @@ export default function PlanningTab({
                 {activeTab === 'forecast' && (
                     <motion.div
                         key="tab-forecast"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
                     >
                         <GrowthForecastTab
@@ -111,9 +111,9 @@ export default function PlanningTab({
                 {activeTab === 'advisor' && (
                     <motion.div
                         key="tab-rebalance"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
                     >
                         <RebalanceAdvisorTab

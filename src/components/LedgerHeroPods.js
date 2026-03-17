@@ -32,8 +32,8 @@ const PodTooltip = ({ active, payload, label, isCurrency = true }) => {
     if (!active || !payload || !payload.length) return null;
     return (
         <div style={{
-            background: 'rgba(13,8,20,0.95)',
-            border: '1px solid rgba(212,175,55,0.2)',
+            background: 'rgba(18, 20, 24, 0.90)',
+            border: '1px solid rgba(255,255,255,0.06)',
             borderRadius: '10px',
             padding: '10px 14px',
             backdropFilter: 'blur(12px)',
@@ -55,7 +55,7 @@ const PodTooltip = ({ active, payload, label, isCurrency = true }) => {
 
 // --- Pod Card Wrapper ---
 const PodCard = ({ title, icon, children }) => (
-    <div className="rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/5 p-5" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)', overflow: 'hidden' }}>
+    <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)]" style={{ overflow: 'hidden' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
             <span style={{ fontSize: '14px' }}>{icon}</span>
             <span style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(245,245,220,0.7)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{title}</span>

@@ -112,7 +112,7 @@ function MonthCombobox({ value, onChange, placeholder = "Select month..." }) {
             </div>
 
             {isOpen && (
-                <div className="absolute z-[100] bottom-full left-0 mb-1.5 w-[220px] bg-[#0D0814] border border-[#D4AF37]/30 rounded-xl shadow-2xl shadow-black/60 p-3">
+                <div className="absolute z-[100] bottom-full left-0 mb-1.5 w-[220px] bg-[#121418]/90 backdrop-blur-xl border border-white/[0.06] rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-3">
                     {/* Year nav */}
                     <div className="flex items-center justify-between mb-3">
                         <button onClick={() => setViewYear(y => y - 1)} className="w-8 h-8 flex items-center justify-center rounded-lg text-[#D4AF37] text-xl font-bold hover:bg-[#D4AF37]/20 transition-colors select-none">
@@ -532,7 +532,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
     const ChartTooltip = ({ active, payload, label }) => {
         if (!active || !payload?.length) return null;
         return (
-            <div className="bg-[#0D0814]/95 border border-[#D4AF37]/30 rounded-lg p-3 shadow-xl backdrop-blur-md font-mono text-xs">
+            <div className="bg-[#121418]/90 border border-white/[0.06] rounded-lg p-3 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl font-mono text-xs">
                 <p className="text-[#D4AF37] font-bold mb-1.5">{label}</p>
                 {payload.filter(e => e.value != null).map((entry, i) => {
                     const isGbp = entry.dataKey?.toLowerCase().includes('gbp');
@@ -576,7 +576,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
         <div id="ftue-forecast-container" className="w-full mx-auto pb-12 space-y-6">
 
             {/* ─── FORECAST & PROJECTIONS ─── */}
-            <div id="ftue-forecast-projection" className="glass-card !p-6 lg:!p-8 relative overflow-hidden">
+            <div id="ftue-forecast-projection" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] !p-6 lg:!p-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-[#D4AF37]/5 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3" />
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-center relative z-10">
                     {/* Left: Progress Ring */}
@@ -614,7 +614,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
                     </div>
 
                     {/* Right: The Future Projection (Highlighted Box) */}
-                    <div className="bg-[#0D0814]/80 border border-[#D4AF37]/30 rounded-2xl p-6 shadow-[0_0_30px_rgba(212,175,55,0.08)] relative overflow-hidden group hover:border-[#D4AF37]/50 transition-all duration-500 hover:shadow-[0_0_40px_rgba(212,175,55,0.15)]">
+                    <div className="bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative overflow-hidden group hover:border-[#D4AF37]/30 transition-all duration-500 hover:shadow-[0_0_40px_rgba(212,175,55,0.15)]">
                         <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/10 to-transparent opacity-60 pointer-events-none" />
                         <div className="absolute -inset-1 bg-gradient-to-r from-[#D4AF37] to-[#05ff9b] opacity-[0.03] pointer-events-none blur-xl" />
 
@@ -652,7 +652,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
 
 
             {/* ─── SCENARIO BUILDER ─── */}
-            <div id="ftue-forecast-scenario" className="glass-card">
+            <div id="ftue-forecast-scenario" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-6 lg:p-8">
                 <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center gap-3">
                         <h3 className="font-bebas text-xl tracking-widest text-parchment m-0">
@@ -705,7 +705,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
                     <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                             {/* Start Month */}
-                            <div className="bg-black/30 border border-white/5 rounded-xl p-4 hover:border-[#D4AF37]/20 transition-colors">
+                            <div className="bg-[#121418]/50 backdrop-blur-lg border border-white/[0.06] rounded-xl p-4 hover:border-[#D4AF37]/20 transition-colors">
                                 <div className="flex justify-between items-center mb-3">
                                     <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest flex items-center gap-1.5">
                                         <Calendar size={10} />
@@ -722,7 +722,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
                             </div>
 
                             {/* Monthly Contribution */}
-                            <div className="bg-black/30 border border-white/5 rounded-xl p-4 hover:border-[#D4AF37]/20 transition-colors">
+                            <div className="bg-[#121418]/50 backdrop-blur-lg border border-white/[0.06] rounded-xl p-4 hover:border-[#D4AF37]/20 transition-colors">
                                 <div className="flex justify-between items-center mb-3">
                                     <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest">Monthly Gain</span>
                                     <EditableValue
@@ -745,7 +745,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
                             </div>
 
                             {/* Expected Yield */}
-                            <div className="bg-black/30 border border-white/5 rounded-xl p-4 hover:border-[#D4AF37]/20 transition-colors">
+                            <div className="bg-[#121418]/50 backdrop-blur-lg border border-white/[0.06] rounded-xl p-4 hover:border-[#D4AF37]/20 transition-colors">
                                 <div className="flex justify-between items-center mb-3">
                                     <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest">Expected Yield</span>
                                     <EditableValue
@@ -768,7 +768,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
                             </div>
 
                             {/* 2031 Goal */}
-                            <div className="bg-black/30 border border-white/5 rounded-xl p-4 hover:border-[#D4AF37]/20 transition-colors">
+                            <div className="bg-[#121418]/50 backdrop-blur-lg border border-white/[0.06] rounded-xl p-4 hover:border-[#D4AF37]/20 transition-colors">
                                 <div className="flex justify-between items-center mb-3">
                                     <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest">2031 Goal</span>
                                     <EditableValue
@@ -813,7 +813,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
 
 
             {/* ─── GRANULAR FORECAST TOOL ─── */}
-            <div className="glass-card overflow-visible relative z-10">
+            <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-4 lg:p-6 overflow-visible relative z-10">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] m-0">Forecasting Assumptions</h3>
                     <button
@@ -838,7 +838,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
                             </div>
 
                             {/* Phase Card */}
-                            <div className="flex-1 bg-black/20 border border-white/5 rounded-xl p-4 flex flex-col sm:flex-row gap-4 sm:items-center justify-between hover:border-[#D4AF37]/20 transition-all">
+                            <div className="flex-1 bg-[#121418]/50 backdrop-blur-lg border border-white/[0.06] rounded-xl p-4 flex flex-col sm:flex-row gap-4 sm:items-center justify-between hover:border-[#D4AF37]/20 transition-all">
                                 <div className="flex flex-col gap-1 w-[160px] shrink-0">
                                     <span className="font-mono text-[9px] text-white/40 uppercase tracking-widest">
                                         Phase {index + 1} &bull; Start Month
@@ -896,7 +896,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
 
             {/* ─── WEALTH TRAJECTORY CHART ─── */}
 
-            <div className="glass-card">
+            <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-4 lg:p-6">
                 <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] m-0 mb-5">Wealth Trajectory</h3>
                 <div style={{ width: '100%', height: '420px' }}>
                     <ResponsiveContainer width="100%" height="100%">
@@ -1030,7 +1030,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
             </div>
 
             {/* ─── COLLAPSIBLE LEDGER ─── */}
-            <div className="glass-card p-0 overflow-hidden">
+            <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-0 overflow-hidden">
                 <div className="flex justify-between items-center px-5 py-4">
                     <button
                         onClick={() => setLedgerOpen(!ledgerOpen)}
@@ -1054,7 +1054,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
                 {ledgerOpen && (
                     <div className="border-t border-white/5 overflow-x-auto max-h-[500px] overflow-y-auto">
                         <table className="w-full border-collapse text-xs">
-                            <thead className="sticky top-0 z-10 bg-[#0D0814] shadow-md">
+                            <thead className="sticky top-0 z-10 bg-[#121418] shadow-md">
                                 <tr>
                                     <th className="p-3 text-left text-white/50 font-mono font-normal">Date</th>
                                     <th className="p-3 text-left text-white/50 font-mono font-normal">Type</th>

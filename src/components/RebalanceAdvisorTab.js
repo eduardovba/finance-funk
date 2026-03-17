@@ -121,23 +121,25 @@ export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }
         <div className="w-full mx-auto pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
             {/* Header Area */}
-            <div className="mb-10 text-center max-w-2xl mx-auto">
-                <div className="inline-flex items-center justify-center p-3 sm:p-4 rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37] mb-6 shadow-[0_0_30px_rgba(212,175,55,0.15)] border border-[#D4AF37]/20">
+            <div className="mb-8 rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-6 lg:p-8 flex flex-col sm:flex-row items-center gap-6 justify-center text-center sm:text-left">
+                <div className="inline-flex items-center justify-center p-4 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37] shadow-[0_0_30px_rgba(212,175,55,0.15)] border border-[#D4AF37]/20 shrink-0">
                     <Scale size={32} strokeWidth={1.5} />
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-bebas tracking-widest text-white mb-4 drop-shadow-md">
-                    Smart Rebalance Engine
-                </h2>
-                <p className="font-mono text-sm uppercase tracking-widest text-parchment/60 leading-relaxed">
-                    Optimize your capital deployment to align your portfolio with your master allocation targets.
-                </p>
+                <div>
+                    <h2 className="text-2xl sm:text-3xl font-bebas tracking-widest text-[#D4AF37] mb-2 drop-shadow-md uppercase">
+                        Smart Rebalance
+                    </h2>
+                    <p className="font-mono text-xs sm:text-sm uppercase tracking-widest text-parchment/60 leading-relaxed max-w-2xl">
+                        Optimize your capital deployment to align your portfolio with your master allocation targets.
+                    </p>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
                 {/* ─── LEFT COLUMN: The "What-If" Capital Slider ─── */}
                 <div id="ftue-rebalance-input" className="lg:col-span-5 flex flex-col gap-6">
-                    <div className="glass-card flex flex-col items-center justify-center text-center p-8 lg:p-12 relative overflow-hidden h-full min-h-[400px]">
+                    <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center text-center p-8 lg:p-12 relative overflow-hidden h-full min-h-[400px]">
                         {/* Background flourish */}
                         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px] -mr-32 -mt-32"></div>
                         <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#D4AF37]/5 rounded-full blur-[80px] -ml-32 -mb-32"></div>
@@ -182,7 +184,7 @@ export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }
                 <div id="ftue-rebalance-actions" className="lg:col-span-7 flex flex-col gap-6">
 
                     {/* SECTION 1: BUY ACTIONS (Routing New Capital) */}
-                    <div className="glass-card relative overflow-hidden">
+                    <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-6 lg:p-8 relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-1 h-full bg-[#05ff9b]/80 shadow-[0_0_15px_#05ff9b]"></div>
 
                         <div className="mb-6 flex items-center justify-between">
@@ -244,7 +246,7 @@ export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }
                             <motion.div
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
-                                className="glass-card relative overflow-hidden border-orange-500/20"
+                                className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-orange-500/20 shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-6 lg:p-8 relative overflow-hidden"
                             >
                                 <div className="absolute top-0 left-0 w-1 h-full bg-orange-500/80 shadow-[0_0_15px_rgba(249,115,22,0.8)]"></div>
 

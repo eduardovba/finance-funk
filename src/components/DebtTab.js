@@ -333,7 +333,7 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
             .sort((a, b) => Math.abs(b.totalInTop) - Math.abs(a.totalInTop));
 
         return (
-            <div id="ftue-debt-header" className="glass-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '48px', border: '1px solid rgba(244, 63, 94, 0.2)' }}>
+            <div id="ftue-debt-header" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden mb-12">
                 <div id="ftue-debt-hero" style={{
                     padding: '24px',
                     background: 'linear-gradient(180deg, rgba(244, 63, 94, 0.08) 0%, rgba(255,255,255,0) 100%)',
@@ -391,7 +391,7 @@ export default function DebtTab({ transactions = [], rates = { GBP: 1, BRL: 7.20
             <div key={lenderName} id={encodeURIComponent(lenderName)} className={`mb-8 rounded-2xl transition-all duration-1000 ${glowClass}`}>
                 <div
                     onClick={() => toggleLender(lenderName)}
-                    className="flex justify-between items-center mb-4 px-4 py-3 cursor-pointer bg-white/5 hover:bg-white/10 rounded-2xl transition-colors"
+                    className="flex justify-between items-center mb-4 px-4 py-3 cursor-pointer bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] hover:bg-[#121418]/70 rounded-2xl transition-colors shadow-[0_4px_16px_rgba(0,0,0,0.3)]"
                 >
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-lg shrink-0">

@@ -1,0 +1,4 @@
+Date,Asset Name,Ticker,Type,Quantity,Price,Total Amount,Currency,Broker,Notes
+2024-02-01,Bitcoin,BTC,Buy,0.5,42000.00,21000.00,USD,Coinbase,DCA purchase
+2024-04-15,Ethereum,ETH,Buy,10,3200.00,32000.00,USD,Binance,
+2024-07-20,Bitcoin,BTC,Sell,0.25,63000.00,15750.00,USD,Coinbase,Taking profits

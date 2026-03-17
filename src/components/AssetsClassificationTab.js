@@ -188,7 +188,7 @@ export default function AssetsClassificationTab({
     });
 
     return (
-        <div className="glass-card w-full mb-8">
+        <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] w-full mb-8 p-6 lg:p-8">
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <div
                     className="flex justify-between items-center w-full sm:w-auto cursor-pointer sm:cursor-default"

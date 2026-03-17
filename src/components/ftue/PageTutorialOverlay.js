@@ -354,7 +354,7 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
                             {/* Reset tip on last step */}
                             {isLastStep && (
                                 <p className="text-[10px] text-[#F5F5DC]/30 font-space m-0 mb-3 italic">
-                                    You can replay this tour anytime from Profile → Reset FTUE.
+                                    You can replay this tour anytime from Profile → Replay Tutorial.
                                 </p>
                             )}
 

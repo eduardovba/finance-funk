@@ -11,9 +11,8 @@ const OFFLINE_URL = '/offline.html';
 // Pre-cache these on install
 const PRECACHE_URLS = [
     OFFLINE_URL,
-    '/icon-192x192.png',
-    '/icon-512x512.png',
-    '/FF.png',
+    '/logos/FF Star.png',
+    '/logos/FF Star Favcon.png',
 ];
 
 // ─── Install ────────────────────────────────────────────────────────

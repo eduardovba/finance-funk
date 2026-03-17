@@ -5,12 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Upload, FileSpreadsheet, ArrowRight, ArrowLeft, Check, X,
     AlertCircle, CheckCircle2, Loader2, Sparkles, ChevronDown,
-    Table2, Zap, RotateCcw
+    Table2, Zap, RotateCcw, Building2, FileText
 } from 'lucide-react';
 import {
     parseSpreadsheetFile, smartMapColumns, transformRows,
     getFieldsForAssetClass, FIELD_LABELS
 } from '@/lib/spreadsheetParser';
+import { getAllProviders, parseWithProvider, detectProvider } from '@/lib/providers/registry';
+import ProviderPicker from './ProviderPicker';
 
 const ASSET_CLASSES = [
     { value: 'Equity', label: 'Equity / Stocks', icon: '📈', desc: 'Shares, ETFs, mutual funds' },
@@ -21,7 +23,8 @@ const ASSET_CLASSES = [
     { value: 'Debt', label: 'Debt', icon: '💳', desc: 'Loans, mortgages, credit' },
 ];
 
-const STEPS = [
+// Steps for each mode
+const GENERIC_STEPS = [
     { id: 'upload', title: 'Upload File', subtitle: 'Drop your spreadsheet' },
     { id: 'configure', title: 'Configure', subtitle: 'Asset class & defaults' },
     { id: 'map', title: 'Map Columns', subtitle: 'Match your data' },
@@ -29,10 +32,24 @@ const STEPS = [
     { id: 'result', title: 'Complete', subtitle: 'Import summary' },
 ];
 
+const PROVIDER_STEPS = [
+    { id: 'provider', title: 'Provider', subtitle: 'Select your broker' },
+    { id: 'upload', title: 'Upload', subtitle: 'Drop your statement' },
+    { id: 'preview', title: 'Preview', subtitle: 'Review & confirm' },
+    { id: 'result', title: 'Complete', subtitle: 'Import summary' },
+];
+
 export default function ImportWizard() {
+    // ─── Import Mode ───
+    const [importMode, setImportMode] = useState(null); // null = choose, 'provider' or 'generic'
+    const [selectedProvider, setSelectedProvider] = useState(null);
+    const [providerConfidence, setProviderConfidence] = useState(0);
+
+    // ─── Shared State ───
     const [step, setStep] = useState(0);
     const [file, setFile] = useState(null);
     const [parsedData, setParsedData] = useState(null);
+    const [sheetsConfig, setSheetsConfig] = useState([]); // [{sheetName, headers, rows, enabled, assetClass, defaultCurrency, defaultBroker, columnMapping}]
     const [assetClass, setAssetClass] = useState('');
     const [defaultCurrency, setDefaultCurrency] = useState('GBP');
     const [defaultBroker, setDefaultBroker] = useState('');
@@ -45,7 +62,28 @@ export default function ImportWizard() {
 
     const fileInputRef = useRef(null);
 
-    // ─── Step 1: Upload ───
+    const STEPS = importMode === 'provider' ? PROVIDER_STEPS : GENERIC_STEPS;
+
+    // ─── Choose Import Mode ───
+    const handleChooseProvider = () => {
+        setImportMode('provider');
+        setStep(0); // Provider picker is step 0
+    };
+    const handleChooseGeneric = () => {
+        setImportMode('generic');
+        setStep(0); // Upload is step 0
+    };
+
+    // ─── Provider Selected → go to Upload step ───
+    const handleProviderSelected = (provider) => {
+        setSelectedProvider(provider);
+        setDefaultBroker(provider.name);
+        // Set default currency based on country
+        setDefaultCurrency(provider.country === 'BR' ? 'BRL' : 'GBP');
+        setStep(1); // Upload step in provider flow
+    };
+
+    // ─── Generic Step 1: Upload ───
     const handleFile = useCallback(async (f) => {
         if (!f) return;
         const ext = f.name.split('.').pop().toLowerCase();
@@ -61,14 +99,52 @@ export default function ImportWizard() {
         try {
             const data = await parseSpreadsheetFile(f);
             setParsedData(data);
-            setStep(1);
+
+            if (importMode === 'provider' && selectedProvider) {
+                // ─── Provider Mode: Auto-parse and go straight to preview ───
+                try {
+                    const result = parseWithProvider(selectedProvider.id, data.headers, data.rows, {
+                        defaultCurrency,
+                        defaultBroker: selectedProvider.name,
+                    });
+
+                    if (result.transactions.length === 0) {
+                        setError(`No transactions could be parsed from this file using the ${selectedProvider.name} template. The file format might be different than expected. Try the Generic Spreadsheet import instead.`);
+                        setParsing(false);
+                        return;
+                    }
+
+                    setTransformedTxs(result.transactions);
+                    setProviderConfidence(selectedProvider.detect(data.headers, data.rows.slice(0, 10)));
+                    if (result.summary?.assetClasses?.length > 0) {
+                        setAssetClass(result.summary.assetClasses[0]);
+                    }
+                    setStep(2); // Preview step in provider flow
+                } catch (parseErr) {
+                    setError(`Auto-parse failed: ${parseErr.message}. Try the Generic Spreadsheet import instead.`);
+                }
+            } else {
+                // ─── Generic Mode: Build sheetsConfig from all parsed sheets ───
+                const configs = data.sheets.map(sheet => ({
+                    sheetName: sheet.sheetName,
+                    headers: sheet.headers,
+                    rows: sheet.rows,
+                    enabled: true,
+                    assetClass: '',
+                    defaultCurrency: 'GBP',
+                    defaultBroker: '',
+                    columnMapping: {},
+                }));
+                setSheetsConfig(configs);
+                setStep(1);
+            }
         } catch (err) {
             setError(err.message);
             setFile(null);
         } finally {
             setParsing(false);
         }
-    }, []);
+    }, [importMode, selectedProvider, defaultCurrency]);
 
     const handleDrop = useCallback((e) => {
         e.preventDefault();
@@ -82,23 +158,37 @@ export default function ImportWizard() {
         e.stopPropagation();
     }, []);
 
-    // ─── Step 2: Configure → auto-map columns ───
+    // ─── Generic Step 2: Configure → auto-map columns per sheet ───
     const handleConfigure = useCallback(() => {
-        if (!assetClass || !parsedData) return;
-        const sampleRows = parsedData.rows.slice(0, 20);
-        const mapping = smartMapColumns(parsedData.headers, sampleRows, assetClass);
-        setColumnMapping(mapping);
+        const enabledSheets = sheetsConfig.filter(s => s.enabled && s.assetClass);
+        if (enabledSheets.length === 0) return;
+
+        const updated = sheetsConfig.map(sc => {
+            if (!sc.enabled || !sc.assetClass) return sc;
+            const sampleRows = sc.rows.slice(0, 20);
+            const mapping = smartMapColumns(sc.headers, sampleRows, sc.assetClass);
+            return { ...sc, columnMapping: mapping };
+        });
+        setSheetsConfig(updated);
         setStep(2);
-    }, [assetClass, parsedData]);
+    }, [sheetsConfig]);
 
-    // ─── Step 3: Map → transform & preview ───
+    // ─── Generic Step 3: Map → transform & preview (aggregate all sheets) ───
     const handleMapConfirm = useCallback(() => {
-        const txs = transformRows(parsedData.rows, columnMapping, assetClass, defaultCurrency, defaultBroker);
-        setTransformedTxs(txs);
+        let allTxs = [];
+        for (const sc of sheetsConfig) {
+            if (!sc.enabled || !sc.assetClass) continue;
+            const txs = transformRows(sc.rows, sc.columnMapping, sc.assetClass, sc.defaultCurrency, sc.defaultBroker);
+            allTxs = allTxs.concat(txs);
+        }
+        setTransformedTxs(allTxs);
+        // Figure out if we need the asset class column in preview
+        const uniqueClasses = new Set(allTxs.map(t => t.assetClass).filter(Boolean));
+        setAssetClass(uniqueClasses.size === 1 ? [...uniqueClasses][0] : '');
         setStep(3);
-    }, [parsedData, columnMapping, assetClass, defaultCurrency, defaultBroker]);
+    }, [sheetsConfig]);
 
-    // ─── Step 4: Import ───
+    // ─── Import (shared) ───
     const handleImport = useCallback(async () => {
         setImporting(true);
         setError('');
@@ -108,9 +198,9 @@ export default function ImportWizard() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    assetClass,
+                    assetClass: assetClass || undefined,
                     defaultCurrency,
-                    defaultBroker: defaultBroker || 'Manual',
+                    defaultBroker: defaultBroker || selectedProvider?.name || 'Manual',
                     transactions: transformedTxs,
                 }),
             });
@@ -119,19 +209,23 @@ export default function ImportWizard() {
             if (!res.ok) throw new Error(data.error || 'Import failed');
 
             setImportResult(data);
-            setStep(4);
+            setStep(importMode === 'provider' ? 3 : 4);
         } catch (err) {
             setError(err.message);
         } finally {
             setImporting(false);
         }
-    }, [assetClass, defaultCurrency, defaultBroker, transformedTxs]);
+    }, [assetClass, defaultCurrency, defaultBroker, transformedTxs, importMode, selectedProvider]);
 
     // ─── Reset ───
     const handleReset = () => {
+        setImportMode(null);
+        setSelectedProvider(null);
+        setProviderConfidence(0);
         setStep(0);
         setFile(null);
         setParsedData(null);
+        setSheetsConfig([]);
         setAssetClass('');
         setDefaultBroker('');
         setColumnMapping({});
@@ -139,6 +233,98 @@ export default function ImportWizard() {
         setImportResult(null);
         setError('');
     };
+
+    // ─── Switch to generic from provider mode ───
+    const handleSwitchToGeneric = () => {
+        setImportMode('generic');
+        setSelectedProvider(null);
+        setStep(0);
+        setTransformedTxs([]);
+        setSheetsConfig([]);
+    };
+
+    // ─── RENDER ───
+
+    // Step 0: Choose Import Method (landing page)
+    if (importMode === null) {
+        return (
+            <div className="max-w-5xl mx-auto">
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 mb-2">
+                    <FileSpreadsheet size={20} className="text-[#D4AF37]/60" />
+                    <h2 className="text-xs uppercase text-parchment/50 tracking-[0.2em] font-space font-medium m-0">
+                        Import Data
+                    </h2>
+                </motion.div>
+                <motion.h1
+                    initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+                    className="font-bebas text-3xl md:text-4xl tracking-widest text-gradient m-0 mb-8"
+                >
+                    Bring Your Data Home
+                </motion.h1>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <motion.button
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        whileHover={{ scale: 1.02, y: -4 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleChooseProvider}
+                        className="group glass-card text-left cursor-pointer border-white/10 hover:border-[#D4AF37]/40 transition-all"
+                    >
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#D4AF37]/20 to-[#CC5500]/10 flex items-center justify-center mb-4 group-hover:from-[#D4AF37]/30 group-hover:to-[#CC5500]/20 transition-all">
+                            <Building2 size={28} className="text-[#D4AF37]" />
+                        </div>
+                        <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] mb-1">
+                            Provider Statement
+                        </h3>
+                        <p className="text-parchment/50 font-space text-xs mb-4 leading-relaxed">
+                            Upload a statement from your broker or bank. We&apos;ll auto-detect the format and import everything — no manual mapping needed.
+                        </p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                            {['Trading 212', 'B3/CEI', 'XP', 'IBKR', '+7 more'].map(name => (
+                                <span key={name} className="px-2 py-0.5 rounded text-[9px] font-space bg-white/[0.05] text-parchment/30">
+                                    {name}
+                                </span>
+                            ))}
+                        </div>
+                    </motion.button>
+
+                    <motion.button
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        whileHover={{ scale: 1.02, y: -4 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleChooseGeneric}
+                        className="group glass-card text-left cursor-pointer border-white/10 hover:border-[#D4AF37]/40 transition-all"
+                    >
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#D4AF37]/20 to-[#CC5500]/10 flex items-center justify-center mb-4 group-hover:from-[#D4AF37]/30 group-hover:to-[#CC5500]/20 transition-all">
+                            <FileText size={28} className="text-[#D4AF37]" />
+                        </div>
+                        <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] mb-1">
+                            Generic Spreadsheet
+                        </h3>
+                        <p className="text-parchment/50 font-space text-xs mb-4 leading-relaxed">
+                            Import any CSV or Excel file. You&apos;ll choose the asset class and map columns manually with our smart detection.
+                        </p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                            {['.csv', '.xlsx', '.xls', '.tsv', '.ods'].map(fmt => (
+                                <span key={fmt} className="px-2 py-0.5 rounded text-[9px] font-space bg-white/[0.05] text-parchment/30">
+                                    {fmt}
+                                </span>
+                            ))}
+                        </div>
+                    </motion.button>
+                </div>
+            </div>
+        );
+    }
+
+    // Determine which step components to show based on mode
+    const isProviderMode = importMode === 'provider';
+    const previewStep = isProviderMode ? 2 : 3;
+    const resultStep = isProviderMode ? 3 : 4;
 
     return (
         <div className="max-w-5xl mx-auto">
@@ -150,7 +336,7 @@ export default function ImportWizard() {
             >
                 <FileSpreadsheet size={20} className="text-[#D4AF37]/60" />
                 <h2 className="text-xs uppercase text-parchment/50 tracking-[0.2em] font-space font-medium m-0">
-                    Import Spreadsheet
+                    {isProviderMode ? `Import from ${selectedProvider?.name || 'Provider'}` : 'Import Spreadsheet'}
                 </h2>
             </motion.div>
 
@@ -207,7 +393,74 @@ export default function ImportWizard() {
 
             {/* ═══ Step Content ═══ */}
             <AnimatePresence mode="wait">
-                {step === 0 && (
+                {/* Provider Mode: Step 0 = ProviderPicker */}
+                {isProviderMode && step === 0 && (
+                    <ProviderPicker
+                        key="provider-picker"
+                        providers={getAllProviders()}
+                        onSelect={handleProviderSelected}
+                        onBack={handleSwitchToGeneric}
+                    />
+                )}
+
+                {/* Provider Mode: Step 1 = Upload */}
+                {isProviderMode && step === 1 && (
+                    <StepUpload
+                        key="provider-upload"
+                        onFile={handleFile}
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                        fileInputRef={fileInputRef}
+                        parsing={parsing}
+                        file={file}
+                        providerName={selectedProvider?.name}
+                    />
+                )}
+
+                {/* Provider Mode: Step 2 = Preview (with provider confidence badge) */}
+                {isProviderMode && step === 2 && (
+                    <div key="provider-preview">
+                        {/* Provider Detection Badge */}
+                        <motion.div
+                            initial={{ opacity: 0, y: -8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex items-center gap-3 px-4 py-3 mb-6 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-space"
+                        >
+                            <CheckCircle2 size={16} className="flex-shrink-0" />
+                            <span className="flex-1">
+                                ✅ Detected <strong>{transformedTxs.length}</strong> transactions from <strong>{selectedProvider?.name}</strong>
+                                {providerConfidence >= 0.8 && ` (${Math.round(providerConfidence * 100)}% confidence)`}
+                            </span>
+                            <button
+                                onClick={handleSwitchToGeneric}
+                                className="text-[10px] text-emerald-400/50 hover:text-emerald-400 transition-colors bg-transparent border-none cursor-pointer underline"
+                            >
+                                Switch to manual mapping
+                            </button>
+                        </motion.div>
+                        <StepPreview
+                            transformedTxs={transformedTxs}
+                            assetClass={assetClass}
+                            importing={importing}
+                            onImport={handleImport}
+                            onBack={() => { setStep(1); setFile(null); setParsedData(null); setTransformedTxs([]); }}
+                            showAssetClassColumn={true}
+                        />
+                    </div>
+                )}
+
+                {/* Provider Mode: Step 3 = Result */}
+                {isProviderMode && step === 3 && (
+                    <StepResult
+                        key="provider-result"
+                        result={importResult}
+                        assetClass={assetClass}
+                        onReset={handleReset}
+                    />
+                )}
+
+                {/* Generic Mode: Step 0 = Upload */}
+                {!isProviderMode && step === 0 && (
                     <StepUpload
                         key="upload"
                         onFile={handleFile}
@@ -218,33 +471,26 @@ export default function ImportWizard() {
                         file={file}
                     />
                 )}
-                {step === 1 && (
+                {!isProviderMode && step === 1 && (
                     <StepConfigure
                         key="configure"
-                        parsedData={parsedData}
-                        assetClass={assetClass}
-                        setAssetClass={setAssetClass}
-                        defaultCurrency={defaultCurrency}
-                        setDefaultCurrency={setDefaultCurrency}
-                        defaultBroker={defaultBroker}
-                        setDefaultBroker={setDefaultBroker}
+                        sheetsConfig={sheetsConfig}
+                        setSheetsConfig={setSheetsConfig}
                         onNext={handleConfigure}
-                        onBack={() => { setStep(0); setFile(null); setParsedData(null); }}
+                        onBack={() => { setStep(0); setFile(null); setParsedData(null); setSheetsConfig([]); }}
                         fileName={file?.name}
                     />
                 )}
-                {step === 2 && (
+                {!isProviderMode && step === 2 && (
                     <StepMap
                         key="map"
-                        parsedData={parsedData}
-                        assetClass={assetClass}
-                        columnMapping={columnMapping}
-                        setColumnMapping={setColumnMapping}
+                        sheetsConfig={sheetsConfig}
+                        setSheetsConfig={setSheetsConfig}
                         onNext={handleMapConfirm}
                         onBack={() => setStep(1)}
                     />
                 )}
-                {step === 3 && (
+                {!isProviderMode && step === 3 && (
                     <StepPreview
                         key="preview"
                         transformedTxs={transformedTxs}
@@ -252,9 +498,10 @@ export default function ImportWizard() {
                         importing={importing}
                         onImport={handleImport}
                         onBack={() => setStep(2)}
+                        showAssetClassColumn={sheetsConfig.filter(s => s.enabled).length > 1 || sheetsConfig.some(s => s.assetClass === 'Mixed')}
                     />
                 )}
-                {step === 4 && (
+                {!isProviderMode && step === 4 && (
                     <StepResult
                         key="result"
                         result={importResult}
@@ -268,7 +515,7 @@ export default function ImportWizard() {
 }
 
 // ─── STEP 1: Upload ───────────────────────────────────────────────────────────
-function StepUpload({ onFile, onDrop, onDragOver, fileInputRef, parsing, file }) {
+function StepUpload({ onFile, onDrop, onDragOver, fileInputRef, parsing, file, providerName }) {
     const [dragActive, setDragActive] = useState(false);
 
     return (
@@ -299,21 +546,25 @@ function StepUpload({ onFile, onDrop, onDragOver, fileInputRef, parsing, file })
                             </div>
                         </div>
                         <h3 className="font-bebas text-2xl tracking-widest text-[#D4AF37] mb-2">
-                            Drop Your Spreadsheet
+                            {providerName ? `Upload ${providerName} Statement` : 'Drop Your Spreadsheet'}
                         </h3>
                         <p className="text-parchment/50 font-space text-sm mb-4 max-w-md mx-auto">
-                            Drag & drop a file here, or click to browse.
-                            We support <span className="text-[#D4AF37]/80">.csv</span>,{' '}
-                            <span className="text-[#D4AF37]/80">.xlsx</span>,{' '}
-                            <span className="text-[#D4AF37]/80">.xls</span>,{' '}
-                            <span className="text-[#D4AF37]/80">.tsv</span>, and{' '}
-                            <span className="text-[#D4AF37]/80">.ods</span> formats.
+                            {providerName
+                                ? `Drop your ${providerName} export file here. We'll auto-detect columns and import instantly.`
+                                : <>Drag & drop a file here, or click to browse.
+                                    We support <span className="text-[#D4AF37]/80">.csv</span>,{' '}
+                                    <span className="text-[#D4AF37]/80">.xlsx</span>,{' '}
+                                    <span className="text-[#D4AF37]/80">.xls</span>,{' '}
+                                    <span className="text-[#D4AF37]/80">.tsv</span>, and{' '}
+                                    <span className="text-[#D4AF37]/80">.ods</span> formats.</>}
                         </p>
-                        <div className="flex items-center justify-center gap-4 text-parchment/30 text-xs font-space">
-                            <span>Google Sheets → File → Download</span>
-                            <span>•</span>
-                            <span>Excel → Save As</span>
-                        </div>
+                        {!providerName && (
+                            <div className="flex items-center justify-center gap-4 text-parchment/30 text-xs font-space">
+                                <span>Google Sheets → File → Download</span>
+                                <span>•</span>
+                                <span>Excel → Save As</span>
+                            </div>
+                        )}
                     </>
                 )}
             </div>
@@ -325,12 +576,139 @@ function StepUpload({ onFile, onDrop, onDragOver, fileInputRef, parsing, file })
                 className="hidden"
                 onChange={(e) => onFile(e.target.files?.[0])}
             />
+
+            {/* Template Downloads (generic mode only) */}
+            {!providerName && (
+                <div className="mt-4 text-center" onClick={e => e.stopPropagation()}>
+                    <p className="text-parchment/30 text-xs font-space mb-2.5">
+                        Need a template? Download one to see the expected format:
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                        {[
+                            { label: 'Equity', file: 'equity_template.csv', icon: '📈' },
+                            { label: 'Crypto', file: 'crypto_template.csv', icon: '₿' },
+                            { label: 'Fixed Income', file: 'fixed_income_template.csv', icon: '🏦' },
+                            { label: 'Pension', file: 'pension_template.csv', icon: '🏛️' },
+                            { label: 'Real Estate', file: 'real_estate_template.csv', icon: '🏠' },
+                            { label: 'Debt', file: 'debt_template.csv', icon: '💳' },
+                        ].map(t => (
+                            <a
+                                key={t.file}
+                                href={`/templates/${t.file}`}
+                                download={t.file}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/10 text-parchment/50 text-[11px] font-space hover:border-[#D4AF37]/30 hover:text-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all no-underline"
+                            >
+                                <span>{t.icon}</span> {t.label}
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            )}
         </motion.div>
     );
 }
 
-// ─── STEP 2: Configure ───────────────────────────────────────────────────────
-function StepConfigure({ parsedData, assetClass, setAssetClass, defaultCurrency, setDefaultCurrency, defaultBroker, setDefaultBroker, onNext, onBack, fileName }) {
+// ─── STEP 2: Configure (Multi-Sheet Aware) ──────────────────────────────────
+function StepConfigure({ sheetsConfig, setSheetsConfig, onNext, onBack, fileName }) {
+    const isMultiSheet = sheetsConfig.length > 1;
+    const totalRows = sheetsConfig.reduce((sum, s) => sum + s.rows.length, 0);
+    const enabledSheets = sheetsConfig.filter(s => s.enabled);
+    const canProceed = enabledSheets.length > 0 && enabledSheets.every(s => s.assetClass);
+
+    const ALL_ASSET_CLASSES = [
+        ...ASSET_CLASSES,
+        { value: 'Mixed', label: 'Mixed (Map per Row)', icon: '🔀', desc: 'File has an asset-class column' },
+    ];
+
+    const updateSheet = (idx, updates) => {
+        setSheetsConfig(prev => prev.map((s, i) => i === idx ? { ...s, ...updates } : s));
+    };
+
+    // For single-sheet files, render a simplified version close to the original
+    const renderSheetConfig = (sc, idx) => (
+        <div key={idx} className={`glass-card space-y-5 ${isMultiSheet ? '' : ''}`}>
+            {isMultiSheet && (
+                <div className="flex items-center gap-3 pb-3 border-b border-white/5">
+                    <button
+                        onClick={() => updateSheet(idx, { enabled: !sc.enabled })}
+                        className={`w-10 h-6 rounded-full relative transition-colors cursor-pointer border-none ${sc.enabled ? 'bg-[#D4AF37]/40' : 'bg-white/10'}`}
+                    >
+                        <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${sc.enabled ? 'right-1' : 'left-1'}`} />
+                    </button>
+                    <div className="flex-1 min-w-0">
+                        <h4 className="text-parchment font-space text-sm font-bold m-0 truncate">
+                            📄 {sc.sheetName}
+                        </h4>
+                        <p className="text-parchment/40 text-xs font-space m-0">
+                            {sc.rows.length} rows · {sc.headers.length} columns
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {(sc.enabled || !isMultiSheet) && (
+                <>
+                    {/* Asset Class */}
+                    <div>
+                        <h4 className="font-bebas text-lg tracking-widest text-[#D4AF37] mb-2">
+                            {isMultiSheet ? 'Asset Class' : 'What type of data is this?'}
+                        </h4>
+                        {!isMultiSheet && (
+                            <p className="text-parchment/40 text-xs font-space mb-3">Select the asset class that best matches your spreadsheet.</p>
+                        )}
+                        <div className={`grid gap-2 ${isMultiSheet ? 'grid-cols-3 md:grid-cols-4' : 'grid-cols-2 md:grid-cols-3 gap-3'}`}>
+                            {ALL_ASSET_CLASSES.map(ac => (
+                                <button
+                                    key={ac.value}
+                                    onClick={() => updateSheet(idx, { assetClass: ac.value })}
+                                    className={`${isMultiSheet ? 'p-2.5' : 'p-4'} rounded-xl border text-left transition-all group cursor-pointer
+                                        ${sc.assetClass === ac.value
+                                            ? 'bg-[#D4AF37]/10 border-[#D4AF37]/40 ring-1 ring-[#D4AF37]/20'
+                                            : 'bg-white/[0.03] border-white/10 hover:border-[#D4AF37]/20 hover:bg-white/[0.05]'
+                                        }`}
+                                >
+                                    <span className={`${isMultiSheet ? 'text-lg' : 'text-2xl'} block mb-1`}>{ac.icon}</span>
+                                    <span className={`${isMultiSheet ? 'text-xs' : 'text-sm'} font-space font-medium block ${sc.assetClass === ac.value ? 'text-[#D4AF37]' : 'text-parchment'}`}>
+                                        {ac.label}
+                                    </span>
+                                    {!isMultiSheet && <span className="text-xs text-parchment/30 font-space">{ac.desc}</span>}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Defaults */}
+                    <div className={isMultiSheet ? '' : 'glass-card'}>
+                        <h4 className={`font-bebas tracking-widest text-[#D4AF37] mb-3 ${isMultiSheet ? 'text-base' : 'text-lg'}`}>Defaults</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label className="text-[10px] uppercase tracking-widest text-parchment/30 mb-1 font-space block">Currency</label>
+                                <select
+                                    value={sc.defaultCurrency}
+                                    onChange={e => updateSheet(idx, { defaultCurrency: e.target.value })}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-parchment font-space outline-none focus:border-[#D4AF37]/40 transition-colors appearance-none cursor-pointer"
+                                >
+                                    {['GBP', 'BRL', 'USD', 'EUR', 'JPY', 'CHF', 'AUD', 'CAD', 'TRY', 'INR'].map(c => (
+                                        <option key={c} value={c} className="bg-[#1a1a2e] text-parchment">{c}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-[10px] uppercase tracking-widest text-parchment/30 mb-1 font-space block">Broker</label>
+                                <input
+                                    value={sc.defaultBroker}
+                                    onChange={e => updateSheet(idx, { defaultBroker: e.target.value })}
+                                    placeholder="e.g., Trading 212, XP"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-parchment font-space outline-none focus:border-[#D4AF37]/40 transition-colors placeholder:text-parchment/20"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
+        </div>
+    );
+
     return (
         <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -346,83 +724,28 @@ function StepConfigure({ parsedData, assetClass, setAssetClass, defaultCurrency,
                 <div className="flex-1 min-w-0">
                     <h4 className="text-parchment font-space text-sm font-medium m-0 truncate">{fileName}</h4>
                     <p className="text-parchment/40 text-xs font-space m-0">
-                        {parsedData?.rows.length} rows · {parsedData?.headers.length} columns
-                        {parsedData?.sheetNames.length > 1 && ` · ${parsedData.sheetNames.length} sheets (using first)`}
+                        {totalRows} rows · {sheetsConfig.length} {sheetsConfig.length === 1 ? 'sheet' : 'sheets'}
+                        {isMultiSheet && ` · ${enabledSheets.length} enabled`}
                     </p>
                 </div>
                 <Check size={20} className="text-emerald-400 flex-shrink-0" />
             </div>
 
-            {/* Asset Class Selection */}
-            <div>
-                <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] mb-1">What type of data is this?</h3>
-                <p className="text-parchment/40 text-xs font-space mb-4">Select the asset class that best matches your spreadsheet.</p>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {ASSET_CLASSES.map(ac => (
-                        <button
-                            key={ac.value}
-                            onClick={() => setAssetClass(ac.value)}
-                            className={`p-4 rounded-xl border text-left transition-all group
-                                ${assetClass === ac.value
-                                    ? 'bg-[#D4AF37]/10 border-[#D4AF37]/40 ring-1 ring-[#D4AF37]/20'
-                                    : 'bg-white/[0.03] border-white/10 hover:border-[#D4AF37]/20 hover:bg-white/[0.05]'
-                                }`}
-                        >
-                            <span className="text-2xl block mb-2">{ac.icon}</span>
-                            <span className={`text-sm font-space font-medium block ${assetClass === ac.value ? 'text-[#D4AF37]' : 'text-parchment'}`}>
-                                {ac.label}
-                            </span>
-                            <span className="text-xs text-parchment/30 font-space">{ac.desc}</span>
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* Defaults */}
-            <div className="glass-card">
-                <h3 className="font-bebas text-lg tracking-widest text-[#D4AF37] mb-4">Defaults</h3>
-                <p className="text-parchment/40 text-xs font-space mb-4">
-                    These will be used when your spreadsheet doesn&apos;t specify a value.
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="text-[10px] uppercase tracking-widest text-parchment/30 mb-1.5 font-space block">Default Currency</label>
-                        <select
-                            value={defaultCurrency}
-                            onChange={e => setDefaultCurrency(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-parchment font-space outline-none focus:border-[#D4AF37]/40 transition-colors appearance-none cursor-pointer"
-                        >
-                            {['GBP', 'BRL', 'USD', 'EUR', 'JPY', 'CHF', 'AUD', 'CAD', 'TRY', 'INR'].map(c => (
-                                <option key={c} value={c} className="bg-[#1a1a2e] text-parchment">{c}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="text-[10px] uppercase tracking-widest text-parchment/30 mb-1.5 font-space block">Default Broker</label>
-                        <input
-                            value={defaultBroker}
-                            onChange={e => setDefaultBroker(e.target.value)}
-                            placeholder="e.g., Trading 212, XP, Interactive Brokers"
-                            className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-parchment font-space outline-none focus:border-[#D4AF37]/40 transition-colors placeholder:text-parchment/20"
-                        />
-                    </div>
-                </div>
-            </div>
+            {/* Sheet Configs */}
+            {sheetsConfig.map((sc, idx) => renderSheetConfig(sc, idx))}
 
             {/* Nav */}
             <div className="flex justify-between gap-4">
                 <button
                     onClick={onBack}
-                    className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-parchment/60 text-sm font-space hover:bg-white/10 transition-all"
+                    className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-parchment/60 text-sm font-space hover:bg-white/10 transition-all cursor-pointer"
                 >
                     <ArrowLeft size={16} /> Back
                 </button>
                 <button
                     onClick={onNext}
-                    disabled={!assetClass}
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl btn-primary text-sm font-space disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    disabled={!canProceed}
+                    className="flex items-center gap-2 px-6 py-3 rounded-xl btn-primary text-sm font-space disabled:opacity-30 disabled:cursor-not-allowed transition-all border-none cursor-pointer"
                 >
                     <Sparkles size={16} /> Auto-Map Columns <ArrowRight size={16} />
                 </button>
@@ -431,19 +754,40 @@ function StepConfigure({ parsedData, assetClass, setAssetClass, defaultCurrency,
     );
 }
 
-// ─── STEP 3: Column Mapping ──────────────────────────────────────────────────
-function StepMap({ parsedData, assetClass, columnMapping, setColumnMapping, onNext, onBack }) {
-    const availableFields = ['ignore', ...getFieldsForAssetClass(assetClass)];
-    const sampleRows = parsedData.rows.slice(0, 3);
+// ─── STEP 3: Column Mapping (Multi-Sheet with Tabs) ──────────────────────────
+function StepMap({ sheetsConfig, setSheetsConfig, onNext, onBack }) {
+    const enabledSheets = sheetsConfig.filter(s => s.enabled && s.assetClass);
+    const [activeTab, setActiveTab] = useState(0);
+    const isMultiSheet = enabledSheets.length > 1;
+
+    // Resolve the actual index in sheetsConfig for the active enabled sheet
+    const enabledIndices = sheetsConfig.map((s, i) => (s.enabled && s.assetClass) ? i : -1).filter(i => i >= 0);
+    const activeSheetIdx = enabledIndices[activeTab] ?? enabledIndices[0];
+    const sc = sheetsConfig[activeSheetIdx];
+
+    if (!sc) return null;
+
+    const availableFields = ['ignore', ...getFieldsForAssetClass(sc.assetClass)];
+    const sampleRows = sc.rows.slice(0, 3);
+    const mapping = sc.columnMapping || {};
 
     const updateMapping = (header, newField) => {
-        setColumnMapping(prev => ({ ...prev, [header]: newField }));
+        setSheetsConfig(prev => prev.map((s, i) =>
+            i === activeSheetIdx
+                ? { ...s, columnMapping: { ...s.columnMapping, [header]: newField } }
+                : s
+        ));
     };
 
-    // Count how many fields are mapped (excluding 'ignore')
-    const mappedCount = Object.values(columnMapping).filter(f => f !== 'ignore').length;
-    const hasDate = Object.values(columnMapping).includes('date');
-    const hasAmount = Object.values(columnMapping).includes('amount');
+    const mappedCount = Object.values(mapping).filter(f => f !== 'ignore').length;
+    const hasDate = Object.values(mapping).includes('date');
+    const hasAmount = Object.values(mapping).includes('amount');
+
+    // Check all enabled sheets have minimum mapping
+    const allSheetsReady = enabledSheets.every(s => {
+        const m = s.columnMapping || {};
+        return Object.values(m).includes('date') && Object.values(m).includes('amount');
+    });
 
     return (
         <motion.div
@@ -452,6 +796,29 @@ function StepMap({ parsedData, assetClass, columnMapping, setColumnMapping, onNe
             exit={{ opacity: 0, x: -20 }}
             className="space-y-6"
         >
+            {/* Sheet Tabs (only for multi-sheet) */}
+            {isMultiSheet && (
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                    {enabledSheets.map((s, i) => {
+                        const sheetMapping = s.columnMapping || {};
+                        const sheetReady = Object.values(sheetMapping).includes('date') && Object.values(sheetMapping).includes('amount');
+                        return (
+                            <button
+                                key={i}
+                                onClick={() => setActiveTab(i)}
+                                className={`px-4 py-2 rounded-lg text-xs font-space whitespace-nowrap transition-all border cursor-pointer flex items-center gap-2
+                                    ${i === activeTab
+                                        ? 'bg-[#D4AF37]/15 border-[#D4AF37]/30 text-[#D4AF37]'
+                                        : 'bg-white/[0.03] border-white/10 text-parchment/50 hover:bg-white/[0.06]'}`}
+                            >
+                                📄 {s.sheetName}
+                                {sheetReady && <Check size={12} className="text-emerald-400" />}
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+
             {/* AI Detection Banner */}
             <div className="glass-card flex items-center gap-3 !py-3">
                 <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center flex-shrink-0">
@@ -459,7 +826,7 @@ function StepMap({ parsedData, assetClass, columnMapping, setColumnMapping, onNe
                 </div>
                 <div className="flex-1">
                     <p className="text-parchment text-sm font-space font-medium m-0">
-                        Smart Detection found {mappedCount} matches
+                        {isMultiSheet ? `${sc.sheetName}: ` : ''}Smart Detection found {mappedCount} matches
                     </p>
                     <p className="text-parchment/40 text-xs font-space m-0">
                         Review the AI suggestions below and adjust if needed.
@@ -480,8 +847,8 @@ function StepMap({ parsedData, assetClass, columnMapping, setColumnMapping, onNe
                             </tr>
                         </thead>
                         <tbody>
-                            {parsedData.headers.filter(h => h).map(header => {
-                                const currentField = columnMapping[header] || 'ignore';
+                            {sc.headers.filter(h => h).map(header => {
+                                const currentField = mapping[header] || 'ignore';
                                 const isIgnored = currentField === 'ignore';
 
                                 return (
@@ -539,19 +906,25 @@ function StepMap({ parsedData, assetClass, columnMapping, setColumnMapping, onNe
                     <span>No column mapped to <strong>Total Amount</strong> — this is required for all imports.</span>
                 </div>
             )}
+            {sc.assetClass === 'Mixed' && !Object.values(mapping).includes('assetClass') && (
+                <div className="flex items-center gap-2 text-amber-400 text-xs font-space">
+                    <AlertCircle size={14} />
+                    <span>This sheet is set to <strong>Mixed</strong> but no column is mapped to <strong>Asset Class</strong>. Map it or switch to a specific type.</span>
+                </div>
+            )}
 
             {/* Nav */}
             <div className="flex justify-between gap-4">
                 <button
                     onClick={onBack}
-                    className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-parchment/60 text-sm font-space hover:bg-white/10 transition-all"
+                    className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-parchment/60 text-sm font-space hover:bg-white/10 transition-all cursor-pointer"
                 >
                     <ArrowLeft size={16} /> Back
                 </button>
                 <button
                     onClick={onNext}
-                    disabled={!hasDate || !hasAmount}
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl btn-primary text-sm font-space disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    disabled={!allSheetsReady}
+                    className="flex items-center gap-2 px-6 py-3 rounded-xl btn-primary text-sm font-space disabled:opacity-30 disabled:cursor-not-allowed transition-all border-none cursor-pointer"
                 >
                     Preview Import <ArrowRight size={16} />
                 </button>
@@ -561,7 +934,7 @@ function StepMap({ parsedData, assetClass, columnMapping, setColumnMapping, onNe
 }
 
 // ─── STEP 4: Preview ─────────────────────────────────────────────────────────
-function StepPreview({ transformedTxs, assetClass, importing, onImport, onBack }) {
+function StepPreview({ transformedTxs, assetClass, importing, onImport, onBack, showAssetClassColumn = false }) {
     const [expandedView, setExpandedView] = useState(false);
     const previewTxs = expandedView ? transformedTxs : transformedTxs.slice(0, 10);
 
@@ -620,7 +993,10 @@ function StepPreview({ transformedTxs, assetClass, importing, onImport, onBack }
                                 <th className="text-left px-4 py-2 text-[10px] uppercase tracking-widest text-parchment/40 font-space font-medium">Date</th>
                                 <th className="text-left px-4 py-2 text-[10px] uppercase tracking-widest text-parchment/40 font-space font-medium">Asset</th>
                                 <th className="text-left px-4 py-2 text-[10px] uppercase tracking-widest text-parchment/40 font-space font-medium">Type</th>
-                                {['Equity', 'Crypto', 'Pension'].includes(assetClass) && (
+                                {showAssetClassColumn && (
+                                    <th className="text-left px-4 py-2 text-[10px] uppercase tracking-widest text-parchment/40 font-space font-medium">Class</th>
+                                )}
+                                {['Equity', 'Crypto', 'Pension'].includes(assetClass) && !showAssetClassColumn && (
                                     <th className="text-right px-4 py-2 text-[10px] uppercase tracking-widest text-parchment/40 font-space font-medium">Qty</th>
                                 )}
                                 <th className="text-right px-4 py-2 text-[10px] uppercase tracking-widest text-parchment/40 font-space font-medium">Amount</th>
@@ -638,7 +1014,10 @@ function StepPreview({ transformedTxs, assetClass, importing, onImport, onBack }
                                             {tx.type}
                                         </span>
                                     </td>
-                                    {['Equity', 'Crypto', 'Pension'].includes(assetClass) && (
+                                    {showAssetClassColumn && (
+                                        <td className="px-4 py-2.5 text-[10px] text-parchment/50 font-space">{tx.assetClass || assetClass}</td>
+                                    )}
+                                    {['Equity', 'Crypto', 'Pension'].includes(assetClass) && !showAssetClassColumn && (
                                         <td className="px-4 py-2.5 text-xs text-parchment/60 font-space text-right">{tx.quantity?.toFixed(2)}</td>
                                     )}
                                     <td className="px-4 py-2.5 text-xs text-parchment font-space text-right tabular-nums">{tx.amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>

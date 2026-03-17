@@ -6,12 +6,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     User, Mail, Shield, LogOut, Pencil, Check, X,
     Landmark, Calendar, ChevronRight, Settings,
-    Lock, Download, Upload, Trash2, AlertTriangle, Eye, EyeOff, ChevronDown
+    Lock, Download, Upload, Trash2, AlertTriangle, Eye, EyeOff, ChevronDown, LayoutDashboard
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ConnectedInstitutionsList from '@/components/ConnectedInstitutionsList';
 import BankConnectButton from '@/components/BankConnectButton';
 import { SUPPORTED_CURRENCIES } from '@/lib/currency';
+import { usePortfolio } from '@/context/PortfolioContext';
 
 /* ─── Avatar with fallback ─── */
 function ProfileAvatar({ src, name, size = 96 }) {
@@ -125,7 +127,7 @@ function SectionCard({ title, icon: Icon, children, className = '', variant = 'd
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className={`glass-card p-0 overflow-hidden ${className}`}
+            className={`glass-card p-0 ${className}`}
         >
             <div className={`px-5 py-4 border-b ${borderColor} flex items-center gap-3`}>
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconBg}`}>
@@ -310,6 +312,74 @@ function CurrencySelect({ label, value, onChange }) {
     );
 }
 
+/* ─── Background Select Dropdown ─── */
+function BackgroundSelect({ label, value, onChange }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef(null);
+    
+    const backgrounds = [
+        { id: 'concrete', name: 'Concrete' },
+        { id: 'copper-flow', name: 'Copper Flow' },
+        { id: 'copper-rise', name: 'Copper Rise' },
+        { id: 'cream-linen', name: 'Cream Linen' },
+        { id: 'crystal-large', name: 'Crystal Large' },
+        { id: 'crystal-minimal', name: 'Crystal Minimal' },
+        { id: 'frosted-glass', name: 'Frosted Glass' },
+        { id: 'leather', name: 'Leather' },
+        { id: 'linen-detail-large', name: 'Linen Detail Large' },
+        { id: 'linen-detail-minimal', name: 'Linen Detail Minimal' },
+        { id: 'mosaic', name: 'Mosaic' },
+        { id: 'paper-large', name: 'Paper Large' },
+        { id: 'paper-small', name: 'Paper Small' },
+        { id: 'walnut', name: 'Walnut' },
+    ];
+    
+    const selected = backgrounds.find(b => b.id === value) || backgrounds[2];
+
+    useEffect(() => {
+        const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    return (
+        <div ref={ref} className="relative mt-4">
+            <div className="text-[10px] uppercase tracking-widest text-parchment/30 mb-1.5 font-space">{label}</div>
+            <button
+                onClick={() => setOpen(!open)}
+                className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 hover:border-[#D4AF37]/30 transition-colors"
+            >
+                <span className="text-sm text-parchment font-space">{selected.name}</span>
+                <ChevronDown size={14} className={`text-parchment/30 transition-transform ${open ? 'rotate-180' : ''}`} />
+            </button>
+
+            <AnimatePresence>
+                {open && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        className="absolute z-50 top-full mt-1 left-0 right-0 bg-[#1a1a2e]/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-2xl"
+                    >
+                        <div className="max-h-60 overflow-y-auto">
+                            {backgrounds.map(b => (
+                                <button
+                                    key={b.id}
+                                    onClick={() => { onChange(b.id); setOpen(false); }}
+                                    className={`w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/5 transition-colors
+                                        ${b.id === selected.id ? 'bg-[#D4AF37]/10 text-[#D4AF37]' : 'text-parchment'}`}
+                                >
+                                    <span className="text-sm font-space font-medium">{b.name}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}
+
 /* ─── Delete Account Confirmation Modal ─── */
 function DeleteAccountModal({ isOpen, onClose, onConfirm }) {
     const [input, setInput] = useState('');
@@ -395,10 +465,13 @@ function DeleteAccountModal({ isOpen, onClose, onConfirm }) {
 /* ─── Main Profile Page ─── */
 export default function ProfilePage() {
     const { data: session, update: updateSession } = useSession();
+    const { appSettings, handleUpdateAppSettings, resetFtue } = usePortfolio();
+    const router = useRouter();
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [exporting, setExporting] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [resettingFtue, setResettingFtue] = useState(false);
 
     useEffect(() => {
         fetchProfile();
@@ -448,6 +521,10 @@ export default function ProfilePage() {
         } catch (err) {
             console.error('Failed to update currency:', err);
         }
+    };
+
+    const handleBackgroundChange = async (value) => {
+        handleUpdateAppSettings({ ...appSettings, backgroundSelection: value });
     };
 
     const handleExport = async () => {
@@ -605,6 +682,41 @@ export default function ProfilePage() {
                                 value={currencyPrefs.secondary}
                                 onChange={(v) => handleCurrencyChange('secondary', v)}
                             />
+                            <BackgroundSelect
+                                label="App Background"
+                                value={appSettings?.backgroundSelection || 'leather'}
+                                onChange={handleBackgroundChange}
+                            />
+
+                            {/* Replay Tutorial */}
+                            <div className="mt-5 pt-4 border-t border-white/5">
+                                <div className="text-[10px] uppercase tracking-widest text-parchment/30 mb-1.5 font-space">Tutorial</div>
+                                <button
+                                    onClick={async () => {
+                                        setResettingFtue(true);
+                                        try {
+                                            await resetFtue();
+                                            router.push('/dashboard');
+                                        } catch (e) {
+                                            console.error(e);
+                                        } finally {
+                                            setResettingFtue(false);
+                                        }
+                                    }}
+                                    disabled={resettingFtue}
+                                    className="w-full flex items-center gap-3 px-3 py-3 rounded-xl bg-white/[0.03] border border-white/10 hover:border-[#D4AF37]/30 hover:bg-[#D4AF37]/[0.03] transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center shrink-0 group-hover:bg-[#D4AF37]/20 transition-colors">
+                                        <LayoutDashboard size={14} className="text-[#D4AF37]/70" />
+                                    </div>
+                                    <div className="text-left">
+                                        <div className="text-sm text-parchment font-space font-medium">
+                                            {resettingFtue ? 'Resetting...' : 'Replay Tutorial'}
+                                        </div>
+                                        <div className="text-[10px] text-parchment/30 font-space">Restart the guided walkthrough from the beginning</div>
+                                    </div>
+                                </button>
+                            </div>
                         </div>
                     </SectionCard>
 

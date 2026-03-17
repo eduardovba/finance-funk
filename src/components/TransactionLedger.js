@@ -82,7 +82,7 @@ export default function TransactionLedger({
                 )}
             </div>
             {isOpen && (
-                <div className="glass-card" style={{ padding: '0', overflow: 'hidden' }}>
+                <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)]" style={{ padding: '0', overflow: 'hidden' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }} className="ledger-table">
                         <thead>
                             <tr style={{ borderBottom: '1px solid var(--glass-border)', backgroundColor: 'rgba(255,255,255,0.02)' }}>

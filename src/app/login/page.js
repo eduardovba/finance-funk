@@ -48,7 +48,7 @@ function LoginForm() {
                 {/* Logo */}
                 <div className="login-header">
                     <div className="login-logo">
-                        <img src="/ff-logo.png" alt="Finance Funk" className="login-logo-img" />
+                        <img src="/logos/ff-logo.png" alt="Finance Funk" className="login-logo-img" />
                     </div>
                 </div>
 

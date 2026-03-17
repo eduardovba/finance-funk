@@ -21,9 +21,43 @@ async function loadXLSX() {
 }
 
 /**
- * Parse a File object (CSV, XLSX, XLS, TSV, ODS) into rows
- * @param {File} file 
- * @returns {Promise<{ headers: string[], rows: object[], sheetNames: string[] }>}
+ * Parse a single sheet into { sheetName, headers, rows }
+ */
+function parseSheet(xlsx, sheet, sheetName) {
+    const jsonData = xlsx.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+    if (jsonData.length < 2) return null; // skip empty/header-only sheets
+
+    const headerRowIndex = jsonData.findIndex(row => row.some(cell => cell !== ''));
+    if (headerRowIndex === -1) return null;
+
+    const rawHeaders = jsonData[headerRowIndex].map(h => String(h || '').trim());
+    const dataRows = jsonData.slice(headerRowIndex + 1)
+        .filter(row => row.some(cell => cell !== '' && cell !== null && cell !== undefined));
+
+    if (dataRows.length === 0) return null;
+
+    const headers = rawHeaders.filter(h => h !== '');
+    const rows = dataRows.map(row => {
+        const obj = {};
+        rawHeaders.forEach((header, i) => {
+            if (header) obj[header] = row[i] !== undefined ? row[i] : '';
+        });
+        return obj;
+    });
+
+    return { sheetName, headers, rows };
+}
+
+/**
+ * Parse a File object (CSV, XLSX, XLS, TSV, ODS) into sheets.
+ * Returns all non-empty sheets.
+ *
+ * For backward compatibility, `.headers`, `.rows`, and `.sheetNames`
+ * are aliased to the first sheet's data.
+ *
+ * @param {File} file
+ * @returns {Promise<{ sheets: Array<{ sheetName, headers, rows }>, headers, rows, sheetNames }>}
  */
 export async function parseSpreadsheetFile(file) {
     const xlsx = await loadXLSX();
@@ -31,34 +65,23 @@ export async function parseSpreadsheetFile(file) {
     const data = await file.arrayBuffer();
     const workbook = xlsx.read(data, { type: 'array', cellDates: true });
 
-    const sheetNames = workbook.SheetNames;
-    const firstSheet = workbook.Sheets[sheetNames[0]];
+    const sheets = [];
+    for (const name of workbook.SheetNames) {
+        const parsed = parseSheet(xlsx, workbook.Sheets[name], name);
+        if (parsed) sheets.push(parsed);
+    }
 
-    // Convert to JSON with header row
-    const jsonData = xlsx.utils.sheet_to_json(firstSheet, { header: 1, defval: '' });
-
-    if (jsonData.length < 2) {
+    if (sheets.length === 0) {
         throw new Error('Spreadsheet must have at least a header row and one data row.');
     }
 
-    // First non-empty row = headers
-    const headerRowIndex = jsonData.findIndex(row => row.some(cell => cell !== ''));
-    if (headerRowIndex === -1) throw new Error('No header row found.');
-
-    const rawHeaders = jsonData[headerRowIndex].map(h => String(h || '').trim());
-    const dataRows = jsonData.slice(headerRowIndex + 1)
-        .filter(row => row.some(cell => cell !== '' && cell !== null && cell !== undefined));
-
-    // Convert to array of objects
-    const rows = dataRows.map(row => {
-        const obj = {};
-        rawHeaders.forEach((header, i) => {
-            obj[header] = row[i] !== undefined ? row[i] : '';
-        });
-        return obj;
-    });
-
-    return { headers: rawHeaders.filter(h => h !== ''), rows, sheetNames };
+    // Backward-compat aliases (first sheet)
+    return {
+        sheets,
+        headers: sheets[0].headers,
+        rows: sheets[0].rows,
+        sheetNames: workbook.SheetNames,
+    };
 }
 
 // ─── AI-Powered Smart Column Detection ────────────────────────────────────────
@@ -72,7 +95,10 @@ const FIELD_PATTERNS = {
         headerPatterns: [
             /^date$/i, /transaction.?date/i, /trade.?date/i, /settlement/i,
             /^data$/i, /^datum$/i, /^fecha$/i, /purchased/i, /^when$/i,
+            /entry.?date/i, /open.?date/i, /sold.?date/i, /acquired/i,
+            /purchase.?date/i, /buy.?date/i, /sell.?date/i,
         ],
+        fuzzyTokens: ['date', 'data', 'when', 'purchased', 'acquired'],
         dataValidator: (values) => {
             const dateCount = values.filter(v => isDateLike(v)).length;
             return dateCount / values.length;
@@ -82,8 +108,10 @@ const FIELD_PATTERNS = {
         headerPatterns: [
             /^(asset|name|stock|fund|instrument|security|holding|description|ticker.?name)$/i,
             /asset.?name/i, /stock.?name/i, /fund.?name/i, /instrument.?name/i,
-            /^nome$/i, /^ativo$/i, /^título$/i
+            /^nome$/i, /^ativo$/i, /^título$/i, /^titulo$/i,
+            /^product$/i, /^investment$/i, /^company$/i, /^paper$/i, /^papel$/i,
         ],
+        fuzzyTokens: ['asset', 'name', 'stock', 'fund', 'holding', 'investment', 'company', 'product', 'ativo', 'papel'],
         dataValidator: (values) => {
             const textCount = values.filter(v => typeof v === 'string' && v.length > 1 && !/^\d+([.,]\d+)?$/.test(v)).length;
             return textCount / values.length;
@@ -91,11 +119,11 @@ const FIELD_PATTERNS = {
     },
     ticker: {
         headerPatterns: [
-            /^(ticker|symbol|code|isin|epic)$/i, /ticker.?symbol/i,
-            /^código$/i, /^codigo$/i
+            /^(ticker|symbol|code|isin|epic|sedol|cusip)$/i, /ticker.?symbol/i,
+            /^código$/i, /^codigo$/i, /^id$/i,
         ],
+        fuzzyTokens: ['ticker', 'symbol', 'isin', 'sedol', 'cusip', 'code'],
         dataValidator: (values) => {
-            // Tickers are typically 1-6 uppercase letters, sometimes with dots/numbers
             const tickerCount = values.filter(v => /^[A-Z0-9]{1,8}(\.[A-Z]{1,3})?$/i.test(String(v).trim())).length;
             return tickerCount / values.length;
         }
@@ -103,11 +131,12 @@ const FIELD_PATTERNS = {
     quantity: {
         headerPatterns: [
             /^(qty|quantity|shares|units|amount.?of|no.?of|number|qtd|qtde|quantidade)$/i,
-            /^shares$/i, /^units$/i
+            /^shares$/i, /^units$/i, /^lots$/i, /^volume$/i, /^count$/i,
         ],
+        fuzzyTokens: ['quantity', 'qty', 'shares', 'units', 'qtd', 'volume'],
         dataValidator: (values) => {
             const numCount = values.filter(v => isNumericLike(v)).length;
-            return numCount / values.length * 0.8; // Slight downweight since many cols are numeric
+            return numCount / values.length * 0.8;
         }
     },
     price: {
@@ -123,8 +152,10 @@ const FIELD_PATTERNS = {
     amount: {
         headerPatterns: [
             /^(amount|total|value|investment|invested|cost|net|market.?value|valor|valor.?total|montante)$/i,
-            /total.?amount/i, /total.?cost/i, /total.?value/i, /net.?amount/i
+            /total.?amount/i, /total.?cost/i, /total.?value/i, /net.?amount/i,
+            /^balance$/i, /^sum$/i, /^mv$/i, /^mkt$/i, /^spend$/i,
         ],
+        fuzzyTokens: ['amount', 'total', 'value', 'cost', 'invested', 'balance', 'valor', 'sum'],
         dataValidator: (values) => {
             const numCount = values.filter(v => isNumericLike(v)).length;
             const hasCurrencySigns = values.some(v => /[$£€R\$¥]/.test(String(v)));
@@ -151,8 +182,10 @@ const FIELD_PATTERNS = {
     },
     type: {
         headerPatterns: [
-            /^(type|side|action|direction|buy.?sell|operation|tipo|operação|operacao)$/i
+            /^(type|side|action|direction|buy.?sell|operation|tipo|operação|operacao)$/i,
+            /transaction.?type/i, /^op$/i, /tx.?type/i,
         ],
+        fuzzyTokens: ['type', 'side', 'action', 'operation', 'direction', 'tipo'],
         dataValidator: (values) => {
             const typeWords = /^(buy|sell|purchase|sale|deposit|withdrawal|investment|divestment|compra|venda)$/i;
             const matchCount = values.filter(v => typeWords.test(String(v).trim())).length;
@@ -184,6 +217,16 @@ const FIELD_PATTERNS = {
             const textCount = values.filter(v => typeof v === 'string' && v.length > 1).length;
             return textCount / values.length * 0.4;
         }
+    },
+    assetClass: {
+        headerPatterns: [
+            /^(asset.?class|asset.?type|class|tipo.?de.?ativo|classe)$/i
+        ],
+        dataValidator: (values) => {
+            const knownClasses = /^(equity|stocks?|crypto|fixed.?income|pension|real.?estate|debt|renda.?fixa|ações|cripto)$/i;
+            const matchCount = values.filter(v => knownClasses.test(String(v).trim())).length;
+            return matchCount / values.length;
+        }
     }
 };
 
@@ -208,23 +251,30 @@ export function smartMapColumns(headers, sampleRows, targetAssetClass) {
         for (const [field, config] of Object.entries(FIELD_PATTERNS)) {
             let score = 0;
 
-            // 1. Header name matching (60% weight)
+            // 1. Header name matching (50% weight)
             const headerScore = config.headerPatterns.reduce((best, pattern) => {
                 return pattern.test(header) ? Math.max(best, 1) : best;
             }, 0);
-            score += headerScore * 0.6;
+            score += headerScore * 0.5;
 
-            // 2. Data content analysis (40% weight) — the "AI" part
+            // 2. Fuzzy token matching (15% weight) — catches "Transaction Date", "My Shares", etc.
+            if (!headerScore && config.fuzzyTokens) {
+                const normalizedHeader = header.toLowerCase().replace(/[^a-z0-9]/g, ' ');
+                const tokenMatch = config.fuzzyTokens.some(token => normalizedHeader.includes(token));
+                if (tokenMatch) score += 0.15;
+            }
+
+            // 3. Data content analysis (35% weight) — the "AI" part
             if (columnValues.length > 0 && config.dataValidator) {
                 const dataScore = config.dataValidator(columnValues);
-                score += dataScore * 0.4;
+                score += dataScore * 0.35;
             }
 
             // Boost fields that match the target asset class context
             if (targetAssetClass === 'Debt' && field === 'lender') score += 0.2;
             if (['Equity', 'Crypto'].includes(targetAssetClass) && field === 'ticker') score += 0.1;
 
-            if (score > 0.15) {
+            if (score > 0.10) {
                 scores.push({ header, field, score });
             }
         }
@@ -367,6 +417,18 @@ export function transformRows(rows, mapping, assetClass, defaultCurrency, defaul
         const quantity = Math.abs(rawQuantity);
         const price = rawPrice || (quantity ? amount / quantity : 0);
 
+        // Per-row assetClass from mapped column, falling back to sheet default
+        const rowAssetClassRaw = String(getVal(row, 'assetClass') || '').trim();
+        const ASSET_CLASS_ALIASES = {
+            'equity': 'Equity', 'stocks': 'Equity', 'stock': 'Equity', 'ações': 'Equity',
+            'crypto': 'Crypto', 'cripto': 'Crypto', 'cryptocurrency': 'Crypto',
+            'fixed income': 'Fixed Income', 'fixed-income': 'Fixed Income', 'renda fixa': 'Fixed Income', 'bonds': 'Fixed Income',
+            'pension': 'Pension', 'pensions': 'Pension', 'retirement': 'Pension',
+            'real estate': 'Real Estate', 'property': 'Real Estate', 'imóveis': 'Real Estate',
+            'debt': 'Debt', 'loan': 'Debt', 'dívida': 'Debt',
+        };
+        const effectiveClass = ASSET_CLASS_ALIASES[rowAssetClassRaw.toLowerCase()] || (rowAssetClassRaw || assetClass);
+
         const tx = {
             _rowIndex: idx,
             date,
@@ -375,24 +437,25 @@ export function transformRows(rows, mapping, assetClass, defaultCurrency, defaul
             broker: String(broker).trim() || defaultBroker,
             amount,
             notes: String(notes),
+            assetClass: effectiveClass,
         };
 
         // Asset class specific fields
-        if (assetClass === 'Equity' || assetClass === 'Crypto') {
+        if (effectiveClass === 'Equity' || effectiveClass === 'Crypto') {
             tx.asset = getVal(row, 'asset') || getVal(row, 'ticker') || 'Unknown';
             tx.ticker = getVal(row, 'ticker') || '';
             tx.quantity = quantity;
             tx.price = price;
             if (pnl) tx.pnl = pnl;
-        } else if (assetClass === 'Fixed Income') {
+        } else if (effectiveClass === 'Fixed Income') {
             tx.asset = getVal(row, 'asset') || 'Fixed Income';
-        } else if (assetClass === 'Pension') {
+        } else if (effectiveClass === 'Pension') {
             tx.asset = getVal(row, 'asset') || 'Pension Fund';
             tx.quantity = quantity;
             tx.price = price;
-        } else if (assetClass === 'Real Estate') {
+        } else if (effectiveClass === 'Real Estate') {
             tx.asset = getVal(row, 'asset') || 'Property';
-        } else if (assetClass === 'Debt') {
+        } else if (effectiveClass === 'Debt') {
             tx.asset = getVal(row, 'lender') || getVal(row, 'asset') || 'Unknown Lender';
         }
 
@@ -412,6 +475,7 @@ export function getFieldsForAssetClass(assetClass) {
         case 'Pension': return ['date', 'asset', 'quantity', 'price', 'amount', 'broker', 'type', 'notes'];
         case 'Real Estate': return ['date', 'asset', 'amount', 'currency', 'type', 'notes'];
         case 'Debt': return ['date', 'lender', 'amount', 'currency', 'notes'];
+        case 'Mixed': return ['date', 'assetClass', 'asset', 'ticker', 'quantity', 'price', 'amount', 'currency', 'broker', 'type', 'pnl', 'notes'];
         default: return common;
     }
 }
@@ -430,5 +494,6 @@ export const FIELD_LABELS = {
     pnl: 'Realized P&L',
     notes: 'Notes',
     lender: 'Lender',
+    assetClass: 'Asset Class',
     ignore: '— Skip this column —',
 };

@@ -52,7 +52,7 @@ export default function InstallPrompt() {
         <div style={styles.backdrop}>
             <div style={styles.banner}>
                 <img
-                    src="/icon-192x192.png"
+                    src="/logos/FF Star.png"
                     alt="Finance Funk"
                     style={styles.icon}
                 />

@@ -110,7 +110,7 @@ export default function GlowingInvestmentPods({ data, historicalData = [], curre
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.08, duration: 0.4, ease: "easeOut" }}
-                        className="relative rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/5 flex flex-col group"
+                        className="relative rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] flex flex-col group"
                         style={{ minHeight: '160px', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
                     >
                         {/* Top Content */}

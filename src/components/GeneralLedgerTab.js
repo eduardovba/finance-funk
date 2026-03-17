@@ -540,7 +540,7 @@ export default function GeneralLedgerTab({
                     )}
 
                     {/* Auto-Close Toggle */}
-                    <div className="glass-card" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid var(--glass-border)', height: '44px', background: 'rgba(255,255,255,0.02)' }}>
+                    <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)]" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '12px', height: '44px' }}>
                         <span style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Auto Close</span>
                         <div
                             onClick={() => onUpdateAppSettings({ ...appSettings, autoMonthlyCloseEnabled: !appSettings?.autoMonthlyCloseEnabled })}
@@ -584,7 +584,7 @@ export default function GeneralLedgerTab({
                     <div className="flex flex-col gap-8 w-full mt-2">
 
                         {/* Chart — premium styled */}
-                        <div id="ftue-income-chart" className="rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/5 p-6" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+                        <div id="ftue-income-chart" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                                 <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'rgba(245,245,220,0.8)', fontWeight: 600, letterSpacing: '0.3px' }}>Monthly Income</h3>
 
@@ -690,7 +690,7 @@ export default function GeneralLedgerTab({
                         </div>
 
                         {/* Revenue Ledger Accordion */}
-                        <div id="ftue-income-table" className="rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/5" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)', overflow: 'hidden' }}>
+                        <div id="ftue-income-table" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)]" style={{ overflow: 'hidden' }}>
                             {/* Accordion Header */}
                             <button
                                 onClick={() => setShowLedgerTable(!showLedgerTable)}
@@ -800,7 +800,7 @@ export default function GeneralLedgerTab({
                         </div>
 
                         {/* Snapshot Ledger Accordion */}
-                        <div id="ftue-totals-table" className="rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/5" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)', overflow: 'hidden' }}>
+                        <div id="ftue-totals-table" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)]" style={{ overflow: 'hidden' }}>
                             {/* Accordion Header */}
                             <button
                                 onClick={() => setShowHistoricalsLedger(!showHistoricalsLedger)}
@@ -907,7 +907,7 @@ export default function GeneralLedgerTab({
                         <div className="flex flex-col gap-8 w-full mt-2">
 
                             {/* Chart — full width */}
-                            <div id="ftue-investment-chart" className="rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/5 p-6" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+                            <div id="ftue-investment-chart" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                                     <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'rgba(245,245,220,0.8)', fontWeight: 600 }}>Monthly Investments (Capital Injection)</h3>
                                 </div>
@@ -1013,7 +1013,7 @@ export default function GeneralLedgerTab({
                             </div>
 
                             {/* Investment Ledger Accordion */}
-                            <div id="ftue-investment-table" className="rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/5" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)', overflow: 'hidden' }}>
+                            <div id="ftue-investment-table" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)]" style={{ overflow: 'hidden' }}>
                                 {/* Accordion Header */}
                                 <button
                                     onClick={() => setShowInvestmentLedgerTable(!showInvestmentLedgerTable)}
@@ -1120,7 +1120,7 @@ export default function GeneralLedgerTab({
                 {editingRow && (
                     <div style={{ position: 'fixed', inset: 0, zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} onClick={() => setEditingRow(null)} />
-                        <div className="glass-card" style={{ position: 'relative', zIndex: 1, padding: '32px', width: '90%', maxWidth: '500px', border: '1px solid var(--glass-border)' }}>
+                        <div className="rounded-2xl bg-[#121418]/90 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)]" style={{ position: 'relative', zIndex: 1, padding: '32px', width: '90%', maxWidth: '500px' }}>
                             <h3 className="text-gradient" style={{ marginBottom: '24px' }}>
                                 Edit {editingRow.type === 'income' ? 'Income' : editingRow.type === 'investments' ? 'Investments' : 'Snapshot'} — {editingRow.month}
                             </h3>

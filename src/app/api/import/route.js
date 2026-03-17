@@ -6,10 +6,15 @@ export async function POST(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
-        const { assetClass, defaultCurrency, defaultBroker, transactions } = body;
+        const { assetClass: globalAssetClass, defaultCurrency, defaultBroker, transactions } = body;
 
-        if (!assetClass || !transactions || !Array.isArray(transactions)) {
-            return NextResponse.json({ error: 'assetClass and transactions[] are required' }, { status: 400 });
+        if (!transactions || !Array.isArray(transactions)) {
+            return NextResponse.json({ error: 'transactions[] is required' }, { status: 400 });
+        }
+
+        // At least a global assetClass or per-tx assetClass must be present
+        if (!globalAssetClass && !transactions[0]?.assetClass) {
+            return NextResponse.json({ error: 'assetClass is required (globally or per transaction)' }, { status: 400 });
         }
 
         if (transactions.length === 0) {
@@ -45,8 +50,11 @@ export async function POST(request) {
                     continue;
                 }
 
+                // Per-transaction assetClass takes priority over global
+                const txAssetClass = tx.assetClass || globalAssetClass;
+
                 // ─── Route to the correct asset class handler ───
-                switch (assetClass) {
+                switch (txAssetClass) {
                     case 'Equity':
                         await importEquity(tx, user.id, defaultCurrency, defaultBroker, results);
                         break;
@@ -66,7 +74,7 @@ export async function POST(request) {
                         await importDebt(tx, user.id, defaultCurrency, results);
                         break;
                     default:
-                        results.errors.push({ row: i + 1, error: `Unknown asset class: ${assetClass}` });
+                        results.errors.push({ row: i + 1, error: `Unknown asset class: ${txAssetClass}` });
                         results.skipped++;
                 }
             } catch (err) {

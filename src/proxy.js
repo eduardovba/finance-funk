@@ -10,7 +10,7 @@ export default async function proxy(request) {
     const isAuthRoute = pathname.startsWith("/api/auth");
 
     // PWA static assets that must be served without auth
-    const pwaAssets = ["/manifest.json", "/sw.js", "/offline.html", "/icon-192x192.png", "/icon-512x512.png", "/apple-touch-icon.png"];
+    const pwaAssets = ["/manifest.json", "/sw.js", "/offline.html", "/logos/FF Star.png", "/logos/FF Star Favcon.png"];
     const isPwaAsset = pwaAssets.includes(pathname);
 
     // Allow public routes, auth API routes, and PWA assets

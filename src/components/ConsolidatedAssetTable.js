@@ -25,7 +25,7 @@ export default function ConsolidatedAssetTable({ title, categoryId, assets, rate
     const subRoi = subInv !== 0 ? (subPnL / subInv) * 100 : 0;
 
     return (
-        <section className="mt-0 mb-6 bg-[#0D0814]/60 border border-[#D4AF37]/10 rounded-2xl p-4 md:p-5 shadow-2xl relative overflow-hidden">
+        <section className="mt-0 mb-6 bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] rounded-2xl p-4 md:p-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative overflow-hidden">
             {/* Subtle background glow for the cluster */}
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#D4AF37]/20 to-transparent"></div>
 
@@ -43,8 +43,8 @@ export default function ConsolidatedAssetTable({ title, categoryId, assets, rate
                     <div
                         key={index}
                         onClick={() => onNavigate && categoryId ? onNavigate(categoryId, asset.name) : null}
-                        className={`bg-[#1A0F2E] border border-white/5 rounded-xl p-3 xl:p-4 shadow-lg shadow-black/40 flex flex-col justify-between
-                                   transition-all duration-300 hover:bg-black/40 hover:border-[#D4AF37]/30 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(212,175,55,0.1)] group relative overflow-hidden ${onNavigate && categoryId ? 'cursor-pointer' : ''}`}
+                        className={`bg-[#121418]/50 backdrop-blur-lg border border-white/[0.06] rounded-xl p-3 xl:p-4 shadow-[0_4px_16px_rgba(0,0,0,0.3)] flex flex-col justify-between
+                                   transition-all duration-300 hover:bg-[#121418]/70 hover:border-[#D4AF37]/30 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(212,175,55,0.1)] group relative overflow-hidden ${onNavigate && categoryId ? 'cursor-pointer' : ''}`}
                     >
                         {/* Status glow indicator based on ROI */}
                         <div className={`absolute top-0 right-0 w-20 h-20 rounded-full blur-[40px] -mr-8 -mt-8 opacity-10 transition-opacity duration-300 group-hover:opacity-25 ${asset.roi >= 0 ? 'bg-vu-green' : 'bg-red-400'}`}></div>
@@ -82,7 +82,7 @@ export default function ConsolidatedAssetTable({ title, categoryId, assets, rate
 
             {/* Summary Section (Subtotal, Realised P&L, Total) */}
             {(realisedPnL || totalAsset) && (
-                <div className="mt-4 bg-[#0D0814] border border-[#D4AF37]/20 rounded-xl overflow-hidden font-space">
+                <div className="mt-4 bg-[#121418]/50 backdrop-blur-lg border border-white/[0.06] rounded-xl overflow-hidden font-space">
                     {/* Current Holdings Subtotal */}
                     {realisedPnL && categoryId !== 'real-estate' && (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 border-b border-white/5 bg-white/5 items-center">

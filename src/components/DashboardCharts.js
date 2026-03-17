@@ -812,7 +812,7 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
 
     return (
         <div
-            className={`bg-[#1A0F2E] border border-[#D4AF37]/30 rounded-xl p-6 shadow-lg shadow-black/20 flex flex-col h-full ${isClickable ? 'cursor-pointer hover:border-[#D4AF37]/50 transition-colors' : ''}`}
+            className={`bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex flex-col h-full ${isClickable ? 'cursor-pointer hover:border-[#D4AF37]/30 transition-colors' : ''}`}
             data-chart-id={config.id}
             onClick={isClickable ? () => { window.location.href = '/ledger/investments'; } : undefined}
         >

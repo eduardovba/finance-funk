@@ -125,7 +125,7 @@ export default function SmartInsights({
     };
 
     return (
-        <div className="glass-card p-5 h-full">
+        <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-5 h-full">
             <h4 className="font-bebas text-lg tracking-widest text-[#D4AF37] mb-4 flex items-center gap-2">
                 <Lightbulb size={16} className="text-[#D4AF37]" />
                 Smart Insights

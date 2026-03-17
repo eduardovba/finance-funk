@@ -3,7 +3,7 @@ import { kvGet, kvSet } from '@/lib/kv';
 import { requireAuth } from '@/lib/authGuard';
 
 const KEY = 'app_settings';
-const DEFAULTS = { autoMonthlyCloseEnabled: true };
+const DEFAULTS = { autoMonthlyCloseEnabled: true, backgroundSelection: 'leather' };
 
 export async function GET() {
     try {

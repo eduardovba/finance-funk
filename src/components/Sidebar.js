@@ -79,7 +79,7 @@ export default function Sidebar({ activeItem, onNavigate }) {
         <aside className="glass-card h-[calc(100vh-64px)] w-[260px] sticky top-8 p-6 flex-shrink-0 overflow-y-auto flex flex-col border-r border-[#D4AF37]/20">
             {/* Logo */}
             <div className="mb-10 px-2 flex items-center gap-3">
-                <img src="/ff-logo.png" alt="Finance Funk" className="h-[60px] w-auto" />
+                <img src="/logos/ff-logo.png" alt="Finance Funk" className="h-[60px] w-auto" />
                 <h2 className="text-[#D4AF37] text-2xl m-0 font-normal tracking-wider font-bebas drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">Finance Funk</h2>
             </div>
 

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { usePortfolio } from '@/context/PortfolioContext';
 
 const TUTORIAL_STEPS = [
@@ -59,6 +60,7 @@ const SPOTLIGHT_PADDING = 12;
 const SPOTLIGHT_RADIUS = 16;
 
 export default function TutorialOverlay() {
+    const router = useRouter();
     const { ftueState, updateFtueProgress, refreshAllData } = usePortfolio();
     const [currentStep, setCurrentStep] = useState(ftueState?.tutorialStep || 0);
     const [targetRect, setTargetRect] = useState(null);
@@ -176,7 +178,8 @@ export default function TutorialOverlay() {
             showCurrencyPicker: true,
         });
         await refreshAllData();
-    }, [updateFtueProgress, refreshAllData]);
+        router.push('/import');
+    }, [updateFtueProgress, refreshAllData, router]);
 
     const handleKeepExploring = useCallback(async () => {
         await updateFtueProgress({

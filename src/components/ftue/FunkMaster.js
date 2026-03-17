@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 
 const POSES = {
-    welcome: '/ftue/funk-master-welcome.png',
+    welcome: '/ftue/professor-f-welcome.png',
     thinking: '/ftue/funk-master-thinking.png',
     celebrating: '/ftue/funk-master-celebrating.png',
 };

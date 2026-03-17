@@ -16,51 +16,12 @@
     position: relative;
     overflow-x: hidden;
 
-    /* Layered Background: Dark Base + Animated Gradients + Subtle Texture */
-    background:
-      radial-gradient(circle at 0% 0%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
-      radial-gradient(circle at 100% 100%, rgba(204, 85, 0, 0.08) 0%, transparent 50%),
-      radial-gradient(circle at 50% 50%, rgba(29, 17, 53, 0.4) 0%, transparent 100%),
-      var(--bg-primary);
-    background-attachment: fixed;
+    /* Base color behind the aurora */
+    background-color: #0b0510;
   }
 
-  /* body::before removed - Now handled by InteractiveDots.js canvas */
+  /* Background is now rendered by AnimatedBackground.js component */
 
-  body::after {
-    content: "";
-    position: fixed;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background:
-      radial-gradient(circle at 30% 30%, rgba(212, 175, 55, 0.03) 0%, transparent 45%),
-      radial-gradient(circle at 70% 70%, rgba(204, 85, 0, 0.05) 0%, transparent 45%),
-      radial-gradient(circle at 80% 20%, rgba(29, 17, 53, 0.1) 0%, transparent 50%);
-    animation: background-alive 60s linear infinite;
-    /* Toned down to 60s */
-    z-index: -2;
-    pointer-events: none;
-    filter: blur(100px);
-    /* Increased blur for deep atmospheric feel */
-    opacity: 0.7;
-  }
-
-  @keyframes background-alive {
-    0% {
-      transform: rotate(0deg) scale(1);
-    }
-
-    50% {
-      transform: rotate(180deg) scale(1.02);
-    }
-
-    /* Extremely subtle scaling */
-    100% {
-      transform: rotate(360deg) scale(1);
-    }
-  }
 
   h1,
   h2,
@@ -92,6 +53,7 @@
   }
 }
 
+
 /* ─── Backward-compat utilities used by 31+ components not yet migrated ─── */
 @layer components {
 
@@ -105,9 +67,9 @@
     --accent-color: #D4AF37;
     --vu-green: #05ff9b;
     --error: #ef4444;
-    --glass-bg: rgba(13, 8, 20, 0.85);
-    --glass-border: rgba(212, 175, 55, 0.1);
-    --glass-blur: blur(20px);
+    --glass-bg: rgba(18, 20, 24, 0.60);
+    --glass-border: rgba(255, 255, 255, 0.08); /* Crisp highlight edge */
+    --glass-blur: blur(24px) saturate(150%);
     --radius-lg: 16px;
     --radius-md: 12px;
     --spacing-unit: 8px;
@@ -116,18 +78,21 @@
   .glass-card {
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur); /* For Safari */
     border: 1px solid var(--glass-border);
+    border-top: 1px solid rgba(255, 255, 255, 0.18); /* Stronger directional light edge */
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: var(--radius-lg);
     padding: calc(var(--spacing-unit) * 3);
     transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); /* True depth cast shadow */
   }
 
   .glass-card:hover {
-    border-color: rgba(212, 175, 55, 0.25);
+    border-color: rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
-    background: rgba(30, 18, 52, 0.8);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    background: rgba(18, 20, 24, 0.78);
   }
 
   .text-gradient {
