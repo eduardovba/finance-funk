@@ -42,7 +42,7 @@ export function PortfolioProvider({ children }) {
     const [forecastSettings, setForecastSettings] = useState({});
     const [allocationTargets, setAllocationTargets] = useState({});
     const [assetClasses, setAssetClasses] = useState({});
-    const [appSettings, setAppSettings] = useState({ autoMonthlyCloseEnabled: true, backgroundSelection: 'leather' });
+    const [appSettings, setAppSettings] = useState({ autoMonthlyCloseEnabled: true, backgroundSelection: 'frosted-glass' });
     const [dashboardConfig, setDashboardConfig] = useState(null);
     const [ftueState, setFtueState] = useState(null); // null = loading, object = loaded
 
@@ -793,7 +793,7 @@ export function PortfolioProvider({ children }) {
 
     // ═══════════ BACKGROUND SYNC ═══════════
     useEffect(() => {
-        const bg = appSettings?.backgroundSelection || 'leather';
+        const bg = appSettings?.backgroundSelection || 'frosted-glass';
         document.body.setAttribute('data-bg', bg);
     }, [appSettings?.backgroundSelection]);
 

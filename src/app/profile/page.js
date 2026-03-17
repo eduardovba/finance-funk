@@ -328,13 +328,15 @@ function BackgroundSelect({ label, value, onChange }) {
         { id: 'leather', name: 'Leather' },
         { id: 'linen-detail-large', name: 'Linen Detail Large' },
         { id: 'linen-detail-minimal', name: 'Linen Detail Minimal' },
-        { id: 'mosaic', name: 'Mosaic' },
+        { id: 'mosaic-large', name: 'Mosaic Large' },
+        { id: 'mosaic-medium', name: 'Mosaic Medium' },
+        { id: 'mosaic-minimal', name: 'Mosaic Minimal' },
         { id: 'paper-large', name: 'Paper Large' },
         { id: 'paper-small', name: 'Paper Small' },
         { id: 'walnut', name: 'Walnut' },
     ];
     
-    const selected = backgrounds.find(b => b.id === value) || backgrounds[2];
+    const selected = backgrounds.find(b => b.id === value) || backgrounds.find(b => b.id === 'frosted-glass');
 
     useEffect(() => {
         const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
@@ -684,7 +686,7 @@ export default function ProfilePage() {
                             />
                             <BackgroundSelect
                                 label="App Background"
-                                value={appSettings?.backgroundSelection || 'leather'}
+                                value={appSettings?.backgroundSelection || 'frosted-glass'}
                                 onChange={handleBackgroundChange}
                             />
 

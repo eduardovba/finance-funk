@@ -24,7 +24,9 @@ const BACKGROUNDS = [
     { id: 'leather', name: 'Leather' },
     { id: 'linen-detail-large', name: 'Linen Detail Large' },
     { id: 'linen-detail-minimal', name: 'Linen Detail Minimal' },
-    { id: 'mosaic', name: 'Mosaic' },
+    { id: 'mosaic-large', name: 'Mosaic Large' },
+    { id: 'mosaic-medium', name: 'Mosaic Medium' },
+    { id: 'mosaic-minimal', name: 'Mosaic Minimal' },
     { id: 'paper-large', name: 'Paper Large' },
     { id: 'paper-small', name: 'Paper Small' },
     { id: 'walnut', name: 'Walnut' },
@@ -71,7 +73,7 @@ function SectionHeader({ title, icon: Icon }) {
 function BackgroundMiniSelect({ value, onChange }) {
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
-    const selected = BACKGROUNDS.find(b => b.id === value) || BACKGROUNDS[0];
+    const selected = BACKGROUNDS.find(b => b.id === value) || BACKGROUNDS.find(b => b.id === 'frosted-glass');
 
     useEffect(() => {
         const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
@@ -555,7 +557,7 @@ export default function Inspector() {
                                 <div className="mt-2.5">
                                     <div className="text-[10px] text-parchment/30 font-space mb-1.5 px-1">Background</div>
                                     <BackgroundMiniSelect
-                                        value={appSettings?.backgroundSelection || 'leather'}
+                                        value={appSettings?.backgroundSelection || 'frosted-glass'}
                                         onChange={(val) => handleUpdateAppSettings({ ...appSettings, backgroundSelection: val })}
                                     />
                                 </div>

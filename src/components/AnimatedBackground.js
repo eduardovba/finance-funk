@@ -19,7 +19,9 @@ const IMAGE_WALLPAPERS = {
     'leather': '/backgrounds/Leather.jpeg',
     'linen-detail-large': '/backgrounds/Linen Detail Large.jpeg',
     'linen-detail-minimal': '/backgrounds/Linen Detail Minimal.jpeg',
-    'mosaic': '/backgrounds/Mosaic.jpeg',
+    'mosaic-large': '/backgrounds/Mosaic Large.jpeg',
+    'mosaic-medium': '/backgrounds/Mosaic Medium.jpeg',
+    'mosaic-minimal': '/backgrounds/Mosaic Minimal.jpeg',
     'paper-large': '/backgrounds/Paper Large.jpeg',
     'paper-small': '/backgrounds/Paper Small.jpeg',
     'walnut': '/backgrounds/Walnut.jpeg',
@@ -27,9 +29,9 @@ const IMAGE_WALLPAPERS = {
 
 export default function AnimatedBackground() {
     const { appSettings } = usePortfolio();
-    const themeId = appSettings?.backgroundSelection || 'leather';
+    const themeId = appSettings?.backgroundSelection || 'frosted-glass';
 
-    const imagePath = IMAGE_WALLPAPERS[themeId] || IMAGE_WALLPAPERS['leather'];
+    const imagePath = IMAGE_WALLPAPERS[themeId] || IMAGE_WALLPAPERS['frosted-glass'];
 
     return (
         <div style={{
