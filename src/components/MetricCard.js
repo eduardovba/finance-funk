@@ -28,7 +28,7 @@ export default function MetricCard({ id, title, amount, percentage, diffAmount, 
         return (
             <motion.div
                 className={`
-                    glass-card p-1.5 xl:p-2
+                    rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-1.5 xl:p-2
                     flex flex-col
                     relative overflow-visible
                     ${onNavigate ? 'cursor-pointer' : 'cursor-default'}
@@ -102,7 +102,7 @@ export default function MetricCard({ id, title, amount, percentage, diffAmount, 
     return (
         <motion.div
             className={`
-                glass-card p-4 md:p-6
+                rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-4 md:p-6
                 flex flex-col justify-between
                 relative overflow-hidden
                 ${onNavigate || (isTouchDevice && contributors.length > 0) ? 'cursor-pointer' : 'cursor-default'}

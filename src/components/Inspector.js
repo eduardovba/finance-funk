@@ -144,80 +144,87 @@ export default function Inspector() {
     const router = useRouter();
 
     // ═══════════ RECENT ACTIVITY ═══════════
+    const NEGATIVE_ACTIONS = ['Sell', 'Withdrawal', 'Divestment', 'Liability'];
+
     const recentActivity = useMemo(() => {
         const items = [];
 
-        // Equity transactions
+        // Equity transactions — API returns { ticker, asset, broker, investment, currency, type, date }
         if (Array.isArray(equityTransactions)) {
             equityTransactions.forEach(tx => {
                 items.push({
                     type: 'equity',
-                    name: tx.ticker || tx.name || 'Equity',
-                    date: tx.date || tx.created_at,
-                    amount: tx.total_cost || tx.amount || 0,
+                    name: tx.ticker || tx.asset || 'Equity',
+                    date: tx.date,
+                    amount: tx.investment || 0,
                     currency: tx.currency || 'GBP',
-                    action: tx.type || 'buy',
+                    action: tx.type || 'Buy',
+                    broker: tx.broker,
                 });
             });
         }
 
-        // Crypto transactions
+        // Crypto transactions — API returns { ticker, asset, platform, investment, currency, type, date }
         if (Array.isArray(cryptoTransactions)) {
             cryptoTransactions.forEach(tx => {
                 items.push({
                     type: 'crypto',
-                    name: tx.ticker || tx.name || 'Crypto',
-                    date: tx.date || tx.created_at,
-                    amount: tx.total_cost || tx.amount || 0,
+                    name: tx.ticker || tx.asset || 'Crypto',
+                    date: tx.date,
+                    amount: tx.investment || 0,
                     currency: tx.currency || 'USD',
-                    action: tx.type || 'buy',
+                    action: tx.type || 'Buy',
+                    broker: tx.platform || tx.broker,
                 });
             });
         }
 
-        // Fixed income
+        // Fixed income — API returns { asset, broker, investment, interest, currency, type, date }
         if (Array.isArray(fixedIncomeTransactions)) {
             fixedIncomeTransactions.forEach(tx => {
                 items.push({
                     type: 'fixed-income',
-                    name: tx.name || tx.asset || 'Fixed Income',
-                    date: tx.date || tx.created_at,
-                    amount: tx.amount || 0,
+                    name: tx.asset || 'Fixed Income',
+                    date: tx.date,
+                    amount: tx.investment || tx.interest || 0,
                     currency: tx.currency || 'BRL',
-                    action: 'deposit',
+                    action: tx.type || 'Investment',
+                    broker: tx.broker,
                 });
             });
         }
 
-        // Pensions
+        // Pensions — API returns { asset, broker, value, type, date }
         if (Array.isArray(pensionTransactions)) {
             pensionTransactions.forEach(tx => {
                 items.push({
                     type: 'pensions',
-                    name: tx.fund_name || tx.ticker || 'Pension',
-                    date: tx.date || tx.created_at,
-                    amount: tx.amount || 0,
-                    currency: tx.currency || 'GBP',
-                    action: tx.type || 'contribution',
+                    name: tx.asset || 'Pension',
+                    date: tx.date,
+                    amount: tx.value || 0,
+                    currency: 'GBP',
+                    action: tx.type || 'Buy',
+                    broker: tx.broker,
                 });
             });
         }
 
-        // Debt
+        // Debt — API returns { lender, value_brl, date }
         if (Array.isArray(debtTransactions)) {
             debtTransactions.forEach(tx => {
                 items.push({
                     type: 'debt',
-                    name: tx.lender || tx.name || 'Debt',
-                    date: tx.date || tx.created_at,
-                    amount: tx.amount || 0,
-                    currency: tx.currency || 'GBP',
-                    action: 'payment',
+                    name: tx.lender || 'Debt',
+                    date: tx.date,
+                    amount: tx.value_brl || 0,
+                    currency: 'BRL',
+                    action: 'Liability',
+                    broker: tx.lender,
                 });
             });
         }
 
-        // Sort by date descending, take last 8
+        // Sort by date descending, take last 5
         return items
             .filter(i => i.date)
             .sort((a, b) => {
@@ -290,11 +297,15 @@ export default function Inspector() {
         }
     };
 
-    const formatAmount = (amount, currency = '') => {
+    const CURRENCY_SYMBOLS = { BRL: 'R$', GBP: '£', USD: '$', EUR: '€', JPY: '¥', CHF: 'Fr', AUD: 'A$' };
+
+    const formatAmount = (amount, currencyCode = 'GBP', isNegative = false) => {
+        const sym = CURRENCY_SYMBOLS[currencyCode] || currencyCode;
         const num = Math.abs(Number(amount) || 0);
-        if (num >= 1000000) return `${currency}${(num / 1000000).toFixed(1)}M`;
-        if (num >= 1000) return `${currency}${(num / 1000).toFixed(1)}K`;
-        return `${currency}${num.toFixed(0)}`;
+        const sign = isNegative ? '-' : '';
+        if (num >= 1000000) return `${sign}${sym}${(num / 1000000).toFixed(1)}M`;
+        if (num >= 1000) return `${sign}${sym}${(num / 1000).toFixed(1)}K`;
+        return `${sign}${sym}${num.toFixed(0)}`;
     };
 
     const timeAgo = (date) => {
@@ -362,6 +373,10 @@ export default function Inspector() {
                                         {recentActivity.map((item, idx) => {
                                             const assetType = ASSET_ICONS[item.type] || ASSET_ICONS.default;
                                             const Icon = assetType.icon;
+                                            const isNeg = NEGATIVE_ACTIONS.includes(item.action);
+                                            const deepLink = item.broker
+                                                ? `${assetType.href}#${encodeURIComponent(item.broker)}`
+                                                : assetType.href;
                                             return (
                                                 <motion.div
                                                     key={idx}
@@ -370,7 +385,7 @@ export default function Inspector() {
                                                     transition={{ delay: idx * 0.03 }}
                                                 >
                                                     <Link
-                                                        href={assetType.href}
+                                                        href={deepLink}
                                                         onClick={() => setIsInspectorOpen(false)}
                                                         className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-white/[0.03] transition-colors group cursor-pointer no-underline"
                                                     >
@@ -384,12 +399,12 @@ export default function Inspector() {
                                                             <div className="text-[11px] text-parchment/80 font-space font-medium truncate">
                                                                 {item.name}
                                                             </div>
-                                                            <div className="text-[9px] text-parchment/30 font-space">
-                                                                {formatDate(item.date)} · {item.action}
+                                                            <div className="text-[9px] text-parchment/30 font-space truncate">
+                                                                {formatDate(item.date)}{item.broker ? ` · ${item.broker}` : ''} · {item.action}
                                                             </div>
                                                         </div>
-                                                        <div className="text-[11px] text-parchment/50 font-space font-medium tabular-nums shrink-0">
-                                                            {formatAmount(item.amount)}
+                                                        <div className={`text-[11px] font-space font-medium tabular-nums shrink-0 ${isNeg ? 'text-rose-400/70' : 'text-parchment/50'}`}>
+                                                            {formatAmount(item.amount, item.currency, isNeg)}
                                                         </div>
                                                     </Link>
                                                 </motion.div>
