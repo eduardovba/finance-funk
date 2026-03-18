@@ -1,6 +1,48 @@
 import { NextResponse } from 'next/server';
 import { query, run } from '@/lib/db';
 import { requireAuth } from '@/lib/authGuard';
+import { z } from 'zod';
+import { validateBody, validateId, dateField, currencyField, optionalNumber, optionalString } from '@/lib/validation';
+
+const PostTransactionSchema = z.object({
+    date: dateField,
+    description: optionalString,
+    account: optionalString,
+    broker: optionalString,
+    category: optionalString,
+    type: z.string().optional().default('Investment'),
+    amount: optionalNumber,
+    investment: optionalNumber,
+    interest: optionalNumber,
+    currency: currencyField.default('GBP'),
+    notes: optionalString,
+    quantity: optionalNumber,
+    price: optionalNumber,
+    isSalaryContribution: z.boolean().optional().default(false),
+    pnl: optionalNumber,
+    roiPercent: optionalNumber
+});
+
+const PutTransactionSchema = z.object({
+    id: z.coerce.number(),
+    date: dateField,
+    type: z.string().optional().default('Investment'),
+    investment: optionalNumber,
+    interest: optionalNumber,
+    amount: optionalNumber,
+    description: optionalString,
+    account: optionalString,
+    broker: optionalString,
+    category: optionalString,
+    currency: currencyField.default('GBP'),
+    notes: optionalString,
+    quantity: optionalNumber,
+    price: optionalNumber,
+    isSalaryContribution: z.boolean().optional().default(false),
+    pnl: optionalNumber,
+    roiPercent: optionalNumber,
+    asset_id: optionalNumber
+});
 
 export async function GET() {
     try {
@@ -57,22 +99,24 @@ export async function POST(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
+        const { data, error } = validateBody(PostTransactionSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
         // Normalization
-        const assetName = body.description || body.account || 'General Transaction';
-        const currency = body.currency || 'GBP';
-        const notes = body.notes || '';
-        let amount = body.amount !== undefined ? body.amount : (body.investment || 0);
-        let type = body.type || 'Investment';
-        let category = body.category || (body.account ? 'Fixed Income' : 'Other');
+        const assetName = data.description || data.account || 'General Transaction';
+        const currency = data.currency || 'GBP';
+        const notes = data.notes || '';
+        let amount = data.amount !== undefined ? data.amount : (data.investment || 0);
+        let type = data.type || 'Investment';
+        let category = data.category || (data.account ? 'Fixed Income' : 'Other');
 
         // If it's a pure interest payment from the FI form
-        if (body.interest > 0 && (body.investment === 0 || body.investment === undefined)) {
-            amount = body.interest;
+        if (data.interest > 0 && (data.investment === 0 || data.investment === undefined)) {
+            amount = data.interest;
             type = 'Interest';
         }
 
-        const broker = body.account || body.broker || 'Manual';
+        const broker = data.account || data.broker || 'Manual';
         let assetId;
         const rows = await query('SELECT id FROM assets WHERE name = ? AND broker = ? AND user_id = ?', [assetName, broker, user.id]);
 
@@ -88,7 +132,7 @@ export async function POST(request) {
 
         const res = await run(
             `INSERT INTO ledger (date, type, asset_id, amount, currency, notes, quantity, price, is_salary_contribution, realized_pnl, realized_roi_percent, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [body.date, type, assetId, amount, currency, notes, body.quantity || null, body.price || null, body.isSalaryContribution ? 1 : 0, body.pnl || null, body.roiPercent || null, user.id]
+            [data.date, type, assetId, amount, currency, notes, data.quantity || null, data.price || null, data.isSalaryContribution ? 1 : 0, data.pnl || null, data.roiPercent || null, user.id]
         );
 
         return NextResponse.json({ success: true, id: res.lastID });
@@ -103,17 +147,17 @@ export async function PUT(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
-        const { id, type, investment, interest, amount, description, account, category, currency } = body;
-        if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
+        const { data, error } = validateBody(PutTransactionSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
-        let finalAmount = amount !== undefined ? amount : (type === 'Interest' ? interest : investment);
+        let finalAmount = data.amount !== undefined ? data.amount : (data.type === 'Interest' ? data.interest : data.investment);
 
         // Re-check asset if description or account is provided (for edits)
-        let assetId = body.asset_id;
-        if (description || account) {
-            const assetName = description || account || 'General Transaction';
-            const broker = account || body.broker || 'Manual';
-            const cat = category || 'Fixed Income';
+        let assetId = data.asset_id;
+        if (data.description || data.account) {
+            const assetName = data.description || data.account || 'General Transaction';
+            const broker = data.account || data.broker || 'Manual';
+            const cat = data.category || 'Fixed Income';
 
             const rows = await query('SELECT id FROM assets WHERE name = ? AND broker = ? AND user_id = ?', [assetName, broker, user.id]);
             if (rows.length > 0) {
@@ -121,7 +165,7 @@ export async function PUT(request) {
             } else {
                 const res = await run(
                     `INSERT INTO assets (name, asset_class, currency, broker, user_id) VALUES (?, ?, ?, ?, ?)`,
-                    [assetName, cat, currency || 'GBP', broker, user.id]
+                    [assetName, cat, data.currency || 'GBP', broker, user.id]
                 );
                 assetId = res.lastID;
             }
@@ -129,10 +173,10 @@ export async function PUT(request) {
 
         await run(
             `UPDATE ledger SET date = ?, type = ?, asset_id = ?, amount = ?, currency = ?, notes = ?, quantity = ?, price = ?, is_salary_contribution = ?, realized_pnl = ?, realized_roi_percent = ? WHERE id = ? AND user_id = ?`,
-            [body.date, type || 'Investment', assetId, finalAmount, body.currency, body.notes || '', body.quantity || null, body.price || null, body.isSalaryContribution ? 1 : 0, body.pnl || null, body.roiPercent || null, id, user.id]
+            [data.date, data.type || 'Investment', assetId, finalAmount, data.currency, data.notes || '', data.quantity || null, data.price || null, data.isSalaryContribution ? 1 : 0, data.pnl || null, data.roiPercent || null, data.id, user.id]
         );
 
-        return NextResponse.json({ success: true, id });
+        return NextResponse.json({ success: true, id: data.id });
     } catch (e) {
         if (e instanceof Response) return e;
         console.error('PUT Error:', e);
@@ -144,9 +188,8 @@ export async function DELETE(request) {
     try {
         const user = await requireAuth();
         const { searchParams } = new URL(request.url);
-        const id = searchParams.get('id');
-
-        if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
+        const { id, error } = validateId(searchParams.get('id'));
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
         await run('DELETE FROM ledger WHERE id = ? AND user_id = ?', [id, user.id]);
 

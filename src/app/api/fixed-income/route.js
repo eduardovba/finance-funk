@@ -1,6 +1,31 @@
 import { NextResponse } from 'next/server';
 import { query, run } from '@/lib/db';
 import { requireAuth } from '@/lib/authGuard';
+import { z } from 'zod';
+import { validateBody, validateId, dateField, currencyField, optionalNumber, optionalString } from '@/lib/validation';
+
+const PostFixedIncomeSchema = z.object({
+    asset: z.string().min(1, 'Asset name is required'),
+    broker: z.string().min(1, 'Broker is required'),
+    date: dateField,
+    type: z.enum(['Investment', 'Interest', 'Withdrawal', 'Divestment']).default('Investment'),
+    investment: optionalNumber,
+    interest: optionalNumber,
+    currency: currencyField.default('BRL'),
+    notes: optionalString,
+    isSalaryContribution: z.boolean().optional().default(false)
+});
+
+const PutFixedIncomeSchema = z.object({
+    id: z.coerce.number(),
+    date: dateField,
+    type: z.enum(['Investment', 'Interest', 'Withdrawal', 'Divestment']),
+    investment: optionalNumber,
+    interest: optionalNumber,
+    notes: optionalString,
+    isSalaryContribution: z.boolean().optional().default(false),
+    currency: currencyField.default('BRL')
+});
 
 export async function GET() {
     try {
@@ -53,12 +78,14 @@ export async function POST(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
+        const { data, error } = validateBody(PostFixedIncomeSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
         // 1. Get/Create Asset
         let assetId;
         const existing = await query(
             `SELECT id FROM assets WHERE name = ? AND broker = ? AND asset_class = 'Fixed Income' AND user_id = ?`,
-            [body.asset, body.broker, user.id]
+            [data.asset, data.broker, user.id]
         );
 
         if (existing.length > 0) {
@@ -66,14 +93,14 @@ export async function POST(request) {
         } else {
             const res = await run(
                 `INSERT INTO assets (name, ticker, broker, asset_class, currency, allocation_bucket, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                [body.asset, body.asset, body.broker, 'Fixed Income', body.currency || 'BRL', 'Fixed Income', user.id]
+                [data.asset, data.asset, data.broker, 'Fixed Income', data.currency || 'BRL', 'Fixed Income', user.id]
             );
             assetId = res.lastID;
         }
 
         // 2. Insert Ledger
-        let amount = body.type === 'Interest' ? Math.abs(body.interest) : Math.abs(body.investment);
-        const finalType = body.type === 'Divestment' ? 'Withdrawal' : (body.type || 'Investment');
+        let amount = data.type === 'Interest' ? Math.abs(data.interest) : Math.abs(data.investment);
+        const finalType = data.type === 'Divestment' ? 'Withdrawal' : (data.type || 'Investment');
 
         if (finalType === 'Withdrawal') {
             amount = -Math.abs(amount);
@@ -82,13 +109,13 @@ export async function POST(request) {
         const res = await run(
             `INSERT INTO ledger (date, type, asset_id, amount, currency, notes, is_salary_contribution, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             [
-                body.date,
+                data.date,
                 finalType,
                 assetId,
                 amount,
-                body.currency || 'BRL',
-                body.notes || 'Manual Entry',
-                body.isSalaryContribution ? 1 : 0,
+                data.currency || 'BRL',
+                data.notes || 'Manual Entry',
+                data.isSalaryContribution ? 1 : 0,
                 user.id
             ]
         );
@@ -105,12 +132,11 @@ export async function PUT(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
-        const { id, date, type, investment, interest, notes, isSalaryContribution, currency } = body;
+        const { data, error } = validateBody(PutFixedIncomeSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
-        if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
-
-        let amount = type === 'Interest' ? Math.abs(interest) : Math.abs(investment);
-        const finalType = type === 'Divestment' ? 'Withdrawal' : type;
+        let amount = data.type === 'Interest' ? Math.abs(data.interest) : Math.abs(data.investment);
+        const finalType = data.type === 'Divestment' ? 'Withdrawal' : data.type;
 
         if (finalType === 'Withdrawal') {
             amount = -Math.abs(amount);
@@ -118,7 +144,7 @@ export async function PUT(request) {
 
         await run(
             `UPDATE ledger SET date = ?, type = ?, amount = ?, notes = ?, is_salary_contribution = ?, currency = ? WHERE id = ? AND user_id = ?`,
-            [date, finalType, amount, notes, isSalaryContribution ? 1 : 0, currency || 'BRL', id, user.id]
+            [data.date, finalType, amount, data.notes, data.isSalaryContribution ? 1 : 0, data.currency || 'BRL', data.id, user.id]
         );
 
         return NextResponse.json({ success: true });
@@ -133,9 +159,8 @@ export async function DELETE(request) {
     try {
         const user = await requireAuth();
         const { searchParams } = new URL(request.url);
-        const id = searchParams.get('id');
-
-        if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+        const { id, error } = validateId(searchParams.get('id'));
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
         await run(`DELETE FROM ledger WHERE id = ? AND user_id = ?`, [id, user.id]);
 

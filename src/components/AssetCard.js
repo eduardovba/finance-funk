@@ -69,7 +69,7 @@ export default function AssetCard({
 
     return (
         <div
-            className={`glass-card relative overflow-hidden transition-all duration-300 ease-out mb-3 bg-opacity-40 backdrop-blur-md cursor-pointer select-none 
+            className={`rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative overflow-hidden transition-all duration-300 ease-out mb-3 cursor-pointer select-none 
                 ${isExpanded ? 'ring-1 ring-[var(--accent-color)]/30 bg-[rgba(30,18,52,0.6)]' : 'hover:bg-[rgba(255,255,255,0.03)] active:scale-[0.98]'}`}
             style={{ padding: '0' }}
             onClick={handleTap}

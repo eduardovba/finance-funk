@@ -2,6 +2,21 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/authGuard';
 import { getUserById, updateUser, changePassword } from '@/lib/users';
 import { kvGet, kvSet } from '@/lib/kv';
+import { z } from 'zod';
+import { validateBody } from '@/lib/validation';
+
+const PatchProfileSchema = z.object({
+    // Password change fields
+    currentPassword: z.string().optional(),
+    newPassword: z.string().min(8, 'New password must be at least 8 characters').optional(),
+    // Currency preference fields
+    primaryCurrency: z.string().optional(),
+    secondaryCurrency: z.string().optional(),
+    rateFlipped: z.boolean().optional(),
+    displayCurrencyOverrides: z.record(z.string(), z.string()).optional(),
+    // Name update
+    name: z.string().optional()
+}).passthrough();
 
 export async function GET() {
     try {
@@ -29,14 +44,13 @@ export async function PATCH(request) {
     try {
         const sessionUser = await requireAuth();
         const body = await request.json();
+        const { data, error } = validateBody(PatchProfileSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
         // ── Password change ──
-        if (body.currentPassword && body.newPassword) {
-            if (body.newPassword.length < 8) {
-                return NextResponse.json({ error: 'New password must be at least 8 characters' }, { status: 400 });
-            }
+        if (data.currentPassword && data.newPassword) {
             try {
-                await changePassword(sessionUser.id, body.currentPassword, body.newPassword);
+                await changePassword(sessionUser.id, data.currentPassword, data.newPassword);
                 return NextResponse.json({ success: true, message: 'Password updated successfully' });
             } catch (err) {
                 const msg = err.message || 'Failed to change password';
@@ -46,13 +60,13 @@ export async function PATCH(request) {
         }
 
         // ── Currency preferences ──
-        if (body.primaryCurrency || body.secondaryCurrency || body.rateFlipped !== undefined || body.displayCurrencyOverrides !== undefined) {
+        if (data.primaryCurrency || data.secondaryCurrency || data.rateFlipped !== undefined || data.displayCurrencyOverrides !== undefined) {
             const current = await kvGet('currency_preferences', { primary: 'BRL', secondary: 'GBP', rateFlipped: false, displayCurrencyOverrides: {} }, sessionUser.id);
             const updated = {
-                primary: body.primaryCurrency || current.primary,
-                secondary: body.secondaryCurrency || current.secondary,
-                rateFlipped: body.rateFlipped !== undefined ? body.rateFlipped : (current.rateFlipped || false),
-                displayCurrencyOverrides: body.displayCurrencyOverrides !== undefined ? body.displayCurrencyOverrides : (current.displayCurrencyOverrides || {}),
+                primary: data.primaryCurrency || current.primary,
+                secondary: data.secondaryCurrency || current.secondary,
+                rateFlipped: data.rateFlipped !== undefined ? data.rateFlipped : (current.rateFlipped || false),
+                displayCurrencyOverrides: data.displayCurrencyOverrides !== undefined ? data.displayCurrencyOverrides : (current.displayCurrencyOverrides || {}),
             };
             await kvSet('currency_preferences', updated, sessionUser.id);
 
@@ -61,7 +75,7 @@ export async function PATCH(request) {
         }
 
         // ── Name update ──
-        const { name } = body;
+        const { name } = data;
         if (!name || typeof name !== 'string' || name.trim().length === 0) {
             return NextResponse.json({ error: 'Name is required' }, { status: 400 });
         }

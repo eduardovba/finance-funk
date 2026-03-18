@@ -1,6 +1,148 @@
 import { NextResponse } from 'next/server';
 import { query, run } from '@/lib/db';
 import { requireAuth } from '@/lib/authGuard';
+import { z } from 'zod';
+import { validateBody, optionalString, optionalNumber } from '@/lib/validation';
+
+// ─── POST Schemas (discriminated by section/type) ───
+
+const PostMortgageSetupSchema = z.object({
+    section: z.literal('mortgage-setup'),
+    propertyName: z.string().min(1, 'Property name required'),
+    originalAmount: z.coerce.number().optional(),
+    deposit: z.coerce.number().optional(),
+    durationMonths: z.coerce.number().optional(),
+    interestRate: z.coerce.number().optional()
+});
+
+const PostMortgagePaymentSchema = z.object({
+    section: z.literal('mortgages'),
+    propertyName: optionalString,
+    transaction: z.object({
+        month: z.string().min(1, 'Month is required'),
+        costs: z.coerce.number(),
+        principal: z.coerce.number().optional().default(0),
+        notes: optionalString
+    }).optional(),
+    month: z.string().optional(),
+    costs: z.coerce.number().optional(),
+    principal: z.coerce.number().optional(),
+    notes: optionalString
+});
+
+const PostAirbnbEntrySchema = z.object({
+    section: z.literal('airbnb-entry'),
+    propertyName: z.string().min(1, 'Property name required'),
+    date: z.string().optional(),
+    amount: z.coerce.number().optional(),
+    type: z.enum(['Revenue', 'Cost']).optional(),
+    notes: optionalString
+});
+
+const PostAirbnbMonthSchema = z.object({
+    section: z.literal('airbnb'),
+    propertyName: optionalString,
+    month: z.string().optional(),
+    revenue: z.coerce.number().optional(),
+    costs: z.coerce.number().optional()
+});
+
+const PostFundsSchema = z.object({
+    section: z.literal('funds'),
+    transaction: z.object({
+        fund: z.string().min(1),
+        date: z.string(),
+        quantity: z.coerce.number(),
+        costPerShare: z.coerce.number(),
+        investment: z.coerce.number().optional(),
+        isSalaryContribution: z.boolean().optional().default(false)
+    }).optional(),
+    fund: z.string().optional(),
+    date: z.string().optional(),
+    quantity: z.coerce.number().optional(),
+    costPerShare: z.coerce.number().optional(),
+    investment: z.coerce.number().optional(),
+    isSalaryContribution: z.boolean().optional()
+});
+
+const PostSellPropertySchema = z.object({
+    section: z.literal('sell-property'),
+    name: z.string().min(1, 'Property name required'),
+    salePrice: z.coerce.number().optional(),
+    taxes: z.coerce.number().optional(),
+    date: z.string().optional()
+});
+
+const PostPropertySchema = z.object({
+    type: z.literal('property'),
+    name: z.string().min(1, 'Property name required'),
+    currency: z.string().optional().default('BRL'),
+    investment: z.coerce.number().optional(),
+    currentValue: z.coerce.number().optional()
+});
+
+// Use a union approach — try each schema based on section/type
+const PostRealEstateSchema = z.union([
+    PostMortgageSetupSchema,
+    PostMortgagePaymentSchema,
+    PostAirbnbEntrySchema,
+    PostAirbnbMonthSchema,
+    PostFundsSchema,
+    PostSellPropertySchema,
+    PostPropertySchema
+]);
+
+// ─── PUT Schemas ───
+
+const PutPropertyValuesSchema = z.object({
+    action: z.literal('updatePropertyValues'),
+    id: z.string().min(1),
+    name: z.string().min(1),
+    currentValue: optionalNumber,
+    investment: optionalNumber,
+    oldInvestment: optionalNumber
+});
+
+const PutPropertyTransactionSchema = z.object({
+    section: z.literal('property-transaction'),
+    transaction: z.object({
+        id: z.coerce.number(),
+        date: z.string(),
+        amount: z.coerce.number(),
+        type: z.string()
+    })
+});
+
+const PutInkCourtSchema = z.object({
+    section: z.literal('inkCourt'),
+    transaction: z.object({
+        id: z.string().min(1),
+        month: z.string().min(1),
+        costs: z.coerce.number(),
+        principal: z.coerce.number().optional().default(0),
+        source: optionalString,
+        notes: optionalString
+    })
+});
+
+const PutFundsSchema = z.object({
+    section: z.literal('funds'),
+    transaction: z.object({
+        id: z.coerce.number(),
+        date: z.string(),
+        investment: z.coerce.number(),
+        quantity: z.coerce.number(),
+        costPerShare: z.coerce.number(),
+        isSalaryContribution: z.boolean().optional().default(false)
+    })
+});
+
+const PutRealEstateSchema = z.union([
+    PutPropertyValuesSchema,
+    PutPropertyTransactionSchema,
+    PutInkCourtSchema,
+    PutFundsSchema
+]);
 
 export async function GET(request) {
     try {
@@ -404,11 +546,14 @@ export async function POST(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
-        const t = body.transaction || body;
+        const { data, error } = validateBody(PostRealEstateSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
+
+        const t = data.transaction || data;
 
         // Handle Mortgage Setup (configure mortgage for any property)
-        if (body.section === 'mortgage-setup') {
-            const propertyName = body.propertyName;
+        if (data.section === 'mortgage-setup') {
+            const propertyName = data.propertyName;
             if (!propertyName) return NextResponse.json({ error: 'Property name required' }, { status: 400 });
 
             const assetRow = await query("SELECT id, currency FROM assets WHERE name = ? AND asset_class = 'Real Estate' AND user_id = ?", [propertyName, user.id]);
@@ -419,10 +564,10 @@ export async function POST(request) {
             await run(`DELETE FROM ledger WHERE asset_id = ? AND type = 'Mortgage Setup' AND user_id = ?`, [asset.id, user.id]);
 
             const config = JSON.stringify({
-                originalAmount: parseFloat(body.originalAmount) || 0,
-                deposit: parseFloat(body.deposit) || 0,
-                durationMonths: parseInt(body.durationMonths) || 0,
-                interestRate: parseFloat(body.interestRate) || 0
+                originalAmount: parseFloat(data.originalAmount) || 0,
+                deposit: parseFloat(data.deposit) || 0,
+                durationMonths: parseInt(data.durationMonths) || 0,
+                interestRate: parseFloat(data.interestRate) || 0
             });
 
             const today = new Date().toISOString().split('T')[0];
@@ -435,7 +580,7 @@ export async function POST(request) {
         }
 
         // Handle Add Mortgage Payment (works for any property)
-        if (body.section === 'mortgages') {
+        if (data.section === 'mortgages') {
             const months = { 'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12' };
             const monthVal = (t.month || '');
             let dateStr;
@@ -454,7 +599,7 @@ export async function POST(request) {
             }
 
             // Accept propertyName, fallback to 'Ink Court' for backward compat
-            const propertyName = body.propertyName || 'Ink Court';
+            const propertyName = data.propertyName || 'Ink Court';
             const assetRow = await query("SELECT id, currency FROM assets WHERE name = ? AND user_id = ?", [propertyName, user.id]);
             if (!assetRow.length) return NextResponse.json({ error: `Property '${propertyName}' not found` }, { status: 404 });
             const asset = assetRow[0];
@@ -471,18 +616,18 @@ export async function POST(request) {
         }
 
         // Handle Add Individual Rental Entry (revenue or cost on a specific date)
-        if (body.section === 'airbnb-entry') {
-            const propertyName = body.propertyName;
+        if (data.section === 'airbnb-entry') {
+            const propertyName = data.propertyName;
             if (!propertyName) return NextResponse.json({ error: 'Property name required' }, { status: 400 });
 
             const assetRow = await query("SELECT id, currency FROM assets WHERE name = ? AND asset_class = 'Real Estate' AND user_id = ?", [propertyName, user.id]);
             if (!assetRow.length) return NextResponse.json({ error: 'Property not found' }, { status: 404 });
             const asset = assetRow[0];
 
-            const dateStr = body.date || new Date().toISOString().split('T')[0];
-            const amount = parseFloat(body.amount) || 0;
-            const entryType = body.type === 'Revenue' ? 'Income' : 'Expense';
-            const notes = body.notes || `Rental ${body.type}`;
+            const dateStr = data.date || new Date().toISOString().split('T')[0];
+            const amount = parseFloat(data.amount) || 0;
+            const entryType = data.type === 'Revenue' ? 'Income' : 'Expense';
+            const notes = data.notes || `Rental ${data.type}`;
 
             if (amount > 0) {
                 const dbAmount = entryType === 'Income' ? amount : -Math.abs(amount);
@@ -496,9 +641,9 @@ export async function POST(request) {
         }
 
         // Handle Add Rental Month (works for any property)
-        if (body.section === 'airbnb') {
+        if (data.section === 'airbnb') {
             // Accept propertyName, fallback to '%Zara%' pattern for backward compat
-            const propertyName = body.propertyName;
+            const propertyName = data.propertyName;
             let assetRow;
             if (propertyName) {
                 assetRow = await query("SELECT id, currency FROM assets WHERE name = ? AND asset_class = 'Real Estate' AND user_id = ?", [propertyName, user.id]);
@@ -508,9 +653,9 @@ export async function POST(request) {
             if (!assetRow.length) return NextResponse.json({ error: 'Property not found' }, { status: 404 });
             const asset = assetRow[0];
 
-            const month = body.month;
-            const revenue = parseFloat(body.revenue) || 0;
-            const costs = parseFloat(body.costs) || 0;
+            const month = data.month;
+            const revenue = parseFloat(data.revenue) || 0;
+            const costs = parseFloat(data.costs) || 0;
 
             // Determine date string from month input
             let dateStr;
@@ -537,8 +682,8 @@ export async function POST(request) {
         }
 
         // Handle Add Funds
-        if (body.section === 'funds') {
-            const t = body.transaction || body;
+        if (data.section === 'funds') {
+            const t = data.transaction || data;
             const ticker = (t.fund.split(' - ')[1] || t.fund || '').toUpperCase();
 
             let assetId;
@@ -565,11 +710,11 @@ export async function POST(request) {
         }
 
         // Handle Sell Property
-        if (body.section === 'sell-property') {
-            const propertyName = body.name;
-            const salePrice = parseFloat(body.salePrice) || 0;
-            const taxes = parseFloat(body.taxes) || 0;
-            const saleDate = body.date || new Date().toISOString().split('T')[0];
+        if (data.section === 'sell-property') {
+            const propertyName = data.name;
+            const salePrice = parseFloat(data.salePrice) || 0;
+            const taxes = parseFloat(data.taxes) || 0;
+            const saleDate = data.date || new Date().toISOString().split('T')[0];
 
             const assetRows = await query("SELECT id, currency FROM assets WHERE name = ? AND user_id = ?", [propertyName, user.id]);
             if (!assetRows.length) return NextResponse.json({ error: 'Property not found' }, { status: 404 });
@@ -589,11 +734,11 @@ export async function POST(request) {
         }
 
         // Handle Add Property
-        if (body.type === 'property') {
-            const name = body.name;
-            const currency = body.currency || 'BRL';
-            const investment = parseFloat(body.investment) || 0;
-            const currentValue = parseFloat(body.currentValue) || 0;
+        if (data.type === 'property') {
+            const name = data.name;
+            const currency = data.currency || 'BRL';
+            const investment = parseFloat(data.investment) || 0;
+            const currentValue = parseFloat(data.currentValue) || 0;
 
             if (!name) return NextResponse.json({ error: 'Property name required' }, { status: 400 });
 
@@ -643,9 +788,11 @@ export async function PUT(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
+        const { data, error } = validateBody(PutRealEstateSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
-        if (body.action === 'updatePropertyValues') {
-            const { id, name, currentValue, investment: newInvestment, oldInvestment } = body;
+        if (data.action === 'updatePropertyValues') {
+            const { id, name, currentValue, investment: newInvestment, oldInvestment } = data;
             if (!id || !name) return NextResponse.json({ error: 'Property ID/Name required' }, { status: 400 });
 
             const today = new Date().toISOString().split('T')[0];
@@ -675,8 +822,8 @@ export async function PUT(request) {
         }
 
         // Handle Property Transaction Update
-        if (body.section === 'property-transaction') {
-            const t = body.transaction;
+        if (data.section === 'property-transaction') {
+            const t = data.transaction;
             if (!t.id) return NextResponse.json({ error: 'Transaction ID required' }, { status: 400 });
 
             await run(
@@ -687,8 +834,8 @@ export async function PUT(request) {
             return NextResponse.json({ success: true });
         }
 
-        if (body.section === 'inkCourt') {
-            const t = body.transaction;
+        if (data.section === 'inkCourt') {
+            const t = data.transaction;
 
             if (!t.id) return NextResponse.json({ error: 'Transaction ID required' }, { status: 400 });
 
@@ -726,8 +873,8 @@ export async function PUT(request) {
         }
 
         // Handle Fund Update
-        if (body.section === 'funds') {
-            const t = body.transaction;
+        if (data.section === 'funds') {
+            const t = data.transaction;
             if (!t.id) return NextResponse.json({ error: 'Transaction ID required' }, { status: 400 });
 
             await run(

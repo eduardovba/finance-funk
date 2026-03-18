@@ -1,6 +1,23 @@
 import { NextResponse } from 'next/server';
 import { query, run } from '@/lib/db';
 import { requireAuth } from '@/lib/authGuard';
+import { z } from 'zod';
+import { validateBody, validateId, dateField, optionalString } from '@/lib/validation';
+
+const PostDebtSchema = z.object({
+    date: dateField.optional(),
+    lender: z.string().min(1, 'Lender is required'),
+    value_brl: z.coerce.number({ required_error: 'value_brl is required' }),
+    obs: optionalString
+});
+
+const PutDebtSchema = z.object({
+    id: z.coerce.number(),
+    date: dateField.optional(),
+    lender: z.string().min(1, 'Lender is required'),
+    value_brl: z.coerce.number(),
+    obs: optionalString
+});
 
 export async function GET() {
     try {
@@ -35,28 +52,25 @@ export async function POST(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
-        const { date, lender, value_brl, obs } = body;
-
-        if (!lender || value_brl === undefined || value_brl === null || isNaN(value_brl)) {
-            return NextResponse.json({ error: 'Lender and value_brl are required' }, { status: 400 });
-        }
+        const { data, error } = validateBody(PostDebtSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
         let assetId;
-        const rows = await query('SELECT id FROM assets WHERE name = ? AND asset_class = ? AND user_id = ?', [lender, 'Debt', user.id]);
+        const rows = await query('SELECT id FROM assets WHERE name = ? AND asset_class = ? AND user_id = ?', [data.lender, 'Debt', user.id]);
 
         if (rows.length > 0) {
             assetId = rows[0].id;
         } else {
             const res = await run(
                 `INSERT INTO assets (name, asset_class, currency, broker, user_id) VALUES (?, ?, ?, ?, ?)`,
-                [lender, 'Debt', 'BRL', 'Manual', user.id]
+                [data.lender, 'Debt', 'BRL', 'Manual', user.id]
             );
             assetId = res.lastID;
         }
 
         const res = await run(
             `INSERT INTO ledger (date, type, asset_id, amount, currency, notes, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [date, 'Liability', assetId, value_brl, 'BRL', obs || '', user.id]
+            [data.date, 'Liability', assetId, data.value_brl, 'BRL', data.obs || '', user.id]
         );
 
         return NextResponse.json({ success: true, id: res.lastID });
@@ -71,29 +85,28 @@ export async function PUT(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
-        const { id, date, lender, value_brl, obs } = body;
-
-        if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
+        const { data, error } = validateBody(PutDebtSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
         let assetId;
-        const rows = await query('SELECT id FROM assets WHERE name = ? AND asset_class = ? AND user_id = ?', [lender, 'Debt', user.id]);
+        const rows = await query('SELECT id FROM assets WHERE name = ? AND asset_class = ? AND user_id = ?', [data.lender, 'Debt', user.id]);
 
         if (rows.length > 0) {
             assetId = rows[0].id;
         } else {
             const res = await run(
                 `INSERT INTO assets (name, asset_class, currency, broker, user_id) VALUES (?, ?, ?, ?, ?)`,
-                [lender, 'Debt', 'BRL', 'Manual', user.id]
+                [data.lender, 'Debt', 'BRL', 'Manual', user.id]
             );
             assetId = res.lastID;
         }
 
         await run(
             `UPDATE ledger SET date = ?, asset_id = ?, amount = ?, notes = ? WHERE id = ? AND user_id = ?`,
-            [date, assetId, value_brl, obs, id, user.id]
+            [data.date, assetId, data.value_brl, data.obs, data.id, user.id]
         );
 
-        return NextResponse.json({ success: true, id });
+        return NextResponse.json({ success: true, id: data.id });
     } catch (e) {
         if (e instanceof Response) return e;
         console.error('PUT Debt Error:', e);
@@ -105,9 +118,8 @@ export async function DELETE(request) {
     try {
         const user = await requireAuth();
         const { searchParams } = new URL(request.url);
-        const id = searchParams.get('id');
-
-        if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
+        const { id, error } = validateId(searchParams.get('id'));
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
         await run('DELETE FROM ledger WHERE id = ? AND user_id = ?', [id, user.id]);
 

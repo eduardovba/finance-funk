@@ -1,28 +1,41 @@
 import { NextResponse } from 'next/server';
 import { query, run } from '@/lib/db';
 import { requireAuth } from '@/lib/authGuard';
+import { z } from 'zod';
+import { validateBody } from '@/lib/validation';
+
+const PostImportSchema = z.object({
+    assetClass: z.string().optional(),
+    defaultCurrency: z.string().optional(),
+    defaultBroker: z.string().optional(),
+    transactions: z.array(z.object({
+        date: z.string(),
+        amount: z.coerce.number().optional(),
+        type: z.string().optional(),
+        ticker: z.string().optional(),
+        asset: z.string().optional(),
+        broker: z.string().optional(),
+        currency: z.string().optional(),
+        quantity: z.coerce.number().optional(),
+        price: z.coerce.number().optional(),
+        pnl: z.coerce.number().optional(),
+        notes: z.string().optional(),
+        assetClass: z.string().optional()
+    })).min(1, 'No transactions to import').max(5000, 'Maximum 5000 transactions per import')
+});
 
 export async function POST(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
-        const { assetClass: globalAssetClass, defaultCurrency, defaultBroker, transactions } = body;
+        const { data, error } = validateBody(PostImportSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
-        if (!transactions || !Array.isArray(transactions)) {
-            return NextResponse.json({ error: 'transactions[] is required' }, { status: 400 });
-        }
+        const { assetClass: globalAssetClass, defaultCurrency, defaultBroker, transactions } = data;
 
         // At least a global assetClass or per-tx assetClass must be present
         if (!globalAssetClass && !transactions[0]?.assetClass) {
             return NextResponse.json({ error: 'assetClass is required (globally or per transaction)' }, { status: 400 });
-        }
-
-        if (transactions.length === 0) {
-            return NextResponse.json({ error: 'No transactions to import' }, { status: 400 });
-        }
-
-        if (transactions.length > 5000) {
-            return NextResponse.json({ error: 'Maximum 5000 transactions per import' }, { status: 400 });
         }
 
         const results = {

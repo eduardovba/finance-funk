@@ -1,16 +1,24 @@
 import { NextResponse } from 'next/server';
 import { query, run } from '@/lib/db';
 import { requireAuth } from '@/lib/authGuard';
+import { z } from 'zod';
+import { validateBody, requiredString } from '@/lib/validation';
+
+const PatchRenameSchema = z.object({
+    oldName: requiredString,
+    newName: requiredString,
+    broker: requiredString,
+    assetClass: requiredString
+});
 
 export async function PATCH(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
-        const { oldName, newName, broker, assetClass } = body;
+        const { data, error } = validateBody(PatchRenameSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
-        if (!oldName || !newName || !broker || !assetClass) {
-            return NextResponse.json({ error: 'Missing required fields: oldName, newName, broker, assetClass' }, { status: 400 });
-        }
+        const { oldName, newName, broker, assetClass } = data;
 
         if (oldName === newName) {
             return NextResponse.json({ success: true, message: 'No change needed' });

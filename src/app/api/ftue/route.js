@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { kvGet, kvSet } from '@/lib/kv';
 import { requireAuth } from '@/lib/authGuard';
 import { query } from '@/lib/db';
+import { z } from 'zod';
+import { validateBody } from '@/lib/validation';
 
 const KEY = 'ftue_state';
 
@@ -28,6 +30,23 @@ const DEFAULT_STATE = {
     checklistDismissed: false,
     pageTutorials: {}  // { equity: true, crypto: true, ... } — tracks which pages have shown their tutorial
 };
+
+const PostFtueSchema = z.object({
+    action: z.enum(['reset'])
+});
+
+const PatchFtueSchema = z.object({
+    wizardCompleted: z.boolean().optional(),
+    wizardStep: z.coerce.number().optional(),
+    selectedAssetClasses: z.array(z.string()).optional(),
+    timeHorizon: z.string().optional().nullable(),
+    netWorthTarget: z.coerce.number().optional().nullable(),
+    targetReturn: z.coerce.number().optional().nullable(),
+    usingDemoData: z.boolean().optional(),
+    checklistItems: z.record(z.string(), z.boolean()).optional(),
+    checklistDismissed: z.boolean().optional(),
+    pageTutorials: z.record(z.string(), z.boolean()).optional()
+}).passthrough();
 
 // Auto-detect which checklist items are already completed based on real data
 async function detectCompletedItems(userId) {
@@ -99,7 +118,9 @@ export async function GET() {
 export async function PATCH(request) {
     try {
         const user = await requireAuth();
-        const updates = await request.json();
+        const body = await request.json();
+        const { data: updates, error } = validateBody(PatchFtueSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
         // Merge updates into current state
         const current = await kvGet(KEY, DEFAULT_STATE, user.id);
@@ -126,8 +147,10 @@ export async function POST(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
+        const { data, error } = validateBody(PostFtueSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
-        if (body.action === 'reset') {
+        if (data.action === 'reset') {
             await kvSet(KEY, DEFAULT_STATE, user.id);
             return NextResponse.json(DEFAULT_STATE);
         }

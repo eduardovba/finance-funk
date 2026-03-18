@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server';
 import { kvGet, kvSet } from '@/lib/kv';
 import { requireAuth } from '@/lib/authGuard';
+import { z } from 'zod';
+import { validateBody } from '@/lib/validation';
 
 const KEY = 'app_settings';
 const DEFAULTS = { autoMonthlyCloseEnabled: true, backgroundSelection: 'frosted-glass' };
+
+const PostAppSettingsSchema = z.object({
+    autoMonthlyCloseEnabled: z.boolean().optional(),
+    backgroundSelection: z.string().optional()
+}).passthrough();
 
 export async function GET() {
     try {
@@ -20,7 +27,10 @@ export async function GET() {
 export async function POST(request) {
     try {
         const user = await requireAuth();
-        const settings = await request.json();
+        const body = await request.json();
+        const { data: settings, error } = validateBody(PostAppSettingsSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
+
         await kvSet(KEY, settings, user.id);
         return NextResponse.json({ success: true, settings });
     } catch (error) {

@@ -1,8 +1,18 @@
 import { NextResponse } from 'next/server';
 import { kvGet, kvSet } from '@/lib/kv';
 import { requireAuth } from '@/lib/authGuard';
+import { z } from 'zod';
+import { validateBody } from '@/lib/validation';
 
 const KEY = 'live_assets';
+
+const PostLiveAssetSchema = z.object({
+    ticker: z.string().min(1, 'Ticker is required'),
+    name: z.string().optional(),
+    assetClass: z.string().optional(),
+    broker: z.string().optional(),
+    currency: z.string().optional()
+}).passthrough();
 
 export async function GET() {
     try {
@@ -18,10 +28,9 @@ export async function GET() {
 export async function POST(request) {
     try {
         const user = await requireAuth();
-        const newAsset = await request.json();
-        if (!newAsset.ticker) {
-            return NextResponse.json({ error: 'Ticker is required' }, { status: 400 });
-        }
+        const body = await request.json();
+        const { data: newAsset, error } = validateBody(PostLiveAssetSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
         const assets = await kvGet(KEY, [], user.id);
 

@@ -1,6 +1,34 @@
 import { NextResponse } from 'next/server';
 import { query, run } from '@/lib/db';
 import { requireAuth } from '@/lib/authGuard';
+import { z } from 'zod';
+import { validateBody, validateId, dateField, currencyField, optionalNumber, optionalString } from '@/lib/validation';
+
+const PostCryptoSchema = z.object({
+    ticker: z.string().min(1).max(20),
+    platform: z.string().min(1).max(100),
+    asset: optionalString,
+    date: dateField,
+    type: z.enum(['Buy', 'Sell']),
+    investment: z.coerce.number(),
+    quantity: z.coerce.number(),
+    currency: currencyField.default('USD'),
+    isSalaryContribution: z.boolean().optional().default(false),
+    pnl: optionalNumber,
+    costPerShare: optionalNumber
+});
+
+const PutCryptoSchema = z.object({
+    id: z.coerce.number(),
+    date: dateField,
+    type: z.enum(['Buy', 'Sell', 'Investment', 'Divestment']),
+    quantity: z.coerce.number(),
+    investment: z.coerce.number(),
+    currency: currencyField.default('USD'),
+    pnl: optionalNumber,
+    costPerShare: optionalNumber,
+    isSalaryContribution: z.boolean().optional().default(false)
+});
 
 export async function GET() {
     try {
@@ -49,11 +77,13 @@ export async function POST(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
+        const { data, error } = validateBody(PostCryptoSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
         let assetId;
         const existing = await query(
             `SELECT id FROM assets WHERE ticker = ? AND broker = ? AND user_id = ?`,
-            [body.ticker, body.platform, user.id]
+            [data.ticker, data.platform, user.id]
         );
 
         if (existing.length > 0) {
@@ -61,25 +91,25 @@ export async function POST(request) {
         } else {
             const res = await run(
                 `INSERT INTO assets (name, ticker, broker, asset_class, currency, allocation_bucket, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                [body.asset || body.ticker, body.ticker, body.platform, 'Crypto', 'USD', 'Crypto', user.id]
+                [data.asset || data.ticker, data.ticker, data.platform, 'Crypto', 'USD', 'Crypto', user.id]
             );
             assetId = res.lastID;
         }
 
-        const amount = body.type === 'Buy' ? -Math.abs(body.investment) : Math.abs(body.investment);
+        const amount = data.type === 'Buy' ? -Math.abs(data.investment) : Math.abs(data.investment);
 
         const res = await run(
             `INSERT INTO ledger (date, type, asset_id, quantity, price, amount, currency, notes, is_salary_contribution, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
-                body.date,
-                body.type === 'Buy' ? 'Investment' : 'Divestment',
+                data.date,
+                data.type === 'Buy' ? 'Investment' : 'Divestment',
                 assetId,
-                body.quantity,
+                data.quantity,
                 0,
                 amount,
-                body.currency || 'USD',
+                data.currency || 'USD',
                 'API Input',
-                body.isSalaryContribution ? 1 : 0,
+                data.isSalaryContribution ? 1 : 0,
                 user.id
             ]
         );
@@ -96,16 +126,15 @@ export async function PUT(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
-        const { id, date, type, quantity, investment, currency, pnl } = body;
+        const { data, error } = validateBody(PutCryptoSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
-        if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
-
-        const amount = (type === 'Buy' || type === 'Investment') ? -Math.abs(investment) : Math.abs(investment);
-        const dbType = (type === 'Buy' || type === 'Investment') ? 'Investment' : 'Divestment';
+        const amount = (data.type === 'Buy' || data.type === 'Investment') ? -Math.abs(data.investment) : Math.abs(data.investment);
+        const dbType = (data.type === 'Buy' || data.type === 'Investment') ? 'Investment' : 'Divestment';
 
         await run(
             `UPDATE ledger SET date = ?, type = ?, quantity = ?, amount = ?, price = ?, realized_pnl = ?, currency = ?, is_salary_contribution = ? WHERE id = ? AND user_id = ?`,
-            [date, dbType, quantity, amount, body.costPerShare || 0, pnl || null, currency || 'USD', body.isSalaryContribution ? 1 : 0, id, user.id]
+            [data.date, dbType, data.quantity, amount, data.costPerShare || 0, data.pnl || null, data.currency || 'USD', data.isSalaryContribution ? 1 : 0, data.id, user.id]
         );
 
         return NextResponse.json({ success: true });
@@ -120,9 +149,8 @@ export async function DELETE(request) {
     try {
         const user = await requireAuth();
         const { searchParams } = new URL(request.url);
-        const id = searchParams.get('id');
-
-        if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+        const { id, error } = validateId(searchParams.get('id'));
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
         await run(`DELETE FROM ledger WHERE id = ? AND user_id = ?`, [id, user.id]);
 

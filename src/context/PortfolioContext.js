@@ -2,6 +2,10 @@
 
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { formatCurrency, convertCurrency, SUPPORTED_CURRENCIES, getFallbackRates } from '@/lib/currency';
+import useCurrencyStore from '@/stores/useCurrencyStore';
+import useUIStore from '@/stores/useUIStore';
+import useFTUEStore from '@/stores/useFTUEStore';
+import useSettingsStore from '@/stores/useSettingsStore';
 import { normalizeTransactions, calculateMonthlyIncome, calculateMonthlyInvestments } from '@/lib/ledgerUtils';
 import { calculateFV, getMonthDiff, parseDate as parseForecastDate, calculatePMT } from '@/lib/forecastUtils';
 import actualsData from '@/data/forecast_actuals.json';
@@ -31,109 +35,77 @@ export function PortfolioProvider({ children }) {
     const [historicalSnapshots, setHistoricalSnapshots] = useState([]);
     const [marketData, setMarketData] = useState({});
     const [pensionPrices, setPensionPrices] = useState({});
-    const [rates, setRates] = useState({ GBP: 1, BRL: 7.10, USD: 1.28 });
-    const [loadingRates, setLoadingRates] = useState(true);
+    // rates are managed by useCurrencyStore — read reactively
+    const rates = useCurrencyStore(s => s.rates);
+    const setRates = useCurrencyStore(s => s.setRates);
+    const loadingRates = useCurrencyStore(s => s.loadingRates);
+    const setLoadingRates = useCurrencyStore(s => s.setLoadingRates);
     const [lastUpdated, setLastUpdated] = useState(null);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isRefreshingMarketData, setIsRefreshingMarketData] = useState(false);
     const [marketDataCacheInfo, setMarketDataCacheInfo] = useState(null);
     const [ledgerData, setLedgerData] = useState('');
-    const [fxHistory, setFxHistory] = useState({});
-    const [forecastSettings, setForecastSettings] = useState({});
-    const [allocationTargets, setAllocationTargets] = useState({});
-    const [assetClasses, setAssetClasses] = useState({});
-    const [appSettings, setAppSettings] = useState({ autoMonthlyCloseEnabled: true, backgroundSelection: 'frosted-glass' });
-    const [dashboardConfig, setDashboardConfig] = useState(null);
-    const [ftueState, setFtueState] = useState(null); // null = loading, object = loaded
+    const fxHistory = useCurrencyStore(s => s.fxHistory);
+    const setFxHistory = useCurrencyStore(s => s.setFxHistory);
 
-    // ═══════════ UI STATE ═══════════
-    const [isFormOpen, setIsFormOpen] = useState(false);
-    const [editingTransaction, setEditingTransaction] = useState(null);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [transactionToDelete, setTransactionToDelete] = useState(null);
-    const [isInspectorOpen, setIsInspectorOpen] = useState(false);
-    const [inspectorMode, setInspectorMode] = useState('default'); // 'default', 'add-broker', 'add-transaction'
-    const [statusModal, setStatusModal] = useState({ isOpen: false, title: '', message: '', type: 'success' });
-    const [isMonthlyCloseModalOpen, setIsMonthlyCloseModalOpen] = useState(false);
+    // ═══════════ SETTINGS (from Zustand store) ═══════════
+    const forecastSettings = useSettingsStore(s => s.forecastSettings);
+    const setForecastSettings = useSettingsStore(s => s.setForecastSettings);
+    const allocationTargets = useSettingsStore(s => s.allocationTargets);
+    const setAllocationTargets = useSettingsStore(s => s.setAllocationTargets);
+    const assetClasses = useSettingsStore(s => s.assetClasses);
+    const setAssetClasses = useSettingsStore(s => s.setAssetClasses);
+    const appSettings = useSettingsStore(s => s.appSettings);
+    const setAppSettings = useSettingsStore(s => s.setAppSettings);
+    const dashboardConfig = useSettingsStore(s => s.dashboardConfig);
+    const setDashboardConfig = useSettingsStore(s => s.setDashboardConfig);
+    const handleUpdateAppSettings = useSettingsStore(s => s.handleUpdateAppSettings);
 
-    // ═══════════ CURRENCY SELECTION ═══════════
-    const [primaryCurrency, setPrimaryCurrency] = useState('BRL');
-    const [secondaryCurrency, setSecondaryCurrency] = useState('GBP');
-    const [rateFlipped, setRateFlipped] = useState(false);
-    const [displayCurrencyOverrides, setDisplayCurrencyOverridesState] = useState({}); // per-category map, e.g. { equity: 'USD', crypto: null }
-    const [currencyLoaded, setCurrencyLoaded] = useState(false);
+    // ═══════════ FTUE (from Zustand store) ═══════════
+    const ftueState = useFTUEStore(s => s.ftueState);
+    const setFtueState = useFTUEStore(s => s.setFtueState);
+    const updateFtueProgress = useFTUEStore(s => s.updateFtueProgress);
 
-    // Load currency prefs: DB first, then localStorage fallback
+    // ═══════════ UI STATE (from Zustand store) ═══════════
+    const isFormOpen = useUIStore(s => s.isFormOpen);
+    const setIsFormOpen = useUIStore(s => s.setIsFormOpen);
+    const editingTransaction = useUIStore(s => s.editingTransaction);
+    const setEditingTransaction = useUIStore(s => s.setEditingTransaction);
+    const isDeleteModalOpen = useUIStore(s => s.isDeleteModalOpen);
+    const setIsDeleteModalOpen = useUIStore(s => s.setIsDeleteModalOpen);
+    const transactionToDelete = useUIStore(s => s.transactionToDelete);
+    const setTransactionToDelete = useUIStore(s => s.setTransactionToDelete);
+    const isInspectorOpen = useUIStore(s => s.isInspectorOpen);
+    const setIsInspectorOpen = useUIStore(s => s.setIsInspectorOpen);
+    const inspectorMode = useUIStore(s => s.inspectorMode);
+    const setInspectorMode = useUIStore(s => s.setInspectorMode);
+    const statusModal = useUIStore(s => s.statusModal);
+    const setStatusModal = useUIStore(s => s.setStatusModal);
+    const isMonthlyCloseModalOpen = useUIStore(s => s.isMonthlyCloseModalOpen);
+    const setIsMonthlyCloseModalOpen = useUIStore(s => s.setIsMonthlyCloseModalOpen);
+
+    // ═══════════ CURRENCY (from Zustand store) ═══════════
+    const primaryCurrency = useCurrencyStore(s => s.primaryCurrency);
+    const secondaryCurrency = useCurrencyStore(s => s.secondaryCurrency);
+    const displayCurrencyOverrides = useCurrencyStore(s => s.displayCurrencyOverrides);
+    const rateFlipped = useCurrencyStore(s => s.rateFlipped);
+    const currencyLoaded = useCurrencyStore(s => s.currencyLoaded);
+    const formatPrimary = useCurrencyStore(s => s.formatPrimary);
+    const formatSecondary = useCurrencyStore(s => s.formatSecondary);
+    const toPrimary = useCurrencyStore(s => s.toPrimary);
+    const toSecondary = useCurrencyStore(s => s.toSecondary);
+    const setPrimaryCurrency = useCurrencyStore(s => s.setPrimaryCurrency);
+    const setSecondaryCurrency = useCurrencyStore(s => s.setSecondaryCurrency);
+    const setRateFlipped = useCurrencyStore(s => s.setRateFlipped);
+    const setDisplayCurrencyOverride = useCurrencyStore(s => s.setDisplayCurrencyOverride);
+
+    // Load currency prefs once on mount
+    useEffect(() => { useCurrencyStore.getState().loadCurrencyPrefs(); }, []);
+
+    // Persist currency prefs whenever they change
     useEffect(() => {
-        let cancelled = false;
-        (async () => {
-            try {
-                const res = await fetch('/api/user/profile');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (!cancelled && data.currencyPreferences) {
-                        setPrimaryCurrency(data.currencyPreferences.primary || 'BRL');
-                        setSecondaryCurrency(data.currencyPreferences.secondary || 'GBP');
-                        if (data.currencyPreferences.rateFlipped !== undefined) {
-                            setRateFlipped(data.currencyPreferences.rateFlipped);
-                        }
-                        if (data.currencyPreferences.displayCurrencyOverrides !== undefined) {
-                            setDisplayCurrencyOverridesState(data.currencyPreferences.displayCurrencyOverrides || {});
-                        } else if (data.currencyPreferences.displayCurrency !== undefined && data.currencyPreferences.displayCurrency) {
-                            // Legacy migration: single value -> apply to no category (ignore)
-                            setDisplayCurrencyOverridesState({});
-                        }
-                        setCurrencyLoaded(true);
-                        return;
-                    }
-                }
-            } catch { /* fall through to localStorage */ }
-
-            // Fallback to localStorage
-            if (!cancelled && typeof window !== 'undefined') {
-                const savedPrimary = localStorage.getItem('ff_primaryCurrency');
-                const savedSecondary = localStorage.getItem('ff_secondaryCurrency');
-                const savedFlipped = localStorage.getItem('ff_rateFlipped');
-                const savedOverrides = localStorage.getItem('ff_displayCurrencyOverrides');
-                if (savedPrimary && SUPPORTED_CURRENCIES[savedPrimary]) setPrimaryCurrency(savedPrimary);
-                if (savedSecondary && SUPPORTED_CURRENCIES[savedSecondary]) setSecondaryCurrency(savedSecondary);
-                if (savedFlipped !== null) setRateFlipped(savedFlipped === 'true');
-                if (savedOverrides) {
-                    try { setDisplayCurrencyOverridesState(JSON.parse(savedOverrides)); } catch { /* ignore */ }
-                }
-            }
-            if (!cancelled) setCurrencyLoaded(true);
-        })();
-        return () => { cancelled = true; };
-    }, []);
-
-    // Persist currency preferences to localStorage (instant) and DB (background)
-    useEffect(() => {
-        if (!currencyLoaded) return; // don't persist initial defaults
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('ff_primaryCurrency', primaryCurrency);
-            localStorage.setItem('ff_secondaryCurrency', secondaryCurrency);
-            localStorage.setItem('ff_rateFlipped', rateFlipped);
-            localStorage.setItem('ff_displayCurrencyOverrides', JSON.stringify(displayCurrencyOverrides));
-        }
-        // Background persist to DB
-        fetch('/api/user/profile', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ primaryCurrency, secondaryCurrency, rateFlipped, displayCurrencyOverrides }),
-        }).catch(() => { /* ignore – localStorage is the instant fallback */ });
-    }, [primaryCurrency, secondaryCurrency, rateFlipped, displayCurrencyOverrides, currencyLoaded]);
-
-    // Wrapped setter for per-category displayCurrencyOverrides
-    const setDisplayCurrencyOverride = useCallback((category, value) => {
-        setDisplayCurrencyOverridesState(prev => ({ ...prev, [category]: value }));
-    }, []);
-
-    // ═══════════ CURRENCY HELPERS ═══════════
-    const formatPrimary = useCallback((amount, options = {}) => formatCurrency(amount, primaryCurrency, options), [primaryCurrency]);
-    const formatSecondary = useCallback((amount, options = {}) => formatCurrency(amount, secondaryCurrency, options), [secondaryCurrency]);
-    const toPrimary = useCallback((amount, fromCurrency = 'GBP') => convertCurrency(amount, fromCurrency, primaryCurrency, rates), [primaryCurrency, rates]);
-    const toSecondary = useCallback((amount, fromCurrency = 'GBP') => convertCurrency(amount, fromCurrency, secondaryCurrency, rates), [secondaryCurrency, rates]);
+        useCurrencyStore.getState().persistCurrencyPrefs();
+    }, [primaryCurrency, secondaryCurrency, rateFlipped, displayCurrencyOverrides]);
 
     // ═══════════ HELPERS ═══════════
     const parseDate = (dateStr) => {
@@ -749,18 +721,7 @@ export function PortfolioProvider({ children }) {
         }
     }, [totalNetWorthBRL, totalPensionBRL, totalFixedIncomeBRL, totalEquityBRL, totalRealEstateBRL, totalCryptoBRL, totalDebtBRL, rates, refreshAllData]);
 
-    const handleUpdateAppSettings = useCallback(async (newSettings) => {
-        setAppSettings(newSettings);
-        try {
-            await fetch('/api/app-settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newSettings)
-            });
-        } catch (error) {
-            console.error('Failed to update app settings:', error);
-        }
-    }, []);
+
 
     // ═══════════ AUTO MONTHLY CLOSE TRIGGER ═══════════
     useEffect(() => {
@@ -821,36 +782,8 @@ export function PortfolioProvider({ children }) {
 
         // FTUE
         ftueState, setFtueState,
-        updateFtueProgress: async (updates) => {
-            try {
-                const res = await fetch('/api/ftue', {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(updates)
-                });
-                if (res.ok) {
-                    const merged = await res.json();
-                    setFtueState(merged);
-                    return merged;
-                } else {
-                    console.error('FTUE update returned non-OK status:', res.status, await res.text().catch(() => ''));
-                }
-            } catch (e) { console.error('Failed to update FTUE:', e); }
-        },
-        resetFtue: async () => {
-            try {
-                const res = await fetch('/api/ftue', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'reset' })
-                });
-                if (res.ok) {
-                    const state = await res.json();
-                    setFtueState(state);
-                    refreshAllData();
-                }
-            } catch (e) { console.error('Failed to reset FTUE:', e); }
-        },
+        updateFtueProgress,
+        resetFtue: () => useFTUEStore.getState().resetFtue(refreshAllData),
 
         // UI state
         isFormOpen, setIsFormOpen,
@@ -885,8 +818,8 @@ export function PortfolioProvider({ children }) {
         isInspectorOpen, inspectorMode, statusModal, isMonthlyCloseModalOpen,
         setIsFormOpen, setEditingTransaction, setIsDeleteModalOpen, setIsInspectorOpen, setInspectorMode, setStatusModal, setIsMonthlyCloseModalOpen,
         primaryCurrency, secondaryCurrency, rateFlipped, displayCurrencyOverrides, formatPrimary, formatSecondary, toPrimary, toSecondary,
-        setPrimaryCurrency, setSecondaryCurrency, setRateFlipped, setDisplayCurrencyOverride, displayCurrencyOverrides,
-        ftueState, setFtueState,
+        setPrimaryCurrency, setSecondaryCurrency, setRateFlipped, setDisplayCurrencyOverride,
+        ftueState, updateFtueProgress,
         appSettings, handleUpdateAppSettings
     ]);
 

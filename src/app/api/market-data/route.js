@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { kvGet, kvSet } from '@/lib/kv';
+import { z } from 'zod';
+import { validateBody } from '@/lib/validation';
 
 // ═══════════ CACHE CONFIG ═══════════
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
@@ -7,6 +9,11 @@ const CACHE_KEY = 'market_data_cache';
 
 // Track in-flight background refresh to prevent duplicate scrapes
 let backgroundRefreshInFlight = false;
+
+const PostMarketDataSchema = z.object({
+    tickers: z.array(z.string().min(1)).min(1, 'No tickers provided'),
+    forceRefresh: z.boolean().optional().default(false)
+});
 
 // ═══════════ CACHE HELPERS ═══════════
 const loadCacheFromDB = async () => {
@@ -158,11 +165,11 @@ const backgroundRefresh = async (staleTickers, dbCache) => {
 // ═══════════ API HANDLER ═══════════
 export async function POST(request) {
     try {
-        const { tickers, forceRefresh } = await request.json();
+        const body = await request.json();
+        const { data, error } = validateBody(PostMarketDataSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
-        if (!tickers || tickers.length === 0) {
-            return NextResponse.json({ error: 'No tickers provided' }, { status: 400 });
-        }
+        const { tickers, forceRefresh } = data;
 
         // Load cache from persistent DB (survives serverless cold starts)
         const dbCache = await loadCacheFromDB();

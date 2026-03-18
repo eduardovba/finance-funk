@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { kvGet, kvSet } from '@/lib/kv';
 import { requireAuth } from '@/lib/authGuard';
+import { z } from 'zod';
+import { validateBody } from '@/lib/validation';
 
 const KEY = 'allocation_targets';
 
@@ -19,6 +21,11 @@ const DEFAULTS = {
         USD: 10
     }
 };
+
+const PostAllocationTargetsSchema = z.object({
+    assetClasses: z.record(z.string(), z.coerce.number()).optional(),
+    currencies: z.record(z.string(), z.coerce.number()).optional()
+}).passthrough();
 
 export async function GET() {
     try {
@@ -45,7 +52,10 @@ export async function GET() {
 export async function POST(request) {
     try {
         const user = await requireAuth();
-        const data = await request.json();
+        const body = await request.json();
+        const { data, error } = validateBody(PostAllocationTargetsSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
+
         await kvSet(KEY, data, user.id);
         return NextResponse.json({ success: true, data });
     } catch (error) {

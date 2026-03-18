@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function AssetCardSkeleton() {
     return (
-        <div className="glass-card relative overflow-hidden transition-all duration-300 ease-out mb-3 bg-opacity-40 backdrop-blur-md pointer-events-none" style={{ padding: '0' }}>
+        <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative overflow-hidden transition-all duration-300 ease-out mb-3 pointer-events-none" style={{ padding: '0' }}>
             <div className="p-4 pl-5 flex items-center justify-between min-h-[72px]">
                 <div className="flex items-center gap-3 flex-1">
                     {/* Icon Skeleton */}

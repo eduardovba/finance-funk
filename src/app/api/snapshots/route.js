@@ -3,9 +3,26 @@ import { NextResponse } from 'next/server';
 import { query, run } from '@/lib/db';
 import { kvGet, kvSet } from '@/lib/kv';
 import { requireAuth } from '@/lib/authGuard';
+import { z } from 'zod';
+import { validateBody } from '@/lib/validation';
 
 const KEY = 'historical_snapshots';
 export const dynamic = 'force-dynamic';
+
+const PostSnapshotSchema = z.object({
+    month: z.string().regex(/^\d{4}-\d{2}$/, 'Month must be YYYY-MM format'),
+    totalminuspensionsBRL: z.coerce.number(),
+    totalminuspensionsGBP: z.coerce.number().optional(),
+    totalWithPensionsBRL: z.coerce.number().optional(),
+    totalWithPensionsGBP: z.coerce.number().optional(),
+    equityBRL: z.coerce.number().optional(),
+    cryptoBRL: z.coerce.number().optional(),
+    fixedIncomeBRL: z.coerce.number().optional(),
+    realEstateBRL: z.coerce.number().optional(),
+    pensionsBRL: z.coerce.number().optional(),
+    debtBRL: z.coerce.number().optional(),
+    fxRate: z.coerce.number().optional()
+}).passthrough(); // Allow additional fields for forward compatibility
 
 export async function GET() {
     try {
@@ -23,12 +40,9 @@ export async function GET() {
 export async function POST(request) {
     try {
         const user = await requireAuth();
-        const newSnapshot = await request.json();
-
-        // Validate required fields
-        if (!newSnapshot.month || !newSnapshot.totalminuspensionsBRL) {
-            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-        }
+        const body = await request.json();
+        const { data: newSnapshot, error } = validateBody(PostSnapshotSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
         let data = await kvGet(KEY, [], user.id);
 

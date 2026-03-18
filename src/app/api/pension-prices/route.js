@@ -1,8 +1,28 @@
 import { NextResponse } from 'next/server';
 import { kvGet, kvSet } from '@/lib/kv';
+import { z } from 'zod';
+import { validateBody, optionalString } from '@/lib/validation';
 
 const MAP_KEY = 'pension_fund_map';
 const CACHE_KEY = 'pension_live_prices';
+
+const PostTestScrapeSchema = z.object({
+    action: z.literal('test-scrape'),
+    url: z.string().url('URL is required'),
+    assetName: z.string().optional()
+});
+
+const PostSaveConfigSchema = z.object({
+    action: z.literal('save-config'),
+    asset: z.string().min(1),
+    url: z.string().optional(),
+    ticker: z.string().optional(),
+    type: z.string().optional(),
+    selector: z.string().optional(),
+    buyPath: z.string().optional()
+});
+
+const PostPensionPriceSchema = z.union([PostTestScrapeSchema, PostSaveConfigSchema]);
 
 // Helper to read the mapping
 const getMapping = async () => {
@@ -116,11 +136,11 @@ export async function GET(request) {
 export async function POST(request) {
     try {
         const body = await request.json();
-        const { action } = body;
+        const { data, error } = validateBody(PostPensionPriceSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
-        if (action === 'test-scrape') {
-            const { url, assetName } = body;
-            if (!url) return NextResponse.json({ error: 'URL is required' }, { status: 400 });
+        if (data.action === 'test-scrape') {
+            const { url, assetName } = data;
 
             console.log(`Testing scrape for ${assetName} at ${url}`);
 
@@ -184,8 +204,8 @@ export async function POST(request) {
             return NextResponse.json({ price, type, selector, scrapedName });
         }
 
-        if (action === 'save-config') {
-            const { asset, url, ticker, type, selector, buyPath } = body;
+        if (data.action === 'save-config') {
+            const { asset, url, ticker, type, selector, buyPath } = data;
             const mapping = await getMapping();
 
             const exists = mapping.find(m => m.asset === asset);

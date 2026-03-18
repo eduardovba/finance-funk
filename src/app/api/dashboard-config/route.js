@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { kvGet, kvSet } from '@/lib/kv';
 import { requireAuth } from '@/lib/authGuard';
+import { z } from 'zod';
+import { validateBody } from '@/lib/validation';
 
 const KEY = 'dashboard_config';
 
@@ -72,6 +74,18 @@ const defaultDashboardConfig = {
     ]
 };
 
+const PostDashboardConfigSchema = z.object({
+    charts: z.array(z.object({
+        id: z.string(),
+        title: z.string(),
+        chartType: z.string(),
+        dataSources: z.array(z.string()),
+        series: z.array(z.string()),
+        order: z.coerce.number(),
+        options: z.record(z.string(), z.any()).optional()
+    })).optional()
+}).passthrough();
+
 export async function GET() {
     try {
         const user = await requireAuth();
@@ -87,7 +101,10 @@ export async function GET() {
 export async function POST(request) {
     try {
         const user = await requireAuth();
-        const config = await request.json();
+        const body = await request.json();
+        const { data: config, error } = validateBody(PostDashboardConfigSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
+
         await kvSet(KEY, config, user.id);
         return NextResponse.json({ success: true, config });
     } catch (error) {

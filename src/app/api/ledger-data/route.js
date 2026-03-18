@@ -1,6 +1,38 @@
 import { NextResponse } from 'next/server';
 import { query, run } from '@/lib/db';
 import { requireAuth } from '@/lib/authGuard';
+import { z } from 'zod';
+import { validateBody } from '@/lib/validation';
+
+const incomeDataSchema = z.object({
+    salarySavings: z.coerce.number().optional(),
+    salary: z.coerce.number().optional(),
+    fixedIncome: z.coerce.number().optional(),
+    equity: z.coerce.number().optional(),
+    realEstate: z.coerce.number().optional(),
+    extraordinary: z.coerce.number().optional()
+}).optional();
+
+const investmentsDataSchema = z.object({
+    equity: z.coerce.number().optional(),
+    fixedIncome: z.coerce.number().optional(),
+    realEstate: z.coerce.number().optional(),
+    pensions: z.coerce.number().optional(),
+    crypto: z.coerce.number().optional(),
+    debt: z.coerce.number().optional()
+}).optional();
+
+const PostLedgerDataSchema = z.object({
+    month: z.string().regex(/^\d{4}-\d{2}$/, 'Month must be YYYY-MM format'),
+    income: incomeDataSchema,
+    investments: investmentsDataSchema
+});
+
+const PutLedgerDataSchema = z.object({
+    month: z.string().regex(/^\d{4}-\d{2}$/, 'Month must be YYYY-MM format'),
+    type: z.enum(['income', 'investments']),
+    data: z.object({}).passthrough()
+});
 
 export async function GET() {
     try {
@@ -40,11 +72,10 @@ export async function PUT(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
-        const { month, type, data } = body;
+        const { data: validated, error } = validateBody(PutLedgerDataSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
-        if (!month || !type || !data) {
-            return NextResponse.json({ error: 'Missing required fields: month, type, data' }, { status: 400 });
-        }
+        const { month, type, data } = validated;
 
         if (type === 'income') {
             await run(
@@ -72,11 +103,10 @@ export async function POST(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
-        const { month, income, investments } = body;
+        const { data: validated, error } = validateBody(PostLedgerDataSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
-        if (!month) {
-            return NextResponse.json({ error: 'Missing required field: month' }, { status: 400 });
-        }
+        const { month, income, investments } = validated;
 
         // Check if row for this month already exists for this user
         const existing = await query('SELECT month FROM monthly_ledger WHERE month = ? AND user_id = ?', [month, user.id]);

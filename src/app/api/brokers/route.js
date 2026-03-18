@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import { query, run } from '@/lib/db';
 import { requireAuth } from '@/lib/authGuard';
+import { z } from 'zod';
+import { validateBody } from '@/lib/validation';
+
+const PostBrokerSchema = z.object({
+    name: z.string().min(1, 'Broker name is required').max(100),
+    currency: z.string().optional().default('USD'),
+    assetClass: z.string().optional().nullable()
+});
 
 export async function GET(request) {
     try {
@@ -39,17 +47,15 @@ export async function POST(request) {
     try {
         const user = await requireAuth();
         const body = await request.json();
-
-        if (!body.name) {
-            return NextResponse.json({ error: 'Broker name is required' }, { status: 400 });
-        }
+        const { data, error } = validateBody(PostBrokerSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
         const res = await run(
             `INSERT INTO brokers (name, currency, user_id, asset_class) VALUES (?, ?, ?, ?)`,
-            [body.name.trim(), body.currency || 'USD', user.id, body.assetClass || null]
+            [data.name.trim(), data.currency || 'USD', user.id, data.assetClass || null]
         );
 
-        return NextResponse.json({ success: true, id: res.lastID, name: body.name.trim(), currency: body.currency || 'USD', assetClass: body.assetClass || null });
+        return NextResponse.json({ success: true, id: res.lastID, name: data.name.trim(), currency: data.currency || 'USD', assetClass: data.assetClass || null });
     } catch (error) {
         if (error instanceof Response) return error;
         console.error('POST Error:', error);
