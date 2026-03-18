@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import AllocationTargetsBox from './AllocationTargetsBox';
-import GrowthForecastTab from './GrowthForecastTab';
+import GrowthForecastTab from './growth-forecast';
 import RebalanceAdvisorTab from './RebalanceAdvisorTab';
 import AssetsClassificationTab from './AssetsClassificationTab';
 import { usePortfolio } from '@/context/PortfolioContext';

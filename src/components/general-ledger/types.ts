@@ -1,27 +1,28 @@
 export interface GeneralLedgerTabProps {
-    activeTab: string;
-    equityTransactions: unknown[];
-    cryptoTransactions: unknown[];
-    pensionTransactions: unknown[];
-    debtTransactions: unknown[];
-    transactions: unknown[];
-    realEstate: unknown[];
-    rates: Record<string, number> | null;
-    historicalSnapshots: HistoricalSnapshot[];
-    dashboardData: DashboardData | null;
-    onRecordSnapshot: () => Promise<void>;
-    onRefreshLedger: () => void;
-    onDeleteSnapshot: () => void;
-    marketData: Record<string, unknown>;
-    pensionPrices: Record<string, unknown>;
-    ledgerData: unknown;
-    fxHistory: Record<string, Record<string, number>>;
-    assetClasses: unknown[];
-    onSaveAssetClasses: (classes: unknown[]) => void;
-    appSettings: Record<string, unknown>;
-    onUpdateAppSettings: (settings: Record<string, unknown>) => void;
-    setIsMonthlyCloseModalOpen: (open: boolean) => void;
+    activeTab?: string;
+    equityTransactions?: unknown[];
+    cryptoTransactions?: unknown[];
+    pensionTransactions?: unknown[];
+    debtTransactions?: unknown[];
+    transactions?: unknown[];
+    realEstate?: unknown[];
+    rates?: Record<string, number> | null;
+    historicalSnapshots?: HistoricalSnapshot[];
+    dashboardData?: DashboardData | null;
+    onRecordSnapshot?: () => Promise<void>;
+    onRefreshLedger?: () => void;
+    onDeleteSnapshot?: () => void;
+    marketData?: Record<string, unknown>;
+    pensionPrices?: Record<string, unknown>;
+    ledgerData?: unknown;
+    fxHistory?: Record<string, Record<string, number>>;
+    assetClasses?: unknown[];
+    onSaveAssetClasses?: (classes: unknown[]) => void;
+    appSettings?: Record<string, unknown>;
+    onUpdateAppSettings?: (settings: Record<string, unknown>) => void;
+    setIsMonthlyCloseModalOpen?: (open: boolean) => void;
 }
+
 
 export interface HistoricalSnapshot {
     month: string;

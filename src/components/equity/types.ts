@@ -1,8 +1,8 @@
 export interface EquityTabProps {
-    transactions: EquityTransaction[];
-    marketData: Record<string, { price?: number; currency?: string; [key: string]: unknown }>;
-    rates: Record<string, number> | null;
-    onRefresh: () => void;
+    transactions?: EquityTransaction[];
+    marketData?: Record<string, { price?: number; currency?: string; [key: string]: unknown }>;
+    rates?: Record<string, number> | null;
+    onRefresh?: () => void;
 }
 
 export interface EquityTransaction {
