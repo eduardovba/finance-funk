@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { usePortfolio } from '@/context/PortfolioContext';
-import GeneralLedgerTab from '@/components/GeneralLedgerTab';
+import GeneralLedgerTab from '@/components/general-ledger';
 
 export default function LedgerPage() {
     const params = useParams();

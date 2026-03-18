@@ -2,7 +2,33 @@
 
 import { create } from 'zustand';
 
-const useSettingsStore = create((set, get) => ({
+// ═══════════ TYPES ═══════════
+
+export interface AppSettings {
+    autoMonthlyCloseEnabled: boolean;
+    backgroundSelection: string;
+}
+
+export interface SettingsState {
+    appSettings: AppSettings;
+    forecastSettings: Record<string, unknown>;       // TODO: define ForecastSettings shape
+    dashboardConfig: unknown | null;                 // TODO: define DashboardConfig shape
+    allocationTargets: Record<string, unknown>;      // TODO: define AllocationTargets shape
+    assetClasses: Record<string, string>;
+}
+
+export interface SettingsActions {
+    setAppSettings: (v: AppSettings | ((prev: AppSettings) => AppSettings)) => void;
+    setForecastSettings: (v: Record<string, unknown>) => void;
+    setDashboardConfig: (v: unknown | null) => void;
+    setAllocationTargets: (v: Record<string, unknown>) => void;
+    setAssetClasses: (v: Record<string, string>) => void;
+    handleUpdateAppSettings: (newSettings: AppSettings) => Promise<void>;
+}
+
+// ═══════════ STORE ═══════════
+
+const useSettingsStore = create<SettingsState & SettingsActions>((set) => ({
     // ═══════════ STATE ═══════════
     appSettings: { autoMonthlyCloseEnabled: true, backgroundSelection: 'frosted-glass' },
     forecastSettings: {},

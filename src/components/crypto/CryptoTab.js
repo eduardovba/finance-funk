@@ -1,476 +1,79 @@
-import React, { useState, useEffect, useRef } from 'react';
-import ConfirmationModal from './ConfirmationModal';
-import AssetSearch from './AssetSearch';
+import React from 'react';
+import ConfirmationModal from '../ConfirmationModal';
+import AssetSearch from '../AssetSearch';
 import { formatCurrency, convertCurrency, SUPPORTED_CURRENCIES } from '@/lib/currency';
-import CurrencySelector from './CurrencySelector';
-import AssetCard from './AssetCard';
-import TransactionTimeline from './TransactionTimeline';
-import FloatingActionButton from './FloatingActionButton';
-import EmptyState from './EmptyState';
-import PullToRefresh from './PullToRefresh';
-import AssetCardSkeleton from './AssetCardSkeleton';
-
-import DesktopAssetTable from './DesktopAssetTable';
-import ContextPane from './ContextPane';
-import useContextPaneHeight from '@/hooks/useContextPaneHeight';
-import { usePortfolio } from '@/context/PortfolioContext';
-import DisplayCurrencyPicker from './DisplayCurrencyPicker';
+import CurrencySelector from '../CurrencySelector';
+import AssetCard from '../AssetCard';
+import TransactionTimeline from '../TransactionTimeline';
+import FloatingActionButton from '../FloatingActionButton';
+import EmptyState from '../EmptyState';
+import AssetCardSkeleton from '../AssetCardSkeleton';
+import DesktopAssetTable from '../DesktopAssetTable';
+import ContextPane from '../ContextPane';
 import { X } from 'lucide-react';
-import BrokerForm from './BrokerForm';
-import TransactionForm from './TransactionForm';
-import AssetLogo from './AssetLogo';
-import PageTutorialOverlay from './ftue/PageTutorialOverlay';
-import HeroDetailDrawer from './HeroDetailDrawer';
+import BrokerForm from '../BrokerForm';
+import TransactionForm from '../TransactionForm';
+import AssetLogo from '../AssetLogo';
+import NumberInput from '../NumberInput';
+import DisplayCurrencyPicker from '../DisplayCurrencyPicker';
+import PageTutorialOverlay from '../ftue/PageTutorialOverlay';
+import HeroDetailDrawer from '../HeroDetailDrawer';
+import PullToRefresh from '../PullToRefresh';
+import useCrypto, { BROKER_CURRENCY } from './useCrypto';
 
-// No more ASSET_TICKER_MAP - tickers are stored directly on transactions
-
-const EQUITY_TUTORIAL_STEPS = [
-    // Populated state steps (shown when data exists)
-    { type: 'spotlight', targetId: 'ftue-equity-header', title: 'Portfolio Pulse', message: "Get a high-level view of your total equity value, invested capital, P&L, and broker breakdown, all in a single interface. Use the currency picker to instantly adjust your display.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-equity-broker-section', title: 'Broker Insights', message: "Each broker expands to reveal individual holdings, precise P&L, and available actions. Toggle \u2018Show Empty\u2019 to see brokers with no current positions.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-equity-ledger', title: 'Transparent Activity Stream', message: "Every buy, sell, and dividend payment is meticulously logged for your review. You have full edit and deletion control over any entry.", position: 'top' },
-    // Empty state step (shown when no data)
-    { type: 'spotlight', targetId: 'ftue-equity-empty', title: 'Ready to Invest?', message: "It seems your equity portfolio is a blank slate. Let\u2019s get you started. Make your first move with the \u2018+\u2019 button.", position: 'top' },
-    // Always visible
-    { type: 'spotlight', targetId: 'ftue-equity-fab', title: 'Action Required', message: "Click \u2018+\u2019 to add your first broker, execute your first stock or ETF buy, or record a sale. This is where your equity journey begins.", position: 'top' },
+const CRYPTO_TUTORIAL_STEPS = [
+    { type: 'spotlight', targetId: 'ftue-crypto-header', title: 'Digital Wealth Snap', message: "Your total crypto value, cost basis, and detailed P&L \u2013 including a clear breakdown by exchange. Pick your display currency.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-crypto-exchange-section', title: 'Exchange-Specific Views', message: "Drill down into any exchange to review holdings, P&L, and specific wallet/cold storage entries. Your assets, tracked individually.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-crypto-ledger', title: 'Crypto Activity Ledger', message: "A complete transaction history with automated cost basis tracking. We record every buy and sell for absolute transparency.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-crypto-empty', title: 'Entering the Market?', message: "Your crypto portfolio is currently a clean slate. Tap the \u2018+\u2019 button to integrate your first exchange, such as Binance or Coinbase.", position: 'top' },
+    { type: 'spotlight', targetId: 'global-fab', title: 'Add Exchange or Buy', message: "Link your crypto world with \u2018+\u2019. Add an exchange, record your first crypto buy, or log a sale. Start building your digital position.", position: 'top', shape: 'circle', padding: 8 },
 ];
 
-const BROKER_CURRENCY = {
-    'Trading 212': 'GBP', 'XP': 'BRL', 'Amazon': 'USD', 'Green Gold Farms': 'USD', 'Monzo': 'GBP', 'Fidelity': 'GBP'
-};
-
-export default function EquityTab({ transactions = [], marketData, rates, onRefresh }) {
-    const { setIsInspectorOpen, setInspectorMode, setEditingTransaction, displayCurrencyOverrides } = usePortfolio();
-
-    const [isLoading, setIsLoading] = useState(false);
-    const [ledgerOpen, setLedgerOpen] = useState(false);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [isDeleteBrokerModalOpen, setIsDeleteBrokerModalOpen] = useState(false);
-    const [brokerToDelete, setBrokerToDelete] = useState(null);
-    const [expandedBrokers, setExpandedBrokers] = useState({});
-    const toggleBroker = (b) => setExpandedBrokers(prev => ({ ...prev, [b]: !prev[b] }));
-    const [searchTerm, setSearchTerm] = useState('');
-    const contextPaneMaxHeight = useContextPaneHeight('ftue-equity-broker-section', 'ftue-equity-header');
-    const [selectedAsset, setSelectedAsset] = useState(null);
-    const [rightPaneMode, setRightPaneMode] = useState('default');
-    const [showEmptyBrokers, setShowEmptyBrokers] = useState(false);
-    const [brokerDict, setBrokerDict] = useState({ ...BROKER_CURRENCY });
-    const [explicitDbBrokers, setExplicitDbBrokers] = useState([]);
-    const [deletedBrokerNames, setDeletedBrokerNames] = useState([]);
-    const [newlyAddedBrokers, setNewlyAddedBrokers] = useState([]);
-
-    const isInitialFetch = useRef(true);
-
-    const fetchBrokers = async () => {
-        try {
-            const res = await fetch('/api/brokers');
-            const data = await res.json();
-            if (data.brokers) {
-                const fetchedNames = data.brokers.map(b => b.name);
-
-                // Track newly added brokers in this session
-                if (!isInitialFetch.current) {
-                    const newNames = fetchedNames.filter(name => !explicitDbBrokers.includes(name) && !deletedBrokerNames.includes(name));
-                    if (newNames.length > 0) {
-                        setNewlyAddedBrokers(prev => [...new Set([...prev, ...newNames])]);
-                        // Auto-expand the newly added broker(s)
-                        const expansions = {};
-                        newNames.forEach(n => expansions[n] = true);
-                        setExpandedBrokers(prev => ({ ...prev, ...expansions }));
-                    }
-                }
-
-                const dict = { ...BROKER_CURRENCY };
-                data.brokers.forEach(b => dict[b.name] = b.currency);
-                // Remove any brokers the user has deleted this session
-                deletedBrokerNames.forEach(name => delete dict[name]);
-                setBrokerDict(dict);
-                setExplicitDbBrokers(fetchedNames);
-                isInitialFetch.current = false;
-            }
-        } catch (e) { console.error('Failed to fetch brokers', e); }
-    };
-
-    useEffect(() => {
-        fetchBrokers();
-    }, []);
-
-    // Auto-expand brokers when searching
-    useEffect(() => {
-        if (searchTerm) {
-            const { activeHoldings: rawActiveHoldings } = computeHoldings();
-            const matching = {};
-            rawActiveHoldings.forEach(h => {
-                if (h.asset.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    (h.ticker && h.ticker.toLowerCase().includes(searchTerm.toLowerCase()))) {
-                    matching[h.broker] = true;
-                }
-            });
-            setExpandedBrokers(matching);
-        }
-    }, [searchTerm, transactions]);
-
-    // Scroll to hash on load
-    useEffect(() => {
-        if (!isLoading && typeof window !== 'undefined' && window.location.hash) {
-            const id = window.location.hash.substring(1); // remove '#'
-            const element = document.getElementById(id);
-            if (element) {
-                setTimeout(() => {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    // Highlight the row temporarily
-                    element.style.transition = 'background-color 1.5s ease-out';
-                    element.style.backgroundColor = 'rgba(212, 175, 55, 0.2)';
-                    setTimeout(() => { element.style.backgroundColor = ''; }, 2000);
-                }, 100);
-            }
-        }
-    }, [isLoading, transactions.length]);
-    const [trToDelete, setTrToDelete] = useState(null);
-    const [editingTr, setEditingTr] = useState(null);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [isSellModalOpen, setIsSellModalOpen] = useState(false);
-    const [sellData, setSellData] = useState(null);
-    const [buyData, setBuyData] = useState(null);
-    const [isFetchingPrice, setIsFetchingPrice] = useState(false);
-
-    const handleDeleteClick = (id) => { setTrToDelete(id); setIsDeleteModalOpen(true); };
-    const handleConfirmDelete = async () => {
-        if (!trToDelete) return;
-        try {
-            await fetch(`/api/equity-transactions?id=${trToDelete}`, { method: 'DELETE' });
-            if (onRefresh) onRefresh();
-            setIsDeleteModalOpen(false); setTrToDelete(null);
-        } catch (e) { console.error(e); }
-    };
-
-    const handleDeleteBrokerClick = (brokerName) => {
-        setBrokerToDelete(brokerName);
-        setIsDeleteBrokerModalOpen(true);
-    };
-
-    const handleConfirmDeleteBroker = async () => {
-        if (!brokerToDelete) return;
-        try {
-            const res = await fetch(`/api/brokers?name=${encodeURIComponent(brokerToDelete)}`, { method: 'DELETE' });
-            if (!res.ok) {
-                console.error('Delete failed:', await res.text());
-                return;
-            }
-            // Track this broker as deleted so it won't reappear from BROKER_CURRENCY
-            setDeletedBrokerNames(prev => [...prev, brokerToDelete]);
-            // Remove it from brokerDict immediately
-            setBrokerDict(prev => {
-                const next = { ...prev };
-                delete next[brokerToDelete];
-                return next;
-            });
-            // Remove from explicitDbBrokers
-            setExplicitDbBrokers(prev => prev.filter(n => n !== brokerToDelete));
-            setIsDeleteBrokerModalOpen(false);
-            setBrokerToDelete(null);
-        } catch (e) { console.error('Failed to delete broker', e); }
-    };
-
-    const handleEditClick = (tr) => { setEditingTr({ ...tr }); setRightPaneMode('edit-transaction'); };
-    const handleEditChange = (field, value) => {
-        setEditingTr(prev => ({ ...prev, [field]: value }));
-    };
-    const handleEditSave = async () => {
-        if (!editingTr) return;
-        try {
-            const payload = {
-                ...editingTr,
-                investment: parseFloat(editingTr.investment) || 0,
-                quantity: parseFloat(editingTr.quantity) || 0,
-                costPerShare: parseFloat(editingTr.costPerShare) || 0,
-                pnl: editingTr.pnl ? parseFloat(editingTr.pnl) : null,
-                roiPercent: editingTr.roiPercent ? parseFloat(editingTr.roiPercent) : null,
-            };
-            await fetch('/api/equity-transactions', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (onRefresh) onRefresh();
-            setRightPaneMode('default'); setEditingTr(null);
-        } catch (e) { console.error(e); }
-    };
-
-    // Sell flow
-    const handleSellClick = (holding) => {
-        const livePrice = getLivePrice(holding.ticker, holding.asset);
-        const avgCost = holding.qty > 0 ? holding.totalCost / holding.qty : 0;
-        const qty = Math.abs(holding.qty);
-        const sellPrice = livePrice || avgCost;
-        const proceeds = sellPrice * qty;
-        const pnl = proceeds - holding.totalCost;
-        const roi = holding.totalCost !== 0 ? (pnl / holding.totalCost * 100) : 0;
-        setSellData({
-            asset: holding.asset,
-            broker: holding.broker,
-            currency: holding.currency,
-            ticker: holding.ticker,
-            sharesHeld: qty,
-            avgCost,
-            qtyToSell: qty,
-            sellPricePerShare: sellPrice,
-            totalProceeds: proceeds,
-            pnl,
-            roi,
-            date: new Date().toISOString().split('T')[0],
-        });
-        setIsSellModalOpen(true);
-    };
-
-    const updateSellCalc = (field, value) => {
-        setSellData(prev => {
-            const updated = { ...prev, [field]: value };
-            let qty = parseFloat(updated.qtyToSell) || 0;
-            let price = parseFloat(updated.sellPricePerShare) || 0;
-            let proceeds = parseFloat(updated.totalProceeds) || 0;
-            const avgCost = prev.avgCost;
-
-            if (field === 'totalProceeds') {
-                // If user inputs total value, calculate price per share
-                if (qty > 0) {
-                    price = proceeds / qty;
-                    updated.sellPricePerShare = price;
-                }
-            } else if (field === 'qtyToSell' || field === 'sellPricePerShare') {
-                // If user inputs qty or price, calculate total proceeds
-                proceeds = price * qty;
-                updated.totalProceeds = proceeds;
-            }
-
-            const costBasis = avgCost * qty;
-            updated.pnl = updated.totalProceeds - costBasis;
-            updated.roi = costBasis !== 0 ? (updated.pnl / costBasis * 100) : 0;
-            return updated;
-        });
-    };
-
-    const handleSellConfirm = async () => {
-        if (!sellData) return;
-        const qty = parseFloat(sellData.qtyToSell) || 0;
-        const price = parseFloat(sellData.sellPricePerShare) || 0;
-        const tr = {
-            date: sellData.date,
-            asset: sellData.asset,
-            broker: sellData.broker,
-            currency: sellData.currency,
-            ticker: sellData.ticker,
-            investment: -(price * qty),
-            quantity: -qty,
-            costPerShare: price,
-            pnl: sellData.pnl,
-            roiPercent: sellData.roi,
-        };
-        try {
-            const res = await fetch('/api/equity-transactions', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(tr)
-            });
-            if (res.ok) {
-                if (onRefresh) onRefresh();
-                setIsSellModalOpen(false); setSellData(null);
-            }
-        } catch (e) { console.error(e); }
-    };
-
-    // Buy flow
-    const handleBuyClick = (holding) => {
-        const livePrice = getLivePrice(holding.ticker, holding.asset);
-        setBuyData({
-            asset: holding.asset,
-            broker: holding.broker,
-            currency: holding.currency,
-            ticker: holding.ticker,
-            qtyToBuy: '',
-            buyPricePerShare: livePrice || '',
-            totalInvestment: 0,
-            date: new Date().toISOString().split('T')[0],
-        });
-        setRightPaneMode('add-transaction');
-    };
-
-    const handleNewBuyClick = (brokerName) => {
-        const cur = BROKER_CURRENCY[brokerName] || 'GBP';
-        setBuyData({
-            asset: '',
-            broker: brokerName,
-            currency: cur,
-            ticker: '',
-            qtyToBuy: '',
-            buyPricePerShare: '',
-            totalInvestment: 0,
-            date: new Date().toISOString().split('T')[0],
-        });
-        setRightPaneMode('add-transaction');
-    };
-
-    const updateBuyCalc = (field, value) => {
-        setBuyData(prev => {
-            const updated = { ...prev, [field]: value };
-            let qty = parseFloat(updated.qtyToBuy) || 0;
-            let price = parseFloat(updated.buyPricePerShare) || 0;
-            let investment = parseFloat(updated.totalInvestment) || 0;
-
-            if (field === 'totalInvestment') {
-                // If user inputs total investment, calculate price per share if quantity exists
-                if (qty > 0) {
-                    price = investment / qty;
-                    updated.buyPricePerShare = price;
-                }
-            } else if (field === 'qtyToBuy' || field === 'buyPricePerShare') {
-                // If user inputs qty or price, calculate total investment
-                investment = qty * price;
-                updated.totalInvestment = investment;
-            }
-
-            return updated;
-        });
-    };
-
-    const handleBuyConfirm = async () => {
-        if (!buyData || !buyData.asset) return;
-        const qty = parseFloat(buyData.qtyToBuy) || 0;
-        const price = parseFloat(buyData.buyPricePerShare) || 0;
-        if (qty <= 0 || price <= 0) return;
-        const tr = {
-            date: buyData.date,
-            asset: buyData.asset,
-            broker: buyData.broker,
-            currency: buyData.currency,
-            ticker: buyData.ticker,
-            investment: price * qty,
-            quantity: qty,
-            costPerShare: price,
-            pnl: null,
-            roiPercent: null,
-            isSalaryContribution: buyData.isSalaryContribution || false,
-            type: 'Buy',
-        };
-        try {
-            const res = await fetch('/api/equity-transactions', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(tr)
-            });
-            if (res.ok) {
-                if (onRefresh) onRefresh();
-                setRightPaneMode('default'); setBuyData(null);
-            }
-        } catch (e) { console.error(e); }
-    };
-
-    // Compute current holdings from transactions
-    const computeHoldings = () => {
-        const holdings = {}; // "asset|broker" -> { qty, totalCost, broker, currency, ticker }
-        const lockedPnL = {}; // broker -> total realized P&L from explicit pnl fields
-
-        // Sort transactions chronologically for correct position tracking
-        const sorted = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
-
-        sorted.forEach(tr => {
-            const key = `${tr.asset}|${tr.broker}`;
-            if (!holdings[key]) {
-                holdings[key] = { asset: tr.asset, qty: 0, totalCost: 0, broker: tr.broker, currency: tr.currency, ticker: tr.ticker || null };
-            }
-            // Update ticker if this transaction has one and the holding doesn't yet
-            if (tr.ticker && !holdings[key].ticker) holdings[key].ticker = tr.ticker;
-            if (!lockedPnL[tr.broker]) lockedPnL[tr.broker] = 0;
-
-            // Both buys and sells affect qty and totalCost
-            holdings[key].qty += (tr.quantity || 0);
-            holdings[key].totalCost += tr.investment;
-
-            // Track explicit P&L from sell transactions
-            if (tr.investment < 0 && tr.pnl !== null && tr.pnl !== undefined) {
-                lockedPnL[tr.broker] += tr.pnl;
-            }
-
-            // When position is fully closed, lock the remaining cost as P&L and reset
-            if (Math.abs(holdings[key].qty) < 0.01) {
-                holdings[key].totalCost = 0;
-                holdings[key].qty = 0;
-            }
-        });
-
-
-        // Filter out fully sold positions (qty ≈ 0)
-        const activeHoldings = Object.values(holdings).filter(h => Math.abs(h.qty) > 0.01);
-        return { activeHoldings, lockedPnL };
-    };
-
-    const { activeHoldings: rawActiveHoldings, lockedPnL } = computeHoldings();
-
-    // Filter active holdings based on search term
-    const activeHoldings = rawActiveHoldings.filter(h =>
-        h.asset.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (h.ticker && h.ticker.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-
-    // Group by broker dynamically
-    const brokerGroups = {};
-    activeHoldings.forEach(h => {
-        if (!brokerGroups[h.broker]) brokerGroups[h.broker] = [];
-        brokerGroups[h.broker].push(h);
-    });
-
-    // Calculate total cost for sorting & dynamic top currency
-    const brokerTotals = {};
-    const currencyTotals = {};
-
-    Object.keys(brokerGroups).forEach(b => {
-        const cur = brokerDict[b] || 'GBP';
-        let totalCost = brokerGroups[b].reduce((acc, h) => acc + Math.abs(h.totalCost), 0);
-
-        let totalCostBase = totalCost;
-        if (cur !== 'GBP' && rates) {
-            if (cur === 'USD') totalCostBase = totalCost / rates.USD;
-            if (cur === 'BRL') totalCostBase = totalCost / rates.BRL;
-        }
-        brokerTotals[b] = totalCostBase;
-
-        if (!currencyTotals[cur]) currencyTotals[cur] = 0;
-        currencyTotals[cur] += totalCostBase;
-    });
-
-    const activeBrokers = Object.keys(brokerGroups);
-    const dbBrokerNames = explicitDbBrokers.filter(b => !activeBrokers.includes(b));
-
-    let topCurrency = 'GBP';
-    let maxAmt = -1;
-    Object.entries(currencyTotals).forEach(([cur, amt]) => {
-        if (amt > maxAmt) {
-            maxAmt = amt;
-            topCurrency = cur;
-        }
-    });
-    if (Object.keys(currencyTotals).length === 0) topCurrency = 'GBP';
-
-    // Apply display currency override if set by the user
-    const effectiveCurrency = displayCurrencyOverrides?.equity || topCurrency;
-
-    const brokers = [...activeBrokers, ...dbBrokerNames]
-        .sort((a, b) => {
-            const costA = brokerTotals[a] || 0;
-            const costB = brokerTotals[b] || 0;
-            if (costA !== costB) return costB - costA; // highest first
-            return a.localeCompare(b);
-        });
-
-    const getLivePrice = (ticker, assetName) => {
-        // Cash is always worth 1.00 in its currency
-        if (assetName === 'Cash') return 1.0;
-        // Monzo is private equity, updated manually
-        if (assetName === 'Monzo - Equity') return 14.41;
-        if (!ticker || !marketData[ticker]) return null;
-        return marketData[ticker].price;
-    };
+export default function CryptoTab({ transactions = [], marketData: globalMarketData, rates, onRefresh }) {
+    const h = useCrypto({ transactions, marketData: globalMarketData, rates, onRefresh });
+    const {
+        isLoading, setIsLoading,
+        ledgerOpen, setLedgerOpen,
+        isDeleteModalOpen, setIsDeleteModalOpen,
+        isDeleteBrokerModalOpen, setIsDeleteBrokerModalOpen,
+        brokerToDelete, setBrokerToDelete,
+        expandedBrokers, setExpandedBrokers,
+        toggleBroker,
+        searchTerm, setSearchTerm,
+        contextPaneMaxHeight,
+        selectedAsset, setSelectedAsset,
+        rightPaneMode, setRightPaneMode,
+        showEmptyBrokers, setShowEmptyBrokers,
+        brokerDict,
+        explicitDbBrokers,
+        newlyAddedBrokers, setNewlyAddedBrokers,
+        trToDelete,
+        editingTr, setEditingTr,
+        isSellModalOpen, setIsSellModalOpen,
+        sellData, setSellData,
+        buyData, setBuyData,
+        isFetchingPrice, setIsFetchingPrice,
+        activeHoldings, lockedPnL,
+        brokerGroups,
+        brokers,
+        topCurrency, effectiveCurrency,
+        marketData,
+        fetchBrokers,
+        handleDeleteClick, handleConfirmDelete,
+        handleDeleteBrokerClick, handleConfirmDeleteBroker,
+        handleEditClick, handleEditChange, handleEditSave,
+        handleSellClick, updateSellCalc, handleSellConfirm,
+        handleBuyClick, handleNewBuyClick, updateBuyCalc, handleBuyConfirm,
+        handleRenameAsset,
+        getLivePrice,
+    } = h;
 
     const renderBrokerTable = (brokerName, items) => {
         if (!items) items = [];
         const isNewlyAdded = newlyAddedBrokers.includes(brokerName);
         if (!showEmptyBrokers && !isNewlyAdded && (items.length === 0 && (!lockedPnL[brokerName] || lockedPnL[brokerName] === 0))) return null;
 
-        const cur = brokerDict[brokerName] || 'GBP';
+        const cur = brokerDict[brokerName] || 'USD';
 
         let totalCurrentValue = 0;
         let totalPurchasePrice = 0;
@@ -531,7 +134,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
         const glowClass = isNewlyAdded ? 'shadow-[0_0_25px_rgba(212,175,55,0.4)] border-[#D4AF37] ring-1 ring-[#D4AF37]/50' : '';
 
         return (
-            <div key={brokerName} id={encodeURIComponent(brokerName)} data-ftue-broker className={`mb-8 rounded-2xl transition-all duration-1000 ${glowClass}`}>
+            <div key={brokerName} id={encodeURIComponent(brokerName)} className={`mb-8 rounded-2xl transition-all duration-1000 ${glowClass}`}>
                 <div
                     onClick={() => toggleBroker(brokerName)}
                     className="flex justify-between items-center mb-4 px-4 py-3 cursor-pointer bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] hover:bg-[#121418]/70 rounded-2xl transition-colors shadow-[0_4px_16px_rgba(0,0,0,0.3)]"
@@ -592,7 +195,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                                                 <div className="grid grid-cols-2 gap-4">
                                                     {!isCash && (
                                                         <div>
-                                                            <span className="block text-xs text-white/40 mb-1">Shares Hosted</span>
+                                                            <span className="block text-xs text-white/40 mb-1">Holdings</span>
                                                             <span className="text-sm font-medium text-white/90">{Math.abs(r.qty).toLocaleString(undefined, { maximumFractionDigits: 4 })}</span>
                                                         </div>
                                                     )}
@@ -715,24 +318,6 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
     };
 
     // Consolidated total across all brokers (dynamically picking currency with largest investment amount)
-    const handleRenameAsset = async (oldName, newName, broker) => {
-        try {
-            const res = await fetch('/api/assets/rename', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ oldName, newName, broker, assetClass: 'Equity' })
-            });
-            const data = await res.json();
-            if (!res.ok) return { error: data.error || 'Failed to rename' };
-            onRefresh();
-            setSelectedAsset(null);
-            return { success: true };
-        } catch (e) {
-            console.error('Rename failed:', e);
-            return { error: 'Network error' };
-        }
-    };
-
     const renderConsolidated = () => {
         let totalBase = 0;
         let totalCostBase = 0;
@@ -799,17 +384,17 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
         const totalROI = totalCostBase !== 0 ? totalPnL / totalCostBase * 100 : 0;
 
         return (
-            <div id="ftue-equity-header" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden mb-12">
+            <div id="ftue-crypto-header" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden mb-12">
                 {/* Hero Total */}
-                <div id="ftue-equity-hero" style={{
+                <div id="ftue-crypto-hero" style={{
                     padding: '24px',
-                    background: 'linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(255,255,255,0) 100%)',
+                    background: 'linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, rgba(255,255,255,0) 100%)',
                     borderBottom: '1px solid var(--glass-border)',
                     textAlign: 'center'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--fg-secondary)', marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                        📊 Equity Portfolio
-                        <DisplayCurrencyPicker topCurrency={topCurrency} category="equity" />
+                        ₿ Crypto Portfolio
+                        <DisplayCurrencyPicker topCurrency={topCurrency} category="crypto" />
                     </div>
                     <div style={{ fontSize: '2.2rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{formatCurrency(totalBase, effectiveCurrency)}</div>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '8px' }}>
@@ -821,7 +406,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                 </div>
 
                 {/* Broker Summary Cards */}
-                <div id="ftue-equity-brokers" style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                <div id="ftue-crypto-exchanges" style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
                     {brokerSummaries.filter(s => s.currentValue > 0.01 || s.purchasePrice > 0.01).map(s => (
                         <div
                             key={s.broker}
@@ -861,7 +446,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                     ))}
                 </div>
 
-                <HeroDetailDrawer categoryId="equity" effectiveCurrency={effectiveCurrency} totalCurrentValue={totalBase} />
+                <HeroDetailDrawer categoryId="crypto" effectiveCurrency={effectiveCurrency} totalCurrentValue={totalBase} />
             </div>
         );
     };
@@ -903,7 +488,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                             <label className="block text-white/60 text-xs mb-1">Broker</label>
                             <select
                                 value={buyData.broker}
-                                onChange={e => setBuyData(prev => ({ ...prev, broker: e.target.value, currency: BROKER_CURRENCY[e.target.value] || 'GBP' }))}
+                                onChange={e => setBuyData(prev => ({ ...prev, broker: e.target.value, currency: brokerDict[e.target.value] || 'USD' }))}
                                 className="w-full p-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm outline-none focus:border-[#D4AF37]/50"
                             >
                                 <option value="">Select Broker...</option>
@@ -941,7 +526,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                             ) : (
                                 <AssetSearch onSelect={async (selectedAsset) => {
                                     setIsFetchingPrice(true);
-                                    const destCurrency = BROKER_CURRENCY[buyData.broker] || 'GBP';
+                                    const destCurrency = brokerDict[buyData.broker] || 'USD';
                                     let lp = marketData[selectedAsset.symbol]?.price;
                                     let sourceCurrency = marketData[selectedAsset.symbol]?.currency || 'USD';
 
@@ -1078,10 +663,10 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                         <>
                             {renderConsolidated()}
 
-                            <div id="ftue-equity-broker-section">
+                            <div id="ftue-crypto-exchange-section">
                             {/* Brokers Header & Toggle */}
                             <div className="flex justify-between items-center mb-4 px-2">
-                                <h2 className="text-xl font-bold font-bebas tracking-widest text-white/90">Brokers</h2>
+                                <h3 className="font-bebas text-2xl tracking-widest text-parchment/60 mb-6 px-1">Crypto Exchanges & Wallets</h3>
                                 <button
                                     onClick={() => setShowEmptyBrokers(!showEmptyBrokers)}
                                     className="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-white/60 transition-colors border border-white/5"
@@ -1094,15 +679,18 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                             </div>
                         </>
                     ) : (
-                        <div id="ftue-equity-empty">
-                        <EmptyState
-                            icon="📈"
-                            title="No Equity Assets"
-                            message="You have no equity assets yet. Add a broker to log your first stock or ETF transaction."
-                            actionLabel="Add Broker"
-                            onAction={() => setRightPaneMode('add-broker')}
-                        />
-                        </div>
+                        <>
+                            <h2 className="text-xl font-bold font-bebas tracking-widest text-[#D4AF37]">CRYPTO PORTFOLIO</h2>
+                            <div id="ftue-crypto-empty">
+                            <EmptyState
+                                icon="💎"
+                                title="No Crypto Assets"
+                                message="You have no crypto assets yet. Add an exchange to log your first transaction."
+                                actionLabel="Add Exchange"
+                                onAction={() => setRightPaneMode('add-broker')}
+                            />
+                            </div>
+                        </>
                     )}
                     </div>
                         <div className={`${(selectedAsset || rightPaneMode !== 'default') ? 'block fixed inset-0 z-50 bg-[#0A0612] lg:bg-transparent lg:static lg:block' : 'hidden lg:block'} lg:sticky top-8 h-[100dvh] lg:h-fit overflow-hidden`}>
@@ -1120,7 +708,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                                                     <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors ml-auto"><X size={16} /></button>
                                                 </div>
                                                 <div className="flex-1">
-                                                    <BrokerForm assetClass="Equity" onSave={() => { setRightPaneMode('default'); fetchBrokers(); }} onCancel={() => setRightPaneMode('default')} />
+                                                    <BrokerForm assetClass="Crypto" onSave={() => { setRightPaneMode('default'); fetchBrokers(); }} onCancel={() => setRightPaneMode('default')} />
                                                 </div>
                                             </div>
                                         );
@@ -1136,7 +724,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                                                     <button onClick={() => { setRightPaneMode('default'); setEditingTr(null); }} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors"><X size={16} /></button>
                                                 </div>
                                                 <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
-                                                    {[['date', 'Date'], ['asset', 'Asset'], ['broker', 'Broker'], ['investment', 'Investment'], ['quantity', 'Quantity'], ['costPerShare', 'Cost/Share'], ['currency', 'Currency'], ['pnl', 'P&L'], ['roiPercent', 'ROI %']].map(([field, label]) => (
+                                                    {[['date', 'Date'], ['asset', 'Asset'], ['broker', 'Platform'], ['investment', 'Total Paid / Received'], ['quantity', 'Quantity'], ['currency', 'Currency'], ['pnl', 'P&L']].map(([field, label]) => (
                                                         <div key={field}>
                                                             <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">{label}</label>
                                                             {field === 'currency' ? (
@@ -1159,10 +747,10 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                                                             type="checkbox"
                                                             checked={editingTr.isSalaryContribution || false}
                                                             onChange={e => handleEditChange('isSalaryContribution', e.target.checked)}
-                                                            id="eq-edit-salary-contribution-pane"
+                                                            id="edit-salary-contribution-pane"
                                                             className="w-4 h-4 accent-[#D4AF37]"
                                                         />
-                                                        <label htmlFor="eq-edit-salary-contribution-pane" className="text-white text-sm cursor-pointer">Funded by Salary Contribution</label>
+                                                        <label htmlFor="edit-salary-contribution-pane" className="text-white text-sm cursor-pointer">Funded by Salary Contribution</label>
                                                     </div>
                                                 </div>
                                                 <div className="flex gap-3 justify-end mt-6 pt-4 border-t border-white/10">
@@ -1213,7 +801,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                                         <div className="grid grid-cols-2 gap-4">
                                             {!isCash && (
                                                 <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                                                    <span className="block text-[10px] text-white/40 uppercase tracking-widest mb-1.5">Shares Hosted</span>
+                                                    <span className="block text-[10px] text-white/40 uppercase tracking-widest mb-1.5">Holdings</span>
                                                     <span className="text-sm font-medium text-white/90 font-mono">{Math.abs(asset.qty).toLocaleString(undefined, { maximumFractionDigits: 4 })}</span>
                                                 </div>
                                             )}
@@ -1224,7 +812,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                                                 </div>
                                             )}
                                             <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                                                <span className="block text-[10px] text-white/40 uppercase tracking-widest mb-1.5">{isCash ? 'Deposits' : 'Cost Basis'}</span>
+                                                <span className="block text-[10px] text-white/40 uppercase tracking-widest mb-1.5">Net Investment</span>
                                                 <span className="text-sm font-medium text-white/90 font-mono">{formatCurrency(asset.totalCost, asset.brokerCurrency)}</span>
                                             </div>
                                             <div className="bg-[#D4AF37]/5 border border-[#D4AF37]/20 rounded-xl p-3">
@@ -1297,7 +885,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                     </div>
 
                 {/* Transaction Ledger */}
-                <section id="ftue-equity-ledger" className="max-w-3xl mx-auto mb-10 mt-12">
+                <section id="ftue-crypto-ledger" className="max-w-3xl mx-auto mb-10 mt-12">
                     <div className="flex justify-between items-center mb-6 px-1">
                         <h3 className="text-lg font-medium text-white/90 flex items-center gap-2">
                             Activity History
@@ -1353,6 +941,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                 {/* Context-Aware FAB */}
                 {/* New Expandable FAB */}
                 <FloatingActionButton
+                    brokerLabel="Add Exchange"
                     onAddBroker={() => {
                         setRightPaneMode('add-broker');
                     }}
@@ -1467,7 +1056,7 @@ export default function EquityTab({ transactions = [], marketData, rates, onRefr
                 }
 
             </div >
-            <PageTutorialOverlay pageId="equity" steps={EQUITY_TUTORIAL_STEPS} />
+            <PageTutorialOverlay pageId="crypto" steps={CRYPTO_TUTORIAL_STEPS} />
         </PullToRefresh >
     );
 }

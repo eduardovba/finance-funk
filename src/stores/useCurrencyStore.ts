@@ -3,7 +3,38 @@
 import { create } from 'zustand';
 import { formatCurrency, convertCurrency, SUPPORTED_CURRENCIES } from '@/lib/currency';
 
-const useCurrencyStore = create((set, get) => ({
+// ═══════════ TYPES ═══════════
+
+export interface CurrencyState {
+    primaryCurrency: string;
+    secondaryCurrency: string;
+    rateFlipped: boolean;
+    displayCurrencyOverrides: Record<string, string | null>;
+    rates: Record<string, number>;
+    loadingRates: boolean;
+    fxHistory: Record<string, Record<string, number>>;
+    currencyLoaded: boolean;
+}
+
+export interface CurrencyActions {
+    setPrimaryCurrency: (v: string) => void;
+    setSecondaryCurrency: (v: string) => void;
+    setRateFlipped: (v: boolean) => void;
+    setDisplayCurrencyOverride: (category: string, value: string | null) => void;
+    setRates: (r: Record<string, number> | ((prev: Record<string, number>) => Record<string, number>)) => void;
+    setLoadingRates: (v: boolean) => void;
+    setFxHistory: (v: Record<string, Record<string, number>>) => void;
+    formatPrimary: (amount: number, options?: Intl.NumberFormatOptions) => string;
+    formatSecondary: (amount: number, options?: Intl.NumberFormatOptions) => string;
+    toPrimary: (amount: number, fromCurrency?: string) => number;
+    toSecondary: (amount: number, fromCurrency?: string) => number;
+    loadCurrencyPrefs: () => Promise<void>;
+    persistCurrencyPrefs: () => void;
+}
+
+// ═══════════ STORE ═══════════
+
+const useCurrencyStore = create<CurrencyState & CurrencyActions>((set, get) => ({
     // ═══════════ STATE ═══════════
     primaryCurrency: 'BRL',
     secondaryCurrency: 'GBP',
@@ -65,7 +96,7 @@ const useCurrencyStore = create((set, get) => ({
             const savedSecondary = localStorage.getItem('ff_secondaryCurrency');
             const savedFlipped = localStorage.getItem('ff_rateFlipped');
             const savedOverrides = localStorage.getItem('ff_displayCurrencyOverrides');
-            const patch = {};
+            const patch: Partial<CurrencyState> = {};
             if (savedPrimary && SUPPORTED_CURRENCIES[savedPrimary]) patch.primaryCurrency = savedPrimary;
             if (savedSecondary && SUPPORTED_CURRENCIES[savedSecondary]) patch.secondaryCurrency = savedSecondary;
             if (savedFlipped !== null) patch.rateFlipped = savedFlipped === 'true';
@@ -84,7 +115,7 @@ const useCurrencyStore = create((set, get) => ({
         if (typeof window !== 'undefined') {
             localStorage.setItem('ff_primaryCurrency', primaryCurrency);
             localStorage.setItem('ff_secondaryCurrency', secondaryCurrency);
-            localStorage.setItem('ff_rateFlipped', rateFlipped);
+            localStorage.setItem('ff_rateFlipped', String(rateFlipped));
             localStorage.setItem('ff_displayCurrencyOverrides', JSON.stringify(displayCurrencyOverrides));
         }
         // Background persist to DB

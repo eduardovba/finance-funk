@@ -1,7 +1,7 @@
 "use client";
 
 import { usePortfolio } from '@/context/PortfolioContext';
-import RealEstateTab from '@/components/RealEstateTab';
+import RealEstateTab from '@/components/real-estate';
 
 export default function RealEstatePage() {
     const { realEstate, rates, fetchRealEstate, marketData } = usePortfolio();

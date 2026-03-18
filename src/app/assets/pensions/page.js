@@ -1,7 +1,7 @@
 "use client";
 
 import { usePortfolio } from '@/context/PortfolioContext';
-import PensionsTab from '@/components/PensionsTab';
+import PensionsTab from '@/components/pensions';
 
 export default function PensionsPage() {
     const {

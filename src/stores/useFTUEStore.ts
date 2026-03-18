@@ -2,7 +2,29 @@
 
 import { create } from 'zustand';
 
-const useFTUEStore = create((set, get) => ({
+// ═══════════ TYPES ═══════════
+
+export interface FTUEData {
+    wizardCompleted: boolean;
+    usingDemoData: boolean;
+    isTutorialActive: boolean;
+    showCurrencyPicker: boolean;
+    checklistItems: Record<string, boolean>;
+}
+
+export interface FTUEState {
+    ftueState: FTUEData | null;
+}
+
+export interface FTUEActions {
+    setFtueState: (v: FTUEData | null) => void;
+    updateFtueProgress: (updates: Partial<FTUEData>) => Promise<FTUEData | undefined>;
+    resetFtue: (refreshAllData?: () => Promise<void>) => Promise<void>;
+}
+
+// ═══════════ STORE ═══════════
+
+const useFTUEStore = create<FTUEState & FTUEActions>((set) => ({
     // ═══════════ STATE ═══════════
     ftueState: null,   // null = loading, object = loaded
 
@@ -18,7 +40,7 @@ const useFTUEStore = create((set, get) => ({
                 body: JSON.stringify(updates)
             });
             if (res.ok) {
-                const merged = await res.json();
+                const merged: FTUEData = await res.json();
                 set({ ftueState: merged });
                 return merged;
             } else {
@@ -35,7 +57,7 @@ const useFTUEStore = create((set, get) => ({
                 body: JSON.stringify({ action: 'reset' })
             });
             if (res.ok) {
-                const state = await res.json();
+                const state: FTUEData = await res.json();
                 set({ ftueState: state });
                 if (refreshAllData) refreshAllData();
             }

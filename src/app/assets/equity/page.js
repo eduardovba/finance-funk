@@ -1,7 +1,7 @@
 "use client";
 
 import { usePortfolio } from '@/context/PortfolioContext';
-import EquityTab from '@/components/EquityTab';
+import EquityTab from '@/components/equity';
 
 export default function EquityPage() {
     const { equityTransactions, marketData, rates, refreshAllData } = usePortfolio();

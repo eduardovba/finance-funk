@@ -1,7 +1,7 @@
 "use client";
 
 import { usePortfolio } from '@/context/PortfolioContext';
-import CryptoTab from '@/components/CryptoTab';
+import CryptoTab from '@/components/crypto';
 
 export default function CryptoPage() {
     const { cryptoTransactions, marketData, rates, refreshAllData } = usePortfolio();
