@@ -1,12 +1,13 @@
-import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createClient, type Client, type InValue } from '@libsql/client';
 import { initTestDB } from '@/test/setup';
 
 let testClient: Client;
 
-// Mock db module
+// Mock db module — needed because the route file imports from @/lib/db via @/lib/users
 vi.mock('@/lib/db', async () => {
     testClient = createClient({ url: ':memory:' });
+    await testClient.execute('PRAGMA foreign_keys = OFF');
     await initTestDB(testClient);
 
     return {
@@ -16,7 +17,7 @@ vi.mock('@/lib/db', async () => {
         },
         get: async (sql: string, params: InValue[] = []) => {
             const result = await testClient.execute({ sql, args: params });
-            return result.rows[0];
+            return result.rows[0] ?? undefined;
         },
         run: async (sql: string, params: InValue[] = []) => {
             const result = await testClient.execute({ sql, args: params });
@@ -30,30 +31,9 @@ vi.mock('@/lib/db', async () => {
     };
 });
 
-// Mock the users module
-vi.mock('@/lib/users', async () => {
-    return {
-        findUserByEmail: async (email: string) => {
-            if (!testClient) return undefined;
-            const result = await testClient.execute({
-                sql: 'SELECT * FROM users WHERE email = ?',
-                args: [email],
-            });
-            return result.rows[0] || null;
-        },
-        createUser: async ({ name, email, password }: { name: string; email: string; password: string }) => {
-            const result = await testClient.execute({
-                sql: 'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)',
-                args: [name, email, `hashed_${password}`],
-            });
-            return {
-                id: Number(result.lastInsertRowid),
-                name,
-                email,
-            };
-        },
-    };
-});
+// The register route imports createUser and findUserByEmail from @/lib/users
+// which in turn imports from @/lib/db. Since we've mocked @/lib/db above,
+// the actual users.ts module will use our mock. No separate users mock needed.
 
 const { POST } = await import('@/app/api/auth/register/route');
 
@@ -66,10 +46,6 @@ function createRequest(body: unknown): Request {
 }
 
 describe('Auth Register Integration', () => {
-    beforeAll(async () => {
-        if (testClient) await initTestDB(testClient);
-    });
-
     beforeEach(async () => {
         if (testClient) {
             await testClient.execute('DELETE FROM users');
@@ -100,7 +76,8 @@ describe('Auth Register Integration', () => {
         };
 
         // Create first user
-        await POST(createRequest(body) as any);
+        const first = await POST(createRequest(body) as any);
+        expect(first.status).toBe(201);
 
         // Attempt duplicate
         const body2 = {

@@ -1,5 +1,14 @@
-import { describe, it, expect } from 'vitest';
-import { PostTransactionSchema, PutTransactionSchema } from '@/app/api/transactions/route';
+import { describe, it, expect, vi } from 'vitest';
+
+// Mock modules that route files depend on
+vi.mock('next/server', () => ({
+    NextRequest: class {},
+    NextResponse: { json: (data: any, init?: any) => new Response(JSON.stringify(data), init) },
+}));
+vi.mock('@/lib/db', () => ({ query: vi.fn(), run: vi.fn(), get: vi.fn() }));
+vi.mock('@/lib/authGuard', () => ({ requireAuth: vi.fn() }));
+
+const { PostTransactionSchema, PutTransactionSchema } = await import('@/app/api/transactions/route');
 
 describe('PostTransactionSchema', () => {
     const validPayload = {

@@ -7,7 +7,16 @@ let testClient: Client;
 // Mock db module to use in-memory SQLite
 vi.mock('@/lib/db', async () => {
     testClient = createClient({ url: ':memory:' });
+
+    // Disable FK enforcement for test isolation
+    await testClient.execute('PRAGMA foreign_keys = OFF');
     await initTestDB(testClient);
+
+    // Seed a test user
+    await testClient.execute({
+        sql: 'INSERT INTO users (id, name, email, password_hash) VALUES (?, ?, ?, ?)',
+        args: [1, 'Test User', 'test@test.com', 'hashed_password'],
+    });
 
     return {
         query: async (sql: string, params: InValue[] = []) => {
@@ -52,13 +61,8 @@ function createRequest(method: string, body?: unknown, searchParams?: Record<str
 }
 
 describe('Equity Transactions CRUD Integration', () => {
-    beforeAll(async () => {
-        // Re-init tables for safety
-        if (testClient) await initTestDB(testClient);
-    });
-
     beforeEach(async () => {
-        // Clear data between tests
+        // Clear data between tests (keep user)
         if (testClient) {
             await testClient.execute('DELETE FROM ledger');
             await testClient.execute('DELETE FROM assets');
@@ -111,7 +115,8 @@ describe('Equity Transactions CRUD Integration', () => {
             quantity: 10,
             currency: 'USD',
         };
-        await POST(createRequest('POST', body) as any);
+        const createRes = await POST(createRequest('POST', body) as any);
+        expect(createRes.status).toBe(200);
 
         // Then GET
         const res = await GET();
@@ -135,6 +140,7 @@ describe('Equity Transactions CRUD Integration', () => {
         };
         const createRes = await POST(createRequest('POST', createBody) as any);
         const createData = await createRes.json();
+        expect(createRes.status).toBe(200);
 
         // Update it
         const updateBody = {
@@ -165,6 +171,7 @@ describe('Equity Transactions CRUD Integration', () => {
         };
         const createRes = await POST(createRequest('POST', createBody) as any);
         const createData = await createRes.json();
+        expect(createRes.status).toBe(200);
 
         // Delete it
         const req = createRequest('DELETE', undefined, { id: createData.id.toString() });

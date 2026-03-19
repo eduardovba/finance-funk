@@ -7,7 +7,16 @@ let testClient: Client;
 // Mock db module to use in-memory SQLite
 vi.mock('@/lib/db', async () => {
     testClient = createClient({ url: ':memory:' });
+
+    // Disable FK enforcement for test isolation
+    await testClient.execute('PRAGMA foreign_keys = OFF');
     await initTestDB(testClient);
+
+    // Seed a test user
+    await testClient.execute({
+        sql: 'INSERT INTO users (id, name, email, password_hash) VALUES (?, ?, ?, ?)',
+        args: [1, 'Test User', 'test@test.com', 'hashed_password'],
+    });
 
     return {
         query: async (sql: string, params: InValue[] = []) => {
@@ -52,10 +61,6 @@ function createRequest(method: string, body?: unknown, searchParams?: Record<str
 }
 
 describe('Crypto Transactions CRUD Integration', () => {
-    beforeAll(async () => {
-        if (testClient) await initTestDB(testClient);
-    });
-
     beforeEach(async () => {
         if (testClient) {
             await testClient.execute('DELETE FROM ledger');
@@ -108,7 +113,8 @@ describe('Crypto Transactions CRUD Integration', () => {
             quantity: 2,
             currency: 'USD',
         };
-        await POST(createRequest('POST', body) as any);
+        const createRes = await POST(createRequest('POST', body) as any);
+        expect(createRes.status).toBe(200);
 
         const res = await GET();
         const data = await res.json();
@@ -130,6 +136,7 @@ describe('Crypto Transactions CRUD Integration', () => {
         };
         const createRes = await POST(createRequest('POST', createBody) as any);
         const createData = await createRes.json();
+        expect(createRes.status).toBe(200);
 
         const updateBody = {
             id: createData.id,
@@ -158,6 +165,7 @@ describe('Crypto Transactions CRUD Integration', () => {
         };
         const createRes = await POST(createRequest('POST', createBody) as any);
         const createData = await createRes.json();
+        expect(createRes.status).toBe(200);
 
         const req = createRequest('DELETE', undefined, { id: createData.id.toString() });
         const res = await DELETE_HANDLER(req as any);

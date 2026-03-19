@@ -18,6 +18,63 @@ export default async function proxy(request) {
         return NextResponse.next();
     }
 
+    // ─── Rate Limiting (API routes only) ───
+    if (pathname.startsWith("/api/") && process.env.UPSTASH_REDIS_REST_URL) {
+        try {
+            const { Ratelimit } = await import("@upstash/ratelimit");
+            const { Redis } = await import("@upstash/redis");
+
+            const redis = new Redis({
+                url: process.env.UPSTASH_REDIS_REST_URL,
+                token: process.env.UPSTASH_REDIS_REST_TOKEN,
+            });
+
+            // Determine tier based on path
+            let limit = 60;
+            let prefix = "rl:standard";
+
+            if (pathname.includes("/auth/")) {
+                limit = 10;
+                prefix = "rl:auth";
+            } else if (pathname.includes("/market-data") || pathname.includes("/pension-prices") || pathname.includes("/fx-rates")) {
+                limit = 30;
+                prefix = "rl:market";
+            } else if (pathname.includes("/import")) {
+                limit = 5;
+                prefix = "rl:import";
+            }
+
+            const ratelimit = new Ratelimit({
+                redis,
+                limiter: Ratelimit.slidingWindow(limit, "1 m"),
+                prefix,
+            });
+
+            const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+                || request.headers.get("x-real-ip")
+                || "anonymous";
+
+            const { success, limit: maxLimit, remaining, reset } = await ratelimit.limit(ip);
+
+            if (!success) {
+                return NextResponse.json(
+                    { error: "Too many requests. Please try again later." },
+                    {
+                        status: 429,
+                        headers: {
+                            "X-RateLimit-Limit": maxLimit.toString(),
+                            "X-RateLimit-Remaining": remaining.toString(),
+                            "X-RateLimit-Reset": reset.toString(),
+                        },
+                    }
+                );
+            }
+        } catch (e) {
+            // If rate limiting fails, allow the request through
+            console.error("Rate limiting error:", e);
+        }
+    }
+
     // Check session
     const session = await auth();
 
@@ -36,7 +93,9 @@ export default async function proxy(request) {
         return NextResponse.redirect(loginUrl);
     }
 
-    return NextResponse.next();
+    // Add rate limit headers to successful responses
+    const response = NextResponse.next();
+    return response;
 }
 
 export const config = {

@@ -1,5 +1,14 @@
-import { describe, it, expect } from 'vitest';
-import { PostEquitySchema, PutEquitySchema } from '@/app/api/equity-transactions/route';
+import { describe, it, expect, vi } from 'vitest';
+
+// Mock modules that route files depend on (so we can import schemas without side effects)
+vi.mock('next/server', () => ({
+    NextRequest: class {},
+    NextResponse: { json: (data: any, init?: any) => new Response(JSON.stringify(data), init) },
+}));
+vi.mock('@/lib/db', () => ({ query: vi.fn(), run: vi.fn(), get: vi.fn() }));
+vi.mock('@/lib/authGuard', () => ({ requireAuth: vi.fn() }));
+
+const { PostEquitySchema, PutEquitySchema } = await import('@/app/api/equity-transactions/route');
 
 describe('PostEquitySchema', () => {
     const validPayload = {
