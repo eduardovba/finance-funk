@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "db:status": "npx tsx -e \"import('./src/lib/db').then(m => m.getDB()).then(() => console.log('Migrations up to date'))\""
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",
