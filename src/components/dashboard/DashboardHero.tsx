@@ -131,7 +131,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
 
         {/* DESKTOP HERO */}
         <div className="hidden md:block mb-8">
-            <div className="lg:grid lg:grid-cols-12 lg:gap-5">
+            <div className="lg:grid lg:grid-cols-12 lg:gap-5 lg:items-stretch">
                 {/* Hero Card */}
                 <div id="ftue-hero" className="col-span-12 lg:col-span-8 rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] mb-8 lg:mb-0 relative overflow-hidden flex flex-col">
                     <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.015] to-transparent -translate-x-full pointer-events-none" animate={{ x: ['-100%', '200%'] }} transition={{ duration: 8, repeat: Infinity, ease: "linear" }} />
@@ -145,8 +145,8 @@ export default function DashboardHero(props: DashboardHeroProps) {
                     </div>
 
                     {/* Main Balance */}
-                    <div className="flex flex-col items-center justify-center pt-10 pb-6 xl:pt-14 xl:pb-8 px-6 relative z-10">
-                        <span className="text-[0.75rem] xl:text-xs text-[#F5F5DC]/30 uppercase tracking-[4px] font-space mb-3">Total Balance</span>
+                    <div className="flex flex-col items-center justify-center pt-6 pb-3 xl:pt-8 xl:pb-4 px-6 relative z-10">
+                        <span className="text-[0.75rem] xl:text-xs text-[#F5F5DC]/30 uppercase tracking-[4px] font-space mb-2">Total Balance</span>
                         <div className={`flex items-start justify-center gap-1 transition-opacity duration-300 ${isLoading ? 'opacity-30' : 'opacity-100'}`}>
                             <span className="text-2xl xl:text-3xl text-[#F5F5DC]/50 font-medium font-space mt-2 xl:mt-3">{primaryMeta?.symbol}</span>
                             <span className="text-7xl xl:text-8xl 2xl:text-[7.5rem] leading-none font-normal tracking-wide text-[#D4AF37] drop-shadow-[0_0_20px_rgba(212,175,55,0.35)] font-bebas">
@@ -158,7 +158,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                         </span>
                     </div>
 
-                    <div className="w-full h-px bg-gradient-to-r from-transparent via-[#D4AF37]/25 to-transparent" />
+                    <div className="w-full h-px bg-gradient-to-r from-transparent via-[#D4AF37]/25 to-transparent my-1" />
 
                     {/* Stat Strip */}
                     {!isLoading && (
@@ -203,7 +203,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                     )}
 
                     {/* Expand Chevron */}
-                    <button onClick={() => setHeroExpanded(prev => !prev)} className="w-full flex items-center justify-center py-2 hover:bg-white/[0.02] transition-colors relative z-10 border-t border-white/[0.04]">
+                    <button onClick={() => setHeroExpanded(prev => !prev)} className="w-full flex items-center justify-center py-1.5 hover:bg-white/[0.02] transition-colors relative z-10 border-t border-white/[0.04]">
                         <motion.div animate={{ rotate: heroExpanded ? 180 : 0 }} transition={{ duration: 0.3 }}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#F5F5DC]/20"><path d="m6 9 6 6 6-6"/></svg>
                         </motion.div>

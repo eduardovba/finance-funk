@@ -75,7 +75,7 @@ export default function LedgerInvestmentsView({
 
             <div className="flex flex-col gap-8 w-full mt-2">
                 {/* Chart */}
-                <div id="ftue-investment-chart" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+                <div id="ftue-investment-chart" className="glass-chart p-6">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                         <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'rgba(245,245,220,0.8)', fontWeight: 600 }}>Monthly Investments (Capital Injection)</h3>
                     </div>

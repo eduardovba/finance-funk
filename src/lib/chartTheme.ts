@@ -23,7 +23,7 @@ export const AXIS_STYLE = {
 } as const;
 
 export const GRID_STYLE = {
-  strokeDasharray: '2 4',
+  strokeDasharray: '3 6',
   stroke: 'rgba(245, 245, 220, 0.04)',
 } as const;
 

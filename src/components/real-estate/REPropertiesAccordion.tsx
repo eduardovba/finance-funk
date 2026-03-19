@@ -96,7 +96,7 @@ export default function REPropertiesAccordion({
                             );
                         })}
                         {soldProperties.length > 0 && (
-                            <div className="col-span-full bg-white/5 rounded-3xl p-4 border border-white/10">
+                            <div className="col-span-full rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_4px_16px_rgba(0,0,0,0.3)] p-4">
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-xs text-white/40 font-medium tracking-wide uppercase block">Realised P&L</span>
                                     <span className={`text-sm font-bold ${totalRealisedPnL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
@@ -156,7 +156,7 @@ export default function REPropertiesAccordion({
                             })}
                         </div>
                         {soldProperties.length > 0 && (
-                            <div className="mt-4 bg-white/5 rounded-2xl p-4 border border-white/10">
+                            <div className="mt-4 rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_4px_16px_rgba(0,0,0,0.3)] p-4">
                                 <div className="flex justify-between items-center mb-3">
                                     <span className="text-xs text-white/40 font-medium tracking-wide uppercase block">Realised P&L</span>
                                     <span className={`text-sm font-bold ${totalRealisedPnL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>

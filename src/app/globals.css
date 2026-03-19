@@ -114,13 +114,23 @@
 
   /* ─── Glass Tier: Surface — content cards, metric cards ─── */
   .glass-surface {
-    background: rgba(18, 20, 24, 0.55);
-    backdrop-filter: blur(24px) saturate(150%);
-    -webkit-backdrop-filter: blur(24px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(18, 20, 24, 0.65);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  }
+
+  /* ─── Glass Tier: Chart — darker for data readability over wallpapers ─── */
+  .glass-chart {
+    background: rgba(12, 10, 20, 0.85);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   }
 
   /* ─── Glass Tier: Inset — nested elements, table rows, input groups ─── */
@@ -135,15 +145,15 @@
 
   /* ─── Backward compat — alias for 50+ legacy components ─── */
   .glass-card {
-    background: rgba(18, 20, 24, 0.55);
-    backdrop-filter: blur(24px) saturate(150%);
-    -webkit-backdrop-filter: blur(24px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(18, 20, 24, 0.70);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 16px;
     padding: calc(var(--spacing-unit) * 3);
     transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
   }
 
   .glass-card:hover {

@@ -402,17 +402,7 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
         tickLine: false,
     };
 
-    const renderHeaderBadges = () => {
-        if (mainSource === 'networth-history') {
-            return (
-                <div className="flex gap-3 text-[0.75rem] font-space uppercase tracking-wider">
-                    <span className="text-[#D4AF37]">● {primaryCurrency}</span>
-                    <span className="text-[#A0A0A0]">● Target ({primaryCurrency})</span>
-                    <span className="text-[#CC5500]">● {secondaryCurrency}</span>
-                </div>
-            );
-        }
-        if (mainSource === 'category-history') return null;
+    const renderHeaderKPI = () => {
         if (mainSource === 'allocation-current') {
             return (
                 <div className="flex items-center gap-2 bg-black/40 border border-white/10 rounded-full px-3 py-1">
@@ -421,9 +411,30 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
                 </div>
             );
         }
+        return null;
+    };
+
+    const renderBottomLegend = () => {
+        if (mainSource === 'networth-history') {
+            return (
+                <div className="mt-3 flex justify-center gap-4 text-[0.6875rem] font-space shrink-0 flex-wrap">
+                    <span className="text-[#D4AF37]">● {primaryCurrency}</span>
+                    <span className="text-[#A0A0A0]">● Target ({primaryCurrency})</span>
+                    <span className="text-[#CC5500]">● {secondaryCurrency}</span>
+                </div>
+            );
+        }
+        if (mainSource === 'allocation-current') {
+            return (
+                <div className="mt-3 flex justify-center gap-4 text-[0.6875rem] font-space shrink-0 flex-wrap">
+                    <span className="text-[#D4AF37]">■ Actual %</span>
+                    <span className="text-[#F5F5DC]/40">▪ Target %</span>
+                </div>
+            );
+        }
         if (mainSource === 'roi-history' && dataSources.includes('fx-rate-history')) {
             return (
-                <div className="flex gap-3 text-[0.75rem] font-space uppercase tracking-wider">
+                <div className="mt-3 flex justify-center gap-4 text-[0.6875rem] font-space shrink-0 flex-wrap">
                     <span className="text-[#D4AF37]">● ROI (%)</span>
                     <span className="text-[#CC5500]">● FX Rate</span>
                 </div>
@@ -431,9 +442,9 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
         }
         if (mainSource === 'wealth-trajectory') {
             return (
-                <div className="flex gap-3 text-[0.75rem] font-space uppercase tracking-wider">
-                    <span className="text-vu-green">● Actual (Above)</span>
-                    <span className="text-red-500">● Actual (Below)</span>
+                <div className="mt-3 flex justify-center gap-4 text-[0.6875rem] font-space shrink-0 flex-wrap">
+                    <span className="text-vu-green">● Above Target</span>
+                    <span className="text-red-500">● Below Target</span>
                     <span className="text-[#A0A0A0]">● Target ({primaryCurrency})</span>
                 </div>
             );
@@ -453,7 +464,10 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
                     </defs>
                     <CartesianGrid {...GRID_STYLE} vertical={false} />
                     <XAxis {...commonXAxis} />
-                    <YAxis {...commonYAxisLeft} domain={domainPrimary} tickFormatter={(val: number) => `${primaryMeta?.symbol || ''}${(val / 1000).toFixed(0)}k`} />
+                    <YAxis {...commonYAxisLeft} domain={domainPrimary} tickFormatter={(val: number) => {
+                        if (Math.abs(val) >= 1000000) return `${primaryMeta?.symbol || ''}${(val / 1000000).toFixed(1)}M`;
+                        return `${primaryMeta?.symbol || ''}${(val / 1000).toFixed(0)}k`;
+                    }} />
                     {options?.dualAxis && <YAxis yAxisId="right" orientation="right" stroke="#CC5500" tick={{ fill: '#CC5500', fontSize: 11, opacity: 0.7, fontFamily: 'var(--font-space)' }} domain={domainSecondary} tickFormatter={(val: number) => `${secondaryMeta?.symbol || ''}${(val / 1000).toFixed(0)}k`} axisLine={{ stroke: 'rgba(204,85,0,0.2)' }} />}
                     <Tooltip content={<CustomTooltip {...customTooltipProps} />} />
                     {series.includes('networthPrimary') && <Area yAxisId="left" type="monotone" dataKey="networthPrimary" stroke="#D4AF37" strokeWidth={3} fillOpacity={1} fill={`url(#colorGold-${config.id})`} name={`Net Worth ${primaryCurrency}`} />}
@@ -525,7 +539,7 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
                     <XAxis type="number" domain={[0, 'dataMax + 10']} stroke="#F5F5DC" tick={{ fill: '#F5F5DC', fontSize: 11, opacity: 0.5, fontFamily: 'var(--font-space)' }} tickFormatter={(val: number) => `${Math.round(val)}%`} axisLine={{ stroke: 'rgba(212,175,55,0.1)' }} />
                     <YAxis dataKey={xAxisKey} type="category" stroke="#F5F5DC" tick={{ fill: '#F5F5DC', fontSize: 11, opacity: 0.8, fontFamily: 'var(--font-space)' }} width={80} axisLine={{ stroke: 'rgba(212,175,55,0.1)' }} />
                     <Tooltip cursor={{ fill: 'rgba(212,175,55,0.1)' }} contentStyle={{ backgroundColor: '#1A0F2E', borderColor: '#D4AF37', borderRadius: '8px', color: '#F5F5DC', fontFamily: 'monospace' }} itemStyle={{ color: '#F5F5DC' }} formatter={(value: any) => `${value.toFixed(1)}%`} />
-                    <Legend wrapperStyle={{ color: '#F5F5DC', fontSize: '0.75rem', opacity: 0.7 }} />
+
                     {series.includes('actual') && (
                         <Bar dataKey="actual" name="Actual %" fill="#D4AF37" radius={[0, 4, 4, 0] as any} barSize={16}>
                             <LabelList dataKey="actual" position="right" formatter={(val: number) => `${val.toFixed(1)}%`} style={{ fill: '#F5F5DC', fontSize: '10px', opacity: 0.8, fontFamily: 'var(--font-space)' }} />
@@ -548,7 +562,8 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
                     <YAxis yAxisId="left" stroke="#F5F5DC" tick={{ fill: '#F5F5DC', fontSize: 11, opacity: 0.5, fontFamily: 'var(--font-space)' }} tickFormatter={(val: number) => series.includes('roi') ? `${val}%` : `${secondaryMeta?.symbol || ''}${(val / 1000).toFixed(0)}k`} axisLine={{ stroke: 'rgba(212,175,55,0.1)' }} />
                     {options?.dualAxis && <YAxis yAxisId="right" orientation="right" stroke="#CC5500" tick={{ fill: '#CC5500', fontSize: 11, opacity: 0.7, fontFamily: 'var(--font-space)' }} tickFormatter={(val: number) => `${primaryMeta?.symbol || ''}${val.toFixed(2)}`} axisLine={{ stroke: 'rgba(204,85,0,0.2)' }} domain={['auto', 'auto']} />}
                     <Tooltip content={<CustomTooltip {...customTooltipProps} />} />
-                    <Legend wrapperStyle={{ color: '#F5F5DC', fontSize: '0.75rem', opacity: 0.7 }} />
+
+
                     <ReferenceLine yAxisId="left" y={0} stroke="#F5F5DC" strokeOpacity={0.2} />
                     {series.includes('roi') && <Line yAxisId="left" type="monotone" dataKey="roi" stroke="#D4AF37" strokeWidth={2} dot={{ r: 0 } as any} activeDot={{ r: 4, fill: '#D4AF37' }} name="ROI" />}
                     {series.includes('impliedRate') && <Line yAxisId={options?.dualAxis ? "right" : "left"} type="monotone" dataKey="impliedRate" stroke="#CC5500" strokeWidth={2} dot={{ r: 0 } as any} activeDot={{ r: 4, fill: '#CC5500' }} name={`FX Rate ${secondaryCurrency}/${primaryCurrency}`} connectNulls />}
@@ -564,7 +579,8 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
                     <XAxis {...commonXAxis} />
                     <YAxis stroke="#F5F5DC" tick={{ fill: '#F5F5DC', fontSize: 11, opacity: 0.5, fontFamily: 'var(--font-space)' }} tickFormatter={(val: number) => `${secondaryMeta?.symbol || ''}${(val / 1000).toFixed(0)}k`} axisLine={{ stroke: 'rgba(212,175,55,0.1)' }} />
                     <Tooltip content={<CustomTooltip {...customTooltipProps} />} />
-                    <Legend wrapperStyle={{ color: '#F5F5DC', fontSize: '0.75rem', opacity: 0.7 }} />
+
+
                     <ReferenceLine y={0} stroke="#F5F5DC" strokeOpacity={0.2} />
                     {series.includes('Net') && (
                         <Bar dataKey="Net" name={`Net Flow ${secondaryCurrency}`} radius={[4, 4, 0, 0] as any}>
@@ -608,18 +624,13 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
 
     return (
         <div
-            className={`glass-surface p-6 flex flex-col h-full ${isClickable ? 'cursor-pointer hover:border-[#D4AF37]/30 transition-colors' : ''}`}
+            className={`rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-6 flex flex-col h-full ${isClickable ? 'cursor-pointer hover:border-[#D4AF37]/30 transition-colors' : ''}`}
             data-chart-id={config.id}
             onClick={isClickable ? () => { window.location.href = '/ledger/investments'; } : undefined}
         >
             <div className="flex justify-between items-center mb-5 shrink-0">
-                <div className="flex items-center gap-3">
-                    <h3 className="text-[#D4AF37] m-0 text-xl font-normal font-bebas tracking-wide">{title}</h3>
-                    <button onClick={onCustomizeClick} className="text-[#D4AF37]/40 hover:text-[#D4AF37] transition-colors p-1" title="Customize Dashboard">
-                        <Settings2 size={16} />
-                    </button>
-                </div>
-                {renderHeaderBadges()}
+                <h3 className="text-[#D4AF37] m-0 text-xl font-normal font-bebas tracking-wide">{title}</h3>
+                {renderHeaderKPI()}
             </div>
             <div className="h-[220px] md:h-[300px] flex-grow relative">
                 {isDonut ? chartContent : (
@@ -628,12 +639,13 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
                     </ResponsiveContainer>
                 )}
             </div>
+            {renderBottomLegend()}
             {chartType === 'donut' && (
                 <div className="mt-4 flex justify-center gap-6 shrink-0 flex-wrap">
                     {data.map((entry: any) => (
                         <div key={entry.name} className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                            <span className="text-[#F5F5DC]/80 font-space text-[0.75rem] md:text-sm">
+                            <span className="text-[0.6875rem] font-space" style={{ color: 'rgba(245,245,220,0.5)' }}>
                                 {entry.name}: <span className="font-bold">{((entry.value / totalCurrencyTokensPrimary) * 100).toFixed(1)}%</span>
                             </span>
                         </div>
