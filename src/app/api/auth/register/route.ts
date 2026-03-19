@@ -3,7 +3,7 @@ import { createUser, findUserByEmail } from "@/lib/users";
 import { z } from 'zod';
 import { validateBody } from '@/lib/validation';
 
-const RegisterSchema = z.object({
+export const RegisterSchema = z.object({
     name: z.string().min(1, 'Name is required').max(100),
     email: z.string().email('Valid email required'),
     password: z.string().min(6, 'Password must be at least 6 characters'),

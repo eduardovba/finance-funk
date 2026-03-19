@@ -4,7 +4,7 @@ import { requireAuth } from '@/lib/authGuard';
 import { z } from 'zod';
 import { validateBody, validateId, dateField, currencyField, optionalNumber, optionalString } from '@/lib/validation';
 
-const PostEquitySchema = z.object({
+export const PostEquitySchema = z.object({
     ticker: z.string().min(1).max(20),
     broker: z.string().min(1).max(100),
     asset: optionalString,
@@ -22,7 +22,7 @@ const PostEquitySchema = z.object({
 
 type PostEquityBody = z.infer<typeof PostEquitySchema>;
 
-const PutEquitySchema = z.object({
+export const PutEquitySchema = z.object({
     id: z.coerce.number(),
     date: dateField,
     type: z.enum(['Buy', 'Sell', 'Investment', 'Divestment']),

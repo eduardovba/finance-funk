@@ -4,7 +4,7 @@ import { requireAuth } from '@/lib/authGuard';
 import { z } from 'zod';
 import { validateBody, validateId, dateField, currencyField, optionalNumber, optionalString } from '@/lib/validation';
 
-const PostTransactionSchema = z.object({
+export const PostTransactionSchema = z.object({
     date: dateField,
     description: optionalString,
     account: optionalString,
@@ -25,7 +25,7 @@ const PostTransactionSchema = z.object({
 
 type PostTransactionBody = z.infer<typeof PostTransactionSchema>;
 
-const PutTransactionSchema = z.object({
+export const PutTransactionSchema = z.object({
     id: z.coerce.number(),
     date: dateField,
     type: z.string().optional().default('Investment'),
