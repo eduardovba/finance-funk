@@ -1,8 +1,14 @@
-import { Bebas_Neue, Space_Mono } from "next/font/google";
+import { Bebas_Neue, Space_Mono, Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import AppShell from "@/components/AppShell";
 import Providers from "@/components/Providers";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: '--font-inter',
+  display: 'swap',
+});
 
 const bebasNeue = Bebas_Neue({
   weight: ['400'],
@@ -43,8 +49,8 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${bebasNeue.variable} ${spaceMono.variable}`}>
-      <body className={`bg-midnight text-parchment antialiased font-space min-h-screen`}>
+    <html lang="en" className={`${inter.variable} ${bebasNeue.variable} ${spaceMono.variable}`}>
+      <body className={`bg-midnight text-parchment antialiased font-sans min-h-screen`}>
         <Providers>
           <AppShell>{children}</AppShell>
         </Providers>

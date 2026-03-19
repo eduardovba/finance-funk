@@ -205,14 +205,14 @@ export default function CryptoBrokerSection({
                                         )}
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-semibold text-white/90 truncate leading-tight">{displayName}</p>
-                                            <p className="text-[11px] text-white/40 mt-0.5 font-mono">
+                                            <p className="text-[0.75rem] text-white/40 mt-0.5 font-mono tabular-nums">
                                                 {isCash ? 'Liquid' : `${Math.abs(r.qty).toLocaleString(undefined, { maximumFractionDigits: 4 })} shares${r.ticker ? ` · ${r.ticker}` : ''}`}
                                             </p>
                                         </div>
                                         <div className="text-right shrink-0">
                                             <p className="text-sm font-bold text-white tracking-tight leading-tight">{formatCurrency(r.currentValue, cur)}</p>
                                             {!isCash && (
-                                                <p className={`text-[11px] mt-0.5 font-semibold ${r.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                <p className={`text-[0.75rem] mt-0.5 font-semibold ${r.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                                     {r.pnl >= 0 ? '+' : ''}{formatCurrency(r.pnl, cur)} ({r.roi >= 0 ? '+' : ''}{(r.roi || 0).toFixed(1)}%)
                                                 </p>
                                             )}

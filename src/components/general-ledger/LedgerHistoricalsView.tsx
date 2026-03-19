@@ -101,7 +101,7 @@ export default function LedgerHistoricalsView({
                                 <th style={{ padding: '16px', textAlign: 'right', color: '#f59e0b', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Crypto</th>
                                 <th style={{ padding: '16px', textAlign: 'right', color: '#8b5cf6', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Pensions</th>
                                 <th style={{ padding: '16px', textAlign: 'right', color: '#ec4899', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Debt</th>
-                                <th style={{ padding: '16px', textAlign: 'right', color: '#05ff9b', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>ROI</th>
+                                <th style={{ padding: '16px', textAlign: 'right', color: '#34D399', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>ROI</th>
                                 <th style={{ padding: '16px', textAlign: 'right', color: 'rgba(245,245,220,0.4)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>FX Rate</th>
                                 <th style={{ padding: '16px', textAlign: 'center', width: '80px' }}></th>
                             </tr>
@@ -124,7 +124,7 @@ export default function LedgerHistoricalsView({
                                         <td style={{ padding: '14px 16px', textAlign: 'right', color: 'rgba(245,245,220,0.5)', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(d.categories?.Crypto || 0, 'BRL')}</td>
                                         <td style={{ padding: '14px 16px', textAlign: 'right', color: 'rgba(245,245,220,0.5)', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(d.categories?.Pensions || 0, 'BRL')}</td>
                                         <td style={{ padding: '14px 16px', textAlign: 'right', color: '#ec4899', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(-totalDebt, 'BRL')}</td>
-                                        <td style={{ padding: '14px 16px', textAlign: 'right', color: d.roi >= 0 ? '#05ff9b' : '#ef4444', fontFamily: 'monospace', fontSize: '13px', fontWeight: 600 }}>{d.roi ? `${d.roi.toFixed(2)}%` : '-'}</td>
+                                        <td style={{ padding: '14px 16px', textAlign: 'right', color: d.roi >= 0 ? '#34D399' : '#ef4444', fontFamily: 'monospace', fontSize: '13px', fontWeight: 600 }}>{d.roi ? `${d.roi.toFixed(2)}%` : '-'}</td>
                                         <td style={{ padding: '14px 16px', textAlign: 'right', color: 'rgba(245,245,220,0.4)', fontFamily: 'monospace', fontSize: '13px' }}>{impliedRate ? `R$ ${impliedRate.toFixed(2)}` : '-'}</td>
                                         <td style={{ padding: '14px 8px', textAlign: 'center', whiteSpace: 'nowrap' }}>
                                             {!isLiveRow && !d.isLive && (

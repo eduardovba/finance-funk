@@ -309,7 +309,7 @@ export default function TutorialOverlay() {
                                     flex flex-col items-center gap-0.5"
                             >
                                 <span>🎸 Import My Data</span>
-                                <span className="text-[10px] font-normal opacity-60">Start with your real portfolio</span>
+                                <span className="text-[0.75rem] font-normal opacity-60">Start with your real portfolio</span>
                             </motion.button>
 
                             <motion.button
@@ -322,7 +322,7 @@ export default function TutorialOverlay() {
                                     flex flex-col items-center gap-0.5"
                             >
                                 <span>🎧 Keep Exploring</span>
-                                <span className="text-[10px] font-normal opacity-40">Stay with demo data</span>
+                                <span className="text-[0.75rem] font-normal opacity-40">Stay with demo data</span>
                             </motion.button>
                         </div>
                     </div>
@@ -421,7 +421,7 @@ export default function TutorialOverlay() {
                                 </div>
                                 <div>
                                     <h3 className="text-[#D4AF37] font-space font-bold text-sm m-0">{step.title}</h3>
-                                    <span className="text-[9px] text-[#F5F5DC]/30 font-space uppercase tracking-[2px]">
+                                    <span className="text-[0.6875rem] text-[#F5F5DC]/30 font-space uppercase tracking-[2px]">
                                         Step {currentStep + 1} of {totalSteps}
                                     </span>
                                 </div>
@@ -435,7 +435,7 @@ export default function TutorialOverlay() {
                             <div className="flex items-center justify-between">
                                 <button
                                     onClick={skipTour}
-                                    className="text-[11px] text-[#F5F5DC]/30 hover:text-[#F5F5DC]/60 font-space tracking-wide uppercase transition-colors bg-transparent border-none cursor-pointer"
+                                    className="text-[0.75rem] text-[#F5F5DC]/30 hover:text-[#F5F5DC]/60 font-space tracking-wide uppercase transition-colors bg-transparent border-none cursor-pointer"
                                 >
                                     Skip Tour
                                 </button>
@@ -460,7 +460,7 @@ export default function TutorialOverlay() {
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={goNext}
-                                    className="px-4 py-1.5 rounded-lg font-space text-[11px] tracking-wide font-bold transition-all duration-300
+                                    className="px-4 py-1.5 rounded-lg font-space text-[0.75rem] tracking-wide font-bold transition-all duration-300
                                         bg-gradient-to-r from-[#D4AF37] to-[#B8962E] text-[#0B0611]
                                         hover:shadow-md hover:shadow-[#D4AF37]/20 border-none cursor-pointer"
                                 >

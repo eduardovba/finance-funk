@@ -91,9 +91,9 @@ export default function DebtLenderSection({
                                 {data.transactions.map((tr, idx) => (
                                     <tr key={tr.id || idx} className="border-b border-white/[0.03] hover:bg-white/[0.03] transition-colors cursor-pointer"
                                         onClick={() => onSelectAsset(tr, lenderName)}>
-                                        <td className="px-4 py-3 text-white/70 font-mono text-xs">{tr.date}</td>
-                                        <td className="px-4 py-3 text-right text-rose-400 font-bold font-mono">{formatCurrency(convertCurrency(tr.value_brl || 0, 'BRL', lenderCur, rates as any), lenderCur)}</td>
-                                        <td className="px-4 py-3 text-right text-white/60 font-mono hidden sm:table-cell">{lenderCur !== 'BRL' ? formatCurrency(tr.value_brl, 'BRL') : '—'}</td>
+                                        <td className="px-4 py-3 text-white/70 font-mono tabular-nums text-xs">{tr.date}</td>
+                                        <td className="px-4 py-3 text-right text-rose-400 font-bold font-mono tabular-nums">{formatCurrency(convertCurrency(tr.value_brl || 0, 'BRL', lenderCur, rates as any), lenderCur)}</td>
+                                        <td className="px-4 py-3 text-right text-white/60 font-mono tabular-nums hidden sm:table-cell">{lenderCur !== 'BRL' ? formatCurrency(tr.value_brl, 'BRL') : '—'}</td>
                                         <td className="px-4 py-3 text-white/50 text-xs hidden md:table-cell max-w-[200px] truncate">{tr.obs || '—'}</td>
                                         <td className="px-4 py-3 text-right">
                                             <div className="flex items-center gap-1 justify-end">

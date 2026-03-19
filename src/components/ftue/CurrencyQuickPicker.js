@@ -42,7 +42,7 @@ export default function CurrencyQuickPicker({ onDone }) {
                     </div>
                     <div>
                         <h3 className="text-lg font-bebas tracking-wider text-[#D4AF37] m-0">One quick thing</h3>
-                        <p className="text-[11px] text-[#F5F5DC]/40 font-space m-0">Set your base currencies — takes 5 seconds</p>
+                        <p className="text-[0.75rem] text-[#F5F5DC]/40 font-space m-0">Set your base currencies — takes 5 seconds</p>
                     </div>
                 </div>
 
@@ -50,7 +50,7 @@ export default function CurrencyQuickPicker({ onDone }) {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                     {/* Primary */}
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] uppercase tracking-[3px] text-[#D4AF37]/50 font-space text-center">Primary</label>
+                        <label className="text-[0.6875rem] uppercase tracking-[3px] text-[#D4AF37]/50 font-space text-center">Primary</label>
                         <div className="flex flex-col gap-1">
                             {CURRENCY_LIST.map(c => (
                                 <button
@@ -70,8 +70,8 @@ export default function CurrencyQuickPicker({ onDone }) {
                                 >
                                     <span className="text-lg">{c.flag}</span>
                                     <div className="flex flex-col">
-                                        <span className="text-[11px] font-bold font-space">{c.code}</span>
-                                        <span className="text-[9px] opacity-50">{c.name}</span>
+                                        <span className="text-[0.75rem] font-bold font-space">{c.code}</span>
+                                        <span className="text-[0.6875rem] opacity-50">{c.name}</span>
                                     </div>
                                 </button>
                             ))}
@@ -80,7 +80,7 @@ export default function CurrencyQuickPicker({ onDone }) {
 
                     {/* Secondary */}
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] uppercase tracking-[3px] text-[#CC5500]/50 font-space text-center">Secondary</label>
+                        <label className="text-[0.6875rem] uppercase tracking-[3px] text-[#CC5500]/50 font-space text-center">Secondary</label>
                         <div className="flex flex-col gap-1">
                             {CURRENCY_LIST.map(c => (
                                 <button
@@ -97,8 +97,8 @@ export default function CurrencyQuickPicker({ onDone }) {
                                 >
                                     <span className="text-lg">{c.flag}</span>
                                     <div className="flex flex-col">
-                                        <span className="text-[11px] font-bold font-space">{c.code}</span>
-                                        <span className="text-[9px] opacity-50">{c.name}</span>
+                                        <span className="text-[0.75rem] font-bold font-space">{c.code}</span>
+                                        <span className="text-[0.6875rem] opacity-50">{c.name}</span>
                                     </div>
                                 </button>
                             ))}

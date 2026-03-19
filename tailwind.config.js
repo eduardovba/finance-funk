@@ -11,9 +11,11 @@ module.exports = {
                 vinyl: '#CC5500',
                 parchment: '#F5F5DC',
                 panel: '#1A0F2E',
-                'vu-green': '#05ff9b',
+                'vu-green': '#34D399',
+                success: '#34D399',
             },
             fontFamily: {
+                sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
                 bebas: ['var(--font-bebas)', 'sans-serif'],
                 space: ['var(--font-space)', 'monospace'],
             },

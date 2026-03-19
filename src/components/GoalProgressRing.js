@@ -56,7 +56,7 @@ export default function GoalProgressRing({
 
     // Outer (actual) color: green if ahead, gold if close, red if behind
     const diff = targetValue ? (currentValue / targetValue) : 1;
-    const actualColor = diff >= 1 ? '#05ff9b' : diff >= 0.9 ? '#D4AF37' : '#ef4444';
+    const actualColor = diff >= 1 ? '#34D399' : diff >= 0.9 ? '#D4AF37' : '#ef4444';
 
     // Inner (target) color: grey
     const targetColor = 'rgba(255,255,255,0.35)';
@@ -93,10 +93,10 @@ export default function GoalProgressRing({
                     <span className="font-bebas text-3xl tracking-wider" style={{ color: actualColor }}>
                         {actualPct.toFixed(0)}%
                     </span>
-                    <span className="text-[11px] font-mono text-white/60 font-bold tracking-wide">
+                    <span className="text-[0.75rem] font-mono tabular-nums text-white/60 font-bold tracking-wide">
                         to {fmt(goalValue)}
                     </span>
-                    <span className="text-[9px] font-mono mt-0.5 text-white/25">
+                    <span className="text-[0.6875rem] font-mono tabular-nums mt-0.5 text-white/25">
                         {targetPct.toFixed(0)}% target
                     </span>
                 </div>
@@ -105,17 +105,17 @@ export default function GoalProgressRing({
             {/* Status & ETA Label */}
             <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: actualColor }} />
-                <span className="font-mono text-xs" style={{ color: actualColor }}>{statusLabel}</span>
+                <span className="font-mono tabular-nums text-xs" style={{ color: actualColor }}>{statusLabel}</span>
                 {etaLabel && (
                     <>
                         <span className="text-white/20 mx-1">·</span>
-                        <span className={`font-mono text-xs font-bold ${etaMonths >= 0 ? 'text-[#05ff9b]' : 'text-[#ef4444]'}`}>
+                        <span className={`font-mono tabular-nums text-xs font-bold ${etaMonths >= 0 ? 'text-[#34D399]' : 'text-[#ef4444]'}`}>
                             {etaLabel}
                         </span>
                     </>
                 )}
                 <span className="text-white/20 mx-1">·</span>
-                <span className="font-mono text-xs text-white/40">{daysRemaining.toLocaleString()} days left</span>
+                <span className="font-mono tabular-nums text-xs text-white/40">{daysRemaining.toLocaleString()} days left</span>
             </div>
         </div>
     );

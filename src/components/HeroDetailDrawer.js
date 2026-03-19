@@ -125,12 +125,12 @@ export default function HeroDetailDrawer({ categoryId, effectiveCurrency, totalC
 
                                 {/* MoM Variance */}
                                 <div className="flex items-center justify-between bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3">
-                                    <span className="text-[11px] uppercase font-space tracking-[1.5px] text-[#F5F5DC]/40">MoM</span>
+                                    <span className="text-[0.75rem] uppercase font-space tracking-[1.5px] text-[#F5F5DC]/40">MoM</span>
                                     <div className={`flex items-center gap-2 ${momDiff.amount >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                        <span className="font-mono text-[13px] xl:text-sm font-medium">
+                                        <span className="font-mono tabular-nums text-[13px] xl:text-sm font-medium">
                                             {momDiff.amount >= 0 ? '+' : ''}{fmt(momDiff.amount)}
                                         </span>
-                                        <span className="text-[11px] font-space opacity-70">{Math.abs(momDiff.percentage).toFixed(1)}%</span>
+                                        <span className="text-[0.75rem] font-space opacity-70">{Math.abs(momDiff.percentage).toFixed(1)}%</span>
                                     </div>
                                 </div>
 
@@ -138,25 +138,25 @@ export default function HeroDetailDrawer({ categoryId, effectiveCurrency, totalC
                                 {fxDecomposition && (
                                     <div className="flex flex-col gap-1.5 pl-4 border-l-2 border-white/[0.06] ml-2">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-[10px] font-space text-[#F5F5DC]/40 flex items-center gap-1.5">
-                                                <span className="text-[9px]">↳</span> Asset Prices
+                                            <span className="text-[0.75rem] font-space text-[#F5F5DC]/40 flex items-center gap-1.5">
+                                                <span className="text-[0.6875rem]">↳</span> Asset Prices
                                             </span>
                                             <div className={`flex items-center gap-1.5 ${fxDecomposition.assetAmount >= 0 ? 'text-emerald-400/80' : 'text-red-400/80'}`}>
-                                                <span className="font-mono text-[11px]">
+                                                <span className="font-mono tabular-nums text-[0.75rem]">
                                                     {fxDecomposition.assetAmount >= 0 ? '+' : ''}{fmt(fxDecomposition.assetAmount)}
                                                 </span>
-                                                <span className="font-space text-[10px] opacity-70">{Math.abs(fxDecomposition.assetPercentage).toFixed(1)}%</span>
+                                                <span className="font-space text-[0.75rem] opacity-70">{Math.abs(fxDecomposition.assetPercentage).toFixed(1)}%</span>
                                             </div>
                                         </div>
                                         <div className="flex items-center justify-between">
-                                            <span className="text-[10px] font-space text-[#F5F5DC]/40 flex items-center gap-1.5">
-                                                <span className="text-[9px]">↳</span> FX Effect
+                                            <span className="text-[0.75rem] font-space text-[#F5F5DC]/40 flex items-center gap-1.5">
+                                                <span className="text-[0.6875rem]">↳</span> FX Effect
                                             </span>
                                             <div className={`flex items-center gap-1.5 ${fxDecomposition.fxAmount >= 0 ? 'text-emerald-400/80' : 'text-red-400/80'}`}>
-                                                <span className="font-mono text-[11px]">
+                                                <span className="font-mono tabular-nums text-[0.75rem]">
                                                     {fxDecomposition.fxAmount >= 0 ? '+' : ''}{fmt(fxDecomposition.fxAmount)}
                                                 </span>
-                                                <span className="font-space text-[10px] opacity-70">{Math.abs(fxDecomposition.fxPercentage).toFixed(1)}%</span>
+                                                <span className="font-space text-[0.75rem] opacity-70">{Math.abs(fxDecomposition.fxPercentage).toFixed(1)}%</span>
                                             </div>
                                         </div>
                                     </div>
@@ -165,15 +165,15 @@ export default function HeroDetailDrawer({ categoryId, effectiveCurrency, totalC
                                 {/* Top Contributors */}
                                 {topContributors.length > 0 && (
                                     <div className="flex flex-col gap-2 mt-2">
-                                        <span className="text-[10px] text-[#F5F5DC]/30 uppercase tracking-[1.5px] font-space">Top Contributors</span>
+                                        <span className="text-[0.75rem] text-[#F5F5DC]/30 uppercase tracking-[1.5px] font-space">Top Contributors</span>
                                         {topContributors.map(c => (
-                                            <div key={c.name} className="flex justify-between items-center text-[11px]">
+                                            <div key={c.name} className="flex justify-between items-center text-[0.75rem]">
                                                 <span className="text-[#F5F5DC]/60 font-space truncate max-w-[200px]">{c.name}</span>
                                                 <div className="flex items-center gap-2">
-                                                    <span className={`font-mono ${c.amount >= 0 ? 'text-emerald-400/90' : 'text-red-400/90'}`}>
+                                                    <span className={`font-mono tabular-nums ${c.amount >= 0 ? 'text-emerald-400/90' : 'text-red-400/90'}`}>
                                                         {c.amount >= 0 ? '+' : ''}{fmt(c.amount)}
                                                     </span>
-                                                    <span className={`font-space text-[10px] opacity-60 ${c.percentage >= 0 ? 'text-emerald-400/70' : 'text-red-400/70'}`}>
+                                                    <span className={`font-space text-[0.75rem] opacity-60 ${c.percentage >= 0 ? 'text-emerald-400/70' : 'text-red-400/70'}`}>
                                                         {c.percentage >= 0 ? '+' : ''}{Math.abs(c.percentage).toFixed(1)}%
                                                     </span>
                                                 </div>

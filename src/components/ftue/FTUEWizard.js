@@ -35,7 +35,7 @@ export default function FTUEWizard({ onTakeTour, onSkipTour }) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3 }}
-                    className="text-[#F5F5DC]/40 text-[10px] uppercase tracking-[5px] font-space mb-6"
+                    className="text-[#F5F5DC]/40 text-[0.75rem] uppercase tracking-[5px] font-space mb-6"
                 >
                     Put some funk in your funds
                 </motion.p>
@@ -64,7 +64,7 @@ export default function FTUEWizard({ onTakeTour, onSkipTour }) {
                             flex flex-col items-center gap-0.5 border-none cursor-pointer"
                     >
                         <span>🎸 Show Me Around</span>
-                        <span className="text-[10px] font-normal opacity-60">Quick guided tour</span>
+                        <span className="text-[0.75rem] font-normal opacity-60">Quick guided tour</span>
                     </motion.button>
 
                     <motion.button
@@ -77,7 +77,7 @@ export default function FTUEWizard({ onTakeTour, onSkipTour }) {
                             flex flex-col items-center gap-0.5 cursor-pointer"
                     >
                         <span>Skip, I&apos;ll figure it out</span>
-                        <span className="text-[10px] font-normal opacity-40">Dive right in</span>
+                        <span className="text-[0.75rem] font-normal opacity-40">Dive right in</span>
                     </motion.button>
                 </motion.div>
             </motion.div>

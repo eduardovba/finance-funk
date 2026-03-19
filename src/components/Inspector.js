@@ -396,14 +396,14 @@ export default function Inspector() {
                                                             <Icon size={12} style={{ color: assetType.color }} />
                                                         </div>
                                                         <div className="flex-1 min-w-0">
-                                                            <div className="text-[11px] text-parchment/80 font-space font-medium truncate">
+                                                            <div className="text-[0.75rem] text-parchment/80 font-space font-medium truncate">
                                                                 {item.name}
                                                             </div>
-                                                            <div className="text-[9px] text-parchment/30 font-space truncate">
+                                                            <div className="text-[0.6875rem] text-parchment/30 font-space truncate">
                                                                 {formatDate(item.date)}{item.broker ? ` · ${item.broker}` : ''} · {item.action}
                                                             </div>
                                                         </div>
-                                                        <div className={`text-[11px] font-space font-medium tabular-nums shrink-0 ${isNeg ? 'text-rose-400/70' : 'text-parchment/50'}`}>
+                                                        <div className={`text-[0.75rem] font-space font-medium tabular-nums shrink-0 ${isNeg ? 'text-rose-400/70' : 'text-parchment/50'}`}>
                                                             {formatAmount(item.amount, item.currency, isNeg)}
                                                         </div>
                                                     </Link>
@@ -430,14 +430,14 @@ export default function Inspector() {
                                                 <p className="text-xs text-amber-200/90 font-space font-medium m-0">
                                                     {monthlyCloseStatus.currentMonth} snapshot not recorded
                                                 </p>
-                                                <p className="text-[10px] text-amber-200/50 font-space m-0 mt-0.5">
+                                                <p className="text-[0.75rem] text-amber-200/50 font-space m-0 mt-0.5">
                                                     Record a snapshot to lock in this month's values
                                                 </p>
                                             </div>
                                         </div>
                                         <Button variant="ghost" size="sm"
                                             onClick={() => { setIsMonthlyCloseModalOpen(true); }}
-                                            className="w-full mt-2.5 flex items-center justify-center gap-2 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] font-space font-bold tracking-wide hover:bg-amber-500/20"
+                                            className="w-full mt-2.5 flex items-center justify-center gap-2 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[0.75rem] font-space font-bold tracking-wide hover:bg-amber-500/20"
                                         >
                                             <Camera size={12} />
                                             Record Snapshot
@@ -451,7 +451,7 @@ export default function Inspector() {
                                             <p className="text-xs text-emerald-200/80 font-space font-medium m-0">
                                                 {monthlyCloseStatus.hasCurrentSnapshot ? 'Current month recorded' : 'No snapshot due yet'}
                                             </p>
-                                            <p className="text-[10px] text-parchment/30 font-space m-0 mt-0.5">
+                                            <p className="text-[0.75rem] text-parchment/30 font-space m-0 mt-0.5">
                                                 {monthlyCloseStatus.totalSnapshots} total snapshots tracked
                                             </p>
                                         </div>
@@ -460,7 +460,7 @@ export default function Inspector() {
 
                                 {/* Auto-close toggle */}
                                 <div className="flex items-center justify-between mt-2.5 px-1">
-                                    <span className="text-[10px] text-parchment/40 font-space">Auto monthly close</span>
+                                    <span className="text-[0.75rem] text-parchment/40 font-space">Auto monthly close</span>
                                     <button
                                         onClick={() => handleUpdateAppSettings({ ...appSettings, autoMonthlyCloseEnabled: !appSettings?.autoMonthlyCloseEnabled })}
                                         className="relative shrink-0 w-9 h-5 rounded-full transition-colors duration-200 border-none cursor-pointer flex items-center p-[2px]"
@@ -496,7 +496,7 @@ export default function Inspector() {
                                                     style={{ color: isActive ? link.color : undefined }}
                                                     className={isActive ? '' : 'text-parchment/40'}
                                                 />
-                                                <span className={`text-[9px] font-space font-medium leading-tight ${isActive ? 'text-[#D4AF37]' : 'text-parchment/50'}`}>
+                                                <span className={`text-[0.6875rem] font-space font-medium leading-tight ${isActive ? 'text-[#D4AF37]' : 'text-parchment/50'}`}>
                                                     {link.label}
                                                 </span>
                                             </Link>
@@ -512,11 +512,11 @@ export default function Inspector() {
                                 {/* Market Data Status */}
                                 <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-2.5">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-[10px] text-parchment/40 font-space uppercase tracking-wide">Market Data</span>
+                                        <span className="text-[0.75rem] text-parchment/40 font-space uppercase tracking-wide">Market Data</span>
                                         <button
                                             onClick={() => forceRefreshMarketData()}
                                             disabled={isRefreshingMarketData}
-                                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] text-[10px] font-space font-bold tracking-wide hover:bg-[#D4AF37]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] text-[0.75rem] font-space font-bold tracking-wide hover:bg-[#D4AF37]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                                         >
                                             <RefreshCw size={10} className={isRefreshingMarketData ? 'animate-spin' : ''} />
                                             {isRefreshingMarketData ? 'Refreshing...' : 'Refresh'}
@@ -524,7 +524,7 @@ export default function Inspector() {
                                     </div>
 
                                     {/* Last updated */}
-                                    <div className="flex items-center justify-between text-[10px] font-space">
+                                    <div className="flex items-center justify-between text-[0.75rem] font-space">
                                         <span className="text-parchment/30">Last updated</span>
                                         <span className="text-parchment/60">{lastUpdated ? timeAgo(lastUpdated) : 'Never'}</span>
                                     </div>
@@ -533,16 +533,16 @@ export default function Inspector() {
                                     {marketDataCacheInfo && (
                                         <div className="flex gap-2">
                                             <div className="flex-1 text-center py-1.5 rounded-md bg-emerald-500/[0.06] border border-emerald-500/10">
-                                                <div className="text-[11px] text-emerald-400 font-space font-bold">{marketDataCacheInfo.cached}</div>
-                                                <div className="text-[8px] text-parchment/30 font-space">cached</div>
+                                                <div className="text-[0.75rem] text-emerald-400 font-space font-bold">{marketDataCacheInfo.cached}</div>
+                                                <div className="text-[0.6875rem] text-parchment/30 font-space">cached</div>
                                             </div>
                                             <div className="flex-1 text-center py-1.5 rounded-md bg-amber-500/[0.06] border border-amber-500/10">
-                                                <div className="text-[11px] text-amber-400 font-space font-bold">{marketDataCacheInfo.refreshed}</div>
-                                                <div className="text-[8px] text-parchment/30 font-space">refreshed</div>
+                                                <div className="text-[0.75rem] text-amber-400 font-space font-bold">{marketDataCacheInfo.refreshed}</div>
+                                                <div className="text-[0.6875rem] text-parchment/30 font-space">refreshed</div>
                                             </div>
                                             <div className="flex-1 text-center py-1.5 rounded-md bg-white/[0.03] border border-white/5">
-                                                <div className="text-[11px] text-parchment/60 font-space font-bold">{marketDataCacheInfo.total}</div>
-                                                <div className="text-[8px] text-parchment/30 font-space">total</div>
+                                                <div className="text-[0.75rem] text-parchment/60 font-space font-bold">{marketDataCacheInfo.total}</div>
+                                                <div className="text-[0.6875rem] text-parchment/30 font-space">total</div>
                                             </div>
                                         </div>
                                     )}
@@ -552,13 +552,13 @@ export default function Inspector() {
                                         <div className="pt-1.5 border-t border-white/5">
                                             <div className="flex items-center gap-1.5 mb-1.5">
                                                 <AlertTriangle size={10} className="text-amber-400" />
-                                                <span className="text-[9px] text-amber-300/70 font-space font-medium">Stale tickers</span>
+                                                <span className="text-[0.6875rem] text-amber-300/70 font-space font-medium">Stale tickers</span>
                                             </div>
                                             <div className="flex flex-wrap gap-1">
                                                 {staleTickers.map(ticker => (
                                                     <span
                                                         key={ticker}
-                                                        className="px-1.5 py-0.5 rounded text-[9px] font-space font-medium bg-amber-500/10 text-amber-300/70 border border-amber-500/15"
+                                                        className="px-1.5 py-0.5 rounded text-[0.6875rem] font-space font-medium bg-amber-500/10 text-amber-300/70 border border-amber-500/15"
                                                     >
                                                         {ticker}
                                                     </span>
@@ -570,7 +570,7 @@ export default function Inspector() {
 
                                 {/* Background Selector */}
                                 <div className="mt-2.5">
-                                    <div className="text-[10px] text-parchment/30 font-space mb-1.5 px-1">Background</div>
+                                    <div className="text-[0.75rem] text-parchment/30 font-space mb-1.5 px-1">Background</div>
                                     <BackgroundMiniSelect
                                         value={appSettings?.backgroundSelection || 'frosted-glass'}
                                         onChange={(val) => handleUpdateAppSettings({ ...appSettings, backgroundSelection: val })}
@@ -598,7 +598,7 @@ export default function Inspector() {
                             )}
                             <div className="min-w-0">
                                 <p className="text-[#D4AF37] text-xs font-bold tracking-wide m-0 font-space truncate">{userName}</p>
-                                <p className="text-parchment/30 text-[10px] m-0 font-space truncate">{userEmail || 'Portfolio Manager'}</p>
+                                <p className="text-parchment/30 text-[0.75rem] m-0 font-space truncate">{userEmail || 'Portfolio Manager'}</p>
                             </div>
                         </Link>
                     </motion.div>

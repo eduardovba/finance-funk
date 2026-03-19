@@ -61,11 +61,11 @@ export default function PensionForm({
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Broker</label>
-                            <div className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white/70 text-sm font-mono">{buyData.broker}</div>
+                            <div className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white/70 text-sm font-mono tabular-nums">{buyData.broker}</div>
                         </div>
                         <div>
                             <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Currency</label>
-                            <div className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white/70 text-sm font-mono">{buyData.currency}</div>
+                            <div className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white/70 text-sm font-mono tabular-nums">{buyData.currency}</div>
                         </div>
                     </div>
 
@@ -130,25 +130,25 @@ export default function PensionForm({
                             <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Quantity</label>
                             <input type="number" value={buyData.qtyToBuy} onChange={e => updateBuyCalc('qtyToBuy', e.target.value)}
                                 step="any" placeholder="0.00"
-                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-mono" />
+                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-mono tabular-nums" />
                         </div>
                         <div className="relative">
                             <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Price / Share</label>
                             <input type="number" value={buyData.buyPricePerShare} onChange={e => updateBuyCalc('buyPricePerShare', e.target.value)}
                                 step="any" placeholder="0.00"
-                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-mono" />
-                            {isFetchingPrice && <span className="absolute right-3 top-[34px] text-[10px] text-[#D4AF37] uppercase tracking-wider font-semibold animate-pulse">Fetching...</span>}
+                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-mono tabular-nums" />
+                            {isFetchingPrice && <span className="absolute right-3 top-[34px] text-[0.75rem] text-[#D4AF37] uppercase tracking-wider font-semibold animate-pulse">Fetching...</span>}
                         </div>
                     </div>
 
                     <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 mt-2">
                         <label className="block mb-1 text-emerald-400/70 text-xs font-medium uppercase tracking-wider">Total Investment</label>
                         <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50 font-mono">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50 font-mono tabular-nums">
                                 {buyData.currency === 'BRL' ? 'R$' : (buyData.currency === 'USD' ? '$' : '£')}
                             </span>
                             <input type="number" value={buyData.totalInvestment} onChange={e => updateBuyCalc('totalInvestment', e.target.value)} step="any"
-                                className="w-full py-2.5 pl-8 pr-3 bg-white/5 border border-emerald-500/30 rounded-xl text-white text-lg font-bold focus:outline-none focus:border-emerald-500 transition-all font-mono" />
+                                className="w-full py-2.5 pl-8 pr-3 bg-white/5 border border-emerald-500/30 rounded-xl text-white text-lg font-bold focus:outline-none focus:border-emerald-500 transition-all font-mono tabular-nums" />
                         </div>
                     </div>
 
@@ -178,7 +178,7 @@ export default function PensionForm({
                     <Button variant="ghost" size="sm" onClick={() => { setRightPaneMode('default'); setSellData(null); }} className="rounded-full"><span className="text-sm font-bold">✕</span></Button>
                 </div>
                 <p className="mb-6 text-white/60 text-sm">
-                    {sellData.broker} · {sellData.sharesHeld.toLocaleString(undefined, { maximumFractionDigits: 4 })} units held · Avg cost: <span className="font-mono text-white/80">{formatCurrency(sellData.avgCost, sellData.currency)}</span>
+                    {sellData.broker} · {sellData.sharesHeld.toLocaleString(undefined, { maximumFractionDigits: 4 })} units held · Avg cost: <span className="font-mono tabular-nums text-white/80">{formatCurrency(sellData.avgCost, sellData.currency)}</span>
                 </p>
 
                 <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
@@ -190,7 +190,7 @@ export default function PensionForm({
                         </div>
                         <div>
                             <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Currency</label>
-                            <div className="w-full px-3 py-2.5 bg-white/[0.02] border border-white/5 rounded-xl text-white/50 text-sm font-mono">{sellData.currency}</div>
+                            <div className="w-full px-3 py-2.5 bg-white/[0.02] border border-white/5 rounded-xl text-white/50 text-sm font-mono tabular-nums">{sellData.currency}</div>
                         </div>
                     </div>
 
@@ -198,12 +198,12 @@ export default function PensionForm({
                         <div>
                             <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Quantity to Sell</label>
                             <input type="number" value={sellData.qtyToSell} onChange={e => updateSellCalc('qtyToSell', e.target.value)} step="any"
-                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-rose-500/50 transition-all font-mono" />
+                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-rose-500/50 transition-all font-mono tabular-nums" />
                         </div>
                         <div>
                             <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Sell Price / Share</label>
                             <input type="number" value={sellData.sellPricePerShare} onChange={e => updateSellCalc('sellPricePerShare', e.target.value)} step="any"
-                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-rose-500/50 transition-all font-mono" />
+                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-rose-500/50 transition-all font-mono tabular-nums" />
                         </div>
                     </div>
 
@@ -211,20 +211,20 @@ export default function PensionForm({
                         <div>
                             <label className="block mb-1 text-white/70 text-xs font-medium uppercase tracking-wider">Total Sale Value (Proceeds)</label>
                             <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50 font-mono">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50 font-mono tabular-nums">
                                     {sellData.currency === 'BRL' ? 'R$' : (sellData.currency === 'USD' ? '$' : '£')}
                                 </span>
                                 <input type="number" value={sellData.totalProceeds} onChange={e => updateSellCalc('totalProceeds', e.target.value)} step="any"
-                                    className="w-full py-2.5 pl-8 pr-3 bg-white/5 border border-white/10 rounded-xl text-white text-lg font-bold focus:outline-none focus:border-rose-500/50 transition-all font-mono" />
+                                    className="w-full py-2.5 pl-8 pr-3 bg-white/5 border border-white/10 rounded-xl text-white text-lg font-bold focus:outline-none focus:border-rose-500/50 transition-all font-mono tabular-nums" />
                             </div>
                         </div>
                         <div className="flex justify-between items-center bg-white/5 rounded-lg p-3">
                             <span className="text-white/60 text-sm">Cost Basis</span>
-                            <span className="text-white/80 font-mono text-sm">{formatCurrency((sellData.avgCost || 0) * (parseFloat(String(sellData.qtyToSell)) || 0), sellData.currency)}</span>
+                            <span className="text-white/80 font-mono tabular-nums text-sm">{formatCurrency((sellData.avgCost || 0) * (parseFloat(String(sellData.qtyToSell)) || 0), sellData.currency)}</span>
                         </div>
                         <div className="flex justify-between items-center bg-white/5 border border-white/10 rounded-lg p-3">
                             <span className="text-white text-sm font-bold">P&L</span>
-                            <span className={`text-sm font-bold font-mono ${(sellData.pnl || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            <span className={`text-sm font-bold font-mono tabular-nums ${(sellData.pnl || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                 {(sellData.pnl || 0) >= 0 ? '+' : ''}{formatCurrency(sellData.pnl || 0, sellData.currency)}
                             </span>
                         </div>
@@ -265,7 +265,7 @@ export default function PensionForm({
                         <div key={field}>
                             <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">{label}</label>
                             <input type="text" value={(editingTr as any)[field] ?? ''} onChange={e => handleEditChange(field, e.target.value)}
-                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-mono" />
+                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-mono tabular-nums" />
                         </div>
                     ))}
                     <div className="flex items-center gap-2 mt-2">

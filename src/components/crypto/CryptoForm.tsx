@@ -129,7 +129,7 @@ export default function CryptoForm({
                             )}
                             {isFetchingPrice && (
                                 <div className="text-xs text-[#D4AF37] mt-1.5 flex items-center gap-1.5 font-medium">
-                                    <span className="animate-spin text-[10px]">⏳</span> Fetching price...
+                                    <span className="animate-spin text-[0.75rem]">⏳</span> Fetching price...
                                 </div>
                             )}
                         </div>

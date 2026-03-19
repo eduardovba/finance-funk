@@ -272,7 +272,7 @@ function CurrencySelect({ label, value, onChange }) {
 
     return (
         <div ref={ref} className="relative">
-            <div className="text-[10px] uppercase tracking-widest text-parchment/30 mb-1.5 font-space">{label}</div>
+            <div className="text-[0.75rem] uppercase tracking-widest text-parchment/30 mb-1.5 font-space">{label}</div>
             <button
                 onClick={() => setOpen(!open)}
                 className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 hover:border-[#D4AF37]/30 transition-colors"
@@ -346,7 +346,7 @@ function BackgroundSelect({ label, value, onChange }) {
 
     return (
         <div ref={ref} className="relative mt-4">
-            <div className="text-[10px] uppercase tracking-widest text-parchment/30 mb-1.5 font-space">{label}</div>
+            <div className="text-[0.75rem] uppercase tracking-widest text-parchment/30 mb-1.5 font-space">{label}</div>
             <button
                 onClick={() => setOpen(!open)}
                 className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 hover:border-[#D4AF37]/30 transition-colors"
@@ -692,7 +692,7 @@ export default function ProfilePage() {
 
                             {/* Replay Tutorial */}
                             <div className="mt-5 pt-4 border-t border-white/5">
-                                <div className="text-[10px] uppercase tracking-widest text-parchment/30 mb-1.5 font-space">Tutorial</div>
+                                <div className="text-[0.75rem] uppercase tracking-widest text-parchment/30 mb-1.5 font-space">Tutorial</div>
                                 <button
                                     onClick={async () => {
                                         setResettingFtue(true);
@@ -715,7 +715,7 @@ export default function ProfilePage() {
                                         <div className="text-sm text-parchment font-space font-medium">
                                             {resettingFtue ? 'Resetting...' : 'Replay Tutorial'}
                                         </div>
-                                        <div className="text-[10px] text-parchment/30 font-space">Restart the guided walkthrough from the beginning</div>
+                                        <div className="text-[0.75rem] text-parchment/30 font-space">Restart the guided walkthrough from the beginning</div>
                                     </div>
                                 </button>
                             </div>

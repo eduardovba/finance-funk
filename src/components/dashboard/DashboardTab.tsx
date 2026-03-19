@@ -11,6 +11,7 @@ const TutorialOverlay = _TutorialOverlay as any;
 import DashboardCharts from './charts';
 import DashboardHero from './DashboardHero';
 import useDashboard from './useDashboard';
+import { StaggerList } from '@/components/ui/stagger-list';
 import type { DashboardTabProps } from './types';
 
 export default function DashboardTab(props: DashboardTabProps) {
@@ -116,7 +117,7 @@ export default function DashboardTab(props: DashboardTabProps) {
             )}
 
             {/* Sub-categories Grid (Mobile & Tablet) */}
-            <div className="grid lg:hidden grid-cols-2 md:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3 md:gap-6 mb-8 md:mb-12">
+            <StaggerList className="grid lg:hidden grid-cols-2 md:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3 md:gap-6 mb-8 md:mb-12">
                 {h.expandedSummaries.map((metric: any) => {
                     const contributors = categoryAssetDiffs?.[metric.id]
                         ? Object.entries(categoryAssetDiffs[metric.id])
@@ -145,7 +146,7 @@ export default function DashboardTab(props: DashboardTabProps) {
                         />
                     );
                 })}
-            </div>
+            </StaggerList>
 
             {/* Detailed Tables Section */}
             <div id="ftue-tables" className="grid lg:grid-cols-2 gap-5 mt-4">

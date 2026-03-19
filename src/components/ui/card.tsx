@@ -6,35 +6,64 @@ import { cn } from "@/lib/cn";
 
 const cardVariants = cva(
   [
-    // Base glass-card styles matching globals.css
-    "bg-[rgba(18,20,24,0.60)]",
-    "backdrop-blur-[24px] backdrop-saturate-150",
-    "border border-[rgba(255,255,255,0.08)]",
-    "border-t-[rgba(255,255,255,0.18)] border-l-[rgba(255,255,255,0.12)]",
-    "rounded-2xl p-6",
-    "shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]",
     "transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
+    "p-6",
   ],
   {
     variants: {
       variant: {
         default: [
-          "hover:border-[rgba(255,255,255,0.2)]",
+          // glass-surface
+          "bg-[rgba(18,20,24,0.55)]",
+          "backdrop-blur-[24px] backdrop-saturate-150",
+          "border border-[rgba(255,255,255,0.06)]",
+          "border-t-[rgba(255,255,255,0.1)]",
+          "rounded-2xl",
+          "shadow-[0_8px_32px_rgba(0,0,0,0.3)]",
+          "hover:border-[rgba(255,255,255,0.15)]",
           "hover:-translate-y-0.5",
-          "hover:shadow-[0_12px_40px_rgba(0,0,0,0.5)]",
-          "hover:bg-[rgba(18,20,24,0.78)]",
+          "hover:shadow-[0_12px_40px_rgba(0,0,0,0.45)]",
+          "hover:bg-[rgba(18,20,24,0.70)]",
+        ],
+        elevated: [
+          // glass-elevated
+          "bg-[rgba(18,20,24,0.80)]",
+          "backdrop-blur-[40px] backdrop-saturate-[180%]",
+          "border border-[rgba(255,255,255,0.12)]",
+          "border-t-[rgba(255,255,255,0.2)]",
+          "rounded-[20px]",
+          "shadow-[0_24px_80px_rgba(0,0,0,0.5),0_0_1px_rgba(255,255,255,0.1)]",
+        ],
+        inset: [
+          // glass-inset
+          "bg-[rgba(0,0,0,0.2)]",
+          "backdrop-blur-[12px]",
+          "border border-[rgba(255,255,255,0.03)]",
+          "rounded-xl",
+          "shadow-[inset_0_1px_3px_rgba(0,0,0,0.3)]",
         ],
         flat: [
           // No hover lift or shadow — for nested cards
+          "bg-[rgba(18,20,24,0.55)]",
+          "backdrop-blur-[24px] backdrop-saturate-150",
+          "border border-[rgba(255,255,255,0.06)]",
+          "border-t-[rgba(255,255,255,0.1)]",
+          "rounded-2xl",
           "shadow-none hover:shadow-none",
           "hover:translate-y-0",
         ],
         interactive: [
+          "bg-[rgba(18,20,24,0.55)]",
+          "backdrop-blur-[24px] backdrop-saturate-150",
+          "border border-[rgba(255,255,255,0.06)]",
+          "border-t-[rgba(255,255,255,0.1)]",
+          "rounded-2xl",
+          "shadow-[0_8px_32px_rgba(0,0,0,0.3)]",
           "cursor-pointer",
-          "hover:border-[rgba(255,255,255,0.25)]",
+          "hover:border-[rgba(255,255,255,0.2)]",
           "hover:-translate-y-1",
-          "hover:shadow-[0_16px_48px_rgba(0,0,0,0.6)]",
-          "hover:bg-[rgba(18,20,24,0.85)]",
+          "hover:shadow-[0_16px_48px_rgba(0,0,0,0.5)]",
+          "hover:bg-[rgba(18,20,24,0.80)]",
         ],
       },
     },
@@ -83,7 +112,7 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
     <h3
       ref={ref}
       className={cn(
-        "text-base font-semibold text-[#F5F5DC] tracking-tight",
+        "text-base font-semibold text-[rgba(245,245,220,0.92)] tracking-tight",
         className
       )}
       {...props}
@@ -102,7 +131,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-sm text-white/50", className)}
+    className={cn("text-sm text-[rgba(245,245,220,0.55)]", className)}
     {...props}
   />
 ));

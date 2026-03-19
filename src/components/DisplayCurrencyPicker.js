@@ -66,11 +66,11 @@ export default function DisplayCurrencyPicker({ topCurrency, category }) {
                 title="Change display currency"
             >
                 <span className="text-xs">{meta?.flag}</span>
-                <span className="text-[10px] font-space font-bold text-white/60 group-hover:text-white/90 tracking-wider transition-colors">
+                <span className="text-[0.75rem] font-space font-bold text-white/60 group-hover:text-white/90 tracking-wider transition-colors">
                     {effectiveCurrency}
                 </span>
                 {isAutoMode && (
-                    <span className="text-[8px] text-white/30 font-space uppercase tracking-widest">auto</span>
+                    <span className="text-[0.6875rem] text-white/30 font-space uppercase tracking-widest">auto</span>
                 )}
                 <svg className={`w-2.5 h-2.5 text-white/30 group-hover:text-white/50 transition-all duration-200 ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
@@ -109,7 +109,7 @@ export default function DisplayCurrencyPicker({ topCurrency, category }) {
                                 >
                                     <span className="text-base">🔄</span>
                                     <span className="text-xs font-space font-bold tracking-wider">Auto</span>
-                                    <span className="text-[10px] text-parchment/40 ml-auto">Use native ({topCurrency})</span>
+                                    <span className="text-[0.75rem] text-parchment/40 ml-auto">Use native ({topCurrency})</span>
                                 </button>
                                 <div className="h-px bg-white/5 mx-2" />
                             </>
@@ -127,7 +127,7 @@ export default function DisplayCurrencyPicker({ topCurrency, category }) {
                             >
                                 <span className="text-base">{c.flag}</span>
                                 <span className="text-xs font-space font-bold tracking-wider">{c.code}</span>
-                                <span className="text-[10px] text-parchment/40 ml-auto">{c.name}</span>
+                                <span className="text-[0.75rem] text-parchment/40 ml-auto">{c.name}</span>
                             </button>
                         ))}
 

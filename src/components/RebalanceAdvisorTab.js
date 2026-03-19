@@ -129,7 +129,7 @@ export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }
                     <h2 className="text-2xl sm:text-3xl font-bebas tracking-widest text-[#D4AF37] mb-2 drop-shadow-md uppercase">
                         Smart Rebalance
                     </h2>
-                    <p className="font-mono text-xs sm:text-sm uppercase tracking-widest text-parchment/60 leading-relaxed max-w-2xl">
+                    <p className="font-mono tabular-nums text-xs sm:text-sm uppercase tracking-widest text-parchment/60 leading-relaxed max-w-2xl">
                         Optimize your capital deployment to align your portfolio with your master allocation targets.
                     </p>
                 </div>
@@ -145,7 +145,7 @@ export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }
                         <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#D4AF37]/5 rounded-full blur-[80px] -ml-32 -mb-32"></div>
 
                         <div className="relative z-10 w-full flex flex-col items-center">
-                            <span className="font-mono text-[11px] text-parchment/50 uppercase tracking-[0.2em] mb-4">
+                            <span className="font-mono tabular-nums text-[0.75rem] text-parchment/50 uppercase tracking-[0.2em] mb-4">
                                 1. Input Deployable Capital
                             </span>
 
@@ -162,18 +162,18 @@ export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }
                                 />
                             </div>
 
-                            <p className="font-mono text-xs text-parchment/40 text-center max-w-[250px] leading-relaxed">
+                            <p className="font-mono tabular-nums text-xs text-parchment/40 text-center max-w-[250px] leading-relaxed">
                                 Enter the amount you plan to invest this month. The engine will route this capital to correct your asset drift.
                             </p>
 
                             <div className="mt-8 pt-8 border-t border-white/5 w-full flex flex-col gap-3">
                                 <div className="flex justify-between items-center bg-black/20 p-3 rounded-lg border border-white/5">
-                                    <span className="font-mono text-[10px] uppercase text-parchment/50">Current NW</span>
-                                    <span className="font-mono text-sm text-parchment">{formatPrimary(totalNW)}</span>
+                                    <span className="font-mono tabular-nums text-[0.75rem] uppercase text-parchment/50">Current NW</span>
+                                    <span className="font-mono tabular-nums text-sm text-parchment">{formatPrimary(totalNW)}</span>
                                 </div>
                                 <div className="flex justify-between items-center bg-black/20 p-3 rounded-lg border border-white/5">
-                                    <span className="font-mono text-[10px] uppercase text-parchment/50">Post-Deploy Target</span>
-                                    <span className="font-mono text-sm text-[#D4AF37] font-bold">{formatPrimary(totalNW + deployableCapital)}</span>
+                                    <span className="font-mono tabular-nums text-[0.75rem] uppercase text-parchment/50">Post-Deploy Target</span>
+                                    <span className="font-mono tabular-nums text-sm text-[#D4AF37] font-bold">{formatPrimary(totalNW + deployableCapital)}</span>
                                 </div>
                             </div>
                         </div>
@@ -185,13 +185,13 @@ export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }
 
                     {/* SECTION 1: BUY ACTIONS (Routing New Capital) */}
                     <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-6 lg:p-8 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-[#05ff9b]/80 shadow-[0_0_15px_#05ff9b]"></div>
+                        <div className="absolute top-0 left-0 w-1 h-full bg-[#34D399]/80 shadow-[0_0_15px_#34D399]"></div>
 
                         <div className="mb-6 flex items-center justify-between">
-                            <h3 className="font-bebas text-2xl tracking-widest text-[#05ff9b] flex items-center gap-2">
+                            <h3 className="font-bebas text-2xl tracking-widest text-[#34D399] flex items-center gap-2">
                                 <TrendingUp size={20} /> Capital Routing
                             </h3>
-                            <span className="font-mono text-xs px-2 py-1 rounded bg-[#05ff9b]/10 text-[#05ff9b] border border-[#05ff9b]/20">
+                            <span className="font-mono tabular-nums text-xs px-2 py-1 rounded bg-[#34D399]/10 text-[#34D399] border border-[#34D399]/20">
                                 BUY ORDERS
                             </span>
                         </div>
@@ -199,11 +199,11 @@ export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }
                         {deployableCapital === 0 ? (
                             <div className="text-center py-10 border border-dashed border-white/10 rounded-xl bg-black/20">
                                 <Wallet className="mx-auto mb-3 text-parchment/20" size={32} />
-                                <p className="font-mono text-sm text-parchment/40">Enter a capital value to see routing suggestions.</p>
+                                <p className="font-mono tabular-nums text-sm text-parchment/40">Enter a capital value to see routing suggestions.</p>
                             </div>
                         ) : advisorData.buyActions.length === 0 ? (
                             <div className="text-center py-10 border border-dashed border-white/10 rounded-xl bg-black/20">
-                                <p className="font-mono text-sm text-parchment/40">Portfolio is perfectly balanced or no valid targets found.</p>
+                                <p className="font-mono tabular-nums text-sm text-parchment/40">Portfolio is perfectly balanced or no valid targets found.</p>
                             </div>
                         ) : (
                             <div className="flex flex-col gap-3">
@@ -214,11 +214,11 @@ export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }
                                             initial={{ opacity: 0, x: 20 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             transition={{ delay: idx * 0.1 }}
-                                            className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-4 items-center bg-black/40 border border-white/5 hover:border-[#05ff9b]/30 p-4 rounded-xl transition-all"
+                                            className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-4 items-center bg-black/40 border border-white/5 hover:border-[#34D399]/30 p-4 rounded-xl transition-all"
                                         >
                                             <div className="flex flex-col">
                                                 <span className="font-bebas text-xl text-white tracking-widest">{action.asset}</span>
-                                                <div className="flex items-center gap-2 font-mono text-[10px] mt-1">
+                                                <div className="flex items-center gap-2 font-mono tabular-nums text-[0.75rem] mt-1">
                                                     <span className="text-red-400">{action.currentPct.toFixed(1)}%</span>
                                                     <ArrowRight size={10} className="text-parchment/30" />
                                                     <span className="text-[#D4AF37] tracking-wider">TARGET {action.targetPct}%</span>
@@ -226,11 +226,11 @@ export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }
                                             </div>
 
                                             <div className="flex flex-col sm:items-end p-2 bg-black/40 rounded-lg border border-white/5">
-                                                <span className="font-mono text-[9px] uppercase text-parchment/40">Allocation</span>
-                                                <span className="font-mono text-base font-bold text-[#D4AF37]">{action.percentageOfContribution.toFixed(0)}%</span>
+                                                <span className="font-mono tabular-nums text-[0.6875rem] uppercase text-parchment/40">Allocation</span>
+                                                <span className="font-mono tabular-nums text-base font-bold text-[#D4AF37]">{action.percentageOfContribution.toFixed(0)}%</span>
                                             </div>
 
-                                            <button className="flex items-center justify-center gap-2 bg-[#05ff9b]/10 hover:bg-[#05ff9b]/20 border border-[#05ff9b]/30 text-[#05ff9b] px-5 py-3 rounded-lg font-bebas text-lg tracking-widest transition-colors w-full sm:w-auto">
+                                            <button className="flex items-center justify-center gap-2 bg-[#34D399]/10 hover:bg-[#34D399]/20 border border-[#34D399]/30 text-[#34D399] px-5 py-3 rounded-lg font-bebas text-lg tracking-widest transition-colors w-full sm:w-auto">
                                                 BUY {formatPrimary(action.amount)}
                                             </button>
                                         </motion.div>
@@ -254,14 +254,14 @@ export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }
                                     <h3 className="font-bebas text-2xl tracking-widest text-orange-500 flex items-center gap-2">
                                         <AlertTriangle size={20} /> Severe Drift Detected
                                     </h3>
-                                    <span className="font-mono text-xs px-2 py-1 rounded bg-orange-500/10 text-orange-500 border border-orange-500/20">
+                                    <span className="font-mono tabular-nums text-xs px-2 py-1 rounded bg-orange-500/10 text-orange-500 border border-orange-500/20">
                                         DIVESTMENT ALERTS
                                     </span>
                                 </div>
 
                                 <div className="mb-6 p-4 bg-orange-500/5 border border-orange-500/10 rounded-xl flex items-start gap-4">
                                     <AlertTriangle className="text-orange-500 shrink-0 mt-0.5" size={18} />
-                                    <p className="font-mono text-xs leading-relaxed text-parchment/70">
+                                    <p className="font-mono tabular-nums text-xs leading-relaxed text-parchment/70">
                                         The following assets are <span className="text-orange-400 font-bold">&gt;5%</span> over their required limits. Your new capital is insufficient to correct this ratio passively. Consider selling to aggressively rebalance.
                                         <br /><span className="text-parchment/40 italic block mt-1">Note: Evaluate Capital Gains Tax (CGT) implications before divesting.</span>
                                     </p>
@@ -275,7 +275,7 @@ export default function RebalanceAdvisorTab({ masterMixData, allocationTargets }
                                         >
                                             <div className="flex flex-col">
                                                 <span className="font-bebas text-xl text-white tracking-widest">{action.asset}</span>
-                                                <div className="flex items-center gap-2 font-mono text-[10px] mt-1">
+                                                <div className="flex items-center gap-2 font-mono tabular-nums text-[0.75rem] mt-1">
                                                     <span className="text-orange-400">{action.currentPct.toFixed(1)}%</span>
                                                     <ArrowRight size={10} className="text-parchment/30" />
                                                     <span className="text-[#D4AF37] tracking-wider">TARGET {action.targetPct}%</span>

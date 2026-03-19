@@ -282,7 +282,7 @@ export default function AssetsClassificationTab({
                                         <div className="flex justify-between items-center">
                                             <label className="text-xs text-white/40 font-medium">Allocation Category</label>
                                             {isCatOverridden && (
-                                                <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-semibold tracking-wide uppercase">
+                                                <span className="text-[0.75rem] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-semibold tracking-wide uppercase">
                                                     Overridden
                                                 </span>
                                             )}
@@ -303,7 +303,7 @@ export default function AssetsClassificationTab({
                                         <div className="flex justify-between items-center">
                                             <label className="text-xs text-white/40 font-medium">Native Currency</label>
                                             {isCurOverridden && (
-                                                <span className="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-semibold tracking-wide uppercase">
+                                                <span className="text-[0.75rem] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-semibold tracking-wide uppercase">
                                                     Overridden
                                                 </span>
                                             )}

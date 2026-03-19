@@ -153,7 +153,7 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             return (
-                <div className="bg-black/90 border border-white/10 rounded px-3 py-2 text-xs font-mono shadow-xl backdrop-blur-md">
+                <div className="bg-black/90 border border-white/10 rounded px-3 py-2 text-xs font-mono tabular-nums shadow-xl backdrop-blur-md">
                     <span style={{ color: data.fill }}>{data.name}</span>: {data.value.toFixed(1)}%
                 </div>
             );
@@ -167,7 +167,7 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
                 <div className="p-1.5 rounded-md text-white/50 bg-white/5 group-hover:bg-white/10 group-hover:text-white/80 transition-colors">
                     <fader.icon size={14} strokeWidth={2} />
                 </div>
-                <span className="font-mono text-sm tracking-wide text-white/80">{fader.label}</span>
+                <span className="font-mono tabular-nums text-sm tracking-wide text-white/80">{fader.label}</span>
             </div>
             <div className="relative flex items-center justify-end">
                 <input
@@ -177,9 +177,9 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
                     value={fader.target === 0 ? '' : fader.target}
                     onChange={(e) => onChange(fader.id, e.target.value)}
                     placeholder="0"
-                    className="w-16 bg-black/40 border border-white/10 rounded px-2 py-1.5 text-right font-mono text-sm text-[#D4AF37] focus:border-[#D4AF37] outline-none transition-colors"
+                    className="w-16 bg-black/40 border border-white/10 rounded px-2 py-1.5 text-right font-mono tabular-nums text-sm text-[#D4AF37] focus:border-[#D4AF37] outline-none transition-colors"
                 />
-                <span className="ml-1.5 text-white/40 font-mono text-xs">%</span>
+                <span className="ml-1.5 text-white/40 font-mono tabular-nums text-xs">%</span>
             </div>
         </div>
     );
@@ -200,19 +200,19 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
                 <div className="flex justify-between items-end mb-2">
                     <div className="flex items-center gap-2">
                         <fader.icon size={12} className="text-white/40" />
-                        <span className="font-mono text-xs text-white/70 uppercase tracking-widest">{fader.label}</span>
+                        <span className="font-mono tabular-nums text-xs text-white/70 uppercase tracking-widest">{fader.label}</span>
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="flex flex-col items-end">
-                            <span className="text-[9px] text-white/30 uppercase tracking-widest">Target</span>
-                            <span className="font-mono text-xs text-white/80">{fader.target.toFixed(1)}%</span>
+                            <span className="text-[0.6875rem] text-white/30 uppercase tracking-widest">Target</span>
+                            <span className="font-mono tabular-nums text-xs text-white/80">{fader.target.toFixed(1)}%</span>
                         </div>
                         <div className="flex flex-col items-end">
-                            <span className="text-[9px] text-white/30 uppercase tracking-widest">Actual</span>
-                            <span className="font-mono text-xs text-[#D4AF37] font-bold">{fader.actual.toFixed(1)}%</span>
+                            <span className="text-[0.6875rem] text-white/30 uppercase tracking-widest">Actual</span>
+                            <span className="font-mono tabular-nums text-xs text-[#D4AF37] font-bold">{fader.actual.toFixed(1)}%</span>
                         </div>
                         <div className="w-16 text-right">
-                            <span className={`font-mono text-xs font-bold ${textColor}`}>
+                            <span className={`font-mono tabular-nums text-xs font-bold ${textColor}`}>
                                 {diff > 0 ? '+' : ''}{diff.toFixed(1)}%
                             </span>
                         </div>
@@ -234,7 +234,7 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
                     )}
                 </div>
                 <div className="mt-1.5 flex justify-end">
-                    <span className="text-[10px] font-mono text-white/40">
+                    <span className="text-[0.75rem] font-mono tabular-nums text-white/40">
                         {formatPrimary((fader.actual / 100) * totalNW_GBP)}
                     </span>
                 </div>
@@ -260,7 +260,7 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
                         className="relative group bg-gradient-to-b from-[#333] to-[#111] border border-white/10 rounded-lg px-6 py-2 overflow-hidden shadow-xl transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-2"
                     >
                         <Save size={14} className="text-[#D4AF37] group-disabled:text-white/30 relative z-10" />
-                        <span className="relative font-mono font-bold tracking-[0.1em] text-[#D4AF37] group-disabled:text-white/30 text-sm">
+                        <span className="relative font-mono tabular-nums font-bold tracking-[0.1em] text-[#D4AF37] group-disabled:text-white/30 text-sm">
                             {isSaving ? 'SAVING...' : 'SAVE TARGETS'}
                         </span>
                     </button>
@@ -313,8 +313,8 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
                         {/* Asset Classes */}
                         <div>
                             <div className="flex justify-between items-center mb-2 px-1">
-                                <span className="text-[10px] font-mono uppercase text-white/50 tracking-widest">Asset Classes</span>
-                                <div className={`px-1.5 py-0.5 rounded text-[9px] font-mono tracking-wider ${isValidAssets ? 'text-emerald-400 bg-emerald-400/10' : 'text-red-400 bg-red-400/10'}`}>
+                                <span className="text-[0.75rem] font-mono tabular-nums uppercase text-white/50 tracking-widest">Asset Classes</span>
+                                <div className={`px-1.5 py-0.5 rounded text-[0.6875rem] font-mono tabular-nums tracking-wider ${isValidAssets ? 'text-emerald-400 bg-emerald-400/10' : 'text-red-400 bg-red-400/10'}`}>
                                     {totalAssetEdit.toFixed(1)}% / 100%
                                 </div>
                             </div>
@@ -326,8 +326,8 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
                         {/* Currencies */}
                         <div>
                             <div className="flex justify-between items-center mb-2 px-1">
-                                <span className="text-[10px] font-mono uppercase text-white/50 tracking-widest">Currency Exposure</span>
-                                <div className={`px-1.5 py-0.5 rounded text-[9px] font-mono tracking-wider ${isValidCurrencies ? 'text-emerald-400 bg-emerald-400/10' : 'text-red-400 bg-red-400/10'}`}>
+                                <span className="text-[0.75rem] font-mono tabular-nums uppercase text-white/50 tracking-widest">Currency Exposure</span>
+                                <div className={`px-1.5 py-0.5 rounded text-[0.6875rem] font-mono tabular-nums tracking-wider ${isValidCurrencies ? 'text-emerald-400 bg-emerald-400/10' : 'text-red-400 bg-red-400/10'}`}>
                                     {totalCurrencyEdit.toFixed(1)}% / 100%
                                 </div>
                             </div>
@@ -346,10 +346,10 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
                             Execution Drift
                         </h3>
                         <div className="flex gap-3">
-                            <span className="font-mono text-[10px] tracking-wide text-white/40">
+                            <span className="font-mono tabular-nums text-[0.75rem] tracking-wide text-white/40">
                                 ASSET DRIFT: <strong className={assetDeviation > 0.1 ? 'text-red-400' : 'text-emerald-400'}>{assetDeviation.toFixed(1)}%</strong>
                             </span>
-                            <span className="font-mono text-[10px] tracking-wide text-white/40">
+                            <span className="font-mono tabular-nums text-[0.75rem] tracking-wide text-white/40">
                                 FX DRIFT: <strong className={currencyDeviation > 0.1 ? 'text-red-400' : 'text-emerald-400'}>{currencyDeviation.toFixed(1)}%</strong>
                             </span>
                         </div>
@@ -358,7 +358,7 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
                     <div className="flex flex-col gap-6">
                         {/* Asset Class Drift */}
                         <div>
-                            <span className="text-[10px] font-mono uppercase text-white/50 tracking-widest block mb-2 px-1">Asset Misalignment</span>
+                            <span className="text-[0.75rem] font-mono tabular-nums uppercase text-white/50 tracking-widest block mb-2 px-1">Asset Misalignment</span>
                             <div className="px-1">
                                 {assetFaders.map(renderDriftRow)}
                             </div>
@@ -366,7 +366,7 @@ export default function AllocationTargetsBox({ masterMixData, allocationTargets,
 
                         {/* Currency Drift */}
                         <div>
-                            <span className="text-[10px] font-mono uppercase text-white/50 tracking-widest block mb-2 px-1">Currency Misalignment</span>
+                            <span className="text-[0.75rem] font-mono tabular-nums uppercase text-white/50 tracking-widest block mb-2 px-1">Currency Misalignment</span>
                             <div className="px-1">
                                 {currencyFaders.map(renderDriftRow)}
                             </div>

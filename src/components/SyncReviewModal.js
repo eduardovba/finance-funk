@@ -91,7 +91,7 @@ export default function SyncReviewModal({ isOpen, onClose, assets, institutionNa
                             <div key={asset.id} className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all">
                                 <div className="flex-1">
                                     <h4 className="text-parchment font-medium m-0">{asset.name}</h4>
-                                    <div className="flex items-center gap-3 mt-1 text-[10px] uppercase tracking-widest text-parchment/40">
+                                    <div className="flex items-center gap-3 mt-1 text-[0.75rem] uppercase tracking-widest text-parchment/40">
                                         <span>{asset.broker}</span>
                                         <span className="w-1 h-1 rounded-full bg-white/10" />
                                         <span>
@@ -117,7 +117,7 @@ export default function SyncReviewModal({ isOpen, onClose, assets, institutionNa
                                             title={cat.id}
                                         >
                                             <cat.icon size={16} />
-                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black text-[8px] rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap border border-white/10">
+                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black text-[0.6875rem] rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap border border-white/10">
                                                 {cat.id}
                                             </div>
                                         </button>

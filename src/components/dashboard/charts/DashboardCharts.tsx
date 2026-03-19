@@ -9,6 +9,8 @@ import {
 import actualsData from '@/data/forecast_actuals.json';
 import { calculateFV, calculatePMT, parseDate, getMonthDiff } from '@/lib/forecastUtils';
 import { Settings2 } from 'lucide-react';
+import { ChartTooltip } from '@/components/ui/chart-tooltip';
+import { CHART_COLORS, AXIS_STYLE, GRID_STYLE, GOLD_GRADIENT } from '@/lib/chartTheme';
 import type { DashboardChartsProps } from '../types';
 
 const formatMonthYear = (val: any) => {
@@ -27,50 +29,36 @@ const formatMonthYear = (val: any) => {
 };
 
 const CustomTooltip = ({ active, payload, label, primaryCurrency, secondaryCurrency, primaryMeta, secondaryMeta, formatPrimary, formatSecondary }: any) => {
-    if (active && payload && payload.length) {
-        const uniquePayload = payload.filter((v: any, i: number, a: any[]) => a.findIndex(t => (t.name === v.name)) === i);
-        return (
-            <div className="bg-[#1A0F2E] border border-[#D4AF37] rounded-lg p-3 shadow-xl shadow-black/30 backdrop-blur-md font-mono text-[#F5F5DC]">
-                <p className="text-parchment mb-2 font-semibold text-sm">{typeof label === 'string' ? formatMonthYear(label) : label}</p>
-                {uniquePayload.map((entry: any, index: number) => {
-                    const isDebt = entry.dataKey === 'categories.Debt';
-                    const actualValue = isDebt ? Math.abs(entry.payload.actuals?.Debt || 0) : (entry.payload.actuals?.[entry.dataKey.replace('categories.', '')] || entry.value);
+    if (!active || !payload || !payload.length) return null;
 
-                    let formattedValue = '';
-                    if (entry.name.includes('ROI')) {
-                        formattedValue = `${actualValue.toFixed(1)}%`;
-                    } else if (entry.name.includes('Rate')) {
-                        formattedValue = `${primaryMeta?.symbol || 'R$'} ${actualValue.toFixed(2)}`;
-                    } else if (entry.name.includes(secondaryCurrency)) {
-                        formattedValue = formatSecondary(actualValue);
-                    } else if (entry.name.includes(primaryCurrency)) {
-                        formattedValue = formatPrimary(actualValue);
-                    } else if (entry.name.includes('Net Worth') || entry.name.includes('Total')) {
-                        formattedValue = formatPrimary(actualValue);
-                    } else {
-                        formattedValue = formatPrimary(actualValue);
-                    }
+    const uniquePayload = payload.filter((v: any, i: number, a: any[]) => a.findIndex(t => (t.name === v.name)) === i);
 
-                    return (
-                        <div key={index} className="flex items-center gap-2 mb-1">
-                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color || entry.fill }} />
-                            <span className="text-parchment/70 text-xs">{entry.name}: {formattedValue}</span>
-                        </div>
-                    );
-                })}
-                {payload[0]?.payload?.networthPrimary && (
-                    <>
-                        <div className="h-px bg-record/20 my-2" />
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-record" />
-                            <span className="text-parchment text-sm font-bold">Total: {formatPrimary(payload[0].payload.networthPrimary)}</span>
-                        </div>
-                    </>
-                )}
-            </div>
-        );
-    }
-    return null;
+    const valueFormatter = (value: number, name: string, entry: any) => {
+        const isDebt = entry.dataKey === 'categories.Debt';
+        const actualValue = isDebt
+            ? Math.abs(entry.payload?.actuals?.Debt || 0)
+            : (entry.payload?.actuals?.[entry.dataKey?.replace('categories.', '')] || value);
+
+        if (name.includes('ROI')) return `${actualValue.toFixed(1)}%`;
+        if (name.includes('Rate')) return `${primaryMeta?.symbol || 'R$'} ${actualValue.toFixed(2)}`;
+        if (name.includes(secondaryCurrency)) return formatSecondary(actualValue);
+        return formatPrimary(actualValue);
+    };
+
+    const totalEntry = payload[0]?.payload;
+    const totalLabel = totalEntry?.networthPrimary ? 'Total' : undefined;
+    const totalValue = totalEntry?.networthPrimary ? formatPrimary(totalEntry.networthPrimary) : undefined;
+
+    return (
+        <ChartTooltip
+            active={active}
+            payload={uniquePayload}
+            label={typeof label === 'string' ? formatMonthYear(label) : label}
+            valueFormatter={valueFormatter}
+            totalLabel={totalLabel}
+            totalValue={totalValue}
+        />
+    );
 };
 
 export default function DashboardCharts({ historicalData, currentMonthData, rates, monthlyInvestments, masterMixData, allocationTargets, forecastSettings, dashboardConfig, onCustomizeClick, onNavigate }: DashboardChartsProps) {
@@ -398,24 +386,26 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
 
     const commonXAxis = {
         dataKey: xAxisKey,
-        stroke: "#F5F5DC",
-        tick: { fill: '#F5F5DC', fontSize: 11, opacity: 0.5, fontFamily: 'var(--font-space)' },
+        stroke: 'transparent',
+        tick: { ...AXIS_STYLE },
         tickFormatter: isCategory ? (val: any) => val : formatMonthYear,
-        axisLine: { stroke: 'rgba(212,175,55,0.1)' },
+        axisLine: false,
+        tickLine: false,
         minTickGap: isCategory ? 0 : 30
     };
 
     const commonYAxisLeft = {
         yAxisId: "left",
-        stroke: "#F5F5DC",
-        tick: { fill: '#F5F5DC', fontSize: 11, opacity: 0.5, fontFamily: 'var(--font-space)' },
-        axisLine: { stroke: 'rgba(212,175,55,0.1)' }
+        stroke: 'transparent',
+        tick: { ...AXIS_STYLE },
+        axisLine: false,
+        tickLine: false,
     };
 
     const renderHeaderBadges = () => {
         if (mainSource === 'networth-history') {
             return (
-                <div className="flex gap-3 text-[10px] font-space uppercase tracking-wider">
+                <div className="flex gap-3 text-[0.75rem] font-space uppercase tracking-wider">
                     <span className="text-[#D4AF37]">● {primaryCurrency}</span>
                     <span className="text-[#A0A0A0]">● Target ({primaryCurrency})</span>
                     <span className="text-[#CC5500]">● {secondaryCurrency}</span>
@@ -426,14 +416,14 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
         if (mainSource === 'allocation-current') {
             return (
                 <div className="flex items-center gap-2 bg-black/40 border border-white/10 rounded-full px-3 py-1">
-                    <span className="text-[10px] font-mono text-parchment/40 uppercase tracking-widest">Total Drift</span>
-                    <span className={`text-xs font-mono font-bold ${totalDrift > 0.1 ? 'text-red-400' : 'text-vu-green'}`}>{totalDrift.toFixed(1)}%</span>
+                    <span className="text-[0.75rem] font-mono tabular-nums text-parchment/40 uppercase tracking-widest">Total Drift</span>
+                    <span className={`text-xs font-mono tabular-nums font-bold ${totalDrift > 0.1 ? 'text-red-400' : 'text-vu-green'}`}>{totalDrift.toFixed(1)}%</span>
                 </div>
             );
         }
         if (mainSource === 'roi-history' && dataSources.includes('fx-rate-history')) {
             return (
-                <div className="flex gap-3 text-[10px] font-space uppercase tracking-wider">
+                <div className="flex gap-3 text-[0.75rem] font-space uppercase tracking-wider">
                     <span className="text-[#D4AF37]">● ROI (%)</span>
                     <span className="text-[#CC5500]">● FX Rate</span>
                 </div>
@@ -441,7 +431,7 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
         }
         if (mainSource === 'wealth-trajectory') {
             return (
-                <div className="flex gap-3 text-[10px] font-space uppercase tracking-wider">
+                <div className="flex gap-3 text-[0.75rem] font-space uppercase tracking-wider">
                     <span className="text-vu-green">● Actual (Above)</span>
                     <span className="text-red-500">● Actual (Below)</span>
                     <span className="text-[#A0A0A0]">● Target ({primaryCurrency})</span>
@@ -461,7 +451,7 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
                             <stop offset="100%" stopColor="#CC5500" stopOpacity={0} />
                         </linearGradient>
                     </defs>
-                    <CartesianGrid strokeOpacity={0.1} vertical={false} stroke="#F5F5DC" />
+                    <CartesianGrid {...GRID_STYLE} vertical={false} />
                     <XAxis {...commonXAxis} />
                     <YAxis {...commonYAxisLeft} domain={domainPrimary} tickFormatter={(val: number) => `${primaryMeta?.symbol || ''}${(val / 1000).toFixed(0)}k`} />
                     {options?.dualAxis && <YAxis yAxisId="right" orientation="right" stroke="#CC5500" tick={{ fill: '#CC5500', fontSize: 11, opacity: 0.7, fontFamily: 'var(--font-space)' }} domain={domainSecondary} tickFormatter={(val: number) => `${secondaryMeta?.symbol || ''}${(val / 1000).toFixed(0)}k`} axisLine={{ stroke: 'rgba(204,85,0,0.2)' }} />}
@@ -618,7 +608,7 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
 
     return (
         <div
-            className={`bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex flex-col h-full ${isClickable ? 'cursor-pointer hover:border-[#D4AF37]/30 transition-colors' : ''}`}
+            className={`glass-surface p-6 flex flex-col h-full ${isClickable ? 'cursor-pointer hover:border-[#D4AF37]/30 transition-colors' : ''}`}
             data-chart-id={config.id}
             onClick={isClickable ? () => { window.location.href = '/ledger/investments'; } : undefined}
         >
@@ -643,7 +633,7 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
                     {data.map((entry: any) => (
                         <div key={entry.name} className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                            <span className="text-[#F5F5DC]/80 font-space text-[10px] md:text-sm">
+                            <span className="text-[#F5F5DC]/80 font-space text-[0.75rem] md:text-sm">
                                 {entry.name}: <span className="font-bold">{((entry.value / totalCurrencyTokensPrimary) * 100).toFixed(1)}%</span>
                             </span>
                         </div>
@@ -666,13 +656,13 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
                         {sortedKeys.map(key => (
                             <div key={key} className="flex items-center gap-1">
                                 <div className="w-2 h-2 rounded-sm" style={{ background: COMP_COLORS_LEGEND[key], boxShadow: `0 0 6px ${COMP_COLORS_LEGEND[key]}50` }} />
-                                <span className="text-[9px] font-space" style={{ color: 'rgba(245,245,220,0.4)', fontWeight: 500 }}>{COMP_LABELS_LEGEND[key]}</span>
+                                <span className="text-[0.6875rem] font-space" style={{ color: 'rgba(245,245,220,0.4)', fontWeight: 500 }}>{COMP_LABELS_LEGEND[key]}</span>
                             </div>
                         ))}
                         {series.includes('Debt') && (
                             <div className="flex items-center gap-1">
                                 <div className="w-3 h-0 border-t-[2px] border-dashed border-[#ec4899]" />
-                                <span className="text-[9px] font-space" style={{ color: 'rgba(245,245,220,0.4)', fontWeight: 500 }}>Debt</span>
+                                <span className="text-[0.6875rem] font-space" style={{ color: 'rgba(245,245,220,0.4)', fontWeight: 500 }}>Debt</span>
                             </div>
                         )}
                     </div>

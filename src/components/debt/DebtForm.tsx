@@ -72,7 +72,7 @@ export default function DebtForm({ addFormData, setAddFormData, combinedLenders,
                         <label className="block text-white/60 text-xs mb-1">Amount</label>
                         <input type="number" step="0.01" value={addFormData.amount} onChange={e => setAddFormData(prev => ({ ...prev, amount: e.target.value }))}
                             placeholder="0.00"
-                            className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-mono" />
+                            className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-mono tabular-nums" />
                     </div>
                 </div>
 

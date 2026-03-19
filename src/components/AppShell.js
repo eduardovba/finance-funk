@@ -9,7 +9,6 @@ import TopConsole from '@/components/TopConsole';
 import TransactionForm from '@/components/TransactionForm';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import StatusModal from '@/components/StatusModal';
-import InteractiveDots from '@/components/InteractiveDots';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Inspector from '@/components/Inspector';
 import MonthlyCloseModal from '@/components/MonthlyCloseModal';
@@ -114,15 +113,21 @@ function AppShellInner({ children }) {
             <div className="flex flex-col h-screen bg-transparent overflow-hidden relative">
                 {/* Animated background shapes */}
                 <AnimatedBackground />
-                {/* InteractiveDots — hidden on mobile for performance */}
-                <div className="hidden md:block">
-                    <InteractiveDots />
-                </div>
                 <TopConsole />
 
                 {/* ═══════════ MAIN STAGE ═══════════ */}
                 <main id="main-scroll" className="flex-1 overflow-y-auto p-3 md:p-6 lg:p-8 pb-24 md:pb-8 w-full">
-                    {children}
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={pathname}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -4 }}
+                            transition={{ duration: 0.2, ease: 'easeOut' }}
+                        >
+                            {children}
+                        </motion.div>
+                    </AnimatePresence>
 
                     {isFormOpen && (
                         <div style={{ position: 'fixed', inset: 0, zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

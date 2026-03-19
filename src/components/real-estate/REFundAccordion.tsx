@@ -100,11 +100,11 @@ export default function REFundAccordion({
                                                 <div className="w-9 h-9 min-w-[36px] rounded-full bg-blue-500/20 flex items-center justify-center text-xs font-bold text-blue-400 shrink-0">{f.ticker.slice(0, 2)}</div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-semibold text-white/90 truncate leading-tight">{f.fund}</p>
-                                                    <p className="text-[11px] text-white/40 mt-0.5 font-mono">{f.totalQuantity} shares · {f.ticker}</p>
+                                                    <p className="text-[0.75rem] text-white/40 mt-0.5 font-mono tabular-nums">{f.totalQuantity} shares · {f.ticker}</p>
                                                 </div>
                                                 <div className="text-right shrink-0">
                                                     <p className="text-sm font-bold text-white tracking-tight leading-tight">{formatCurrency(f.currentValue, 'BRL')}</p>
-                                                    <p className={`text-[11px] mt-0.5 font-semibold ${f.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                    <p className={`text-[0.75rem] mt-0.5 font-semibold ${f.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                                         {f.pnl >= 0 ? '+' : ''}{formatCurrency(f.pnl, 'BRL')} ({f.roi >= 0 ? '+' : ''}{f.roi.toFixed(1)}%)
                                                     </p>
                                                 </div>

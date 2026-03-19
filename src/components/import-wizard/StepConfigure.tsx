@@ -86,7 +86,7 @@ export default function StepConfigure({ sheetsConfig, setSheetsConfig, onNext, o
                         <h4 className={`font-bebas tracking-widest text-[#D4AF37] mb-3 ${isMultiSheet ? 'text-base' : 'text-lg'}`}>Defaults</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
-                                <label className="text-[10px] uppercase tracking-widest text-parchment/30 mb-1 font-space block">Currency</label>
+                                <label className="text-[0.75rem] uppercase tracking-widest text-parchment/30 mb-1 font-space block">Currency</label>
                                 <select
                                     value={sc.defaultCurrency}
                                     onChange={e => updateSheet(idx, { defaultCurrency: e.target.value })}
@@ -98,7 +98,7 @@ export default function StepConfigure({ sheetsConfig, setSheetsConfig, onNext, o
                                 </select>
                             </div>
                             <div>
-                                <label className="text-[10px] uppercase tracking-widest text-parchment/30 mb-1 font-space block">Broker</label>
+                                <label className="text-[0.75rem] uppercase tracking-widest text-parchment/30 mb-1 font-space block">Broker</label>
                                 <input
                                     value={sc.defaultBroker}
                                     onChange={e => updateSheet(idx, { defaultBroker: e.target.value })}

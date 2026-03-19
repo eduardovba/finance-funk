@@ -58,7 +58,7 @@ function ChartListItem({ item, updateItem, removeItem, isExpanded, setExpandedId
                     </div>
                     <div>
                         <div className="text-sm text-[#F5F5DC] font-medium font-space">{item.title}</div>
-                        <div className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">
+                        <div className="text-[0.75rem] text-white/40 uppercase tracking-wider mt-0.5">
                             {AVAILABLE_CHART_TYPES.find(t => t.id === item.chartType)?.label} • {currentSourceDef?.label}
                         </div>
                     </div>
@@ -121,7 +121,7 @@ function ChartListItem({ item, updateItem, removeItem, isExpanded, setExpandedId
                                     <button
                                         key={s}
                                         onClick={() => handleSeriesToggle(s)}
-                                        className={`px-2 py-1 rounded border text-[10px] uppercase font-space transition-colors ${active ? 'bg-[#D4AF37]/20 border-[#D4AF37]/50 text-[#D4AF37]' : 'bg-transparent border-white/10 text-white/40 hover:bg-white/5'}`}
+                                        className={`px-2 py-1 rounded border text-[0.75rem] uppercase font-space transition-colors ${active ? 'bg-[#D4AF37]/20 border-[#D4AF37]/50 text-[#D4AF37]' : 'bg-transparent border-white/10 text-white/40 hover:bg-white/5'}`}
                                     >
                                         {s}
                                     </button>
@@ -240,7 +240,7 @@ export default function DashboardCustomizer({ initialConfig, onClose, onSave }) 
 
                     {/* Catalog Column */}
                     <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-white/5 p-6 overflow-y-auto bg-black/10">
-                        <h3 className="text-[10px] uppercase font-space text-[#F5F5DC]/40 tracking-[2px] mb-4">Add New Chart</h3>
+                        <h3 className="text-[0.75rem] uppercase font-space text-[#F5F5DC]/40 tracking-[2px] mb-4">Add New Chart</h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-3">
                             {AVAILABLE_CHART_TYPES.map(type => (
                                 <button
@@ -251,7 +251,7 @@ export default function DashboardCustomizer({ initialConfig, onClose, onSave }) 
                                     <div className="w-8 h-8 rounded bg-black/30 flex items-center justify-center text-lg">{type.icon}</div>
                                     <div className="flex-1">
                                         <div className="text-sm font-space text-[#F5F5DC] group-hover:text-[#D4AF37] transition-colors">{type.label}</div>
-                                        <div className="text-[10px] text-white/30 uppercase mt-0.5 tracking-wider">Add to layout</div>
+                                        <div className="text-[0.75rem] text-white/30 uppercase mt-0.5 tracking-wider">Add to layout</div>
                                     </div>
                                     <Plus size={16} className="text-white/20 group-hover:text-[#D4AF37] transition-colors" />
                                 </button>
@@ -271,15 +271,15 @@ export default function DashboardCustomizer({ initialConfig, onClose, onSave }) 
                     {/* Active Charts Column */}
                     <div className="w-full md:w-2/3 p-6 overflow-y-auto">
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-[10px] uppercase font-space text-[#F5F5DC]/40 tracking-[2px]">Layout & Active Charts</h3>
-                            <span className="text-[10px] text-white/30 tracking-widest uppercase">{safeCharts.length} widgets</span>
+                            <h3 className="text-[0.75rem] uppercase font-space text-[#F5F5DC]/40 tracking-[2px]">Layout & Active Charts</h3>
+                            <span className="text-[0.75rem] text-white/30 tracking-widest uppercase">{safeCharts.length} widgets</span>
                         </div>
 
                         {safeCharts.length === 0 ? (
                             <div className="h-40 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-xl text-center px-4">
                                 <span className="text-4xl opacity-20 mb-2">📊</span>
                                 <p className="text-white/30 text-xs font-space">Your dashboard is empty.</p>
-                                <p className="text-white/20 text-[10px] mt-1">Add a chart from the left panel.</p>
+                                <p className="text-white/20 text-[0.75rem] mt-1">Add a chart from the left panel.</p>
                             </div>
                         ) : (
                             <Reorder.Group axis="y" values={safeCharts} onReorder={setCharts} className="min-h-[100px]">

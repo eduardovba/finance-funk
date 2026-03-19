@@ -223,8 +223,8 @@ export default function LedgerHeroPods({ snapshots, forecastActuals, targetROI, 
                         <BarChart data={yearlyROIData} barCategoryGap="20%">
                             <defs>
                                 <linearGradient id="roi-actual-grad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#05ff9b" stopOpacity={0.9} />
-                                    <stop offset="100%" stopColor="#05ff9b" stopOpacity={0.4} />
+                                    <stop offset="0%" stopColor="#34D399" stopOpacity={0.9} />
+                                    <stop offset="100%" stopColor="#34D399" stopOpacity={0.4} />
                                 </linearGradient>
                                 <linearGradient id="roi-target-grad" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="0%" stopColor="#6b7280" stopOpacity={0.5} />
@@ -269,7 +269,7 @@ export default function LedgerHeroPods({ snapshots, forecastActuals, targetROI, 
                         <span style={{ fontSize: '10px', color: 'rgba(245,245,220,0.4)', fontWeight: 500 }}>Target ({targetROI || 10}%)</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: '#05ff9b' }} />
+                        <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: '#34D399' }} />
                         <span style={{ fontSize: '10px', color: 'rgba(245,245,220,0.4)', fontWeight: 500 }}>Actual</span>
                     </div>
                 </div>

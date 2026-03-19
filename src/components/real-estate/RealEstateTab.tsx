@@ -104,11 +104,11 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                                         {asset.type === 'fund' ? asset.fund : asset.name}
                                     </h3>}
                                     <div className="flex items-center gap-2 mt-2">
-                                        <span className="px-2 py-0.5 rounded bg-white/10 text-white/60 text-[10px] font-mono tracking-wider">
+                                        <span className="px-2 py-0.5 rounded bg-white/10 text-white/60 text-[0.75rem] font-mono tabular-nums tracking-wider">
                                             {asset.type === 'fund' ? asset.ticker : asset.currency}
                                         </span>
                                         {asset.type === 'property' && (
-                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${asset.status === 'Sold' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                                            <span className={`px-2 py-0.5 rounded text-[0.75rem] font-bold ${asset.status === 'Sold' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-emerald-500/20 text-emerald-400'}`}>
                                                 {asset.status}
                                             </span>
                                         )}
@@ -293,24 +293,24 @@ function PropertyOptionsSection({ h }: { h: any }) {
                 <label className="flex items-center gap-3 cursor-pointer group">
                     <input type="checkbox" checked={h.newPropertyData.hasMortgage} onChange={(e: any) => h.setNewPropertyData((p: any) => ({ ...p, hasMortgage: e.target.checked }))}
                         className="w-4 h-4 rounded bg-white/5 border-white/20 text-[#D4AF37] focus:ring-[#D4AF37]/50" />
-                    <div><span className="text-sm font-semibold text-white/80 group-hover:text-white transition-colors">Mortgage</span><p className="text-[11px] text-white/40">Track mortgage payments, principal, and interest</p></div>
+                    <div><span className="text-sm font-semibold text-white/80 group-hover:text-white transition-colors">Mortgage</span><p className="text-[0.75rem] text-white/40">Track mortgage payments, principal, and interest</p></div>
                 </label>
                 {h.newPropertyData.hasMortgage && (
                     <div className="ml-7 flex flex-col gap-3 p-3 bg-white/[0.03] border border-white/5 rounded-xl">
                         <div className="grid grid-cols-2 gap-3">
-                            <div><label className="block text-[10px] text-white/50 uppercase tracking-wider mb-1">Original Amount</label><NumberInput value={h.newPropertyData.mortgageAmount || ''} onChange={(val: any) => h.setNewPropertyData((p: any) => ({ ...p, mortgageAmount: val }))} className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="0" /></div>
-                            <div><label className="block text-[10px] text-white/50 uppercase tracking-wider mb-1">Deposit</label><NumberInput value={h.newPropertyData.mortgageDeposit || ''} onChange={(val: any) => h.setNewPropertyData((p: any) => ({ ...p, mortgageDeposit: val }))} className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="0" /></div>
+                            <div><label className="block text-[0.75rem] text-white/50 uppercase tracking-wider mb-1">Original Amount</label><NumberInput value={h.newPropertyData.mortgageAmount || ''} onChange={(val: any) => h.setNewPropertyData((p: any) => ({ ...p, mortgageAmount: val }))} className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="0" /></div>
+                            <div><label className="block text-[0.75rem] text-white/50 uppercase tracking-wider mb-1">Deposit</label><NumberInput value={h.newPropertyData.mortgageDeposit || ''} onChange={(val: any) => h.setNewPropertyData((p: any) => ({ ...p, mortgageDeposit: val }))} className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="0" /></div>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
-                            <div><label className="block text-[10px] text-white/50 uppercase tracking-wider mb-1">Duration (months)</label><NumberInput value={h.newPropertyData.mortgageDuration || ''} onChange={(val: any) => h.setNewPropertyData((p: any) => ({ ...p, mortgageDuration: val }))} className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="e.g. 360" /></div>
-                            <div><label className="block text-[10px] text-white/50 uppercase tracking-wider mb-1">Interest Rate (%)</label><NumberInput value={h.newPropertyData.mortgageRate || ''} onChange={(val: any) => h.setNewPropertyData((p: any) => ({ ...p, mortgageRate: val }))} className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="e.g. 5.5" /></div>
+                            <div><label className="block text-[0.75rem] text-white/50 uppercase tracking-wider mb-1">Duration (months)</label><NumberInput value={h.newPropertyData.mortgageDuration || ''} onChange={(val: any) => h.setNewPropertyData((p: any) => ({ ...p, mortgageDuration: val }))} className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="e.g. 360" /></div>
+                            <div><label className="block text-[0.75rem] text-white/50 uppercase tracking-wider mb-1">Interest Rate (%)</label><NumberInput value={h.newPropertyData.mortgageRate || ''} onChange={(val: any) => h.setNewPropertyData((p: any) => ({ ...p, mortgageRate: val }))} className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="e.g. 5.5" /></div>
                         </div>
                     </div>
                 )}
                 <label className="flex items-center gap-3 cursor-pointer group">
                     <input type="checkbox" checked={h.newPropertyData.hasRental} onChange={(e: any) => h.setNewPropertyData((p: any) => ({ ...p, hasRental: e.target.checked }))}
                         className="w-4 h-4 rounded bg-white/5 border-white/20 text-[#D4AF37] focus:ring-[#D4AF37]/50" />
-                    <div><span className="text-sm font-semibold text-white/80 group-hover:text-white transition-colors">Rental Income</span><p className="text-[11px] text-white/40">Track monthly revenue, costs, and ROI</p></div>
+                    <div><span className="text-sm font-semibold text-white/80 group-hover:text-white transition-colors">Rental Income</span><p className="text-[0.75rem] text-white/40">Track monthly revenue, costs, and ROI</p></div>
                 </label>
             </div>
         </div>

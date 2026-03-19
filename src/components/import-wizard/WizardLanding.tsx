@@ -46,7 +46,7 @@ export default function WizardLanding({ onChooseProvider, onChooseGeneric }: Wiz
                     </p>
                     <div className="flex items-center gap-1.5 flex-wrap">
                         {['Trading 212', 'B3/CEI', 'XP', 'IBKR', '+7 more'].map(name => (
-                            <span key={name} className="px-2 py-0.5 rounded text-[9px] font-space bg-white/[0.05] text-parchment/30">
+                            <span key={name} className="px-2 py-0.5 rounded text-[0.6875rem] font-space bg-white/[0.05] text-parchment/30">
                                 {name}
                             </span>
                         ))}
@@ -73,7 +73,7 @@ export default function WizardLanding({ onChooseProvider, onChooseGeneric }: Wiz
                     </p>
                     <div className="flex items-center gap-1.5 flex-wrap">
                         {['.csv', '.xlsx', '.xls', '.tsv', '.ods'].map(fmt => (
-                            <span key={fmt} className="px-2 py-0.5 rounded text-[9px] font-space bg-white/[0.05] text-parchment/30">
+                            <span key={fmt} className="px-2 py-0.5 rounded text-[0.6875rem] font-space bg-white/[0.05] text-parchment/30">
                                 {fmt}
                             </span>
                         ))}

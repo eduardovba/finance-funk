@@ -67,7 +67,7 @@ export default function ContextPane({
                 <div className="flex-1 overflow-y-auto custom-scrollbar relative z-10">
                     {renderEmptyState ? renderEmptyState() : (
                         <div className="h-full flex items-center justify-center p-8 text-center">
-                            <span className="text-parchment/30 font-space tracking-[4px] uppercase text-[10px]">
+                            <span className="text-parchment/30 font-space tracking-[4px] uppercase text-[0.75rem]">
                                 Select an asset to view details
                             </span>
                         </div>
@@ -154,7 +154,7 @@ export default function ContextPane({
                 {/* Transaction Timeline */}
                 {renderTimeline && (
                     <div className="pt-6 border-t border-white/5">
-                        <h4 className="text-[10px] text-parchment/40 uppercase tracking-[2px] font-space mb-4">Transaction History</h4>
+                        <h4 className="text-[0.75rem] text-parchment/40 uppercase tracking-[2px] font-space mb-4">Transaction History</h4>
                         <div className="bg-black/20 rounded-xl p-4 border border-white/[0.03]">
                             {renderTimeline(selectedAsset)}
                         </div>

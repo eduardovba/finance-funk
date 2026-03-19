@@ -124,8 +124,8 @@ export default function DebtTab({ transactions = [], rates, onRefresh }: DebtTab
                                     <div className="flex flex-col">
                                         {!nameHandledByContextPane && <h3 className="text-xl font-bold text-white/90 tracking-tight">{asset.lenderName || asset.lender}</h3>}
                                         <div className="flex items-center gap-2 mt-2">
-                                            <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 text-[10px] uppercase font-mono tracking-wider">Debt</span>
-                                            <span className="text-white/40 text-[10px] font-mono">{asset.date}</span>
+                                            <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 text-[0.75rem] uppercase font-mono tabular-nums tracking-wider">Debt</span>
+                                            <span className="text-white/40 text-[0.75rem] font-mono tabular-nums">{asset.date}</span>
                                         </div>
                                     </div>
                                 )}
@@ -134,16 +134,16 @@ export default function DebtTab({ transactions = [], rates, onRefresh }: DebtTab
                                     return (
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="bg-rose-500/5 border border-rose-500/20 rounded-xl p-3">
-                                                <span className="block text-[10px] text-rose-400/60 uppercase tracking-widest mb-1.5">Amount ({detailCur})</span>
-                                                <span className="text-sm font-bold text-rose-400 font-mono drop-shadow-[0_0_8px_rgba(244,63,94,0.4)]">{formatCurrency(convertCurrency(asset.value_brl || 0, 'BRL', detailCur, rates as any), detailCur)}</span>
+                                                <span className="block text-[0.75rem] text-rose-400/60 uppercase tracking-widest mb-1.5">Amount ({detailCur})</span>
+                                                <span className="text-sm font-bold text-rose-400 font-mono tabular-nums drop-shadow-[0_0_8px_rgba(244,63,94,0.4)]">{formatCurrency(convertCurrency(asset.value_brl || 0, 'BRL', detailCur, rates as any), detailCur)}</span>
                                             </div>
                                             <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                                                <span className="block text-[10px] text-white/40 uppercase tracking-widest mb-1.5">Original (BRL)</span>
-                                                <span className="text-sm font-medium text-white/90 font-mono">{formatCurrency(asset.value_brl, 'BRL')}</span>
+                                                <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">Original (BRL)</span>
+                                                <span className="text-sm font-medium text-white/90 font-mono tabular-nums">{formatCurrency(asset.value_brl, 'BRL')}</span>
                                             </div>
                                             {asset.obs && (
                                                 <div className="col-span-2 bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                                                    <span className="block text-[10px] text-white/40 uppercase tracking-widest mb-1.5">Notes</span>
+                                                    <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">Notes</span>
                                                     <span className="text-sm text-white/70">{asset.obs}</span>
                                                 </div>
                                             )}
@@ -194,7 +194,7 @@ export default function DebtTab({ transactions = [], rates, onRefresh }: DebtTab
                                                             <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">{label}</label>
                                                             <input type="text" value={h.editingTr[field] ?? ''}
                                                                 onChange={e => h.handleEditChange(field, e.target.value)}
-                                                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-mono" />
+                                                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-mono tabular-nums" />
                                                         </div>
                                                     ))}
                                                 </div>

@@ -81,7 +81,7 @@ export default function FIForm(props: FIFormProps) {
                                     if (addData?.type === 'Interest') setAddData?.(prev => ({ ...prev, interest: e.target.value }));
                                     else setAddData?.(prev => ({ ...prev, investment: e.target.value }));
                                 }}
-                                placeholder="0.00" className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-mono" />
+                                placeholder="0.00" className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-mono tabular-nums" />
                         </div>
                     </div>
 
@@ -134,7 +134,7 @@ export default function FIForm(props: FIFormProps) {
                                 if (editingTr?.type === 'Interest') setEditingTr?.(prev => ({ ...prev, interest: e.target.value }));
                                 else setEditingTr?.(prev => ({ ...prev, investment: e.target.value }));
                             }}
-                            placeholder="0.00" className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-mono" />
+                            placeholder="0.00" className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-mono tabular-nums" />
                     </div>
 
                     <div>
@@ -176,11 +176,11 @@ export default function FIForm(props: FIFormProps) {
                     <div className="bg-white/[0.02] border border-white/5 rounded-xl p-4 space-y-3">
                         <div className="flex justify-between">
                             <span className="text-white/50 text-xs">Current Tracked Value</span>
-                            <span className="text-sm font-semibold text-white/90 font-mono">{formatCurrency(updateTarget.currentValue, cur)}</span>
+                            <span className="text-sm font-semibold text-white/90 font-mono tabular-nums">{formatCurrency(updateTarget.currentValue, cur)}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-white/50 text-xs">Accrued Interest (so far)</span>
-                            <span className="text-sm font-semibold text-emerald-400 font-mono">+{formatCurrency(updateTarget.interest || 0, cur)}</span>
+                            <span className="text-sm font-semibold text-emerald-400 font-mono tabular-nums">+{formatCurrency(updateTarget.interest || 0, cur)}</span>
                         </div>
                     </div>
 
@@ -192,14 +192,14 @@ export default function FIForm(props: FIFormProps) {
                             value={updateNewValue}
                             onChange={e => setUpdateNewValue?.(e.target.value)}
                             onKeyDown={e => { if (e.key === 'Enter' && isValid) onSaveUpdate?.(); }}
-                            className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all" />
+                            className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm font-mono tabular-nums font-semibold focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all" />
                     </div>
 
                     {/* Interest preview */}
                     {isValid && (
                         <div className={`rounded-xl p-4 flex justify-between items-center ${interestCalc >= 0 ? 'bg-emerald-500/5 border border-emerald-500/20' : 'bg-rose-500/5 border border-rose-500/20'}`}>
                             <span className="text-xs text-white/60">{interestCalc >= 0 ? '📈 Interest to record' : '📉 Adjustment to record'}</span>
-                            <span className={`text-lg font-bold font-mono ${interestCalc >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            <span className={`text-lg font-bold font-mono tabular-nums ${interestCalc >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                 {interestCalc >= 0 ? '+' : ''}{formatCurrency(interestCalc, cur)}
                             </span>
                         </div>

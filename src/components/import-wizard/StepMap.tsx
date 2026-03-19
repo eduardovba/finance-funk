@@ -97,9 +97,9 @@ export default function StepMap({ sheetsConfig, setSheetsConfig, onNext, onBack 
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-white/5">
-                                <th className="text-left px-4 py-3 text-[10px] uppercase tracking-widest text-parchment/40 font-space font-medium">Your Column</th>
-                                <th className="text-left px-4 py-3 text-[10px] uppercase tracking-widest text-parchment/40 font-space font-medium">Maps To</th>
-                                <th className="text-left px-4 py-3 text-[10px] uppercase tracking-widest text-parchment/40 font-space font-medium">Sample Data</th>
+                                <th className="text-left px-4 py-3 text-[0.75rem] uppercase tracking-widest text-parchment/40 font-space font-medium">Your Column</th>
+                                <th className="text-left px-4 py-3 text-[0.75rem] uppercase tracking-widest text-parchment/40 font-space font-medium">Maps To</th>
+                                <th className="text-left px-4 py-3 text-[0.75rem] uppercase tracking-widest text-parchment/40 font-space font-medium">Sample Data</th>
                             </tr>
                         </thead>
                         <tbody>

@@ -31,7 +31,7 @@ const ModalOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-[9999] bg-black/70 backdrop-blur-[8px]",
+      "fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xl",
       "data-[state=open]:animate-[fadeIn_200ms_ease-out]",
       "data-[state=closed]:animate-[fadeOut_150ms_ease-in]",
       className
@@ -59,10 +59,11 @@ const ModalContent = React.forwardRef<
       className={cn(
         "fixed left-1/2 top-1/2 z-[10000] -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)]",
         sizeClasses[size],
-        // Glass-card styling
-        "bg-[rgba(18,20,24,0.85)] backdrop-blur-2xl",
-        "border border-white/10 rounded-2xl",
-        "p-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)]",
+        // Glass-elevated styling
+        "bg-[rgba(18,20,24,0.80)] backdrop-blur-[40px] backdrop-saturate-[180%]",
+        "border border-[rgba(255,255,255,0.12)] border-t-[rgba(255,255,255,0.2)]",
+        "rounded-[20px]",
+        "p-6 shadow-[0_24px_80px_rgba(0,0,0,0.5),0_0_1px_rgba(255,255,255,0.1)]",
         // Animations
         "data-[state=open]:animate-[slideUp_250ms_cubic-bezier(0.16,1,0.3,1)]",
         "data-[state=closed]:animate-[slideDown_200ms_ease-in]",
@@ -85,7 +86,7 @@ const ModalTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-lg font-semibold text-[#F5F5DC] tracking-tight",
+      "text-lg font-semibold text-[rgba(245,245,220,0.92)] tracking-tight",
       className
     )}
     {...props}
@@ -100,7 +101,7 @@ const ModalDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-white/50 mt-1.5", className)}
+    className={cn("text-sm text-[rgba(245,245,220,0.55)] mt-1.5", className)}
     {...props}
   />
 ));

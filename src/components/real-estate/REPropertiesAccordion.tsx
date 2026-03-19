@@ -139,15 +139,15 @@ export default function REPropertiesAccordion({
                                         <div className="w-9 h-9 min-w-[36px] rounded-full bg-emerald-500/20 flex items-center justify-center text-lg shrink-0">🏢</div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-semibold text-white/90 truncate leading-tight">{prop.name}</p>
-                                            <p className="text-[11px] text-white/40 mt-0.5 font-mono">
-                                                {prop.currency} · <span className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold ${prop.status === 'Sold' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-emerald-500/20 text-emerald-400'}`}>{prop.status}</span>
+                                            <p className="text-[0.75rem] text-white/40 mt-0.5 font-mono tabular-nums">
+                                                {prop.currency} · <span className={`px-1.5 py-0.5 rounded text-[0.6875rem] uppercase font-bold ${prop.status === 'Sold' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-emerald-500/20 text-emerald-400'}`}>{prop.status}</span>
                                                 {prop.mortgage && ' · Mortgage'}
                                                 {prop.rental && ' · Rental'}
                                             </p>
                                         </div>
                                         <div className="text-right shrink-0">
                                             <p className="text-sm font-bold text-white tracking-tight leading-tight">{formatCurrency(displayVal, prop.currency)}</p>
-                                            <p className={`text-[11px] mt-0.5 font-semibold ${d.profitLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                            <p className={`text-[0.75rem] mt-0.5 font-semibold ${d.profitLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                                 {d.profitLoss >= 0 ? '+' : ''}{formatCurrency(d.profitLoss, prop.currency)} ({d.roi >= 0 ? '+' : ''}{d.roi.toFixed(1)}%)
                                             </p>
                                         </div>
@@ -176,7 +176,7 @@ export default function REPropertiesAccordion({
                                                 <div className="w-9 h-9 min-w-[36px] rounded-full bg-yellow-500/20 flex items-center justify-center text-lg shrink-0">🏠</div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-semibold text-white/90 truncate">{prop.name}</p>
-                                                    <p className="text-[11px] text-white/40 mt-0.5"><span className="px-1.5 py-0.5 rounded text-[9px] uppercase font-bold bg-yellow-500/20 text-yellow-500">Sold</span></p>
+                                                    <p className="text-[0.75rem] text-white/40 mt-0.5"><span className="px-1.5 py-0.5 rounded text-[0.6875rem] uppercase font-bold bg-yellow-500/20 text-yellow-500">Sold</span></p>
                                                 </div>
                                                 <div className="text-right shrink-0">
                                                     <span className={`text-sm font-bold ${d.profitLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>

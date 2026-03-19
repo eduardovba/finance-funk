@@ -47,15 +47,15 @@ export default function StepResult({ result, assetClass, onReset }: StepResultPr
                 <div className="grid grid-cols-3 gap-6 max-w-sm mx-auto mt-8">
                     <div>
                         <div className="text-3xl font-bebas tracking-wider text-emerald-400">{result.imported}</div>
-                        <div className="text-[10px] text-parchment/40 font-space uppercase tracking-widest">Imported</div>
+                        <div className="text-[0.75rem] text-parchment/40 font-space uppercase tracking-widest">Imported</div>
                     </div>
                     <div>
                         <div className="text-3xl font-bebas tracking-wider text-amber-400">{result.skipped}</div>
-                        <div className="text-[10px] text-parchment/40 font-space uppercase tracking-widest">Skipped</div>
+                        <div className="text-[0.75rem] text-parchment/40 font-space uppercase tracking-widest">Skipped</div>
                     </div>
                     <div>
                         <div className="text-3xl font-bebas tracking-wider text-[#D4AF37]">{result.assetsCreated}</div>
-                        <div className="text-[10px] text-parchment/40 font-space uppercase tracking-widest">New Assets</div>
+                        <div className="text-[0.75rem] text-parchment/40 font-space uppercase tracking-widest">New Assets</div>
                     </div>
                 </div>
             </div>

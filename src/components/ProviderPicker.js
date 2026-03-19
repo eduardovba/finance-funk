@@ -49,7 +49,7 @@ export default function ProviderPicker({ providers, onSelect, onBack }) {
                         {selectedProvider.assetClasses.map(ac => (
                             <span
                                 key={ac}
-                                className="px-2 py-0.5 rounded-full text-[9px] font-space uppercase tracking-widest bg-[#D4AF37]/10 text-[#D4AF37]/80 border border-[#D4AF37]/20"
+                                className="px-2 py-0.5 rounded-full text-[0.6875rem] font-space uppercase tracking-widest bg-[#D4AF37]/10 text-[#D4AF37]/80 border border-[#D4AF37]/20"
                             >
                                 {ac}
                             </span>
@@ -69,7 +69,7 @@ export default function ProviderPicker({ providers, onSelect, onBack }) {
                         {selectedProvider.exportInstructions.map((step, i) => (
                             <li key={i} className="flex items-start gap-3">
                                 <span
-                                    className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-space font-bold flex-shrink-0 mt-0.5"
+                                    className="w-6 h-6 rounded-full flex items-center justify-center text-[0.75rem] font-space font-bold flex-shrink-0 mt-0.5"
                                     style={{ background: `${selectedProvider.color}20`, color: selectedProvider.color }}
                                 >
                                     {i + 1}
@@ -81,7 +81,7 @@ export default function ProviderPicker({ providers, onSelect, onBack }) {
                         ))}
                     </ol>
                     <div className="mt-4 pt-3 border-t border-white/5">
-                        <p className="text-[10px] text-parchment/30 font-space m-0">
+                        <p className="text-[0.75rem] text-parchment/30 font-space m-0">
                             Supported formats: {selectedProvider.supportedFormats.map(f => f.toUpperCase()).join(', ')}
                         </p>
                     </div>
@@ -179,7 +179,7 @@ function ProviderGroup({ title, providers, onSelect }) {
                             {provider.assetClasses.slice(0, 3).map(ac => (
                                 <span
                                     key={ac}
-                                    className="px-1.5 py-0.5 rounded text-[8px] font-space uppercase tracking-wider bg-white/[0.05] text-parchment/30"
+                                    className="px-1.5 py-0.5 rounded text-[0.6875rem] font-space uppercase tracking-wider bg-white/[0.05] text-parchment/30"
                                 >
                                     {ac}
                                 </span>

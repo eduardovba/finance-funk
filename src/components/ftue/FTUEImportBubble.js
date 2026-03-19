@@ -103,7 +103,7 @@ export default function FTUEImportBubble() {
 
                                 <Link
                                     href="/import"
-                                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg font-space text-[11px] tracking-wide font-bold transition-all duration-300
+                                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg font-space text-[0.75rem] tracking-wide font-bold transition-all duration-300
                                         bg-gradient-to-r from-[#D4AF37] to-[#B8962E] text-[#0B0611]
                                         hover:shadow-md hover:shadow-[#D4AF37]/20 no-underline"
                                 >

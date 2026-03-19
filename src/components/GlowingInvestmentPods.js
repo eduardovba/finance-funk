@@ -130,17 +130,17 @@ export default function GlowingInvestmentPods({ data, historicalData = [], curre
 
                                 {/* MoM Difference */}
                                 <div className="flex flex-col items-end gap-0.5">
-                                    <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded shadow-sm flex items-center gap-1 ${isPositive ? 'bg-vu-green/10 text-vu-green' : 'bg-red-500/10 text-red-400'}`}>
+                                    <span className={`text-[0.6875rem] font-medium px-1.5 py-0.5 rounded shadow-sm flex items-center gap-1 ${isPositive ? 'bg-vu-green/10 text-vu-green' : 'bg-red-500/10 text-red-400'}`}>
                                         <span>{isPositive ? '+' : ''}{pod.diffPct.toFixed(1)}%</span>
-                                        <span className="text-[7px] opacity-70">MoM</span>
+                                        <span className="text-[0.6875rem] opacity-70">MoM</span>
                                     </span>
-                                    <span className="text-[8px] font-mono text-parchment/40">
+                                    <span className="text-[0.6875rem] font-mono tabular-nums text-parchment/40">
                                         {isPositive ? '+' : ''}{formatCurrency(pod.diff, currency, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                     </span>
                                 </div>
                             </div>
 
-                            <h3 className="text-[9px] uppercase tracking-widest text-[#F5F5DC]/50 font-space mb-0.5">
+                            <h3 className="text-[0.6875rem] uppercase tracking-widest text-[#F5F5DC]/50 font-space mb-0.5">
                                 {pod.title}
                             </h3>
                             <p className="text-xl font-bold text-white tracking-tight drop-shadow-md truncate mb-0">

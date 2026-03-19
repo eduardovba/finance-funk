@@ -64,7 +64,7 @@ export default function FTUEChecklist() {
                                 </div>
                                 <div>
                                     <h3 className="text-[#D4AF37] font-space font-bold text-sm">Getting Funky</h3>
-                                    <p className="text-[10px] text-[#F5F5DC]/60 mt-0.5">
+                                    <p className="text-[0.75rem] text-[#F5F5DC]/60 mt-0.5">
                                         {allDone ? "You're all set up!" : "Complete these to master your money"}
                                     </p>
                                 </div>
@@ -76,7 +76,7 @@ export default function FTUEChecklist() {
 
                         {/* Progress */}
                         <div className="px-4 pt-4 pb-2">
-                            <div className="flex justify-between text-[10px] font-space text-[#F5F5DC]/50 mb-1.5">
+                            <div className="flex justify-between text-[0.75rem] font-space text-[#F5F5DC]/50 mb-1.5">
                                 <span>{completedCount} of {total} complete</span>
                                 <span className={allDone ? 'text-[#D4AF37]' : ''}>{progressPerc}%</span>
                             </div>
@@ -108,7 +108,7 @@ export default function FTUEChecklist() {
 
                         {/* Footer details */}
                         {ftueState.usingDemoData && (
-                            <div className="p-3 bg-red-500/10 border-t border-red-500/20 text-[10px] text-red-200/70 text-center font-space">
+                            <div className="p-3 bg-red-500/10 border-t border-red-500/20 text-[0.75rem] text-red-200/70 text-center font-space">
                                 Currently browsing Demo Data.<br/>
                                 <button 
                                     onClick={async () => {

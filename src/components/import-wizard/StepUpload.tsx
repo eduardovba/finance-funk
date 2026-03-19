@@ -95,7 +95,7 @@ export default function StepUpload({ onFile, onDrop, onDragOver, fileInputRef, p
                                 key={t.file}
                                 href={`/templates/${t.file}`}
                                 download={t.file}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/10 text-parchment/50 text-[11px] font-space hover:border-[#D4AF37]/30 hover:text-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all no-underline"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/10 text-parchment/50 text-[0.75rem] font-space hover:border-[#D4AF37]/30 hover:text-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all no-underline"
                             >
                                 <span>{t.icon}</span> {t.label}
                             </a>

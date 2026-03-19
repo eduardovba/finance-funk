@@ -328,7 +328,7 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
                                 </div>
                                 <div>
                                     <h3 className="text-[#D4AF37] font-space font-bold text-sm m-0">{step.title}</h3>
-                                    <span className="text-[9px] text-[#F5F5DC]/30 font-space uppercase tracking-[2px]">
+                                    <span className="text-[0.6875rem] text-[#F5F5DC]/30 font-space uppercase tracking-[2px]">
                                         Step {currentStep + 1} of {totalSteps}
                                     </span>
                                 </div>
@@ -340,12 +340,12 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
 
                             {/* Action step prompt */}
                             {isActionStep && !actionCompleted && (
-                                <p className="text-[11px] text-[#D4AF37]/60 font-space italic m-0 mb-3">
+                                <p className="text-[0.75rem] text-[#D4AF37]/60 font-space italic m-0 mb-3">
                                     👆 Complete the action above to continue...
                                 </p>
                             )}
                             {isActionStep && actionCompleted && (
-                                <p className="text-[11px] text-emerald-400/80 font-space font-semibold m-0 mb-3">
+                                <p className="text-[0.75rem] text-emerald-400/80 font-space font-semibold m-0 mb-3">
                                     ✓ Done! Click Next to continue.
                                 </p>
                             )}
@@ -353,7 +353,7 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
 
                             {/* Reset tip on last step */}
                             {isLastStep && (
-                                <p className="text-[10px] text-[#F5F5DC]/30 font-space m-0 mb-3 italic">
+                                <p className="text-[0.75rem] text-[#F5F5DC]/30 font-space m-0 mb-3 italic">
                                     You can replay this tour anytime from Profile → Replay Tutorial.
                                 </p>
                             )}
@@ -362,7 +362,7 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
                             <div className="flex items-center justify-between">
                                 <button
                                     onClick={skipTour}
-                                    className="text-[11px] text-[#F5F5DC]/30 hover:text-[#F5F5DC]/60 font-space tracking-wide uppercase transition-colors bg-transparent border-none cursor-pointer"
+                                    className="text-[0.75rem] text-[#F5F5DC]/30 hover:text-[#F5F5DC]/60 font-space tracking-wide uppercase transition-colors bg-transparent border-none cursor-pointer"
                                 >
                                     Skip
                                 </button>
@@ -388,7 +388,7 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
                                     whileTap={canProceed ? { scale: 0.95 } : {}}
                                     onClick={canProceed ? goNext : undefined}
                                     disabled={!canProceed}
-                                    className={`px-4 py-1.5 rounded-lg font-space text-[11px] tracking-wide font-bold transition-all duration-300 border-none cursor-pointer
+                                    className={`px-4 py-1.5 rounded-lg font-space text-[0.75rem] tracking-wide font-bold transition-all duration-300 border-none cursor-pointer
                                         ${canProceed
                                             ? 'bg-gradient-to-r from-[#D4AF37] to-[#B8962E] text-[#0B0611] hover:shadow-md hover:shadow-[#D4AF37]/20'
                                             : 'bg-white/10 text-white/30 cursor-not-allowed'

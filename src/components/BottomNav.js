@@ -94,7 +94,7 @@ function AssetsSheet({ isOpen, onClose }) {
                                                 {tab.label}
                                             </span>
                                         </div>
-                                        <span className="text-parchment/50 text-[11px] font-mono pl-0.5">
+                                        <span className="text-parchment/50 text-[0.75rem] font-mono tabular-nums pl-0.5">
                                             {value ? formatCurrency(value, 'BRL') : '—'}
                                         </span>
                                     </Link>
@@ -258,10 +258,13 @@ export default function BottomNav() {
                                         tab.id === 'assets' ? 'ftue-sidebar-mobile' : undefined
                                     }
                                     onClick={tab.action}
-                                    className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full bg-transparent border-none active:scale-[0.9] transition-transform"
+                                    className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full bg-transparent border-none active:scale-[0.9] transition-transform relative"
                                 >
-                                    <Icon size={22} style={active ? { color: activeColor } : {}} className={active ? '' : 'text-parchment/40'} strokeWidth={active ? 2.5 : 1.5} />
-                                    <span className={`text-[10px] font-space tracking-wider ${active ? 'font-bold' : 'text-parchment/40'}`} style={active ? { color: activeColor } : {}}>
+                                    {active && (
+                                        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 60% 80% at 50% 100%, ${activeColor}15, transparent)` }} />
+                                    )}
+                                    <Icon size={22} style={active ? { color: activeColor, filter: `drop-shadow(0 0 8px ${activeColor}80)` } : {}} className={active ? '' : 'text-parchment/40'} strokeWidth={active ? 2.5 : 1.5} />
+                                    <span className={`text-[0.75rem] font-space tracking-wider ${active ? 'font-bold' : 'text-parchment/40'}`} style={active ? { color: activeColor } : {}}>
                                         {tab.label}
                                     </span>
                                 </button>
@@ -272,10 +275,13 @@ export default function BottomNav() {
                             <Link
                                 key={tab.id}
                                 href={tab.href}
-                                className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full no-underline active:scale-[0.9] transition-transform"
+                                className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full no-underline active:scale-[0.9] transition-transform relative"
                             >
-                                <Icon size={22} style={active ? { color: activeColor } : {}} className={active ? '' : 'text-parchment/40'} strokeWidth={active ? 2.5 : 1.5} />
-                                <span className={`text-[10px] font-space tracking-wider ${active ? 'font-bold' : 'text-parchment/40'}`} style={active ? { color: activeColor } : {}}>
+                                {active && (
+                                    <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 60% 80% at 50% 100%, ${activeColor}15, transparent)` }} />
+                                )}
+                                <Icon size={22} style={active ? { color: activeColor, filter: `drop-shadow(0 0 8px ${activeColor}80)` } : {}} className={active ? '' : 'text-parchment/40'} strokeWidth={active ? 2.5 : 1.5} />
+                                <span className={`text-[0.75rem] font-space tracking-wider ${active ? 'font-bold' : 'text-parchment/40'}`} style={active ? { color: activeColor } : {}}>
                                     {tab.label}
                                 </span>
                             </Link>

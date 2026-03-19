@@ -170,7 +170,7 @@ const HardwareDial = ({
                     {label}
                 </div>
                 {subtitle && (
-                    <div className="font-mono text-[10px] text-parchment/60 tracking-widest uppercase font-bold drop-shadow-[0_1px_rgba(0,0,0,0.8)]">
+                    <div className="font-mono tabular-nums text-[0.75rem] text-parchment/60 tracking-widest uppercase font-bold drop-shadow-[0_1px_rgba(0,0,0,0.8)]">
                         {subtitle}
                     </div>
                 )}
@@ -236,11 +236,11 @@ const HardwareDial = ({
                         onChange={(e) => setTempValue(e.target.value)}
                         onBlur={handleInputBlur}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-transparent border-none outline-none text-center font-mono text-sm tracking-wider font-bold p-0"
+                        className="w-full bg-transparent border-none outline-none text-center font-mono tabular-nums text-sm tracking-wider font-bold p-0"
                         style={{ color: glowColor }}
                     />
                 ) : (
-                    <span className="font-mono text-sm tracking-wider font-bold" style={{ color: glowColor }}>
+                    <span className="font-mono tabular-nums text-sm tracking-wider font-bold" style={{ color: glowColor }}>
                         {formatValue(displayValue)}
                     </span>
                 )}

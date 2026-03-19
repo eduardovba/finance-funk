@@ -174,8 +174,8 @@ export default function EquityTab({ transactions = [], marketData: globalMarketD
                                     <div className="flex flex-col">
                                         {!nameHandledByContextPane && <h3 className="text-xl font-bold text-white/90 tracking-tight">{asset.asset}</h3>}
                                         <div className="flex items-center gap-2 mt-2">
-                                            <span className="px-2 py-0.5 rounded bg-white/10 text-white/60 text-[10px] font-mono tracking-wider">{asset.broker}</span>
-                                            {asset.ticker && <span className="px-2 py-0.5 rounded bg-[#D4AF37]/20 text-[#D4AF37] text-[10px] font-mono tracking-wider">{asset.ticker}</span>}
+                                            <span className="px-2 py-0.5 rounded bg-white/10 text-white/60 text-[0.75rem] font-mono tabular-nums tracking-wider">{asset.broker}</span>
+                                            {asset.ticker && <span className="px-2 py-0.5 rounded bg-[#D4AF37]/20 text-[#D4AF37] text-[0.75rem] font-mono tabular-nums tracking-wider">{asset.ticker}</span>}
                                         </div>
                                     </div>
                                 )}
@@ -185,28 +185,28 @@ export default function EquityTab({ transactions = [], marketData: globalMarketD
                                         <div className="grid grid-cols-2 gap-4">
                                             {!isCash && (
                                                 <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                                                    <span className="block text-[10px] text-white/40 uppercase tracking-widest mb-1.5">Shares Hosted</span>
-                                                    <span className="text-sm font-medium text-white/90 font-mono">{Math.abs(asset.qty).toLocaleString(undefined, { maximumFractionDigits: 4 })}</span>
+                                                    <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">Shares Hosted</span>
+                                                    <span className="text-sm font-medium text-white/90 font-mono tabular-nums">{Math.abs(asset.qty).toLocaleString(undefined, { maximumFractionDigits: 4 })}</span>
                                                 </div>
                                             )}
                                             {!isCash && (
                                                 <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                                                    <span className="block text-[10px] text-white/40 uppercase tracking-widest mb-1.5">Live Price</span>
-                                                    <span className="text-sm font-medium text-white/90 font-mono">{asset.livePrice ? formatCurrency(asset.livePrice, asset.brokerCurrency) : 'N/A'}</span>
+                                                    <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">Live Price</span>
+                                                    <span className="text-sm font-medium text-white/90 font-mono tabular-nums">{asset.livePrice ? formatCurrency(asset.livePrice, asset.brokerCurrency) : 'N/A'}</span>
                                                 </div>
                                             )}
                                             <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                                                <span className="block text-[10px] text-white/40 uppercase tracking-widest mb-1.5">{isCash ? 'Deposits' : 'Cost Basis'}</span>
-                                                <span className="text-sm font-medium text-white/90 font-mono">{formatCurrency(asset.totalCost, asset.brokerCurrency)}</span>
+                                                <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">{isCash ? 'Deposits' : 'Cost Basis'}</span>
+                                                <span className="text-sm font-medium text-white/90 font-mono tabular-nums">{formatCurrency(asset.totalCost, asset.brokerCurrency)}</span>
                                             </div>
                                             <div className="bg-[#D4AF37]/5 border border-[#D4AF37]/20 rounded-xl p-3">
-                                                <span className="block text-[10px] text-[#D4AF37]/60 uppercase tracking-widest mb-1.5">Current Value</span>
-                                                <span className="text-sm font-bold text-[#D4AF37] font-mono drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">{formatCurrency(asset.currentValue, asset.brokerCurrency)}</span>
+                                                <span className="block text-[0.75rem] text-[#D4AF37]/60 uppercase tracking-widest mb-1.5">Current Value</span>
+                                                <span className="text-sm font-bold text-[#D4AF37] font-mono tabular-nums drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">{formatCurrency(asset.currentValue, asset.brokerCurrency)}</span>
                                             </div>
                                             {!isCash && (
                                                 <div className="col-span-2 bg-white/[0.02] border border-white/5 rounded-xl p-3 flex justify-between items-center">
-                                                    <span className="text-[10px] text-white/40 uppercase tracking-widest">Total P&L</span>
-                                                    <span className={`text-sm font-bold tracking-wider rounded-md font-mono ${asset.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                    <span className="text-[0.75rem] text-white/40 uppercase tracking-widest">Total P&L</span>
+                                                    <span className={`text-sm font-bold tracking-wider rounded-md font-mono tabular-nums ${asset.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                                         {asset.pnl >= 0 ? '+' : ''}{formatCurrency(asset.pnl, asset.brokerCurrency)} ({asset.roi >= 0 ? '+' : ''}{asset.roi.toFixed(1)}%)
                                                     </span>
                                                 </div>
@@ -242,15 +242,15 @@ export default function EquityTab({ transactions = [], marketData: globalMarketD
                                                     <>
                                                         <div className="flex items-center gap-2 mb-1.5">
                                                             <div className={`w-1.5 h-1.5 rounded-full ${!isSell ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                                                            <span className="font-medium text-[10px] text-white/90 uppercase tracking-wider font-space">
+                                                            <span className="font-medium text-[0.75rem] text-white/90 uppercase tracking-wider font-space">
                                                                 {!isSell ? 'Bought' : 'Sold'}
                                                             </span>
                                                         </div>
                                                         <div className="flex flex-col gap-1">
-                                                            <span className="text-sm font-bold text-white tracking-tight font-mono">
+                                                            <span className="text-sm font-bold text-white tracking-tight font-mono tabular-nums">
                                                                 {formatCurrency(Math.abs(tr.investment), tr.currency || 'GBP')}
                                                             </span>
-                                                            <span className="text-[10px] text-white/40 font-mono tracking-tight leading-relaxed">
+                                                            <span className="text-[0.75rem] text-white/40 font-mono tabular-nums tracking-tight leading-relaxed">
                                                                 {tr.quantity?.toLocaleString(undefined, { maximumFractionDigits: 2 })} units <br /> {tr.date}
                                                             </span>
                                                         </div>

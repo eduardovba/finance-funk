@@ -16,7 +16,7 @@ interface ForecastChartProps {
 const ChartTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload?.length) return null;
     return (
-        <div className="bg-[#121418]/90 border border-white/[0.06] rounded-lg p-3 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl font-mono text-xs">
+        <div className="bg-[#121418]/90 border border-white/[0.06] rounded-lg p-3 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl font-mono tabular-nums text-xs">
             <p className="text-[#D4AF37] font-bold mb-1.5">{label}</p>
             {payload.filter((e: any) => e.value != null).map((entry: any, i: number) => {
                 const isGbp = entry.dataKey?.toLowerCase().includes('gbp');
@@ -41,12 +41,12 @@ export default function ForecastChart({ forecastData, forecastPhases, target2031
                     <ComposedChart data={forecastData} margin={{ top: 10, right: 60, left: 20, bottom: 10 }}>
                         <defs>
                             <linearGradient id="actualGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#05ff9b" stopOpacity={0.3} />
-                                <stop offset="100%" stopColor="#05ff9b" stopOpacity={0} />
+                                <stop offset="0%" stopColor="#34D399" stopOpacity={0.3} />
+                                <stop offset="100%" stopColor="#34D399" stopOpacity={0} />
                             </linearGradient>
                             <linearGradient id="forecastGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#05ff9b" stopOpacity={0.1} />
-                                <stop offset="100%" stopColor="#05ff9b" stopOpacity={0} />
+                                <stop offset="0%" stopColor="#34D399" stopOpacity={0.1} />
+                                <stop offset="100%" stopColor="#34D399" stopOpacity={0} />
                             </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
@@ -78,15 +78,15 @@ export default function ForecastChart({ forecastData, forecastPhases, target2031
                         ))}
 
                         <Line yAxisId="left" type="monotone" dataKey="targetBrl" name="Target Trajectory" stroke="rgba(255,255,255,0.35)" strokeWidth={2} strokeDasharray="6 3" dot={false} connectNulls />
-                        <Area yAxisId="left" type="monotone" dataKey="actual" name="Actual (BRL)" stroke="#05ff9b" strokeWidth={2.5} fill="url(#actualGradient)" dot={false} connectNulls />
-                        <Area yAxisId="left" type="monotone" dataKey="forecast" name="Forecast (BRL)" stroke="#05ff9b" strokeWidth={2} strokeDasharray="5 5" fill="url(#forecastGradient)" dot={false} connectNulls>
+                        <Area yAxisId="left" type="monotone" dataKey="actual" name="Actual (BRL)" stroke="#34D399" strokeWidth={2.5} fill="url(#actualGradient)" dot={false} connectNulls />
+                        <Area yAxisId="left" type="monotone" dataKey="forecast" name="Forecast (BRL)" stroke="#34D399" strokeWidth={2} strokeDasharray="5 5" fill="url(#forecastGradient)" dot={false} connectNulls>
                             <LabelList
                                 dataKey="forecast"
                                 position="top"
                                 content={({ x, y, value, index }: any) => {
                                     if (index === forecastData.length - 1) {
                                         return (
-                                            <text x={x} y={y} dy={-12} fill="#05ff9b" fontSize={11} fontWeight="bold" textAnchor="middle" fontFamily="var(--font-space)">
+                                            <text x={x} y={y} dy={-12} fill="#34D399" fontSize={11} fontWeight="bold" textAnchor="middle" fontFamily="var(--font-space)">
                                                 {formatK(value, 'BRL')}
                                             </text>
                                         );

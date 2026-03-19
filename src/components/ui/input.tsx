@@ -24,7 +24,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="text-sm font-medium text-[#F5F5DC]/70 font-[var(--font-space),monospace]"
+            className="text-sm font-medium text-[rgba(245,245,220,0.55)] font-[var(--font-space),monospace]"
           >
             {label}
           </label>
@@ -39,15 +39,18 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={cn(
-              "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5",
-              "text-[#F5F5DC] placeholder:text-white/30",
-              "font-[var(--font-space),monospace] text-sm",
+              /* glass-inset pattern */
+              "w-full bg-[rgba(0,0,0,0.2)] border border-[rgba(255,255,255,0.03)] rounded-xl px-4 py-2.5",
+              "backdrop-blur-[12px]",
+              "shadow-[inset_0_1px_3px_rgba(0,0,0,0.3)]",
+              "text-[rgba(245,245,220,0.92)] placeholder:text-white/30",
+              "font-[inherit] text-sm",
               "focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/30 focus:outline-none",
               "disabled:opacity-50 disabled:cursor-not-allowed",
               "transition-all duration-200",
               leftIcon && "pl-10",
               rightIcon && "pr-10",
-              error && "border-red-500/50 focus:border-red-500/50 focus:ring-red-500/30",
+              error && "border-[#F87171]/50 focus:border-[#F87171]/50 focus:ring-[#F87171]/30",
               className
             )}
             {...props}
@@ -59,7 +62,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {error && (
-          <p className="text-xs text-red-400 mt-0.5">{error}</p>
+          <p className="text-xs text-[#F87171] mt-0.5">{error}</p>
         )}
       </div>
     );

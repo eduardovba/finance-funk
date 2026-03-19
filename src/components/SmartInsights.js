@@ -42,13 +42,13 @@ export default function SmartInsights({
                 if (earlyMonths > 0) {
                     items.push({
                         icon: TrendingUp,
-                        color: '#05ff9b',
+                        color: '#34D399',
                         text: `At your current pace, you'll hit your goal **${earlyMonths} months early** (${new Date(goalDate.getTime() - earlyMonths * 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}).`
                     });
                 } else {
                     items.push({
                         icon: TrendingUp,
-                        color: '#05ff9b',
+                        color: '#34D399',
                         text: `You're projected to hit your goal right on schedule.`
                     });
                 }
@@ -95,7 +95,7 @@ export default function SmartInsights({
             if (Math.abs(diff) > 0.5) {
                 items.push({
                     icon: Clock,
-                    color: diff > 0 ? '#05ff9b' : '#ef4444',
+                    color: diff > 0 ? '#34D399' : '#ef4444',
                     text: `Your trailing 12-month yield is **${trailingYield.toFixed(1)}%**, ${diff > 0 ? 'above' : 'below'} your **${annualInterestRate}%** assumption.`
                 });
             }
@@ -132,7 +132,7 @@ export default function SmartInsights({
             </h4>
 
             {insights.length === 0 ? (
-                <p className="font-mono text-xs text-white/30 italic">Not enough data to generate insights.</p>
+                <p className="font-mono tabular-nums text-xs text-white/30 italic">Not enough data to generate insights.</p>
             ) : (
                 <div className="space-y-4">
                     {insights.map((insight, i) => (
@@ -140,7 +140,7 @@ export default function SmartInsights({
                             <div className="mt-0.5 p-1 rounded bg-white/5 group-hover:bg-white/10 transition-colors shrink-0">
                                 <insight.icon size={14} style={{ color: insight.color }} />
                             </div>
-                            <p className="font-mono text-xs text-white/60 leading-relaxed">
+                            <p className="font-mono tabular-nums text-xs text-white/60 leading-relaxed">
                                 {renderText(insight.text)}
                             </p>
                         </div>

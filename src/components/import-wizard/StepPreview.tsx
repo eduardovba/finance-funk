@@ -46,7 +46,7 @@ export default function StepPreview({ transformedTxs, assetClass, importing, onI
                     <div key={card.label} className="glass-card !p-4 text-center">
                         <card.icon size={16} className="text-[#D4AF37]/50 mx-auto mb-2" />
                         <div className="text-xl font-bebas tracking-wider text-[#D4AF37]">{card.value}</div>
-                        <div className="text-[10px] text-parchment/40 font-space uppercase tracking-widest">{card.label}</div>
+                        <div className="text-[0.75rem] text-parchment/40 font-space uppercase tracking-widest">{card.label}</div>
                     </div>
                 ))}
             </div>
@@ -68,17 +68,17 @@ export default function StepPreview({ transformedTxs, assetClass, importing, onI
                     <table className="w-full">
                         <thead className="sticky top-0 bg-[#0d0814]">
                             <tr className="border-b border-white/5">
-                                <th className="text-left px-4 py-2 text-[10px] uppercase tracking-widest text-parchment/40 font-space font-medium">Date</th>
-                                <th className="text-left px-4 py-2 text-[10px] uppercase tracking-widest text-parchment/40 font-space font-medium">Asset</th>
-                                <th className="text-left px-4 py-2 text-[10px] uppercase tracking-widest text-parchment/40 font-space font-medium">Type</th>
+                                <th className="text-left px-4 py-2 text-[0.75rem] uppercase tracking-widest text-parchment/40 font-space font-medium">Date</th>
+                                <th className="text-left px-4 py-2 text-[0.75rem] uppercase tracking-widest text-parchment/40 font-space font-medium">Asset</th>
+                                <th className="text-left px-4 py-2 text-[0.75rem] uppercase tracking-widest text-parchment/40 font-space font-medium">Type</th>
                                 {showAssetClassColumn && (
-                                    <th className="text-left px-4 py-2 text-[10px] uppercase tracking-widest text-parchment/40 font-space font-medium">Class</th>
+                                    <th className="text-left px-4 py-2 text-[0.75rem] uppercase tracking-widest text-parchment/40 font-space font-medium">Class</th>
                                 )}
                                 {['Equity', 'Crypto', 'Pension'].includes(assetClass) && !showAssetClassColumn && (
-                                    <th className="text-right px-4 py-2 text-[10px] uppercase tracking-widest text-parchment/40 font-space font-medium">Qty</th>
+                                    <th className="text-right px-4 py-2 text-[0.75rem] uppercase tracking-widest text-parchment/40 font-space font-medium">Qty</th>
                                 )}
-                                <th className="text-right px-4 py-2 text-[10px] uppercase tracking-widest text-parchment/40 font-space font-medium">Amount</th>
-                                <th className="text-left px-4 py-2 text-[10px] uppercase tracking-widest text-parchment/40 font-space font-medium">CCY</th>
+                                <th className="text-right px-4 py-2 text-[0.75rem] uppercase tracking-widest text-parchment/40 font-space font-medium">Amount</th>
+                                <th className="text-left px-4 py-2 text-[0.75rem] uppercase tracking-widest text-parchment/40 font-space font-medium">CCY</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -87,13 +87,13 @@ export default function StepPreview({ transformedTxs, assetClass, importing, onI
                                     <td className="px-4 py-2.5 text-xs text-parchment/60 font-space whitespace-nowrap">{tx.date}</td>
                                     <td className="px-4 py-2.5 text-xs text-parchment font-space font-medium truncate max-w-[180px]">{tx.asset || tx.ticker || '—'}</td>
                                     <td className="px-4 py-2.5">
-                                        <span className={`text-[10px] font-space font-bold uppercase px-2 py-0.5 rounded-full
+                                        <span className={`text-[0.75rem] font-space font-bold uppercase px-2 py-0.5 rounded-full
                                             ${tx.type === 'Buy' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
                                             {tx.type}
                                         </span>
                                     </td>
                                     {showAssetClassColumn && (
-                                        <td className="px-4 py-2.5 text-[10px] text-parchment/50 font-space">{tx.assetClass || assetClass}</td>
+                                        <td className="px-4 py-2.5 text-[0.75rem] text-parchment/50 font-space">{tx.assetClass || assetClass}</td>
                                     )}
                                     {['Equity', 'Crypto', 'Pension'].includes(assetClass) && !showAssetClassColumn && (
                                         <td className="px-4 py-2.5 text-xs text-parchment/60 font-space text-right">{tx.quantity?.toFixed(2)}</td>

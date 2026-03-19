@@ -8,7 +8,7 @@ import { cn } from "@/lib/cn";
 const buttonVariants = cva(
   [
     "inline-flex items-center justify-center gap-2",
-    "font-semibold rounded-xl",
+    "font-semibold rounded-xl font-[inherit]",
     "transition-all duration-200",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]/50 focus-visible:ring-offset-0",
     "disabled:opacity-50 disabled:pointer-events-none",
@@ -27,15 +27,15 @@ const buttonVariants = cva(
         secondary: [
           "bg-transparent",
           "border border-white/10",
-          "text-[#F5F5DC]",
+          "text-[rgba(245,245,220,0.92)]",
           "hover:bg-white/5 hover:border-white/20",
         ],
         danger: [
-          "bg-[#ef4444]",
-          "border border-[#ef4444]",
+          "bg-[#F87171]",
+          "border border-[#F87171]",
           "text-white",
-          "hover:bg-[#dc2626] hover:border-[#dc2626]",
-          "hover:shadow-[0_4px_12px_rgba(239,68,68,0.4)]",
+          "hover:bg-[#ef4444] hover:border-[#ef4444]",
+          "hover:shadow-[0_4px_12px_rgba(248,113,113,0.4)]",
         ],
         ghost: [
           "bg-transparent",
