@@ -32,7 +32,7 @@ vi.mock('@/lib/db', async () => {
 
 // Mock authGuard to return a fake user
 vi.mock('@/lib/authGuard', () => ({
-    requireAuth: async () => ({ id: '1', name: 'Test User', email: 'test@test.com' }),
+    requireAuth: async () => ({ id: 1, name: 'Test User', email: 'test@test.com' }),
 }));
 
 // Import route handlers AFTER mocks are set up

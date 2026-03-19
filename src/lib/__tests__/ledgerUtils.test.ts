@@ -154,11 +154,11 @@ describe('calculateMonthlyInvestments', () => {
 
     it('adds live transactions to non-historical months', () => {
         const transactions = [
-            { date: '2099-01-15', flow: -500, category: 'Equity' },
-            { date: '2099-01-20', flow: -300, category: 'Crypto' },
+            { date: '2025-01-15', flow: -500, category: 'Equity' },
+            { date: '2025-01-20', flow: -300, category: 'Crypto' },
         ];
         const result = calculateMonthlyInvestments(transactions, []);
-        const month = result.find(d => d.month === '2099-01');
+        const month = result.find(d => d.month === '2025-01');
         expect(month).toBeDefined();
         // flow is negated (-(-500) = 500)
         expect(month!.equity).toBe(500);
