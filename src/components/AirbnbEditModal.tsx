@@ -1,9 +1,17 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Button, Input } from '@/components/ui';
 
-export default function AirbnbEditModal({ month, transactions, onSave, onCancel }) {
+interface AirbnbEditModalProps {
+    month: string;
+    transactions: any[];
+    onSave: (month: string, transactions: any[]) => void;
+    onCancel: () => void;
+}
+
+export default function AirbnbEditModal({ month, transactions, onSave, onCancel }: AirbnbEditModalProps) {
     const [editedTransactions, setEditedTransactions] = useState(transactions || []);
 
-    const handleTransactionChange = (index, field, value) => {
+    const handleTransactionChange = (index: number, field: string, value: any) => {
         const updated = [...editedTransactions];
         updated[index] = { ...updated[index], [field]: value };
         setEditedTransactions(updated);
@@ -19,8 +27,8 @@ export default function AirbnbEditModal({ month, transactions, onSave, onCancel 
         setEditedTransactions([...editedTransactions, newTransaction]);
     };
 
-    const handleDeleteTransaction = (index) => {
-        const updated = editedTransactions.filter((_, i) => i !== index);
+    const handleDeleteTransaction = (index: number) => {
+        const updated = editedTransactions.filter((_: any, i: number) => i !== index);
         setEditedTransactions(updated);
     };
 
@@ -57,7 +65,7 @@ export default function AirbnbEditModal({ month, transactions, onSave, onCancel 
                         </tr>
                     </thead>
                     <tbody>
-                        {editedTransactions.map((transaction, index) => (
+                        {editedTransactions.map((transaction: any, index: number) => (
                             <tr key={transaction.id || index} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                 <td style={{ padding: '12px' }}>
                                     <select
@@ -104,55 +112,24 @@ export default function AirbnbEditModal({ month, transactions, onSave, onCancel 
                                     )}
                                 </td>
                                 <td style={{ padding: '12px' }}>
-                                    <input
+                                    <Input
                                         type="number"
                                         step="0.01"
                                         value={transaction.amount}
                                         onChange={(e) => handleTransactionChange(index, 'amount', parseFloat(e.target.value) || 0)}
-                                        style={{
-                                            background: 'rgba(255,255,255,0.05)',
-                                            border: '1px solid var(--glass-border)',
-                                            borderRadius: '6px',
-                                            padding: '6px 10px',
-                                            color: 'var(--fg-primary)',
-                                            fontSize: '0.9rem',
-                                            width: '100%',
-                                            textAlign: 'right'
-                                        }}
+                                        className="text-right"
                                     />
                                 </td>
                                 <td style={{ padding: '12px' }}>
-                                    <input
+                                    <Input
                                         type="text"
                                         value={transaction.notes || ''}
                                         onChange={(e) => handleTransactionChange(index, 'notes', e.target.value)}
                                         placeholder="Optional notes"
-                                        style={{
-                                            background: 'rgba(255,255,255,0.05)',
-                                            border: '1px solid var(--glass-border)',
-                                            borderRadius: '6px',
-                                            padding: '6px 10px',
-                                            color: 'var(--fg-primary)',
-                                            fontSize: '0.9rem',
-                                            width: '100%'
-                                        }}
                                     />
                                 </td>
                                 <td style={{ padding: '12px', textAlign: 'center' }}>
-                                    <button
-                                        onClick={() => handleDeleteTransaction(index)}
-                                        style={{
-                                            background: 'var(--error)',
-                                            border: 'none',
-                                            borderRadius: '6px',
-                                            padding: '4px 10px',
-                                            color: 'white',
-                                            fontSize: '0.75rem',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        Delete
-                                    </button>
+                                    <Button variant="danger" size="sm" onClick={() => handleDeleteTransaction(index)}>Delete</Button>
                                 </td>
                             </tr>
                         ))}
@@ -160,50 +137,13 @@ export default function AirbnbEditModal({ month, transactions, onSave, onCancel 
                 </table>
             </div>
 
-            <button
-                onClick={handleAddTransaction}
-                className="btn-primary"
-                style={{
-                    marginTop: '20px',
-                    padding: '8px 16px',
-                    fontSize: '0.85rem'
-                }}
-            >
+            <Button variant="primary" size="sm" onClick={handleAddTransaction} className="mt-5">
                 + Add Transaction
-            </button>
+            </Button>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px' }}>
-                <button
-                    onClick={onCancel}
-                    style={{
-                        background: 'transparent',
-                        border: '1px solid var(--glass-border)',
-                        borderRadius: '8px',
-                        padding: '10px 24px',
-                        color: 'var(--fg-primary)',
-                        fontSize: '0.9rem',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                        e.target.style.background = 'rgba(255,255,255,0.05)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.target.style.background = 'transparent';
-                    }}
-                >
-                    Cancel
-                </button>
-                <button
-                    onClick={handleSave}
-                    className="btn-primary"
-                    style={{
-                        padding: '10px 24px',
-                        fontSize: '0.9rem'
-                    }}
-                >
-                    Save Changes
-                </button>
+                <Button variant="secondary" onClick={onCancel}>Cancel</Button>
+                <Button variant="primary" onClick={handleSave}>Save Changes</Button>
             </div>
         </div>
     );

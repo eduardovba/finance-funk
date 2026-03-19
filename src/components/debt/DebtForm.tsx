@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '@/components/ui';
 import _CurrencySelector from '../CurrencySelector';
 const CurrencySelector = _CurrencySelector as any;
 import { X } from 'lucide-react';
@@ -18,7 +19,7 @@ export default function DebtForm({ addFormData, setAddFormData, combinedLenders,
                 <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] uppercase">
                     {addFormData.transactionType === 'payback' ? 'Log Payback' : 'Log New Debt'}
                 </h3>
-                <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors ml-auto"><X size={16} /></button>
+                <Button variant="ghost" size="sm" onClick={onClose} className="rounded-full ml-auto"><X size={16} /></Button>
             </div>
 
             <div className="flex flex-col gap-5 flex-1 pb-4">
@@ -91,14 +92,15 @@ export default function DebtForm({ addFormData, setAddFormData, combinedLenders,
             </div>
 
             <div className="flex gap-3 justify-end mt-4 pt-4 border-t border-white/10 shrink-0">
-                <button onClick={onClose} className="px-5 py-2.5 bg-transparent border border-white/10 rounded-xl text-white/50 text-sm hover:bg-white/5 transition-colors">Cancel</button>
-                <button onClick={onSave} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-[#1A0F2E] transition-colors" style={{
-                    background: addFormData.transactionType === 'payback'
-                        ? 'linear-gradient(135deg, #059669 0%, #10b981 100%)'
-                        : 'linear-gradient(135deg, #CC5500 0%, #D4AF37 100%)'
-                }}>
+                <Button variant="secondary" onClick={onClose}>Cancel</Button>
+                <Button variant="primary" onClick={onSave}
+                    style={{
+                        background: addFormData.transactionType === 'payback'
+                            ? 'linear-gradient(135deg, #059669 0%, #10b981 100%)'
+                            : undefined
+                    }}>
                     {addFormData.transactionType === 'payback' ? 'Confirm Payback' : 'Confirm'}
-                </button>
+                </Button>
             </div>
         </div>
     );

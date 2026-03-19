@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { Button } from '@/components/ui';
 import _ConfirmationModal from '../ConfirmationModal';
 import _TransactionTimeline from '../TransactionTimeline';
 import _FloatingActionButton from '../FloatingActionButton';
@@ -61,10 +62,9 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }: 
                             <div id="ftue-fi-account-section">
                             <div className="flex justify-between items-center mb-4 px-2">
                                 <h2 className="text-xl font-bold font-bebas tracking-widest text-white/90">Brokers</h2>
-                                <button onClick={() => h.setShowEmptyBrokers(!h.showEmptyBrokers)}
-                                    className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 text-sm font-medium transition-colors">
+                                <Button variant="ghost" size="sm" onClick={() => h.setShowEmptyBrokers(!h.showEmptyBrokers)}>
                                     {h.showEmptyBrokers ? 'Hide Empty' : 'Show Empty'}
-                                </button>
+                                </Button>
                             </div>
 
                             {h.brokers_list.map(b => {
@@ -195,7 +195,7 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }: 
                                             <div className="w-full h-full text-left relative flex flex-col z-10">
                                                 <div className="flex justify-between items-center mb-6 p-8 pb-0">
                                                     <h3 className="text-lg font-bold text-white">Add Broker</h3>
-                                                    <button onClick={() => h.setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors"><span className="text-sm font-bold">✕</span></button>
+                                                    <Button variant="ghost" size="sm" onClick={() => h.setRightPaneMode('default')} className="rounded-full"><span className="text-sm font-bold">✕</span></Button>
                                                 </div>
                                                 <div className="flex-1 overflow-y-auto px-8 pb-8">
                                                     <BrokerForm assetClass="FixedIncome" onSave={() => { h.setRightPaneMode('default'); h.fetchBrokers(); }} onCancel={() => h.setRightPaneMode('default')} />
@@ -238,12 +238,11 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }: 
                         <h3 className="text-lg font-medium text-white/90 flex items-center gap-2">
                             Activity History
                         </h3>
-                        <button
+                        <Button variant="ghost" size="sm"
                             onClick={() => h.setLedgerOpen(!h.ledgerOpen)}
-                            className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 text-sm font-medium transition-colors"
                         >
                             {h.ledgerOpen ? 'Hide' : 'Show'} ({transactions.length})
-                        </button>
+                        </Button>
                     </div>
 
                     {h.ledgerOpen && (

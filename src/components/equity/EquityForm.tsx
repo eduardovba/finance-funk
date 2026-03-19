@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '@/components/ui';
 import { formatCurrency, SUPPORTED_CURRENCIES } from '@/lib/currency';
 import { X } from 'lucide-react';
 import _AssetSearch from '../AssetSearch';
@@ -54,7 +55,7 @@ export default function EquityForm({
                     <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] uppercase">
                         {buyData.asset ? `Buy More ${buyData.asset}` : 'New Purchase'}
                     </h3>
-                    <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors ml-auto"><X size={16} /></button>
+                    <Button variant="ghost" size="sm" onClick={() => setRightPaneMode('default')} className="rounded-full ml-auto"><X size={16} /></Button>
                 </div>
 
                 <div className="flex flex-col gap-5 flex-1 pb-4">
@@ -191,8 +192,8 @@ export default function EquityForm({
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-3 mt-4 shrink-0 pt-2 border-t border-white/5">
-                        <button type="button" onClick={() => setRightPaneMode('default')} className="flex-1 py-3 px-4 rounded-xl border border-white/10 bg-transparent text-white/50 hover:text-white font-bold text-xs uppercase tracking-wider transition-colors font-space">Cancel</button>
-                        <button type="button" onClick={handleBuyConfirm} className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-[#CC5500] to-[#D4AF37] text-[#1A0F2E] font-bold tracking-wide uppercase text-xs hover:brightness-110 shadow-lg shadow-[#D4AF37]/20 transition-all font-space">Confirm</button>
+                        <Button variant="secondary" className="flex-1" type="button" onClick={() => setRightPaneMode('default')}>Cancel</Button>
+                        <Button variant="primary" className="flex-1" type="button" onClick={handleBuyConfirm}>Confirm</Button>
                     </div>
                 </div>
             </div>
@@ -204,7 +205,7 @@ export default function EquityForm({
             return (
                 <div className="w-full h-full p-8 text-left relative flex flex-col z-10">
                     <div className="flex justify-between items-center mb-6">
-                        <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors ml-auto"><X size={16} /></button>
+                        <Button variant="ghost" size="sm" onClick={() => setRightPaneMode('default')} className="rounded-full ml-auto"><X size={16} /></Button>
                     </div>
                     <div className="flex-1">
                         <BrokerForm assetClass="Equity" onSave={() => { setRightPaneMode('default'); fetchBrokers(); }} onCancel={() => setRightPaneMode('default')} />
@@ -220,7 +221,7 @@ export default function EquityForm({
                 <div className="w-full h-full p-8 text-left relative flex flex-col z-10">
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="text-lg font-bold text-white">Edit Transaction</h3>
-                        <button onClick={() => { setRightPaneMode('default'); setEditingTr(null); }} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors"><X size={16} /></button>
+                        <Button variant="ghost" size="sm" onClick={() => { setRightPaneMode('default'); setEditingTr(null); }} className="rounded-full"><X size={16} /></Button>
                     </div>
                     <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
                         {[['date', 'Date'], ['asset', 'Asset'], ['broker', 'Broker'], ['investment', 'Investment'], ['quantity', 'Quantity'], ['costPerShare', 'Cost/Share'], ['currency', 'Currency'], ['pnl', 'P&L'], ['roiPercent', 'ROI %']].map(([field, label]) => (
@@ -243,8 +244,8 @@ export default function EquityForm({
                         </div>
                     </div>
                     <div className="flex gap-3 justify-end mt-6 pt-4 border-t border-white/10">
-                        <button onClick={() => { setRightPaneMode('default'); setEditingTr(null); }} className="px-5 py-2.5 bg-transparent border border-white/10 rounded-xl text-white/50 text-sm hover:bg-white/5 transition-colors">Cancel</button>
-                        <button onClick={handleEditSave} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-[#1A0F2E] transition-colors" style={{ background: 'linear-gradient(135deg, #CC5500 0%, #D4AF37 100%)' }}>Save</button>
+                        <Button variant="secondary" onClick={() => { setRightPaneMode('default'); setEditingTr(null); }}>Cancel</Button>
+                        <Button variant="primary" onClick={handleEditSave}>Save</Button>
                     </div>
                 </div>
             );
@@ -333,8 +334,8 @@ export default function EquityForm({
                     </div>
 
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                        <button onClick={() => setIsSellModalOpen(false)} style={{ padding: '10px 20px', background: 'transparent', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--fg-secondary)', cursor: 'pointer' }}>Cancel</button>
-                        <button onClick={handleSellConfirm} style={{ padding: '10px 20px', background: 'var(--error)', border: 'none', borderRadius: '8px', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Confirm Sale</button>
+                        <Button variant="secondary" onClick={() => setIsSellModalOpen(false)}>Cancel</Button>
+                        <Button variant="danger" onClick={handleSellConfirm}>Confirm Sale</Button>
                     </div>
                 </div>
             </div>

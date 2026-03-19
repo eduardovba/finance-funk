@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '@/components/ui';
 import { formatCurrency } from '@/lib/currency';
 import _AssetSearch from '../AssetSearch';
 import _BrokerForm from '../BrokerForm';
@@ -41,7 +42,7 @@ export default function PensionForm({
             <div className="w-full h-full p-8 text-left relative flex flex-col z-10">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-lg font-bold text-white">Add Pension Asset</h3>
-                    <button onClick={() => { setRightPaneMode('default'); setBuyData(null); }} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors"><span className="text-sm font-bold">✕</span></button>
+                    <Button variant="ghost" size="sm" onClick={() => { setRightPaneMode('default'); setBuyData(null); }} className="rounded-full"><span className="text-sm font-bold">✕</span></Button>
                 </div>
 
                 <div className="flex bg-white/5 rounded-2xl p-1 mb-6">
@@ -159,12 +160,11 @@ export default function PensionForm({
                 </div>
 
                 <div className="flex gap-3 justify-end mt-4 pt-4 border-t border-white/10 shrink-0">
-                    <button onClick={() => { setRightPaneMode('default'); setBuyData(null); }} className="px-5 py-2.5 bg-transparent border border-white/10 rounded-xl text-white/50 text-sm hover:bg-white/5 transition-colors">Cancel</button>
-                    <button onClick={handleBuyConfirm} disabled={!buyData.asset || !buyData.qtyToBuy || !buyData.buyPricePerShare}
-                        className="px-5 py-2.5 rounded-xl text-sm font-semibold text-[#1A0F2E] transition-all"
-                        style={{ background: 'linear-gradient(135deg, #CC5500 0%, #D4AF37 100%)', opacity: (!buyData.asset || !buyData.qtyToBuy || !buyData.buyPricePerShare) ? 0.5 : 1 }}>
+                    <Button variant="secondary" onClick={() => { setRightPaneMode('default'); setBuyData(null); }}>Cancel</Button>
+                    <Button variant="primary" onClick={handleBuyConfirm} disabled={!buyData.asset || !buyData.qtyToBuy || !buyData.buyPricePerShare}
+                        className={(!buyData.asset || !buyData.qtyToBuy || !buyData.buyPricePerShare) ? 'opacity-50' : ''}>
                         Confirm Buy
-                    </button>
+                    </Button>
                 </div>
             </div>
         );
@@ -175,7 +175,7 @@ export default function PensionForm({
             <div className="w-full h-full p-8 text-left relative flex flex-col z-10">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-lg font-bold text-rose-400">Sell {sellData.asset}</h3>
-                    <button onClick={() => { setRightPaneMode('default'); setSellData(null); }} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors"><span className="text-sm font-bold">✕</span></button>
+                    <Button variant="ghost" size="sm" onClick={() => { setRightPaneMode('default'); setSellData(null); }} className="rounded-full"><span className="text-sm font-bold">✕</span></Button>
                 </div>
                 <p className="mb-6 text-white/60 text-sm">
                     {sellData.broker} · {sellData.sharesHeld.toLocaleString(undefined, { maximumFractionDigits: 4 })} units held · Avg cost: <span className="font-mono text-white/80">{formatCurrency(sellData.avgCost, sellData.currency)}</span>
@@ -232,8 +232,8 @@ export default function PensionForm({
                 </div>
 
                 <div className="flex gap-3 justify-end mt-4 pt-4 border-t border-white/10 shrink-0">
-                    <button onClick={() => { setRightPaneMode('default'); setSellData(null); }} className="px-5 py-2.5 bg-transparent border border-white/10 rounded-xl text-white/50 text-sm hover:bg-white/5 transition-colors">Cancel</button>
-                    <button onClick={handleSellConfirm} className="px-5 py-2.5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/50 rounded-xl text-rose-400 text-sm font-semibold transition-colors">Confirm Sell</button>
+                    <Button variant="secondary" onClick={() => { setRightPaneMode('default'); setSellData(null); }}>Cancel</Button>
+                    <Button variant="danger" onClick={handleSellConfirm}>Confirm Sell</Button>
                 </div>
             </div>
         );
@@ -244,7 +244,7 @@ export default function PensionForm({
             <div className="w-full h-full text-left relative flex flex-col z-10">
                 <div className="flex justify-between items-center mb-6 p-8 pb-0">
                     <h3 className="text-lg font-bold text-white">Add Pension Provider</h3>
-                    <button onClick={() => setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors"><span className="text-sm font-bold">✕</span></button>
+                    <Button variant="ghost" size="sm" onClick={() => setRightPaneMode('default')} className="rounded-full"><span className="text-sm font-bold">✕</span></Button>
                 </div>
                 <div className="flex-1 overflow-y-auto px-8 pb-8">
                     <BrokerForm assetClass="Pension" onSave={() => { setRightPaneMode('default'); fetchBrokers(); }} onCancel={() => setRightPaneMode('default')} />
@@ -258,7 +258,7 @@ export default function PensionForm({
             <div className="w-full h-full p-8 text-left relative flex flex-col z-10">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-lg font-bold text-white">Edit Transaction</h3>
-                    <button onClick={() => { setRightPaneMode('default'); setEditingTr(null); }} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors"><span className="text-sm font-bold">✕</span></button>
+                    <Button variant="ghost" size="sm" onClick={() => { setRightPaneMode('default'); setEditingTr(null); }} className="rounded-full"><span className="text-sm font-bold">✕</span></Button>
                 </div>
                 <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
                     {([['date', 'Date'], ['asset', 'Asset'], ['broker', 'Broker'], ['value', 'Value (Cost/Proceeds)'], ['quantity', 'Quantity'], ['price', 'Price'], ['type', 'Type (Buy/Sell)']] as const).map(([field, label]) => (
@@ -275,8 +275,8 @@ export default function PensionForm({
                     </div>
                 </div>
                 <div className="flex gap-3 justify-end mt-4 pt-4 border-t border-white/10 shrink-0">
-                    <button onClick={() => { setRightPaneMode('default'); setEditingTr(null); }} className="px-5 py-2.5 bg-transparent border border-white/10 rounded-xl text-white/50 text-sm hover:bg-white/5 transition-colors">Cancel</button>
-                    <button onClick={handleEditSave} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-[#1A0F2E] transition-colors" style={{ background: 'linear-gradient(135deg, #CC5500 0%, #D4AF37 100%)' }}>Save</button>
+                    <Button variant="secondary" onClick={() => { setRightPaneMode('default'); setEditingTr(null); }}>Cancel</Button>
+                    <Button variant="primary" onClick={handleEditSave}>Save</Button>
                 </div>
             </div>
         );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Reorder, useDragControls } from 'framer-motion';
 import { X, GripVertical, Settings2, Plus, Save, RotateCcw } from 'lucide-react';
+import { Button } from '@/components/ui';
 
 const AVAILABLE_DATA_SOURCES = [
     { id: 'networth-history', label: 'Net Worth History', allowedSeries: ['networthPrimary', 'networthSecondary', 'targetPrimary', 'actualGreen', 'actualRed'] },
@@ -230,9 +231,9 @@ export default function DashboardCustomizer({ initialConfig, onClose, onSave }) 
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 border-b border-white/10 bg-black/20">
                     <h2 className="text-2xl font-bebas tracking-wide text-[#D4AF37] m-0">Dashboard Customizer</h2>
-                    <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
+                    <Button variant="ghost" size="sm" onClick={onClose} className="text-white/50 hover:text-white">
                         <X size={24} />
-                    </button>
+                    </Button>
                 </div>
 
                 <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
@@ -306,13 +307,14 @@ export default function DashboardCustomizer({ initialConfig, onClose, onSave }) 
                         <RotateCcw size={14} /> Reset Layout
                     </button> */}
                     <div />
-                    <button
+                    <Button
+                        variant="primary"
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="flex items-center gap-2 bg-[#D4AF37] hover:bg-[#b0902d] text-black px-6 py-2.5 rounded-lg font-space text-sm tracking-widest uppercase font-bold transition-colors disabled:opacity-50"
+                        className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-space text-sm tracking-widest uppercase font-bold"
                     >
                         <Save size={16} /> {isSaving ? 'Saving...' : 'Save Changes'}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

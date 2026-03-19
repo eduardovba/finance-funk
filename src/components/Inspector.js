@@ -8,6 +8,7 @@ import {
     Target, TrendingUp, Scale, DollarSign, ArrowUpDown, BookOpen,
     Upload, User, ChevronDown, Palette
 } from 'lucide-react';
+import { Button } from '@/components/ui';
 import { usePortfolio } from '@/context/PortfolioContext';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -350,12 +351,11 @@ export default function Inspector() {
                         {/* ─── Header ─── */}
                         <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 flex-shrink-0">
                             <h3 className="font-bebas text-xl tracking-[0.2em] text-[#D4AF37] m-0">COMMAND CENTER</h3>
-                            <button
-                                onClick={() => setIsInspectorOpen(false)}
-                                className="p-1.5 rounded-lg bg-transparent border border-white/10 text-gray-400 hover:text-white hover:border-white/20 transition-all"
+                            <Button variant="ghost" size="sm" onClick={() => setIsInspectorOpen(false)}
+                                className="p-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-white hover:border-white/20"
                             >
                                 <X size={14} />
-                            </button>
+                            </Button>
                         </div>
 
                         {/* ─── Scrollable Content ─── */}
@@ -435,13 +435,13 @@ export default function Inspector() {
                                                 </p>
                                             </div>
                                         </div>
-                                        <button
+                                        <Button variant="ghost" size="sm"
                                             onClick={() => { setIsMonthlyCloseModalOpen(true); }}
-                                            className="w-full mt-2.5 flex items-center justify-center gap-2 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] font-space font-bold tracking-wide hover:bg-amber-500/20 transition-all"
+                                            className="w-full mt-2.5 flex items-center justify-center gap-2 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] font-space font-bold tracking-wide hover:bg-amber-500/20"
                                         >
                                             <Camera size={12} />
                                             Record Snapshot
-                                        </button>
+                                        </Button>
                                     </motion.div>
                                 ) : (
                                     /* Green status — all good */

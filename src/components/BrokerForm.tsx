@@ -1,17 +1,26 @@
 "use client";
 
-import { useState } from 'react';
-import CurrencySelector from './CurrencySelector';
+import React, { useState } from 'react';
+import { Button } from '@/components/ui';
+import _CurrencySelector from './CurrencySelector';
+const CurrencySelector = _CurrencySelector as any;
 
-export default function BrokerForm({ onSave, onCancel, assetClass = null, label = 'Broker' }) {
+interface BrokerFormProps {
+    onSave: (broker: any) => void;
+    onCancel: () => void;
+    assetClass?: string | null;
+    label?: string;
+}
+
+export default function BrokerForm({ onSave, onCancel, assetClass = null, label = 'Broker' }: BrokerFormProps) {
     const [formData, setFormData] = useState({
         name: '',
         currency: 'BRL',
     });
     const [isSaving, setIsSaving] = useState(false);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.name.trim()) {
             setError(`${label} name is required.`);
@@ -35,7 +44,7 @@ export default function BrokerForm({ onSave, onCancel, assetClass = null, label 
 
             const savedBroker = await res.json();
             if (onSave) onSave(savedBroker);
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error saving broker:', err);
             setError(err.message);
             setIsSaving(false);
@@ -69,28 +78,19 @@ export default function BrokerForm({ onSave, onCancel, assetClass = null, label 
                     <label className="block text-xs text-parchment/70 tracking-wide uppercase mb-2">Default Currency</label>
                     <CurrencySelector
                         value={formData.currency}
-                        onChange={(val) => setFormData({ ...formData, currency: val })}
+                        onChange={(val: string) => setFormData({ ...formData, currency: val })}
                     />
                 </div>
 
                 <div className="mt-auto pt-6 flex gap-3">
-                    <button
-                        type="button"
-                        onClick={onCancel}
-                        className="flex-1 py-3 px-4 rounded-xl border border-white/10 text-gray-400 font-bold tracking-wide uppercase text-sm hover:bg-white/5 hover:text-white transition-all font-space"
-                        disabled={isSaving}
-                    >
+                    <Button type="button" variant="secondary" onClick={onCancel} disabled={isSaving} className="flex-1">
                         Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={isSaving}
-                        className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-[#CC5500] to-[#D4AF37] text-[#1A0F2E] font-bold tracking-wide uppercase text-sm hover:brightness-110 hover:shadow-lg shadow-[#D4AF37]/20 transition-all font-space disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
+                    </Button>
+                    <Button type="submit" variant="primary" disabled={isSaving} className="flex-1">
                         {isSaving ? (
                             <div className="w-5 h-5 rounded-full border-2 border-[#1A0F2E]/30 border-t-[#1A0F2E] animate-spin" />
                         ) : `Save ${label}`}
-                    </button>
+                    </Button>
                 </div>
             </form>
         </div>

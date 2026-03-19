@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid, LayoutDashboard, BookOpen, TrendingUp, Landmark, Home as HomeIcon, LineChart, Bitcoin, Wallet, CreditCard, Target, LogOut, Settings, Scale, DollarSign, ArrowUpDown, Shield, FileSpreadsheet } from 'lucide-react';
+import { Button } from '@/components/ui';
 import CurrencyPill from '@/components/CurrencyPill';
 import { usePortfolio } from '@/context/PortfolioContext';
 import { useSession, signOut } from 'next-auth/react';
@@ -367,10 +368,12 @@ export default function TopConsole() {
                 <div id="ftue-currency-pill">
                     <CurrencyPill />
                 </div>
-                <button
+                <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setIsInspectorOpen(!isInspectorOpen)}
                     className={`
-            p-2 rounded-lg transition-all duration-200 bg-transparent border
+            p-2 rounded-lg border
             ${isInspectorOpen
                             ? 'border-[#D4AF37]/50 text-[#D4AF37] bg-[#D4AF37]/10'
                             : 'border-white/10 text-gray-400 hover:text-white hover:border-white/20'
@@ -379,7 +382,7 @@ export default function TopConsole() {
                     title="Command Center"
                 >
                     <LayoutGrid size={16} />
-                </button>
+                </Button>
 
                 {/* User Avatar Dropdown */}
                 {session?.user && (
@@ -446,13 +449,15 @@ export default function TopConsole() {
                                                 </Link>
                                             )}
 
-                                            <button
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
                                                 onClick={() => { setIsUserMenuOpen(false); signOut({ callbackUrl: '/login' }); }}
-                                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[11px] font-space font-medium tracking-wide rounded-lg text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all bg-transparent border-none text-left"
+                                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[11px] font-space font-medium tracking-wide rounded-lg text-red-400/70 hover:text-red-400 hover:bg-red-500/10 text-left"
                                             >
                                                 <LogOut size={14} />
                                                 Sign Out
-                                            </button>
+                                            </Button>
                                         </div>
                                     </motion.div>
                                 </>

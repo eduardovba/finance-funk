@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '@/components/ui';
 import _ConfirmationModal from '../ConfirmationModal';
 import _TransactionTimeline from '../TransactionTimeline';
 import _FloatingActionButton from '../FloatingActionButton';
@@ -118,10 +119,10 @@ export default function EquityTab({ transactions = [], marketData: globalMarketD
                             <div id="ftue-equity-broker-section">
                             <div className="flex justify-between items-center mb-4 px-2">
                                 <h2 className="text-xl font-bold font-bebas tracking-widest text-white/90">Brokers</h2>
-                                <button onClick={() => setShowEmptyBrokers(!showEmptyBrokers)}
-                                    className="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-white/60 transition-colors border border-white/5">
+                                <Button variant="ghost" size="sm" onClick={() => setShowEmptyBrokers(!showEmptyBrokers)}
+                                    className="rounded-full border border-white/5">
                                     {showEmptyBrokers ? 'Hide Empty' : 'Show Empty'}
-                                </button>
+                                </Button>
                             </div>
 
                             {brokers.map(b => (
@@ -267,10 +268,9 @@ export default function EquityTab({ transactions = [], marketData: globalMarketD
                 <section id="ftue-equity-ledger" className="max-w-3xl mx-auto mb-10 mt-12">
                     <div className="flex justify-between items-center mb-6 px-1">
                         <h3 className="text-lg font-medium text-white/90 flex items-center gap-2">Activity History</h3>
-                        <button onClick={() => setLedgerOpen(!ledgerOpen)}
-                            className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 text-sm font-medium transition-colors">
+                        <Button variant="ghost" size="sm" onClick={() => setLedgerOpen(!ledgerOpen)}>
                             {ledgerOpen ? 'Hide' : 'Show'} ({transactions.length})
-                        </button>
+                        </Button>
                     </div>
 
                     {ledgerOpen && (

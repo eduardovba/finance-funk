@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { SUPPORTED_CURRENCIES } from '../lib/currency';
+import { Button } from '@/components/ui';
 import {
     getFixedIncomeSummary,
     getEquitySummary,
@@ -199,7 +200,7 @@ export default function MonthlyCloseModal({
                                 }}
                             />
                         </div>
-                        <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', width: '32px', height: '32px', borderRadius: '50%', color: 'var(--fg-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                        <Button variant="ghost" size="sm" onClick={onClose} className="rounded-full w-8 h-8 p-0">✕</Button>
                     </div>
                 </header>
 
@@ -366,35 +367,14 @@ export default function MonthlyCloseModal({
 
                 {/* Footer Actions */}
                 <footer style={{ padding: '24px 32px', background: 'rgba(0,0,0,0.3)', borderTop: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
-                    <button
-                        onClick={onClose}
-                        style={{
-                            padding: '12px 24px',
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid var(--glass-border)',
-                            borderRadius: '8px',
-                            color: 'var(--fg-primary)',
-                            fontSize: '0.9rem',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
-                        }}
-                    >
+                    <Button variant="secondary" onClick={onClose}
+                        style={{ padding: '12px 24px', fontSize: '0.9rem', fontWeight: '600' }}>
                         Review Later
-                    </button>
-                    <button
-                        onClick={() => onRecord(snapshotData)}
-                        className="btn-primary"
-                        style={{
-                            padding: '12px 32px',
-                            height: 'auto',
-                            fontSize: '0.95rem',
-                            fontWeight: '700',
-                            boxShadow: '0 4px 15px rgba(212,175,55,0.2)'
-                        }}
-                    >
+                    </Button>
+                    <Button variant="primary" onClick={() => onRecord(snapshotData)}
+                        style={{ padding: '12px 32px', fontSize: '0.95rem', fontWeight: '700', boxShadow: '0 4px 15px rgba(212,175,55,0.2)' }}>
                         Confirm & Record Snapshot
-                    </button>
+                    </Button>
                 </footer>
             </div>
         </div>

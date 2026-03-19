@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '@/components/ui';
 import { formatCurrency } from '@/lib/currency';
 import { X } from 'lucide-react';
 import { CATEGORIES } from './useFixedIncome';
@@ -33,7 +34,7 @@ export default function FIForm(props: FIFormProps) {
             <div className="w-full h-full p-6 text-left relative flex flex-col z-10 overflow-y-auto custom-scrollbar">
                 <div className="flex justify-between items-center mb-6 shrink-0">
                     <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] uppercase">Add Transaction</h3>
-                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors ml-auto"><X size={16} /></button>
+                    <Button variant="ghost" size="sm" onClick={onClose} className="rounded-full ml-auto"><X size={16} /></Button>
                 </div>
                 <div className="flex flex-col gap-5 flex-1 pb-4">
                     {/* Type toggle */}
@@ -91,8 +92,8 @@ export default function FIForm(props: FIFormProps) {
                     </div>
                 </div>
                 <div className="flex gap-3 justify-end mt-4 pt-4 border-t border-white/10 shrink-0">
-                    <button onClick={onClose} className="px-5 py-2.5 bg-transparent border border-white/10 rounded-xl text-white/50 text-sm hover:bg-white/5 transition-colors">Cancel</button>
-                    <button onClick={onSaveAdd} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-[#1A0F2E] transition-colors" style={{ background: 'linear-gradient(135deg, #CC5500 0%, #D4AF37 100%)' }}>Confirm</button>
+                    <Button variant="secondary" onClick={onClose}>Cancel</Button>
+                    <Button variant="primary" onClick={onSaveAdd}>Confirm</Button>
                 </div>
             </div>
         );
@@ -104,7 +105,7 @@ export default function FIForm(props: FIFormProps) {
             <div className="w-full h-full p-6 text-left relative flex flex-col z-10 overflow-y-auto custom-scrollbar">
                 <div className="flex justify-between items-center mb-6 shrink-0">
                     <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] uppercase">Edit Transaction</h3>
-                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors ml-auto"><X size={16} /></button>
+                    <Button variant="ghost" size="sm" onClick={onClose} className="rounded-full ml-auto"><X size={16} /></Button>
                 </div>
                 <div className="flex flex-col gap-5 flex-1 pb-4">
                     <div className="flex rounded-xl border border-white/10 overflow-hidden">
@@ -143,8 +144,8 @@ export default function FIForm(props: FIFormProps) {
                     </div>
                 </div>
                 <div className="flex gap-3 justify-end mt-4 pt-4 border-t border-white/10 shrink-0">
-                    <button onClick={onClose} className="px-5 py-2.5 bg-transparent border border-white/10 rounded-xl text-white/50 text-sm hover:bg-white/5 transition-colors">Cancel</button>
-                    <button onClick={onSaveEdit} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-[#1A0F2E] transition-colors" style={{ background: 'linear-gradient(135deg, #CC5500 0%, #D4AF37 100%)' }}>Save Changes</button>
+                    <Button variant="secondary" onClick={onClose}>Cancel</Button>
+                    <Button variant="primary" onClick={onSaveEdit}>Save Changes</Button>
                 </div>
             </div>
         );
@@ -161,7 +162,7 @@ export default function FIForm(props: FIFormProps) {
             <div className="w-full h-full p-6 text-left relative flex flex-col z-10 overflow-y-auto custom-scrollbar">
                 <div className="flex justify-between items-center mb-6 shrink-0">
                     <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] uppercase">Update Value</h3>
-                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors ml-auto"><X size={16} /></button>
+                    <Button variant="ghost" size="sm" onClick={onClose} className="rounded-full ml-auto"><X size={16} /></Button>
                 </div>
 
                 <div className="flex flex-col gap-5 flex-1 pb-4">
@@ -206,12 +207,12 @@ export default function FIForm(props: FIFormProps) {
                 </div>
 
                 <div className="flex gap-3 justify-end mt-4 pt-4 border-t border-white/10 shrink-0">
-                    <button onClick={onClose} className="px-5 py-2.5 bg-transparent border border-white/10 rounded-xl text-white/50 text-sm hover:bg-white/5 transition-colors">Cancel</button>
-                    <button onClick={onSaveUpdate} disabled={!isValid || updateSaving}
-                        className="px-5 py-2.5 rounded-xl text-sm font-semibold text-[#1A0F2E] transition-colors disabled:opacity-50"
+                    <Button variant="secondary" onClick={onClose}>Cancel</Button>
+                    <Button variant="primary" onClick={onSaveUpdate} disabled={!isValid || updateSaving}
+                        className="disabled:opacity-50"
                         style={{ background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)' }}>
                         {updateSaving ? 'Saving...' : 'Save Update'}
-                    </button>
+                    </Button>
                 </div>
             </div>
         );

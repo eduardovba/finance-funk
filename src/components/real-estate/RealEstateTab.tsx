@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { Button } from '@/components/ui';
 import _AssetSearch from '../AssetSearch';
 import _ConfirmationModal from '../ConfirmationModal';
 import _TransactionTimeline from '../TransactionTimeline';
@@ -183,7 +184,7 @@ function renderContextPaneEmpty(h: any) {
         return (
             <div className="w-full h-full p-8 text-left relative flex flex-col z-10">
                 <div className="flex justify-between items-center mb-6">
-                    <button onClick={() => h.setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors ml-auto"><X size={16} /></button>
+                    <Button variant="ghost" size="sm" onClick={() => h.setRightPaneMode('default')} className="rounded-full ml-auto"><X size={16} /></Button>
                 </div>
                 <div className="flex-1">
                     <BrokerForm assetClass="Real Estate" onSave={(savedBroker: any) => {
@@ -235,7 +236,7 @@ function AddPropertyForm({ h }: { h: any }) {
         <div className="w-full h-full p-6 text-left relative flex flex-col z-10 overflow-y-auto custom-scrollbar">
             <div className="flex justify-between items-center mb-6 shrink-0">
                 <h3 className="text-lg font-bold text-white">Add New Property</h3>
-                <button onClick={() => h.setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors"><X size={16} /></button>
+                <Button variant="ghost" size="sm" onClick={() => h.setRightPaneMode('default')} className="rounded-full"><X size={16} /></Button>
             </div>
             <div className="flex-1 flex flex-col gap-5">
                 <div>
@@ -261,8 +262,8 @@ function AddPropertyForm({ h }: { h: any }) {
                 </div>
                 <PropertyOptionsSection h={h} />
                 <div className="mt-auto pt-6 flex gap-3">
-                    <button onClick={() => h.setRightPaneMode('default')} className="flex-1 py-3 px-4 rounded-xl border border-white/10 text-gray-400 font-bold tracking-wide uppercase text-sm hover:bg-white/5 hover:text-white transition-all font-space">Cancel</button>
-                    <button onClick={async () => {
+                    <Button variant="secondary" className="flex-1" onClick={() => h.setRightPaneMode('default')}>Cancel</Button>
+                    <Button variant="primary" onClick={async () => {
                         if (!h.newPropertyData.name) return;
                         try {
                             await fetch('/api/real-estate', { method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -277,7 +278,7 @@ function AddPropertyForm({ h }: { h: any }) {
                             if (savedName) { h.setNewlyAddedProperties((prev: string[]) => [...prev, savedName]); h.setExpandedAccordions((prev: any) => ({ ...prev, Properties: true })); setTimeout(() => h.setNewlyAddedProperties((prev: string[]) => prev.filter((n: string) => n !== savedName)), 5000); }
                             if (h.onRefresh) h.onRefresh();
                         } catch (e) { console.error('Failed to add property', e); }
-                    }} className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-[#CC5500] to-[#D4AF37] text-[#1A0F2E] font-bold tracking-wide uppercase text-sm hover:brightness-110 hover:shadow-lg shadow-[#D4AF37]/20 transition-all font-space">Save Property</button>
+                    }} className="flex-1">Save Property</Button>
                 </div>
             </div>
         </div>
@@ -322,7 +323,7 @@ function AddTransactionForm({ h }: { h: any }) {
         <div className="w-full h-full p-6 text-left relative flex flex-col z-10 overflow-y-auto custom-scrollbar">
             <div className="flex justify-between items-center mb-6 shrink-0">
                 <h3 className="text-lg font-bold text-white">Buy Fund Shares</h3>
-                <button onClick={() => h.setRightPaneMode('default')} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors"><X size={16} /></button>
+                <Button variant="ghost" size="sm" onClick={() => h.setRightPaneMode('default')} className="rounded-full"><X size={16} /></Button>
             </div>
             <div className="flex-1 flex flex-col gap-5">
                 <div>
@@ -367,8 +368,8 @@ function AddTransactionForm({ h }: { h: any }) {
                     <div className="text-xl font-bold text-[#D4AF37]">{formatCurrency(h.fundBuyData?.totalInvestment || 0, 'BRL')}</div>
                 </div>
                 <div className="mt-auto pt-6 flex gap-3">
-                    <button onClick={() => h.setRightPaneMode('default')} className="flex-1 py-3 px-4 rounded-xl border border-white/10 text-gray-400 font-bold tracking-wide uppercase text-sm hover:bg-white/5 hover:text-white transition-all font-space">Cancel</button>
-                    <button onClick={() => { h.handleFundBuyConfirm(); h.setRightPaneMode('default'); }} className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-[#CC5500] to-[#D4AF37] text-[#1A0F2E] font-bold tracking-wide uppercase text-sm hover:brightness-110 hover:shadow-lg shadow-[#D4AF37]/20 transition-all font-space">Confirm Purchase</button>
+                    <Button variant="secondary" className="flex-1" onClick={() => h.setRightPaneMode('default')}>Cancel</Button>
+                    <Button variant="primary" className="flex-1" onClick={() => { h.handleFundBuyConfirm(); h.setRightPaneMode('default'); }}>Confirm Purchase</Button>
                 </div>
             </div>
         </div>
@@ -382,7 +383,7 @@ function EditTransactionForm({ h }: { h: any }) {
         <div className="w-full h-full p-6 text-left relative flex flex-col z-10 overflow-y-auto custom-scrollbar">
             <div className="flex justify-between items-center mb-6 shrink-0">
                 <h3 className="text-lg font-bold text-white">Edit Transaction</h3>
-                <button onClick={() => { h.setEditingTransaction(null); h.setRightPaneMode('default'); }} className="p-2 hover:bg-white/10 rounded-full text-white/50 transition-colors"><X size={16} /></button>
+                <Button variant="ghost" size="sm" onClick={() => { h.setEditingTransaction(null); h.setRightPaneMode('default'); }} className="rounded-full"><X size={16} /></Button>
             </div>
             <div className="flex-1 flex flex-col gap-5">
                 {isFund && (
@@ -414,8 +415,8 @@ function EditTransactionForm({ h }: { h: any }) {
                     </div>
                 )}
                 <div className="mt-auto pt-6 flex gap-3">
-                    <button onClick={() => { h.setEditingTransaction(null); h.setRightPaneMode('default'); }} className="flex-1 py-3 px-4 rounded-xl border border-white/10 text-gray-400 font-bold tracking-wide uppercase text-sm hover:bg-white/5 hover:text-white transition-all font-space">Cancel</button>
-                    <button onClick={h.handleSaveEditTransaction} className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-[#CC5500] to-[#D4AF37] text-[#1A0F2E] font-bold tracking-wide uppercase text-sm hover:brightness-110 hover:shadow-lg shadow-[#D4AF37]/20 transition-all font-space">Save Changes</button>
+                    <Button variant="secondary" className="flex-1" onClick={() => { h.setEditingTransaction(null); h.setRightPaneMode('default'); }}>Cancel</Button>
+                    <Button variant="primary" className="flex-1" onClick={h.handleSaveEditTransaction}>Save Changes</Button>
                 </div>
             </div>
         </div>
@@ -442,8 +443,8 @@ function FundBuyModal({ h }: { h: any }) {
                 <div style={{ marginBottom: '16px' }}><label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Buy Price / Share (R$)</label><NumberInput value={h.fundBuyData.buyPricePerShare} onChange={(val: any) => h.updateFundBuyCalc('buyPricePerShare', val)} style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} /></div>
                 <div className="glass-card" style={{ padding: '16px', marginBottom: '24px', textAlign: 'center' }}><div style={{ color: 'var(--fg-secondary)', fontSize: '0.85rem', marginBottom: '4px' }}>Total Investment</div><div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--accent-color)' }}>{formatCurrency(h.fundBuyData.totalInvestment || 0, 'BRL')}</div></div>
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                    <button onClick={() => h.setIsFundBuyModalOpen(false)} style={{ padding: '10px 20px', background: 'transparent', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--fg-secondary)', cursor: 'pointer' }}>Cancel</button>
-                    <button onClick={h.handleFundBuyConfirm} style={{ padding: '10px 20px', background: 'var(--accent-color)', border: 'none', borderRadius: '8px', color: '#000', fontWeight: 600, cursor: 'pointer' }}>Confirm Purchase</button>
+                    <Button variant="secondary" onClick={() => h.setIsFundBuyModalOpen(false)}>Cancel</Button>
+                    <Button variant="primary" onClick={h.handleFundBuyConfirm}>Confirm Purchase</Button>
                 </div>
             </div>
         </div>
@@ -471,8 +472,8 @@ function FundSellModal({ h }: { h: any }) {
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                    <button onClick={() => h.setIsFundSellModalOpen(false)} style={{ padding: '10px 20px', background: 'transparent', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--fg-secondary)', cursor: 'pointer' }}>Cancel</button>
-                    <button onClick={h.handleFundSellConfirm} style={{ padding: '10px 20px', background: 'var(--error)', border: 'none', borderRadius: '8px', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Confirm Sale</button>
+                    <Button variant="secondary" onClick={() => h.setIsFundSellModalOpen(false)}>Cancel</Button>
+                    <Button variant="danger" onClick={h.handleFundSellConfirm}>Confirm Sale</Button>
                 </div>
             </div>
         </div>
@@ -485,9 +486,9 @@ function ActivityHistory({ h, data }: { h: any; data: any }) {
         <section className="max-w-3xl mx-auto mb-10 mt-12">
             <div className="flex justify-between items-center mb-6 px-1">
                 <h3 className="text-lg font-medium text-white/90 flex items-center gap-2">Activity History</h3>
-                <button onClick={() => h.setLedgerOpen(!h.ledgerOpen)} className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 text-sm font-medium transition-colors">
+                <Button variant="ghost" size="sm" onClick={() => h.setLedgerOpen(!h.ledgerOpen)}>
                     {h.ledgerOpen ? 'Hide' : 'Show'} ({(data?.funds?.transactions?.length || 0) + h.properties.reduce((a: number, p: any) => a + (p.ledger?.length || 0), 0)})
-                </button>
+                </Button>
             </div>
             {h.ledgerOpen && (
                 <div className="bg-white/5 backdrop-blur-md border border-white/5 rounded-3xl p-4 sm:p-6 mb-24">

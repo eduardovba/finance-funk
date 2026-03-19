@@ -1,10 +1,21 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import CurrencySelector from './CurrencySelector';
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui';
+import _CurrencySelector from './CurrencySelector';
+const CurrencySelector = _CurrencySelector as any;
 
-export default function TransactionForm({ onAdd, onCancel, initialData = null, isDrawerMode = false, assetClass = null, activeBrokers = [] }) {
-    const [brokers, setBrokers] = useState([]);
+interface TransactionFormProps {
+    onAdd: (data: any) => void;
+    onCancel: () => void;
+    initialData?: any;
+    isDrawerMode?: boolean;
+    assetClass?: string | null;
+    activeBrokers?: string[];
+}
+
+export default function TransactionForm({ onAdd, onCancel, initialData = null, isDrawerMode = false, assetClass = null, activeBrokers = [] }: TransactionFormProps) {
+    const [brokers, setBrokers] = useState<string[]>([]);
 
     // Default fallback brokers if database is totally empty
     const defaultBrokers = assetClass === 'Equity' ? ['Trading 212', 'XP', 'Monzo'] :
@@ -28,7 +39,7 @@ export default function TransactionForm({ onAdd, onCancel, initialData = null, i
                 const url = assetClass ? `/api/brokers?assetClass=${encodeURIComponent(assetClass)}` : '/api/brokers';
                 const res = await fetch(url);
                 const data = await res.json();
-                const fetchedBrokerNames = data.brokers && data.brokers.length > 0 ? data.brokers.map(b => b.name) : [];
+                const fetchedBrokerNames = data.brokers && data.brokers.length > 0 ? data.brokers.map((b: any) => b.name) : [];
                 const mergedBrokers = [...new Set([...fetchedBrokerNames, ...activeBrokers])].sort((a, b) => a.localeCompare(b));
 
                 if (mergedBrokers.length > 0) {
@@ -52,8 +63,6 @@ export default function TransactionForm({ onAdd, onCancel, initialData = null, i
         if (initialData) {
             setFormData({
                 ...initialData,
-                // Ensure numbers are converted to strings for inputs if needed, 
-                // though React handles numbers in inputs fine usually.
                 investment: initialData.investment,
                 interest: initialData.interest,
                 isSalaryContribution: initialData.isSalaryContribution || false
@@ -61,18 +70,18 @@ export default function TransactionForm({ onAdd, onCancel, initialData = null, i
         }
     }, [initialData]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onAdd({
             ...formData,
-            id: initialData?.id, // Preserve ID if editing
+            id: initialData?.id,
             investment: parseFloat(formData.investment) || 0,
             interest: parseFloat(formData.interest) || 0,
             isSalaryContribution: formData.isSalaryContribution || false
         });
     };
 
-    const containerStyle = isDrawerMode
+    const containerStyle: React.CSSProperties = isDrawerMode
         ? { display: 'flex', flexDirection: 'column', height: '100%' }
         : {
             position: 'fixed',
@@ -140,7 +149,7 @@ export default function TransactionForm({ onAdd, onCancel, initialData = null, i
                     <div style={{ gridColumn: 'span 1' }}>
                         <CurrencySelector
                             value={formData.currency}
-                            onChange={(val) => setFormData({ ...formData, currency: val })}
+                            onChange={(val: string) => setFormData({ ...formData, currency: val })}
                         />
                     </div>
                 </div>
@@ -172,22 +181,8 @@ export default function TransactionForm({ onAdd, onCancel, initialData = null, i
                 </div>
 
                 <div style={{ display: 'flex', gap: '12px', marginTop: 'auto', paddingTop: '24px' }}>
-                    <button type="button" onClick={onCancel} style={{
-                        flex: 1,
-                        padding: '12px 24px',
-                        borderRadius: '12px',
-                        border: '1px solid var(--glass-border)',
-                        background: 'transparent',
-                        color: '#94a3b8',
-                        cursor: 'pointer',
-                        fontWeight: 'bold',
-                        letterSpacing: '0.05em',
-                        textTransform: 'uppercase',
-                        fontSize: '0.875rem'
-                    }} className="font-space">Cancel</button>
-                    <button type="submit" className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-[#CC5500] to-[#D4AF37] text-[#1A0F2E] font-bold tracking-wide uppercase text-sm hover:brightness-110 hover:shadow-lg shadow-[#D4AF37]/20 transition-all font-space">
-                        Confirm
-                    </button>
+                    <Button type="button" variant="secondary" onClick={onCancel} className="flex-1">Cancel</Button>
+                    <Button type="submit" variant="primary" className="flex-1">Confirm</Button>
                 </div>
             </form>
         </div>
