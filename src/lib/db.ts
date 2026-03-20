@@ -96,3 +96,18 @@ export async function run(sql: string, params: InValue[] = []): Promise<RunResul
         rowsAffected: result.rowsAffected,
     };
 }
+
+/**
+ * Execute multiple statements in a single ACID transaction (libSQL batch mode).
+ * All statements succeed or all are rolled back.
+ */
+export async function batch(
+    statements: Array<{ sql: string; args: InValue[] }>
+): Promise<void> {
+    const db = getClient();
+    await ensureMigrations();
+    await db.batch(
+        statements.map(s => ({ sql: s.sql, args: s.args })),
+        'write'
+    );
+}

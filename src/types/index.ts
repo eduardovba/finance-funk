@@ -39,3 +39,38 @@ export interface ApiSuccess {
     success: true;
     id?: number;
 }
+
+// ═══════════ Budget domain ═══════════
+
+export interface BudgetCategory {
+    id: number;
+    user_id: number;
+    name: string;
+    icon: string | null;
+    color: string | null;
+    monthly_target_cents: number;
+    parent_id: number | null;
+    sort_order: number;
+    is_income: number;           // 0 | 1
+}
+
+export interface BudgetTransaction {
+    id: number;
+    user_id: number;
+    category_id: number | null;
+    amount_cents: number;
+    currency: string;
+    description: string | null;
+    date: string;                // YYYY-MM-DD
+    is_recurring: number;        // 0 | 1
+}
+
+export interface BudgetMonthlyRollup {
+    id: number;
+    user_id: number;
+    month: string;               // YYYY-MM
+    total_income_cents: number;
+    total_expenses_cents: number;
+    total_savings_cents: number;
+    savings_rate_basis_points: number;
+}

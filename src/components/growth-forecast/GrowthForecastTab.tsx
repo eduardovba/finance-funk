@@ -22,8 +22,8 @@ const FORECAST_TUTORIAL_STEPS = [
     { type: 'spotlight', targetId: 'ftue-forecast-container', title: 'Strategy vs. Reality', message: "Compare your locked projections against actual portfolio performance. Revisit and adjust your strategy to ensure you remain on your chosen path.", position: 'top' },
 ];
 
-export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPortfolioValueGbp, liveContributionBrl, liveContributionGbp }: GrowthForecastTabProps) {
-    const h = useGrowthForecast({ currentPortfolioValueBrl, currentPortfolioValueGbp, liveContributionBrl, liveContributionGbp });
+export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPortfolioValueGbp, liveContributionBrl, liveContributionGbp, budgetSurplusBrl }: GrowthForecastTabProps) {
+    const h = useGrowthForecast({ currentPortfolioValueBrl, currentPortfolioValueGbp, liveContributionBrl, liveContributionGbp, budgetSurplusBrl });
 
     return (
         <>
@@ -62,6 +62,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
                 handleAddPhase={h.handleAddPhase}
                 handleUpdatePhase={h.handleUpdatePhase}
                 handleRemovePhase={h.handleRemovePhase}
+                budgetSurplusBrl={h.budgetSurplusBrl}
             />
 
             <ForecastChart

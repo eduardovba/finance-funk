@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutGrid, LayoutDashboard, BookOpen, TrendingUp, Landmark, Home as HomeIcon, LineChart, Bitcoin, Wallet, CreditCard, Target, LogOut, Settings, Scale, DollarSign, ArrowUpDown, Shield, FileSpreadsheet } from 'lucide-react';
+import { LayoutGrid, LayoutDashboard, BookOpen, TrendingUp, Landmark, Home as HomeIcon, LineChart, Bitcoin, Wallet, CreditCard, Target, LogOut, Settings, Scale, DollarSign, ArrowUpDown, Shield, FileSpreadsheet, ArrowLeftRight, Grid3X3, Upload } from 'lucide-react';
 import { Button } from '@/components/ui';
 import CurrencyPill from '@/components/CurrencyPill';
 import { usePortfolio } from '@/context/PortfolioContext';
@@ -16,14 +16,23 @@ export default function TopConsole() {
     const [isAssetsDropdownOpen, setIsAssetsDropdownOpen] = useState(false);
     const [isPlanningDropdownOpen, setIsPlanningDropdownOpen] = useState(false);
     const [isLedgerDropdownOpen, setIsLedgerDropdownOpen] = useState(false);
+    const [isBudgetDropdownOpen, setIsBudgetDropdownOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isAssetsHovered, setIsAssetsHovered] = useState(false);
     const [isPlanningHovered, setIsPlanningHovered] = useState(false);
     const [isLedgerHovered, setIsLedgerHovered] = useState(false);
+    const [isBudgetHovered, setIsBudgetHovered] = useState(false);
     const { data: session } = useSession();
 
     const trackingTabs = [
         { id: 'dashboard', href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    ];
+
+    const budgetTabs = [
+        { id: 'overview', href: '/budget', label: 'Overview', icon: LayoutDashboard },
+        { id: 'transactions', href: '/budget/transactions', label: 'Transactions', icon: ArrowLeftRight },
+        { id: 'categories', href: '/budget/categories', label: 'Categories', icon: Grid3X3 },
+        { id: 'import', href: '/budget/import', label: 'Import', icon: Upload },
     ];
 
     const ledgerTabs = [
@@ -56,14 +65,21 @@ export default function TopConsole() {
     const activeLedgerTab = ledgerTabs.find(t => pathname.startsWith(t.href));
     const isLedgerRoute = !!activeLedgerTab;
 
+    const activeBudgetTab = budgetTabs.find(t =>
+        t.href === '/budget' ? pathname === '/budget' : pathname.startsWith(t.href)
+    );
+    const isBudgetRoute = pathname.startsWith('/budget');
+
     // Reset hover/dropdown states on navigation
     useEffect(() => {
         setIsAssetsDropdownOpen(false);
         setIsPlanningDropdownOpen(false);
         setIsLedgerDropdownOpen(false);
+        setIsBudgetDropdownOpen(false);
         setIsAssetsHovered(false);
         setIsPlanningHovered(false);
         setIsLedgerHovered(false);
+        setIsBudgetHovered(false);
     }, [pathname]);
 
 
@@ -87,6 +103,7 @@ export default function TopConsole() {
                 {trackingTabs.map(tab => {
                     const Icon = tab.icon;
                     const isActive = pathname === tab.href || (tab.href === '/dashboard' && pathname === '/');
+                    const activeColor = '#D4AF37';
                     return (
                         <Link
                             key={tab.id}
@@ -95,16 +112,103 @@ export default function TopConsole() {
                 flex items-center gap-1.5 px-3 py-1.5 text-[0.75rem] font-space font-medium tracking-widest uppercase whitespace-nowrap
                 transition-all duration-200 bg-transparent no-underline
                 ${isActive
-                                    ? 'text-[#D4AF37]'
+                                    ? ''
                                     : 'text-[#F5F5DC]/40 hover:text-[#F5F5DC]/70'
                                 }
               `}
+                            style={isActive ? { color: activeColor } : {}}
                         >
                             <Icon size={13} strokeWidth={isActive ? 2 : 1.5} />
                             <span>{tab.label}</span>
                         </Link>
                     );
                 })}
+
+                {/* BUDGET DROPDOWN */}
+                <div className="relative" onMouseEnter={() => setIsBudgetHovered(true)} onMouseLeave={() => setIsBudgetHovered(false)}>
+                    <button
+                        onClick={() => setIsBudgetDropdownOpen(!isBudgetDropdownOpen)}
+                        className={`
+              group flex items-center gap-1.5 px-3 py-1.5 text-[0.75rem] font-space font-medium tracking-widest uppercase whitespace-nowrap
+              transition-all duration-200 bg-transparent
+              ${isBudgetRoute
+                                ? 'text-[#34D399]'
+                                : 'text-[#F5F5DC]/40 hover:text-[#F5F5DC]/70'
+                            }
+            `}
+                    >
+                        <Wallet size={13} strokeWidth={isBudgetRoute ? 2 : 1.5} />
+                        <span className="opacity-70 font-normal">Budget</span>
+                        {activeBudgetTab && (() => {
+                            return (
+                                <>
+                                    <span className="opacity-30 mx-0.5">/</span>
+                                    <span className="font-semibold">{activeBudgetTab.label}</span>
+                                </>
+                            );
+                        })()}
+                        <AnimatePresence>
+                            {(isBudgetHovered || isBudgetDropdownOpen) && (
+                                <motion.span
+                                    initial={{ width: 0, opacity: 0 }}
+                                    animate={{ width: 'auto', opacity: 0.5, rotate: isBudgetDropdownOpen ? 180 : 0 }}
+                                    exit={{ width: 0, opacity: 0 }}
+                                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                                    className="text-[0.6875rem] overflow-hidden inline-flex items-center justify-center ml-0.5"
+                                >
+                                    ▼
+                                </motion.span>
+                            )}
+                        </AnimatePresence>
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    <AnimatePresence>
+                        {isBudgetDropdownOpen && (
+                            <>
+                                <div
+                                    className="fixed inset-0 z-10"
+                                    onClick={() => setIsBudgetDropdownOpen(false)}
+                                />
+
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    transition={{ duration: 0.2, ease: "easeOut" }}
+                                    className="absolute top-full left-0 mt-2 w-48 bg-[#1A0F2E] border border-[#34D399]/20 shadow-2xl rounded-xl overflow-hidden z-20 backdrop-blur-xl"
+                                >
+                                    <div className="p-2 grid grid-cols-1 gap-1">
+                                        {budgetTabs.map(tab => {
+                                            const Icon = tab.icon;
+                                            const isActive = tab.href === '/budget'
+                                                ? pathname === '/budget'
+                                                : pathname.startsWith(tab.href);
+                                            return (
+                                                <Link
+                                                    key={tab.id}
+                                                    href={tab.href}
+                                                    onClick={() => setIsBudgetDropdownOpen(false)}
+                                                    className={`
+                            flex items-center gap-3 px-3 py-2.5 text-[0.75rem] font-space font-bold tracking-widest uppercase
+                            rounded-lg transition-all duration-200 text-left border-none no-underline
+                            ${isActive
+                                                            ? 'bg-[#34D399]/20 text-[#34D399]'
+                                                            : 'bg-transparent text-gray-400 hover:bg-white/5 hover:text-white'
+                                                        }
+                          `}
+                                                >
+                                                    <Icon size={14} strokeWidth={isActive ? 2.5 : 1.5} />
+                                                    {tab.label}
+                                                </Link>
+                                            );
+                                        })}
+                                    </div>
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
+                </div>
 
                 {/* ASSETS DROPDOWN */}
                 <div className="relative" onMouseEnter={() => setIsAssetsHovered(true)} onMouseLeave={() => setIsAssetsHovered(false)}>

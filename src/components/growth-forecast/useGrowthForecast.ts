@@ -5,7 +5,7 @@ import actualsData from '../../data/forecast_actuals.json';
 import { parseDate, getMonthDiff, calculateFV, calculatePMT } from '@/lib/forecastUtils';
 import type { GrowthForecastTabProps, ForecastPhase, ForecastDataPoint, StatusModalState } from './types';
 
-export default function useGrowthForecast({ currentPortfolioValueBrl, currentPortfolioValueGbp, liveContributionBrl, liveContributionGbp }: GrowthForecastTabProps) {
+export default function useGrowthForecast({ currentPortfolioValueBrl, currentPortfolioValueGbp, liveContributionBrl, liveContributionGbp, budgetSurplusBrl }: GrowthForecastTabProps) {
     const { formatPrimary, toPrimary, primaryCurrency, ftueState, updateFtueProgress } = usePortfolio() as any;
     const primaryMeta = (SUPPORTED_CURRENCIES as any)[primaryCurrency];
 
@@ -391,5 +391,8 @@ export default function useGrowthForecast({ currentPortfolioValueBrl, currentPor
         handleUpdatePhase,
         handleRemovePhase,
         formatK,
+
+        // Budget integration
+        budgetSurplusBrl,
     };
 }

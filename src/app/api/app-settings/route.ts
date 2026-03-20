@@ -5,11 +5,12 @@ import { z } from 'zod';
 import { validateBody } from '@/lib/validation';
 
 const KEY = 'app_settings';
-const DEFAULTS = { autoMonthlyCloseEnabled: true, backgroundSelection: 'frosted-glass' };
+const DEFAULTS = { autoMonthlyCloseEnabled: true, backgroundSelection: 'frosted-glass', budgetCurrency: 'BRL' };
 
 const PostAppSettingsSchema = z.object({
     autoMonthlyCloseEnabled: z.boolean().optional(),
-    backgroundSelection: z.string().optional()
+    backgroundSelection: z.string().optional(),
+    budgetCurrency: z.string().optional()
 }).passthrough();
 
 export async function GET(): Promise<NextResponse> {

@@ -224,8 +224,11 @@ export default function BottomNav() {
     const isPlanningRoute = PLANNING_ITEMS.some(t => pathname.startsWith(t.href));
     const isLedgerRoute = LEDGER_ITEMS.some(t => pathname.startsWith(t.href));
 
+    const isBudgetRoute = pathname.startsWith('/budget');
+
     const tabs = [
         { id: 'home', href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, color: '#D4AF37' },
+        { id: 'budget', href: '/budget', label: 'Budget', icon: Wallet, color: '#34D399' },
         { id: 'assets', href: null, label: 'Assets', icon: PieChart, color: '#CC5500', action: () => { setPlanningOpen(false); setLedgerOpen(false); setAssetsOpen(true); } },
         { id: 'planning', href: null, label: 'Planning', icon: TrendingUp, color: '#A78BFA', action: () => { setAssetsOpen(false); setLedgerOpen(false); setPlanningOpen(true); } },
         { id: 'ledger', href: null, label: 'Ledger', icon: BookOpen, color: '#D4AF37', action: () => { setAssetsOpen(false); setPlanningOpen(false); setLedgerOpen(true); } },
@@ -233,6 +236,7 @@ export default function BottomNav() {
 
     const isActive = (tab) => {
         if (tab.id === 'home') return pathname === '/dashboard' || pathname === '/';
+        if (tab.id === 'budget') return isBudgetRoute;
         if (tab.id === 'assets') return isAssetRoute || assetsOpen;
         if (tab.id === 'planning') return isPlanningRoute || planningOpen;
         if (tab.id === 'ledger') return isLedgerRoute || ledgerOpen;

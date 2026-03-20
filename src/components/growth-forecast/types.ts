@@ -3,6 +3,8 @@ export interface GrowthForecastTabProps {
     currentPortfolioValueGbp?: number;
     liveContributionBrl?: number;
     liveContributionGbp?: number;
+    /** Current month's investable surplus in whole BRL (cents ÷ 100) */
+    budgetSurplusBrl?: number;
 }
 
 export interface ForecastPhase {

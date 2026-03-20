@@ -316,5 +316,42 @@ function getMigrations(): Migration[] {
             name: 'add_brokers_asset_class',
             sql: ['ALTER TABLE brokers ADD COLUMN asset_class TEXT'],
         },
+        {
+            version: 12,
+            name: 'budget_tables',
+            sql: [
+                `CREATE TABLE IF NOT EXISTS budget_categories (
+                    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    name        TEXT NOT NULL,
+                    icon        TEXT,
+                    color       TEXT,
+                    monthly_target_cents INTEGER NOT NULL DEFAULT 0,
+                    parent_id   INTEGER REFERENCES budget_categories(id) ON DELETE SET NULL,
+                    sort_order  INTEGER NOT NULL DEFAULT 0,
+                    is_income   INTEGER NOT NULL DEFAULT 0
+                )`,
+                `CREATE TABLE IF NOT EXISTS budget_transactions (
+                    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id         INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    category_id     INTEGER REFERENCES budget_categories(id) ON DELETE SET NULL,
+                    amount_cents    INTEGER NOT NULL,
+                    currency        TEXT NOT NULL DEFAULT 'BRL',
+                    description     TEXT,
+                    date            TEXT NOT NULL,
+                    is_recurring    INTEGER NOT NULL DEFAULT 0
+                )`,
+                `CREATE TABLE IF NOT EXISTS budget_monthly_rollups (
+                    id                        INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id                   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    month                     TEXT NOT NULL,
+                    total_income_cents        INTEGER NOT NULL DEFAULT 0,
+                    total_expenses_cents      INTEGER NOT NULL DEFAULT 0,
+                    total_savings_cents       INTEGER NOT NULL DEFAULT 0,
+                    savings_rate_basis_points INTEGER NOT NULL DEFAULT 0,
+                    UNIQUE(user_id, month)
+                )`,
+            ],
+        },
     ];
 }

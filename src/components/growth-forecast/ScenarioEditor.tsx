@@ -155,6 +155,7 @@ interface ScenarioEditorProps {
     handleAddPhase: () => void;
     handleUpdatePhase: (id: number, field: string, value: any) => void;
     handleRemovePhase: (id: number) => void;
+    budgetSurplusBrl?: number;
 }
 
 export default function ScenarioEditor(props: ScenarioEditorProps) {
@@ -163,7 +164,8 @@ export default function ScenarioEditor(props: ScenarioEditorProps) {
         monthlyContribution, annualInterestRate, target2031, startMonth, startingValueBrl, requiredContributionHint,
         forecastPhases, formatK,
         setMonthlyContribution, setAnnualInterestRate, setStartMonth, setLastInteraction,
-        handleGoal2031Change, handleSave, handleAddPhase, handleUpdatePhase, handleRemovePhase
+        handleGoal2031Change, handleSave, handleAddPhase, handleUpdatePhase, handleRemovePhase,
+        budgetSurplusBrl
     } = props;
 
     return (
@@ -233,6 +235,12 @@ export default function ScenarioEditor(props: ScenarioEditorProps) {
                             </div>
                             <input type="range" min={0} max={50000} step={1000} value={monthlyContribution} onChange={(e) => { setLastInteraction('inputs'); setMonthlyContribution(parseInt(e.target.value)); }} className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#D4AF37]" />
                             <div className="mt-2 font-mono tabular-nums text-[0.75rem] text-white/30">Required: {formatK(requiredContributionHint, 'BRL')}/mo</div>
+                            {budgetSurplusBrl != null && budgetSurplusBrl > 0 && (
+                                <div className="mt-1.5 font-mono tabular-nums text-[0.625rem] text-[#D4AF37]/50 flex items-center gap-1">
+                                    <span className="inline-block w-1 h-1 rounded-full bg-[#D4AF37]/40" />
+                                    Based on your {formatK(budgetSurplusBrl, 'BRL')} budget surplus this month
+                                </div>
+                            )}
                         </div>
 
                         {/* Expected Yield */}

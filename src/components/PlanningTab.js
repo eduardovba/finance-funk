@@ -5,6 +5,7 @@ import GrowthForecastTab from './growth-forecast';
 import RebalanceAdvisorTab from './RebalanceAdvisorTab';
 import AssetsClassificationTab from './AssetsClassificationTab';
 import { usePortfolio } from '@/context/PortfolioContext';
+import useBudgetStore from '@/stores/useBudgetStore';
 
 export default function PlanningTab({
     activeTab = 'targets',
@@ -28,6 +29,15 @@ export default function PlanningTab({
         setAssetClasses,
         refreshAllData
     } = usePortfolio();
+
+    // ─── Budget → Forecast integration ──────────────────────
+    const { currentRollup, fetchRollup } = useBudgetStore();
+    React.useEffect(() => { fetchRollup(); }, [fetchRollup]);
+    const budgetSurplusBrl = React.useMemo(() => {
+        if (!currentRollup) return undefined;
+        const surplusCents = currentRollup.total_income_cents - currentRollup.total_expenses_cents;
+        return Math.round(surplusCents / 100);
+    }, [currentRollup]);
 
     const handleSaveAssetClasses = async (overrides) => {
         try {
@@ -103,6 +113,7 @@ export default function PlanningTab({
                             liveContributionGbp={liveContributionGbp}
                             masterMixData={masterMixData}
                             allocationTargets={allocationTargets}
+                            budgetSurplusBrl={budgetSurplusBrl}
                         />
                     </motion.div>
                 )}

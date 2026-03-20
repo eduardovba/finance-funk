@@ -12,6 +12,7 @@ import DashboardCharts from './charts';
 import DashboardHero from './DashboardHero';
 import useDashboard from './useDashboard';
 import { StaggerList } from '@/components/ui/stagger-list';
+import BudgetKpiPod from '@/components/budget/BudgetKpiPod';
 import type { DashboardTabProps } from './types';
 
 export default function DashboardTab(props: DashboardTabProps) {
@@ -115,6 +116,11 @@ export default function DashboardTab(props: DashboardTabProps) {
                     />
                 </div>
             )}
+
+            {/* Budget KPI Pod */}
+            <div className="mb-4">
+                <BudgetKpiPod />
+            </div>
 
             {/* Sub-categories Grid (Mobile & Tablet) */}
             <StaggerList className="grid lg:hidden grid-cols-2 md:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3 md:gap-6 mb-8 md:mb-12">
