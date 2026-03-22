@@ -9,10 +9,12 @@ interface TransactionDayGroupProps {
     date: string;                     // YYYY-MM-DD
     transactions: BudgetTransaction[];
     categories: BudgetCategory[];
+    selectedTxIds: Set<number>;
+    onToggleSelect: (id: number) => void;
     onDelete: (id: number) => void;
 }
 
-export default function TransactionDayGroup({ date, transactions, categories, onDelete }: TransactionDayGroupProps) {
+export default function TransactionDayGroup({ date, transactions, categories, selectedTxIds, onToggleSelect, onDelete }: TransactionDayGroupProps) {
     const categoryMap = new Map(categories.map(c => [c.id, c]));
 
     return (
@@ -29,6 +31,8 @@ export default function TransactionDayGroup({ date, transactions, categories, on
                         key={tx.id}
                         transaction={tx}
                         category={categoryMap.get(tx.category_id ?? -1)}
+                        isSelected={selectedTxIds.has(tx.id)}
+                        onToggleSelect={() => onToggleSelect(tx.id)}
                         onDelete={onDelete}
                     />
                 ))}

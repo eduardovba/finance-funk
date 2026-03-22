@@ -23,7 +23,7 @@ interface CategorySummary {
 
 export default function CategoryBreakdown({ categories, transactions }: CategoryBreakdownProps) {
     const { displayCurrency, fxRates } = useBudgetStore();
-    const fx = (cents: number) => convertCurrency(cents, 'BRL', displayCurrency, fxRates);
+    const fx = (cents: number) => convertCurrency(cents, displayCurrency, displayCurrency, fxRates);
     // Compute per-category spending (all integer arithmetic)
     const summaries: CategorySummary[] = categories
         .filter(c => c.is_income === 0)   // Only expense categories
@@ -86,7 +86,7 @@ export default function CategoryBreakdown({ categories, transactions }: Category
                                 </span>
                                 {item.targetCents > 0 && (
                                     <span className="text-xs font-mono tabular-nums text-[#F5F5DC]/25">
-                                        / {formatCents(fx(item.targetCents), displayCurrency)}
+                                        / {formatCents(item.targetCents, displayCurrency)}
                                     </span>
                                 )}
                             </div>

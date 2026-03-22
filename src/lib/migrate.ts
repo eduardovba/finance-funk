@@ -353,5 +353,12 @@ function getMigrations(): Migration[] {
                 )`,
             ],
         },
+        {
+            version: 13,
+            name: 'budget_transactions_add_source',
+            sql: [
+                `ALTER TABLE budget_transactions ADD COLUMN source TEXT`,
+            ],
+        },
     ];
 }

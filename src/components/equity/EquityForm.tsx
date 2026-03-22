@@ -213,8 +213,11 @@ export default function EquityForm({
                 </div>
             );
         }
-        if (rightPaneMode === 'add-transaction') {
+        if (rightPaneMode === 'buy-transaction') {
             return renderBuyAssetForm();
+        }
+        if (rightPaneMode === 'sell-transaction' && sellData) {
+            return renderSellForm();
         }
         if (rightPaneMode === 'edit-transaction' && editingTr) {
             return (
@@ -271,76 +274,77 @@ export default function EquityForm({
         );
     };
 
-    const renderSellModal = () => {
-        if (!isSellModalOpen || !sellData) return null;
+    const renderSellForm = () => {
+        if (!sellData) return null;
         return (
-            <div style={{ position: 'fixed', inset: 0, zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} onClick={() => setIsSellModalOpen(false)} />
-                <div className="glass-card" style={{ position: 'relative', zIndex: 1000, padding: '32px', width: '520px', maxWidth: '90vw' }}>
-                    <h3 style={{ marginBottom: '8px', fontSize: '1.3rem', color: 'var(--error)' }}>Sell {sellData.asset}</h3>
-                    <p style={{ margin: '0 0 24px', color: 'var(--fg-secondary)', fontSize: '0.9rem' }}>
-                        {sellData.broker} · {sellData.sharesHeld.toLocaleString(undefined, { maximumFractionDigits: 4 })} shares held · Avg cost: {formatCurrency(sellData.avgCost, sellData.currency)}
-                    </p>
+            <div className="w-full h-full p-6 text-left relative flex flex-col z-10 overflow-y-auto custom-scrollbar">
+                <div className="flex justify-between items-center mb-6 shrink-0">
+                    <h3 className="font-bebas text-xl tracking-widest text-rose-400 uppercase">Sell {sellData.asset}</h3>
+                    <Button variant="ghost" size="sm" onClick={() => { setRightPaneMode('default'); setSellData(null); }} className="rounded-full ml-auto"><X size={16} /></Button>
+                </div>
+                <p className="mb-6 text-white/60 text-sm">
+                    {sellData.broker} · {sellData.sharesHeld.toLocaleString(undefined, { maximumFractionDigits: 4 })} shares held · Avg cost: <span className="font-mono tabular-nums text-white/80">{formatCurrency(sellData.avgCost, sellData.currency)}</span>
+                </p>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Date</label>
-                            <input type="text" value={sellData.date} onChange={e => setSellData((prev: any) => ({ ...prev, date: e.target.value }))}
-                                style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
+                <div className="flex flex-col gap-5 flex-1 pb-4">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="flex-1">
+                            <label className="block text-white/60 text-xs mb-1">Date</label>
+                            <input type="date" value={sellData.date} onChange={e => setSellData((prev: any) => ({ ...prev, date: e.target.value }))}
+                                className="w-full p-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm outline-none focus:border-rose-500/50 [color-scheme:dark]" />
                         </div>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Currency</label>
-                            <input type="text" value={sellData.currency} readOnly
-                                style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--fg-secondary)', fontSize: '0.95rem', outline: 'none' }} />
+                        <div className="flex-1">
+                            <label className="block text-white/60 text-xs mb-1">Currency</label>
+                            <div className="w-full p-2.5 bg-white/[0.02] border border-white/5 rounded-xl text-white/50 text-sm font-mono tabular-nums">{sellData.currency}</div>
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Quantity to Sell</label>
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="flex-1">
+                            <label className="block text-white/60 text-xs mb-1">Quantity to Sell</label>
                             <input type="number" value={sellData.qtyToSell} onChange={e => updateSellCalc('qtyToSell', e.target.value)}
                                 max={sellData.sharesHeld} step="any"
-                                style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
+                                className="w-full p-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm outline-none focus:border-rose-500/50 font-mono tabular-nums" />
                         </div>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Sell Price / Share</label>
+                        <div className="flex-1">
+                            <label className="block text-white/60 text-xs mb-1">Sell Price / Share</label>
                             <input type="number" value={sellData.sellPricePerShare} onChange={e => updateSellCalc('sellPricePerShare', e.target.value)}
                                 step="any"
-                                style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
+                                className="w-full p-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm outline-none focus:border-rose-500/50 font-mono tabular-nums" />
                         </div>
                     </div>
 
-                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '20px', marginBottom: '24px', border: '1px solid var(--glass-border)' }}>
-                        <div style={{ marginBottom: '16px' }}>
-                            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Total Sale Value (Proceeds)</label>
-                            <div style={{ position: 'relative' }}>
-                                <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--fg-secondary)' }}>
+                    <div className="bg-white/[0.03] border border-white/10 rounded-xl p-4 mt-2 flex flex-col gap-4">
+                        <div>
+                            <label className="block mb-1 text-white/70 text-xs font-medium uppercase tracking-wider">Total Sale Value (Proceeds)</label>
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50 font-mono tabular-nums">
                                     {sellData.currency === 'BRL' ? 'R$' : (sellData.currency === 'USD' ? '$' : '£')}
                                 </span>
                                 <input type="number" value={sellData.totalProceeds} onChange={e => updateSellCalc('totalProceeds', e.target.value)}
-                                    step="any" style={{ width: '100%', padding: '10px 12px 10px 32px', background: 'rgba(255,255,255,0.08)', border: '1px solid var(--accent-color)', borderRadius: '8px', color: '#fff', fontSize: '1.1rem', fontWeight: 600, outline: 'none' }} />
+                                    step="any" className="w-full py-2.5 pl-8 pr-3 bg-white/5 border border-rose-500/30 rounded-lg text-white text-base font-bold outline-none focus:border-rose-500 transition-all font-mono tabular-nums" />
                             </div>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                            <span style={{ color: 'var(--fg-secondary)' }}>Cost Basis</span>
-                            <span style={{ color: 'var(--fg-secondary)' }}>{formatCurrency(sellData.avgCost * (parseFloat(sellData.qtyToSell) || 0), sellData.currency)}</span>
+                        <div className="flex justify-between items-center bg-white/5 rounded-lg p-3">
+                            <span className="text-white/60 text-sm">Cost Basis</span>
+                            <span className="text-white/80 font-mono tabular-nums text-sm">{formatCurrency(sellData.avgCost * (parseFloat(sellData.qtyToSell) || 0), sellData.currency)}</span>
                         </div>
-                        <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between' }}>
-                            <span style={{ fontWeight: 600 }}>P&L</span>
-                            <span style={{ fontWeight: 700, fontSize: '1.1rem', color: sellData.pnl >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
+                        <div className="flex justify-between items-center bg-white/5 border border-white/10 rounded-lg p-3">
+                            <span className="text-white text-sm font-bold">P&L</span>
+                            <span className={`text-sm font-bold font-mono tabular-nums ${sellData.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                 {sellData.pnl >= 0 ? '+' : ''}{formatCurrency(sellData.pnl, sellData.currency)} ({sellData.roi >= 0 ? '+' : ''}{sellData.roi.toFixed(1)}%)
                             </span>
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                        <Button variant="secondary" onClick={() => setIsSellModalOpen(false)}>Cancel</Button>
-                        <Button variant="danger" onClick={handleSellConfirm}>Confirm Sale</Button>
+                    <div className="flex flex-col sm:flex-row gap-3 mt-4 shrink-0 pt-2 border-t border-white/5">
+                        <Button variant="secondary" className="flex-1" type="button" onClick={() => { setRightPaneMode('default'); setSellData(null); }}>Cancel</Button>
+                        <Button variant="danger" className="flex-1" type="button" onClick={handleSellConfirm}>Confirm Sale</Button>
                     </div>
                 </div>
             </div>
         );
     };
 
-    return { renderEmptyState, renderSellModal };
+    return { renderEmptyState };
 }

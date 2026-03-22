@@ -17,7 +17,7 @@ interface SpendingTrendChartProps {
 
 export default function SpendingTrendChart({ rollupHistory }: SpendingTrendChartProps) {
     const { displayCurrency, fxRates } = useBudgetStore();
-    const fx = (cents: number) => convertCurrency(cents, 'BRL', displayCurrency, fxRates);
+    const fx = (cents: number) => convertCurrency(cents, displayCurrency, displayCurrency, fxRates);
 
     const chartData = rollupHistory.map(r => ({
         month: r.month,

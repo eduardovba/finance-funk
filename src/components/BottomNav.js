@@ -7,19 +7,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     LayoutDashboard, BookOpen, PieChart,
     Landmark, HomeIcon, LineChart, Bitcoin, Wallet, CreditCard,
-    TrendingUp, Target, LogOut, Settings, Scale, DollarSign, ArrowUpDown
+    TrendingUp, Target, LogOut, Settings, Scale, DollarSign, ArrowUpDown,
+    ArrowLeftRight, Grid3X3, Upload
 } from 'lucide-react';
 import { usePortfolio } from '@/context/PortfolioContext';
 import { useSession, signOut } from 'next-auth/react';
 import { formatCurrency } from '@/lib/currency';
 
 const ASSET_TABS = [
-    { id: 'fixed-income', href: '/assets/fixed-income', label: 'Fixed Income', icon: Landmark, color: '#D4AF37' },
+    { id: 'fixed-income', href: '/assets/fixed-income', label: 'Fixed Income', icon: Landmark, color: '#CC5500' },
     { id: 'equity', href: '/assets/equity', label: 'Equity', icon: LineChart, color: '#CC5500' },
-    { id: 'real-estate', href: '/assets/real-estate', label: 'Real Estate', icon: HomeIcon, color: '#8b5cf6' },
-    { id: 'crypto', href: '/assets/crypto', label: 'Crypto', icon: Bitcoin, color: '#f59e0b' },
-    { id: 'pensions', href: '/assets/pensions', label: 'Pensions', icon: Wallet, color: '#06b6d4' },
-    { id: 'debt', href: '/assets/debt', label: 'Debt', icon: CreditCard, color: '#ec4899' },
+    { id: 'real-estate', href: '/assets/real-estate', label: 'Real Estate', icon: HomeIcon, color: '#CC5500' },
+    { id: 'crypto', href: '/assets/crypto', label: 'Crypto', icon: Bitcoin, color: '#CC5500' },
+    { id: 'pensions', href: '/assets/pensions', label: 'Pensions', icon: Wallet, color: '#CC5500' },
+    { id: 'debt', href: '/assets/debt', label: 'Debt', icon: CreditCard, color: '#CC5500' },
 ];
 
 const PLANNING_ITEMS = [
@@ -32,6 +33,13 @@ const LEDGER_ITEMS = [
     { id: 'income', href: '/ledger/income', label: 'Income', icon: DollarSign },
     { id: 'investments', href: '/ledger/investments', label: 'Investments', icon: ArrowUpDown },
     { id: 'totals', href: '/ledger/totals', label: 'General Ledger', icon: BookOpen },
+];
+
+const BUDGET_ITEMS = [
+    { id: 'overview', href: '/budget', label: 'Overview', icon: LayoutDashboard },
+    { id: 'transactions', href: '/budget/transactions', label: 'Transactions', icon: ArrowLeftRight },
+    { id: 'categories', href: '/budget/categories', label: 'Categories', icon: Grid3X3 },
+    { id: 'import', href: '/budget/import', label: 'Import', icon: Upload },
 ];
 
 /* ─── Assets Bottom Sheet ─── */
@@ -213,12 +221,64 @@ function LedgerSheet({ isOpen, onClose }) {
     );
 }
 
+/* ─── Budget Bottom Sheet ─── */
+function BudgetSheet({ isOpen, onClose }) {
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <>
+                    <motion.div
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[998]"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={onClose}
+                    />
+                    <motion.div
+                        className="fixed bottom-0 left-0 right-0 bg-[#0B0611] border-t border-[#34D399]/20 rounded-t-3xl z-[999] pb-safe"
+                        initial={{ y: '100%' }}
+                        animate={{ y: 0 }}
+                        exit={{ y: '100%' }}
+                        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                    >
+                        <div className="flex justify-center pt-3 pb-2">
+                            <div className="w-10 h-1 bg-white/20 rounded-full" />
+                        </div>
+
+                        <div className="px-5 pb-2">
+                            <h3 className="text-[#34D399] font-bebas text-xl tracking-wide">Budget</h3>
+                        </div>
+
+                        <div className="flex flex-col gap-1 px-5 pb-6">
+                            {BUDGET_ITEMS.map(item => {
+                                const Icon = item.icon;
+                                return (
+                                    <Link
+                                        key={item.id}
+                                        href={item.href}
+                                        onClick={onClose}
+                                        className="flex items-center gap-4 px-3 py-3 rounded-xl text-parchment/80 hover:bg-white/5 active:bg-white/5 active:scale-[0.98] transition-all no-underline"
+                                    >
+                                        <Icon size={18} className="text-[#34D399]/60" />
+                                        <span className="text-sm font-space font-medium">{item.label}</span>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    </motion.div>
+                </>
+            )}
+        </AnimatePresence>
+    );
+}
+
 /* ─── Bottom Navigation Bar ─── */
 export default function BottomNav() {
     const pathname = usePathname();
     const [assetsOpen, setAssetsOpen] = useState(false);
     const [planningOpen, setPlanningOpen] = useState(false);
     const [ledgerOpen, setLedgerOpen] = useState(false);
+    const [budgetOpen, setBudgetOpen] = useState(false);
 
     const isAssetRoute = ASSET_TABS.some(t => pathname.startsWith(t.href));
     const isPlanningRoute = PLANNING_ITEMS.some(t => pathname.startsWith(t.href));
@@ -228,15 +288,15 @@ export default function BottomNav() {
 
     const tabs = [
         { id: 'home', href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, color: '#D4AF37' },
-        { id: 'budget', href: '/budget', label: 'Budget', icon: Wallet, color: '#34D399' },
-        { id: 'assets', href: null, label: 'Assets', icon: PieChart, color: '#CC5500', action: () => { setPlanningOpen(false); setLedgerOpen(false); setAssetsOpen(true); } },
-        { id: 'planning', href: null, label: 'Planning', icon: TrendingUp, color: '#A78BFA', action: () => { setAssetsOpen(false); setLedgerOpen(false); setPlanningOpen(true); } },
-        { id: 'ledger', href: null, label: 'Ledger', icon: BookOpen, color: '#D4AF37', action: () => { setAssetsOpen(false); setPlanningOpen(false); setLedgerOpen(true); } },
+        { id: 'budget', href: null, label: 'Budget', icon: Wallet, color: '#34D399', action: () => { setAssetsOpen(false); setPlanningOpen(false); setLedgerOpen(false); setBudgetOpen(true); } },
+        { id: 'assets', href: null, label: 'Assets', icon: PieChart, color: '#CC5500', action: () => { setBudgetOpen(false); setPlanningOpen(false); setLedgerOpen(false); setAssetsOpen(true); } },
+        { id: 'planning', href: null, label: 'Planning', icon: TrendingUp, color: '#A78BFA', action: () => { setBudgetOpen(false); setAssetsOpen(false); setLedgerOpen(false); setPlanningOpen(true); } },
+        { id: 'ledger', href: null, label: 'Ledger', icon: BookOpen, color: '#D4AF37', action: () => { setBudgetOpen(false); setAssetsOpen(false); setPlanningOpen(false); setLedgerOpen(true); } },
     ];
 
     const isActive = (tab) => {
         if (tab.id === 'home') return pathname === '/dashboard' || pathname === '/';
-        if (tab.id === 'budget') return isBudgetRoute;
+        if (tab.id === 'budget') return isBudgetRoute || budgetOpen;
         if (tab.id === 'assets') return isAssetRoute || assetsOpen;
         if (tab.id === 'planning') return isPlanningRoute || planningOpen;
         if (tab.id === 'ledger') return isLedgerRoute || ledgerOpen;
@@ -262,7 +322,7 @@ export default function BottomNav() {
                                         tab.id === 'assets' ? 'ftue-sidebar-mobile' : undefined
                                     }
                                     onClick={tab.action}
-                                    className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full bg-transparent border-none active:scale-[0.9] transition-transform relative"
+                                    className="flex flex-col items-center justify-center gap-0.5 flex-1 w-full max-w-[20%] h-full bg-transparent border-none active:scale-[0.9] transition-transform relative"
                                 >
                                     {active && (
                                         <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 60% 80% at 50% 100%, ${activeColor}15, transparent)` }} />
@@ -279,7 +339,7 @@ export default function BottomNav() {
                             <Link
                                 key={tab.id}
                                 href={tab.href}
-                                className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full no-underline active:scale-[0.9] transition-transform relative"
+                                className="flex flex-col items-center justify-center gap-0.5 flex-1 w-full max-w-[20%] h-full no-underline active:scale-[0.9] transition-transform relative"
                             >
                                 {active && (
                                     <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 60% 80% at 50% 100%, ${activeColor}15, transparent)` }} />
@@ -297,6 +357,7 @@ export default function BottomNav() {
             <AssetsSheet isOpen={assetsOpen} onClose={() => setAssetsOpen(false)} />
             <PlanningSheet isOpen={planningOpen} onClose={() => setPlanningOpen(false)} />
             <LedgerSheet isOpen={ledgerOpen} onClose={() => setLedgerOpen(false)} />
+            <BudgetSheet isOpen={budgetOpen} onClose={() => setBudgetOpen(false)} />
         </>
     );
 }

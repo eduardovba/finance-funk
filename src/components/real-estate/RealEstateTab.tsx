@@ -146,15 +146,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                     </div>
                 </div>
 
-                {/* Fund Buy Modal */}
-                {h.isFundBuyModalOpen && h.fundBuyData && (
-                    <FundBuyModal h={h} />
-                )}
 
-                {/* Fund Sell Modal */}
-                {h.isFundSellModalOpen && h.fundSellData && (
-                    <FundSellModal h={h} />
-                )}
 
                 {/* Activity History */}
                 <ActivityHistory h={h} data={data} />
@@ -163,7 +155,7 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                 <FloatingActionButton
                     onAddBroker={() => { h.setSelectedAsset(null); h.setRightPaneMode('add-broker'); }}
                     onAddProperty={() => { h.setSelectedAsset(null); h.setRightPaneMode('add-property'); }}
-                    onAddTransaction={() => { h.setSelectedAsset(null); h.setFundBuyData({ date: new Date().toISOString().split('T')[0], qtyToBuy: '', buyPricePerShare: '', totalInvestment: 0 } as any); h.setRightPaneMode('add-transaction'); }}
+                    onAddTransaction={() => { h.setSelectedAsset(null); h.setFundBuyData({ date: new Date().toISOString().split('T')[0], qtyToBuy: '', buyPricePerShare: '', totalInvestment: 0 } as any); h.setRightPaneMode('buy-transaction'); }}
                 />
 
                 {/* Delete Modals */}
@@ -205,8 +197,11 @@ function renderContextPaneEmpty(h: any) {
     if (h.rightPaneMode === 'add-property') {
         return <AddPropertyForm h={h} />;
     }
-    if (h.rightPaneMode === 'add-transaction') {
+    if (h.rightPaneMode === 'buy-transaction') {
         return <AddTransactionForm h={h} />;
+    }
+    if (h.rightPaneMode === 'sell-fund-transaction' && h.fundSellData) {
+        return <SellFundTransactionForm h={h} />;
     }
     if (h.rightPaneMode === 'edit-transaction' && h.editingTransaction) {
         return <EditTransactionForm h={h} />;
@@ -423,57 +418,54 @@ function EditTransactionForm({ h }: { h: any }) {
     );
 }
 
-// --- Fund Buy Modal ---
-function FundBuyModal({ h }: { h: any }) {
+// --- Sell Fund Transaction Form (context pane) ---
+function SellFundTransactionForm({ h }: { h: any }) {
     return (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} onClick={() => h.setIsFundBuyModalOpen(false)} />
-            <div className="glass-card" style={{ position: 'relative', zIndex: 1000, padding: '32px', width: '520px', maxWidth: '90vw' }}>
-                <h3 style={{ marginBottom: '8px', fontSize: '1.3rem', color: 'var(--accent-color)' }}>{h.fundBuyData.ticker ? `Buy More ${h.fundBuyData.fund}` : 'New Fund Purchase'}</h3>
-                {!h.fundBuyData.ticker && (
-                    <div style={{ marginBottom: '16px' }}>
-                        <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Search Fund</label>
-                        <AssetSearch onSelect={(sel: any) => { const lp = h.marketData?.[sel.symbol]?.price || ''; h.setFundBuyData((prev: any) => ({ ...prev, fund: 'XP - ' + sel.symbol.replace('.SA', ''), ticker: sel.symbol.replace('.SA', ''), buyPricePerShare: lp, totalInvestment: lp ? (parseFloat(prev.qtyToBuy) || 0) * lp : 0 })); }} />
-                    </div>
-                )}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                    <div><label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Date</label><input type="date" value={h.fundBuyData.date} onChange={(e: any) => h.setFundBuyData((p: any) => ({ ...p, date: e.target.value }))} style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} /></div>
-                    <div><label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Quantity</label><NumberInput value={h.fundBuyData.qtyToBuy} onChange={(val: any) => h.updateFundBuyCalc('qtyToBuy', val)} style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} /></div>
-                </div>
-                <div style={{ marginBottom: '16px' }}><label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Buy Price / Share (R$)</label><NumberInput value={h.fundBuyData.buyPricePerShare} onChange={(val: any) => h.updateFundBuyCalc('buyPricePerShare', val)} style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} /></div>
-                <div className="glass-card" style={{ padding: '16px', marginBottom: '24px', textAlign: 'center' }}><div style={{ color: 'var(--fg-secondary)', fontSize: '0.85rem', marginBottom: '4px' }}>Total Investment</div><div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--accent-color)' }}>{formatCurrency(h.fundBuyData.totalInvestment || 0, 'BRL')}</div></div>
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                    <Button variant="secondary" onClick={() => h.setIsFundBuyModalOpen(false)}>Cancel</Button>
-                    <Button variant="primary" onClick={h.handleFundBuyConfirm}>Confirm Purchase</Button>
-                </div>
+        <div className="w-full h-full p-6 text-left relative flex flex-col z-10 overflow-y-auto custom-scrollbar">
+            <div className="flex justify-between items-center mb-6 shrink-0">
+                <h3 className="font-bebas text-xl tracking-widest text-rose-400 uppercase">Sell {h.fundSellData.fund}</h3>
+                <Button variant="ghost" size="sm" onClick={() => { h.setRightPaneMode('default'); h.setFundSellData(null); }} className="rounded-full ml-auto"><X size={16} /></Button>
             </div>
-        </div>
-    );
-}
-
-// --- Fund Sell Modal ---
-function FundSellModal({ h }: { h: any }) {
-    return (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} onClick={() => h.setIsFundSellModalOpen(false)} />
-            <div className="glass-card" style={{ position: 'relative', zIndex: 1000, padding: '32px', width: '520px', maxWidth: '90vw' }}>
-                <h3 style={{ marginBottom: '8px', fontSize: '1.3rem', color: 'var(--error)' }}>Sell {h.fundSellData.fund}</h3>
-                <p style={{ margin: '0 0 24px', color: 'var(--fg-secondary)', fontSize: '0.9rem' }}>{h.fundSellData.ticker} · BRL · {h.fundSellData.sharesHeld} shares held</p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                    <div><label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Date</label><input type="date" value={h.fundSellData.date} onChange={(e: any) => h.setFundSellData((p: any) => ({ ...p, date: e.target.value }))} style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', outline: 'none' }} /></div>
-                    <div><label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Quantity</label><NumberInput value={h.fundSellData.qtyToSell} onChange={(val: any) => h.updateFundSellCalc('qtyToSell', val)} style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', outline: 'none' }} /></div>
-                </div>
-                <div style={{ marginBottom: '16px' }}><label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Sell Price / Share (R$)</label><NumberInput value={h.fundSellData.sellPricePerShare} onChange={(val: any) => h.updateFundSellCalc('sellPricePerShare', val)} style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', outline: 'none' }} /></div>
-                <div className="glass-card" style={{ padding: '16px', marginBottom: '24px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', textAlign: 'center' }}>
-                        <div><div style={{ color: 'var(--fg-secondary)', fontSize: '0.8rem', marginBottom: '4px' }}>Proceeds</div><div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--accent-color)' }}>{formatCurrency(h.fundSellData.totalProceeds || 0, 'BRL')}</div></div>
-                        <div><div style={{ color: 'var(--fg-secondary)', fontSize: '0.8rem', marginBottom: '4px' }}>Cost Basis</div><div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(h.fundSellData.avgCost * (parseFloat(h.fundSellData.qtyToSell) || 0), 'BRL')}</div></div>
-                        <div><div style={{ color: 'var(--fg-secondary)', fontSize: '0.8rem', marginBottom: '4px' }}>P&L</div><div style={{ fontSize: '1.1rem', fontWeight: 700, color: h.fundSellData.pnl >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>{formatCurrency(h.fundSellData.pnl || 0, 'BRL')} ({(h.fundSellData.roi || 0).toFixed(1)}%)</div></div>
+            <p className="mb-6 text-white/60 text-sm">
+                {h.fundSellData.ticker} · BRL · {h.fundSellData.sharesHeld} shares held
+            </p>
+            <div className="flex-1 flex flex-col gap-5">
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-xs text-parchment/70 tracking-wide uppercase mb-2">Date</label>
+                        <input type="date" value={h.fundSellData.date} onChange={(e: any) => h.setFundSellData((p: any) => ({ ...p, date: e.target.value }))}
+                            className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-rose-500/50 transition-all font-space [color-scheme:dark]" />
+                    </div>
+                    <div>
+                        <label className="block text-xs text-parchment/70 tracking-wide uppercase mb-2">Quantity</label>
+                        <NumberInput value={h.fundSellData.qtyToSell} onChange={(val: any) => h.updateFundSellCalc('qtyToSell', val)}
+                            className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-rose-500/50 transition-all font-space" placeholder="0" />
                     </div>
                 </div>
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                    <Button variant="secondary" onClick={() => h.setIsFundSellModalOpen(false)}>Cancel</Button>
-                    <Button variant="danger" onClick={h.handleFundSellConfirm}>Confirm Sale</Button>
+                <div>
+                    <label className="block text-xs text-parchment/70 tracking-wide uppercase mb-2">Sell Price / Share (R$)</label>
+                    <NumberInput value={h.fundSellData.sellPricePerShare} onChange={(val: any) => h.updateFundSellCalc('sellPricePerShare', val)}
+                        className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-rose-500/50 transition-all font-space" placeholder="0" />
+                </div>
+                <div className="bg-white/[0.03] border border-white/10 rounded-xl p-4 flex flex-col gap-3">
+                    <div className="flex justify-between items-center">
+                        <span className="text-xs text-white/50 uppercase tracking-wider">Proceeds</span>
+                        <span className="text-base font-bold text-[#D4AF37] font-mono tabular-nums">{formatCurrency(h.fundSellData.totalProceeds || 0, 'BRL')}</span>
+                    </div>
+                    <div className="flex justify-between items-center bg-white/5 rounded-lg p-3">
+                        <span className="text-white/60 text-sm">Cost Basis</span>
+                        <span className="text-white/80 font-mono tabular-nums text-sm">{formatCurrency(h.fundSellData.avgCost * (parseFloat(h.fundSellData.qtyToSell) || 0), 'BRL')}</span>
+                    </div>
+                    <div className="flex justify-between items-center bg-white/5 border border-white/10 rounded-lg p-3">
+                        <span className="text-white text-sm font-bold">P&L</span>
+                        <span className={`text-sm font-bold font-mono tabular-nums ${h.fundSellData.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {formatCurrency(h.fundSellData.pnl || 0, 'BRL')} ({(h.fundSellData.roi || 0).toFixed(1)}%)
+                        </span>
+                    </div>
+                </div>
+                <div className="mt-auto pt-6 flex gap-3">
+                    <Button variant="secondary" className="flex-1" onClick={() => { h.setRightPaneMode('default'); h.setFundSellData(null); }}>Cancel</Button>
+                    <Button variant="danger" className="flex-1" onClick={h.handleFundSellConfirm}>Confirm Sale</Button>
                 </div>
             </div>
         </div>

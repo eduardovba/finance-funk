@@ -69,7 +69,7 @@ export default function EquityTab({ transactions = [], marketData: globalMarketD
         handleRenameAsset,
     } = h;
 
-    const { renderEmptyState, renderSellModal } = EquityForm({
+    const { renderEmptyState } = EquityForm({
         rightPaneMode, buyData, sellData, editingTr, isFetchingPrice, searchTerm, brokers, brokerDict, marketData: _marketData, rates: rates || null, isSellModalOpen,
         setSearchTerm, setRightPaneMode, setBuyData, setSellData, setEditingTr, setIsFetchingPrice, setIsSellModalOpen,
         handleBuyConfirm, handleSellConfirm, handleEditSave, handleEditChange, updateBuyCalc, updateSellCalc, fetchBrokers
@@ -333,7 +333,6 @@ export default function EquityTab({ transactions = [], marketData: globalMarketD
                     onCancel={() => { setIsDeleteBrokerModalOpen(false); setBrokerToDelete(null); }}
                 />
 
-                {renderSellModal()}
             </div>
             <PageTutorialOverlay pageId="equity" steps={EQUITY_TUTORIAL_STEPS} />
         </PullToRefresh>

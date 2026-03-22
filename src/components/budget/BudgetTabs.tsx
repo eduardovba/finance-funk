@@ -11,7 +11,7 @@ import { SUPPORTED_CURRENCIES, type CurrencyInfo } from '@/lib/currency';
 const TABS = [
     { href: '/budget', label: 'Overview', icon: LayoutDashboard },
     { href: '/budget/transactions', label: 'Transactions', icon: ArrowLeftRight },
-    { href: '/budget/categories', label: 'Categories', icon: Grid3X3 },
+    { href: '/budget/categories', label: 'Planner', icon: Grid3X3 },
     { href: '/budget/import', label: 'Import', icon: Upload },
 ];
 

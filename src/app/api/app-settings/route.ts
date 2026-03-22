@@ -10,7 +10,9 @@ const DEFAULTS = { autoMonthlyCloseEnabled: true, backgroundSelection: 'frosted-
 const PostAppSettingsSchema = z.object({
     autoMonthlyCloseEnabled: z.boolean().optional(),
     backgroundSelection: z.string().optional(),
-    budgetCurrency: z.string().optional()
+    budgetCurrency: z.string().optional(),
+    categoryRules: z.record(z.string(), z.number()).optional(),
+    ignoreRules: z.array(z.string()).optional(),
 }).passthrough();
 
 export async function GET(): Promise<NextResponse> {

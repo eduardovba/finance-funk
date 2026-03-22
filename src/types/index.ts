@@ -63,6 +63,7 @@ export interface BudgetTransaction {
     description: string | null;
     date: string;                // YYYY-MM-DD
     is_recurring: number;        // 0 | 1
+    source: string | null;       // 'AMEX' | 'HSBC' | 'BARCLAYS' | 'LLOYDS' | 'MONZO' | 'SANTANDER' | 'NUBANK' | 'Manual' | null
 }
 
 export interface BudgetMonthlyRollup {

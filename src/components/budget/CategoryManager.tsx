@@ -15,7 +15,7 @@ import {
     verticalListSortingStrategy,
     arrayMove,
 } from '@dnd-kit/sortable';
-import { Plus } from 'lucide-react';
+import { Plus, RotateCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import _FloatingActionButton from '@/components/FloatingActionButton';
 
@@ -39,6 +39,8 @@ export default function CategoryManager() {
 
     const [sheetOpen, setSheetOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState<BudgetCategory | null>(null);
+    const [resetting, setResetting] = useState(false);
+    const [confirmReset, setConfirmReset] = useState(false);
 
     useEffect(() => {
         fetchCategories();
@@ -90,12 +92,46 @@ export default function CategoryManager() {
         await updateCategory(body);
     };
 
+    const handleResetCategories = async () => {
+        if (!confirmReset) {
+            setConfirmReset(true);
+            return;
+        }
+        setResetting(true);
+        try {
+            const res = await fetch('/api/budget/categories/seed?force=true', { method: 'POST' });
+            if (!res.ok) throw new Error('Failed to reset');
+            await fetchCategories();
+        } catch (err) {
+            console.error('Reset categories error:', err);
+        } finally {
+            setResetting(false);
+            setConfirmReset(false);
+        }
+    };
+
     return (
         <div className="max-w-3xl mx-auto px-4 py-6 pb-28">
-            {/* Page title */}
-            <h1 className="text-2xl font-bebas tracking-wide text-[#D4AF37] drop-shadow-[0_0_10px_rgba(212,175,55,0.3)] mb-6">
-                Budget Categories
-            </h1>
+            {/* Page title + reset */}
+            <div className="flex items-center justify-between mb-6">
+                <h1 className="text-2xl font-bebas tracking-wide text-[#D4AF37] drop-shadow-[0_0_10px_rgba(212,175,55,0.3)]">
+                    Budget Categories
+                </h1>
+                {categories.length > 0 && (
+                    <button
+                        onClick={handleResetCategories}
+                        disabled={resetting}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-space transition-all border ${
+                            confirmReset
+                                ? 'bg-red-500/15 border-red-500/30 text-red-400 hover:bg-red-500/25'
+                                : 'bg-white/[0.03] border-white/[0.06] text-[#F5F5DC]/30 hover:text-[#F5F5DC]/50 hover:border-white/[0.12]'
+                        }`}
+                    >
+                        <RotateCcw size={12} className={resetting ? 'animate-spin' : ''} />
+                        {resetting ? 'Resetting…' : confirmReset ? 'Confirm Reset?' : 'Reset to Defaults'}
+                    </button>
+                )}
+            </div>
 
             {loading && categories.length === 0 ? (
                 <div className="flex items-center justify-center py-20">

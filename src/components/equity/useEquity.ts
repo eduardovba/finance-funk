@@ -254,7 +254,7 @@ export default function useEquity({ transactions = [], marketData = {}, rates, o
             totalProceeds: proceeds, pnl, roi,
             date: new Date().toISOString().split('T')[0],
         });
-        setIsSellModalOpen(true);
+        setRightPaneMode('sell-transaction');
     };
 
     const updateSellCalc = (field: string, value: string) => {
@@ -297,7 +297,7 @@ export default function useEquity({ transactions = [], marketData = {}, rates, o
             });
             if (res.ok) {
                 if (onRefresh) onRefresh();
-                setIsSellModalOpen(false); setSellData(null);
+                setRightPaneMode('default'); setSellData(null);
             }
         } catch (e) { console.error(e); }
     };
@@ -310,7 +310,7 @@ export default function useEquity({ transactions = [], marketData = {}, rates, o
             ticker: holding.ticker, qtyToBuy: '', buyPricePerShare: livePrice || '',
             totalInvestment: 0, date: new Date().toISOString().split('T')[0],
         });
-        setRightPaneMode('add-transaction');
+        setRightPaneMode('buy-transaction');
     };
 
     const handleNewBuyClick = (brokerName: string) => {
@@ -320,7 +320,7 @@ export default function useEquity({ transactions = [], marketData = {}, rates, o
             qtyToBuy: '', buyPricePerShare: '', totalInvestment: 0,
             date: new Date().toISOString().split('T')[0],
         });
-        setRightPaneMode('add-transaction');
+        setRightPaneMode('buy-transaction');
     };
 
     const updateBuyCalc = (field: string, value: string) => {

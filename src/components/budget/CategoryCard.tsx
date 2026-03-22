@@ -33,7 +33,8 @@ export default function CategoryCard({ category, onEdit, onDelete }: CategoryCar
     };
 
     const isIncome = category.is_income === 1;
-    const displayTarget = convertCurrency(category.monthly_target_cents, 'BRL', displayCurrency, fxRates);
+    // monthly_target_cents is entered in the user's displayCurrency — no FX conversion needed
+    const displayTarget = category.monthly_target_cents;
 
     return (
         <div

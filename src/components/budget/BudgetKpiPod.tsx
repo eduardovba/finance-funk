@@ -22,7 +22,7 @@ export default function BudgetKpiPod() {
 
     // ─── Integer-only arithmetic ────────────────────────────
     const surplusCents = currentRollup.total_income_cents - currentRollup.total_expenses_cents;
-    const displaySurplusCents = convertCurrency(Math.abs(surplusCents), 'BRL', displayCurrency, fxRates);
+    const displaySurplusCents = convertCurrency(Math.abs(surplusCents), displayCurrency, displayCurrency, fxRates);
     const savingsRateBps = currentRollup.savings_rate_basis_points ?? 0;
     const savingsRatePercent = Math.round(savingsRateBps / 100);
     const isHealthy = savingsRateBps > 3000; // > 30%

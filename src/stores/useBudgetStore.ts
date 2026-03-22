@@ -18,6 +18,10 @@ export interface BudgetState {
     // FX & Currency
     displayCurrency: string;
     fxRates: Record<string, number>;
+    // Auto-categorization rules
+    categoryRules: Record<string, number>;
+    // Auto-ignore rules (substring matches to skip on import)
+    ignoreRules: string[];
 }
 
 export interface BudgetActions {
@@ -38,11 +42,18 @@ export interface BudgetActions {
         is_recurring?: boolean;
     }) => Promise<void>;
     deleteTransaction: (id: number) => Promise<void>;
+    bulkDeleteTransactions: (ids: number[]) => Promise<void>;
     fetchRollup: (month?: string) => Promise<void>;
     fetchRollupRange: (endMonth?: string, count?: number) => Promise<void>;
+    bulkUpdateTargets: (items: { id: number; monthly_target_cents: number }[]) => Promise<void>;
+    fetchSuggestions: () => Promise<{ suggestions: { category_id: number; suggested_cents: number }[]; avg_monthly_income_cents: number }>;
     // FX & Currency
     setAndPersistCurrency: (currency: string) => Promise<void>;
     hydrateSettings: () => Promise<void>;
+    // Auto-categorization
+    hydrateRules: () => Promise<void>;
+    saveRule: (key: string, categoryId: number) => Promise<void>;
+    saveIgnoreRule: (key: string) => Promise<void>;
 }
 
 // ═══════════ HELPERS ═══════════
@@ -96,6 +107,8 @@ const useBudgetStore = create<BudgetState & BudgetActions>((set, get) => ({
     toastError: null,
     displayCurrency: 'BRL',
     fxRates: MOCK_FX_RATES,
+    categoryRules: {},
+    ignoreRules: [],
 
     // ═══════════ ACTIONS ═══════════
 
@@ -108,6 +121,21 @@ const useBudgetStore = create<BudgetState & BudgetActions>((set, get) => ({
             const res = await fetch('/api/budget/categories');
             if (!res.ok) throw new Error('Failed to fetch categories');
             const data: BudgetCategory[] = await res.json();
+
+            // Auto-seed default categories if empty
+            if (data.length === 0) {
+                const seedRes = await fetch('/api/budget/categories/seed', { method: 'POST' });
+                if (seedRes.ok) {
+                    // Re-fetch after seeding
+                    const reRes = await fetch('/api/budget/categories');
+                    if (reRes.ok) {
+                        const seeded: BudgetCategory[] = await reRes.json();
+                        set({ categories: seeded });
+                        return;
+                    }
+                }
+            }
+
             set({ categories: data });
         } catch (err) {
             console.error('fetchCategories error:', err);
@@ -187,6 +215,35 @@ const useBudgetStore = create<BudgetState & BudgetActions>((set, get) => ({
         }
     },
 
+    bulkUpdateTargets: async (items) => {
+        try {
+            set({ loading: true });
+            const res = await fetch('/api/budget/categories/bulk', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items }),
+            });
+            if (!res.ok) throw new Error('Failed to bulk update targets');
+            await get().fetchCategories();
+        } catch (err) {
+            console.error('bulkUpdateTargets error:', err);
+            set({ toastError: 'Failed to bulk save budgets.' });
+            set({ loading: false });
+        }
+    },
+
+    fetchSuggestions: async () => {
+        try {
+            const res = await fetch('/api/budget/categories/suggest');
+            if (!res.ok) throw new Error('Failed to fetch suggestions');
+            return await res.json();
+        } catch (err) {
+            console.error('fetchSuggestions error:', err);
+            set({ toastError: 'Failed to load budget suggestions.' });
+            return { suggestions: [], avg_monthly_income_cents: 0 };
+        }
+    },
+
     fetchTransactions: async (month?: string) => {
         try {
             set({ loading: true });
@@ -220,6 +277,7 @@ const useBudgetStore = create<BudgetState & BudgetActions>((set, get) => ({
             description: body.description ?? null,
             date: body.date,
             is_recurring: body.is_recurring ? 1 : 0,
+            source: 'Manual',
         };
 
         set({
@@ -290,6 +348,43 @@ const useBudgetStore = create<BudgetState & BudgetActions>((set, get) => ({
         }
     },
 
+    bulkDeleteTransactions: async (ids: number[]) => {
+        const prevTransactions = get().transactions;
+        const prevRollup = get().currentRollup;
+
+        // Optimistic: remove from list. For rollup, we could carefully reverse each but the easiest 
+        // is just relying on the server refetch since bulk deletes are rare and re-calculating everything accurately client-side is complex.
+        set({
+            transactions: prevTransactions.filter(t => !ids.includes(t.id)),
+            loading: true
+        });
+
+        try {
+            const res = await fetch('/api/budget/transactions/bulk', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids }),
+            });
+            if (!res.ok) throw new Error('Failed to bulk delete');
+
+            // Re-fetch for server truth
+            await Promise.all([
+                get().fetchTransactions(),
+                get().fetchRollup(),
+            ]);
+        } catch (err) {
+            console.error('bulkDeleteTransactions error:', err);
+            // Rollback
+            set({
+                transactions: prevTransactions,
+                currentRollup: prevRollup,
+                toastError: 'Failed to delete selected transactions.',
+            });
+        } finally {
+            set({ loading: false });
+        }
+    },
+
     fetchRollup: async (month?: string) => {
         try {
             const m = month ?? get().currentMonth;
@@ -344,8 +439,71 @@ const useBudgetStore = create<BudgetState & BudgetActions>((set, get) => ({
             if (settings.budgetCurrency) {
                 set({ displayCurrency: settings.budgetCurrency });
             }
+            if (settings.categoryRules && typeof settings.categoryRules === 'object') {
+                set({ categoryRules: settings.categoryRules });
+            }
+            if (Array.isArray(settings.ignoreRules)) {
+                set({ ignoreRules: settings.ignoreRules });
+            }
         } catch (err) {
             console.error('hydrateSettings error:', err);
+        }
+    },
+
+    // ═══════════ AUTO-CATEGORIZATION ═══════════
+
+    hydrateRules: async () => {
+        try {
+            const res = await fetch('/api/app-settings');
+            if (!res.ok) return;
+            const settings = await res.json();
+            if (settings.categoryRules && typeof settings.categoryRules === 'object') {
+                set({ categoryRules: settings.categoryRules });
+            }
+            if (Array.isArray(settings.ignoreRules)) {
+                set({ ignoreRules: settings.ignoreRules });
+            }
+        } catch (err) {
+            console.error('hydrateRules error:', err);
+        }
+    },
+
+    saveRule: async (key: string, categoryId: number) => {
+        const prev = get().categoryRules;
+        const updated = { ...prev, [key]: categoryId };
+        set({ categoryRules: updated });
+        try {
+            const existing = await fetch('/api/app-settings').then(r => r.ok ? r.json() : {});
+            const merged = { ...existing, categoryRules: updated };
+            const res = await fetch('/api/app-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(merged),
+            });
+            if (!res.ok) throw new Error('Failed to save rule');
+        } catch (err) {
+            console.error('saveRule error:', err);
+            set({ categoryRules: prev, toastError: 'Failed to save categorization rule' });
+        }
+    },
+    saveIgnoreRule: async (key: string) => {
+        const prev = get().ignoreRules;
+        const upperKey = key.toUpperCase();
+        if (prev.some(r => r.toUpperCase() === upperKey)) return; // already exists
+        const updated = [...prev, key];
+        set({ ignoreRules: updated });
+        try {
+            const existing = await fetch('/api/app-settings').then(r => r.ok ? r.json() : {});
+            const merged = { ...existing, ignoreRules: updated };
+            const res = await fetch('/api/app-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(merged),
+            });
+            if (!res.ok) throw new Error('Failed to save ignore rule');
+        } catch (err) {
+            console.error('saveIgnoreRule error:', err);
+            set({ ignoreRules: prev, toastError: 'Failed to save ignore rule' });
         }
     },
 }));

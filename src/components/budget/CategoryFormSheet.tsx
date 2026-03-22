@@ -7,6 +7,8 @@ import { z } from 'zod';
 import { parseToCents, formatCents } from '@/lib/budgetUtils';
 import ColorPicker from '@/components/budget/ColorPicker';
 import EmojiPicker from '@/components/budget/EmojiPicker';
+import useBudgetStore from '@/stores/useBudgetStore';
+import { SUPPORTED_CURRENCIES } from '@/lib/currency';
 import type { BudgetCategory } from '@/types';
 
 // ═══════════ Client-side Zod schema ═══════════
@@ -32,6 +34,9 @@ export default function CategoryFormSheet({
     isOpen, onClose, editCategory, onSubmitCreate, onSubmitUpdate,
 }: CategoryFormSheetProps) {
     const isEdit = editCategory !== null;
+    const displayCurrency = useBudgetStore(s => s.displayCurrency);
+    const currencyMeta = SUPPORTED_CURRENCIES[displayCurrency] ?? SUPPORTED_CURRENCIES.BRL;
+    const currencySymbol = currencyMeta.symbol;
 
     const [name, setName] = useState('');
     const [icon, setIcon] = useState<string | null>(null);
@@ -189,7 +194,7 @@ export default function CategoryFormSheet({
                             {/* Monthly Target */}
                             <div>
                                 <label className="text-[0.75rem] text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">
-                                    Monthly Target (R$)
+                                    Monthly Target ({currencySymbol})
                                 </label>
                                 <input
                                     type="text"

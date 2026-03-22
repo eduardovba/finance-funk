@@ -1,7 +1,7 @@
 'use client';
 
-import CategoryManager from '@/components/budget/CategoryManager';
+import BudgetPlanner from '@/components/budget/BudgetPlanner';
 
 export default function CategoriesPage() {
-    return <CategoryManager />;
+    return <BudgetPlanner />;
 }

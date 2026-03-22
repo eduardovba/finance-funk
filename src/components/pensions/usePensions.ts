@@ -342,15 +342,17 @@ export default function usePensions({ transactions = [], rates, onRefresh, marke
 
     // Buy flow
     const handleBuyClick = (holding: any) => {
+        const preFillPrice = holding.asset === 'Cash' ? 1
+            : holding.livePrice || (holding.qty > 0 ? holding.totalCost / holding.qty : '');
         setBuyData({
             asset: holding.asset, broker: holding.broker, currency: 'GBP',
             ticker: holding.ticker || '', qtyToBuy: '',
-            buyPricePerShare: holding.asset === 'Cash' ? 1 : '',
+            buyPricePerShare: preFillPrice,
             totalInvestment: 0,
             date: new Date().toISOString().split('T')[0],
             allocationClass: holding.allocationClass || 'Equity'
         });
-        setRightPaneMode('add-transaction');
+        setRightPaneMode('buy-transaction');
     };
 
     const handleNewBuyClick = (brokerName: string) => {
@@ -363,7 +365,7 @@ export default function usePensions({ transactions = [], rates, onRefresh, marke
             allocationClass: 'Equity',
             buyPath: 'search', scraperUrl: '', isVerified: false
         });
-        setRightPaneMode('add-transaction');
+        setRightPaneMode('buy-transaction');
     };
 
     const handleAssetSelect = async (selectedAsset: any) => {

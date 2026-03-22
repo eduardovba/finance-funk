@@ -314,12 +314,12 @@ export default function useRealEstate({ data, rates, onRefresh, marketData = {} 
         const liveData = marketData?.[`${fundRow.ticker}.SA`];
         const livePrice = liveData?.price || fundRow.currentPrice || 0;
         setFundBuyData({ fund: fundRow.fund, ticker: fundRow.ticker, broker: fundRow.broker || 'XP', qtyToBuy: '', buyPricePerShare: livePrice, totalInvestment: 0, date: new Date().toISOString().split('T')[0] });
-        setRightPaneMode('add-transaction');
+        setRightPaneMode('buy-transaction');
     };
 
     const handleNewFundBuyClick = (brokerName: string) => {
         setFundBuyData({ fund: '', ticker: '', broker: brokerName || 'XP', qtyToBuy: '', buyPricePerShare: '', totalInvestment: 0, date: new Date().toISOString().split('T')[0] });
-        setRightPaneMode('add-transaction');
+        setRightPaneMode('buy-transaction');
     };
 
     const updateFundBuyCalc = (field: string, value: any) => {
@@ -334,7 +334,7 @@ export default function useRealEstate({ data, rates, onRefresh, marketData = {} 
         try {
             await fetch('/api/real-estate', { method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ section: 'funds', transaction: { date: fundBuyData.date, fund: fundBuyData.fund, investment: price * qty, quantity: qty, costPerShare: price } }) });
-            setIsFundBuyModalOpen(false); setFundBuyData(null); onRefresh();
+            setRightPaneMode('default'); setFundBuyData(null); onRefresh();
         } catch (e) { console.error(e); }
     };
 
@@ -345,7 +345,7 @@ export default function useRealEstate({ data, rates, onRefresh, marketData = {} 
         const proceeds = livePrice * fundRow.totalQuantity;
         const pnl = proceeds - fundRow.totalInvestment;
         setFundSellData({ fund: fundRow.fund, ticker: fundRow.ticker, sharesHeld: fundRow.totalQuantity, avgCost, qtyToSell: fundRow.totalQuantity, sellPricePerShare: livePrice, totalProceeds: proceeds, pnl, roi: fundRow.totalInvestment ? (pnl / fundRow.totalInvestment * 100) : 0, date: new Date().toISOString().split('T')[0] });
-        setIsFundSellModalOpen(true);
+        setRightPaneMode('sell-fund-transaction');
     };
 
     const updateFundSellCalc = (field: string, value: any) => {
@@ -360,7 +360,7 @@ export default function useRealEstate({ data, rates, onRefresh, marketData = {} 
         try {
             await fetch('/api/real-estate', { method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ section: 'funds', transaction: { date: fundSellData.date, fund: fundSellData.fund, investment: -(price * qty), quantity: -qty, costPerShare: price } }) });
-            setIsFundSellModalOpen(false); setFundSellData(null); onRefresh();
+            setRightPaneMode('default'); setFundSellData(null); onRefresh();
         } catch (e) { console.error(e); }
     };
 

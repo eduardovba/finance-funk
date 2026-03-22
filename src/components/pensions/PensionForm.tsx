@@ -37,7 +37,7 @@ export default function PensionForm({
     handleAssetSelect, handleVerifyScrape, updateBuyCalc, updateSellCalc, fetchBrokers
 }: PensionFormProps) {
 
-    if (rightPaneMode === 'add-transaction' && buyData) {
+    if (rightPaneMode === 'buy-transaction' && buyData) {
         return (
             <div className="w-full h-full p-8 text-left relative flex flex-col z-10">
                 <div className="flex justify-between items-center mb-6">

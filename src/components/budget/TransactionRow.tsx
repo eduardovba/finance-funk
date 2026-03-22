@@ -11,10 +11,12 @@ import type { BudgetCategory, BudgetTransaction } from '@/types';
 interface TransactionRowProps {
     transaction: BudgetTransaction;
     category: BudgetCategory | undefined;
+    isSelected: boolean;
+    onToggleSelect: () => void;
     onDelete: (id: number) => void;
 }
 
-export default function TransactionRow({ transaction, category, onDelete }: TransactionRowProps) {
+export default function TransactionRow({ transaction, category, isSelected, onToggleSelect, onDelete }: TransactionRowProps) {
     const [showDeleteBtn, setShowDeleteBtn] = useState(false);
     const isIncome = category?.is_income === 1;
     const { displayCurrency, fxRates } = useBudgetStore();
@@ -41,7 +43,11 @@ export default function TransactionRow({ transaction, category, onDelete }: Tran
 
             {/* Swipeable row */}
             <motion.div
-                className="relative flex items-center gap-3 px-4 py-3 bg-[#121418]/60 backdrop-blur-xl border border-white/[0.04] rounded-xl cursor-grab active:cursor-grabbing group"
+                className={`relative flex items-center gap-3 px-4 py-3 backdrop-blur-xl border rounded-xl cursor-grab active:cursor-grabbing group transition-all ${
+                    isSelected
+                        ? 'bg-[#D4AF37]/10 border-[#D4AF37]/30 shadow-[0_4px_16px_rgba(212,175,55,0.1)]'
+                        : 'bg-[#121418]/60 border-white/[0.04]'
+                }`}
                 drag="x"
                 dragConstraints={{ left: -120, right: 0 }}
                 dragElastic={0.1}
@@ -51,6 +57,23 @@ export default function TransactionRow({ transaction, category, onDelete }: Tran
                 onHoverStart={() => setShowDeleteBtn(true)}
                 onHoverEnd={() => setShowDeleteBtn(false)}
             >
+                {/* Selection Checkbox */}
+                <button 
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); onToggleSelect(); }}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    style={{ width: 18, height: 18, minWidth: 18, minHeight: 18, padding: 0, borderRadius: 4 }}
+                    className={`aspect-square border flex flex-shrink-0 items-center justify-center transition-colors touch-none ${
+                        isSelected ? 'bg-[#D4AF37] border-[#D4AF37]' : 'border-white/[0.2] bg-white/[0.02] hover:border-white/[0.4]'
+                    }`}
+                >
+                    {isSelected && (
+                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1.5 4.5L3.5 6.5L8.5 1.5" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                    )}
+                </button>
+
                 {/* Category icon */}
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0"
                     style={{ backgroundColor: (category?.color || '#D4AF37') + '20' }}
@@ -63,11 +86,18 @@ export default function TransactionRow({ transaction, category, onDelete }: Tran
                     <span className="text-sm font-space text-[#F5F5DC]/80 truncate">
                         {transaction.description || category?.name || 'Transaction'}
                     </span>
-                    {transaction.description && category && (
-                        <span className="text-[0.6875rem] font-space text-[#F5F5DC]/30 truncate">
-                            {category.name}
-                        </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                        {transaction.description && category && (
+                            <span className="text-[0.6875rem] font-space text-[#F5F5DC]/30 truncate">
+                                {category.name}
+                            </span>
+                        )}
+                        {transaction.source && (
+                            <span className="text-[0.5rem] uppercase tracking-[1px] font-space font-semibold px-1.5 py-px rounded bg-white/[0.04] border border-white/[0.06] text-[#F5F5DC]/25">
+                                {transaction.source}
+                            </span>
+                        )}
+                    </div>
                 </div>
 
                 {/* Amount */}
