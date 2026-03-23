@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 import { CURRENCY_LIST, SUPPORTED_CURRENCIES } from "@/lib/currency";
 import ProfessorF from "@/components/ftue/ProfessorF";
+import { SpendingBarPreview, NetWorthAreaPreview, AllocationDonutPreview, CategoryBarsPreview } from "@/components/ftue/PreviewCharts";
 import "./onboarding.css";
 
 /* ─── Helpers ─── */
@@ -347,27 +348,9 @@ function BudgetMockup({ symbol }) {
             <div className="preview-mockup-value">
                 <AnimatedCount value={4230} prefix={`${symbol} `} />
             </div>
-            <div className="preview-mockup-pills">
-                <span className="preview-mockup-pill preview-mockup-pill--green">🏠 Housing {symbol} 2,100</span>
-                <span className="preview-mockup-pill preview-mockup-pill--gold">🍔 Food {symbol} 980</span>
-                <span className="preview-mockup-pill preview-mockup-pill--orange">🚗 Transport {symbol} 420</span>
-                <span className="preview-mockup-pill preview-mockup-pill--purple">🎭 Entertainment {symbol} 380</span>
-            </div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.6 }}>
-                <span className="preview-mockup-badge preview-mockup-badge--gold" style={{ display: "inline-block", marginBottom: 8 }}>
-                    Savings rate: 24%
-                </span>
-            </motion.div>
-            <div className="preview-mini-chart">
-                {BUDGET_BARS.map((h, i) => (
-                    <motion.div
-                        key={i}
-                        className={`preview-mini-bar ${i === 3 || i === 9 ? "preview-mini-bar--accent" : ""}`}
-                        initial={{ height: 0 }}
-                        animate={{ height: `${h}%` }}
-                        transition={{ delay: 0.3 + i * 0.05, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                    />
-                ))}
+            <SpendingBarPreview height={100} />
+            <div style={{ marginTop: 12 }}>
+                <CategoryBarsPreview />
             </div>
         </div>
     );
@@ -383,36 +366,15 @@ function InvestmentMockup({ symbol }) {
             <div className="preview-mockup-value">
                 <AnimatedCount value={52870} prefix={`${symbol} `} />
             </div>
-            <div className="preview-mockup-pills">
-                <span className="preview-mockup-pill preview-mockup-pill--gold">📈 Equity</span>
-                <span className="preview-mockup-pill preview-mockup-pill--orange">₿ Crypto</span>
-                <span className="preview-mockup-pill preview-mockup-pill--green">🏦 Fixed Income</span>
-                <span className="preview-mockup-pill preview-mockup-pill--purple">🏠 Real Estate</span>
-            </div>
-            <div className="preview-line-chart">
-                <motion.svg
-                    viewBox="0 0 200 48"
-                    preserveAspectRatio="none"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 1 }}
-                    transition={{ delay: 0.4, duration: 1.2 }}
-                >
-                    <defs>
-                        <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stopColor="#CC5500" />
-                            <stop offset="100%" stopColor="#D4AF37" />
-                        </linearGradient>
-                    </defs>
-                    <motion.path
-                        d="M0,40 C20,38 30,35 50,30 C70,25 80,28 100,22 C120,16 130,18 150,12 C170,8 180,10 200,6"
-                        stroke="url(#lineGrad)"
-                        strokeWidth="2"
-                        fill="none"
-                        initial={{ pathLength: 0 }}
-                        animate={{ pathLength: 1 }}
-                        transition={{ delay: 0.4, duration: 1.2, ease: "easeOut" }}
-                    />
-                </motion.svg>
+            <NetWorthAreaPreview height={100} />
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12 }}>
+                <AllocationDonutPreview size={90} />
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4, marginLeft: 12 }}>
+                    <span className="preview-mockup-pill preview-mockup-pill--gold">📈 Equity</span>
+                    <span className="preview-mockup-pill preview-mockup-pill--orange">₿ Crypto</span>
+                    <span className="preview-mockup-pill preview-mockup-pill--green">🏦 Fixed Income</span>
+                    <span className="preview-mockup-pill preview-mockup-pill--purple">🏠 Real Estate</span>
+                </div>
             </div>
         </div>
     );

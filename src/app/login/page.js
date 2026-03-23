@@ -4,6 +4,7 @@ import { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { DashboardPreviewPanel } from "@/components/ftue/PreviewCharts";
 import "./login.css";
 
 /* ─── Transition config ─── */
@@ -102,42 +103,7 @@ function WelcomeView({ onLogin, callbackUrl }) {
                 {/* Dashboard Preview Panel */}
                 <div className="welcome-preview">
                     <div className="preview-label">Preview Your Dashboard</div>
-
-                    {/* Metric cards */}
-                    <div className="preview-metrics">
-                        <div className="preview-metric">
-                            <div className="preview-metric-label">Monthly Spending</div>
-                            <div className="preview-metric-value">R$ 4,230</div>
-                            <div className="preview-metric-change">-12% vs last month</div>
-                        </div>
-                        <div className="preview-metric">
-                            <div className="preview-metric-label">
-                                Portfolio
-                                <span className="preview-metric-badge">GBP</span>
-                            </div>
-                            <div className="preview-metric-value">£52,870</div>
-                            <div className="preview-metric-change">+3.2% this month</div>
-                        </div>
-                    </div>
-
-                    {/* Mini bar chart */}
-                    <div className="preview-bars">
-                        {BAR_HEIGHTS.map((h, i) => (
-                            <div
-                                key={i}
-                                className={`preview-bar${ACCENT_BARS.has(i) ? " preview-bar--accent" : ""}`}
-                                style={{ height: `${h}%` }}
-                            />
-                        ))}
-                    </div>
-
-                    {/* Category pills */}
-                    <div className="preview-categories">
-                        <span className="preview-cat preview-cat--green">Moradia R$ 2,100</span>
-                        <span className="preview-cat preview-cat--gold">Alimentação R$ 980</span>
-                        <span className="preview-cat preview-cat--orange">Transporte R$ 420</span>
-                        <span className="preview-cat preview-cat--purple">Lazer R$ 380</span>
-                    </div>
+                    <DashboardPreviewPanel />
                 </div>
 
                 {/* CTAs */}
