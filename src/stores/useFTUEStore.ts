@@ -8,8 +8,20 @@ export interface FTUEData {
     wizardCompleted: boolean;
     usingDemoData: boolean;
     isTutorialActive: boolean;
+    tutorialStep?: number;
     showCurrencyPicker: boolean;
     checklistItems: Record<string, boolean>;
+    onboardingGoal?: string | null;
+    onboardingExperience?: string | null;
+    showFirstVisitGreeting?: boolean;
+    sidebarDismissed?: boolean;
+    checklistDismissed?: boolean;
+    pageTutorials?: Record<string, boolean>;
+    selectedAssetClasses?: string[];
+    wizardStep?: number;
+    timeHorizon?: string | null;
+    netWorthTarget?: number | null;
+    targetReturn?: number | null;
 }
 
 export interface FTUEState {

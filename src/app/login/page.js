@@ -158,7 +158,7 @@ function WelcomeView({ onLogin, callbackUrl }) {
                     <button
                         type="button"
                         className="welcome-cta-primary"
-                        onClick={() => router.push("/register")}
+                        onClick={() => router.push("/onboarding")}
                     >
                         Get Started
                     </button>
@@ -304,7 +304,7 @@ function LoginView({ onBack, callbackUrl }) {
                 {/* Register Link */}
                 <p className="login-register-link">
                     Don&apos;t have an account?{" "}
-                    <a href="/register">Create one</a>
+                    <a href="/onboarding">Create one</a>
                 </p>
             </div>
         </motion.div>

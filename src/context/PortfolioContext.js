@@ -251,6 +251,59 @@ export function PortfolioProvider({ children }) {
             console.error("Failed to load FTUE state", e);
         }
 
+        // Check for pending onboarding data from OAuth flow (saved to sessionStorage before Google redirect)
+        if (typeof window !== 'undefined') {
+            const pendingOnboarding = sessionStorage.getItem('ff_onboarding');
+            if (pendingOnboarding && ftueStateData) {
+                try {
+                    const onboardingData = JSON.parse(pendingOnboarding);
+                    
+                    // Only apply if this user hasn't had onboarding data set yet
+                    if (!ftueStateData.onboardingGoal) {
+                        const updates = {
+                            wizardCompleted: true,
+                            isTutorialActive: false,
+                            showCurrencyPicker: false,
+                            onboardingGoal: onboardingData.goal || 'both',
+                            onboardingExperience: onboardingData.experienceLevel || 'beginner',
+                            showFirstVisitGreeting: true,
+                            checklistItems: {
+                                ...(ftueStateData.checklistItems || {}),
+                                setCurrencies: !!onboardingData.primaryCurrency,
+                            },
+                        };
+                        
+                        const patchRes = await fetch('/api/ftue', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(updates),
+                        });
+                        
+                        if (patchRes.ok) {
+                            ftueStateData = await patchRes.json();
+                            setFtueState(ftueStateData);
+                        }
+                        
+                        // Set currency preferences via the currency store
+                        if (onboardingData.primaryCurrency) {
+                            useCurrencyStore.getState().setPrimaryCurrency(onboardingData.primaryCurrency);
+                            if (onboardingData.secondaryCurrency) {
+                                useCurrencyStore.getState().setSecondaryCurrency(onboardingData.secondaryCurrency);
+                            }
+                            setTimeout(() => {
+                                useCurrencyStore.getState().persistCurrencyPrefs();
+                            }, 100);
+                        }
+                    }
+                    
+                    sessionStorage.removeItem('ff_onboarding');
+                } catch (e) {
+                    console.error('Failed to process onboarding data:', e);
+                    sessionStorage.removeItem('ff_onboarding');
+                }
+            }
+        }
+
         // 2. If using demo data OR wizard not yet completed (first visit — dashboard renders behind overlay),
         //    bypass APIs and inject demo data instantly
         if (ftueStateData?.usingDemoData || ftueStateData?.wizardCompleted === false) {

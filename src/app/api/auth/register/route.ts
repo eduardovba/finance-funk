@@ -2,13 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { createUser, findUserByEmail } from "@/lib/users";
 import { z } from 'zod';
 import { validateBody } from '@/lib/validation';
+import { kvSet } from '@/lib/kv';
 
 export const RegisterSchema = z.object({
     name: z.string().min(1, 'Name is required').max(100),
     email: z.string().email('Valid email required'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
     confirmPassword: z.string(),
-    onboarding_goal: z.string().nullable().optional()
+    onboarding_goal: z.string().nullable().optional(),
+    onboarding_currency_primary: z.string().nullable().optional(),
+    onboarding_currency_secondary: z.string().nullable().optional(),
+    onboarding_experience: z.string().nullable().optional(),
 }).refine(data => data!.password === data!.confirmPassword, {
     message: 'Passwords do not match',
     path: ['confirmPassword']
@@ -36,6 +40,52 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             password: data!.password,
             onboarding_goal: data!.onboarding_goal
         });
+
+        // Initialize FTUE state with onboarding data
+        const initialFtueState = {
+            wizardCompleted: true,
+            wizardStep: 0,
+            selectedAssetClasses: [],
+            timeHorizon: null,
+            netWorthTarget: null,
+            targetReturn: null,
+            usingDemoData: false,
+            isTutorialActive: false,
+            tutorialStep: 0,
+            showCurrencyPicker: false,
+            onboardingGoal: data!.onboarding_goal || 'both',
+            onboardingExperience: data!.onboarding_experience || 'beginner',
+            showFirstVisitGreeting: true,
+            checklistItems: {
+                setCurrencies: !!data!.onboarding_currency_primary,
+                chooseAssets: false,
+                setGoals: false,
+                addFirstHolding: false,
+                recordFirstSnapshot: false,
+                setTargets: false,
+                exploreForecast: false,
+                connectBank: false,
+                importHistory: false,
+                importBudget: false,
+                customiseDashboard: false,
+            },
+            checklistDismissed: false,
+            sidebarDismissed: false,
+            pageTutorials: {},
+        };
+
+        try {
+            await kvSet('ftue_state', initialFtueState, user.id);
+
+            if (data!.onboarding_currency_primary) {
+                await kvSet('currency_preferences', {
+                    primary: data!.onboarding_currency_primary,
+                    secondary: data!.onboarding_currency_secondary || null,
+                }, user.id);
+            }
+        } catch (e) {
+            console.error('Failed to initialize FTUE/currency state:', e);
+        }
 
         return NextResponse.json(
             { message: "Account created successfully.", user: { id: user.id, name: user.name, email: user.email } },

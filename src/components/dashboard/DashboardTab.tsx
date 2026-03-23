@@ -13,6 +13,7 @@ import DashboardHero from './DashboardHero';
 import useDashboard from './useDashboard';
 import { StaggerList } from '@/components/ui/stagger-list';
 import BudgetKpiPod from '@/components/budget/BudgetKpiPod';
+import FirstGrooveFlow from '@/components/ftue/FirstGrooveFlow';
 import type { DashboardTabProps } from './types';
 
 export default function DashboardTab(props: DashboardTabProps) {
@@ -28,6 +29,9 @@ export default function DashboardTab(props: DashboardTabProps) {
 
     return (
         <div className="pb-10">
+            {/* First Groove — guided first action for new users */}
+            <FirstGrooveFlow />
+
             {/* Mobile Hero */}
             <DashboardHero
                 data={data}

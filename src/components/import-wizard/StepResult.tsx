@@ -1,8 +1,11 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, AlertCircle, CheckCircle2, RotateCcw } from 'lucide-react';
+import { usePortfolio } from '@/context/PortfolioContext';
+import CelebrationOverlay from '@/components/ftue/CelebrationOverlay';
+import { useRouter } from 'next/navigation';
 
 interface StepResultProps {
     result: any;
@@ -11,6 +14,23 @@ interface StepResultProps {
 }
 
 export default function StepResult({ result, assetClass, onReset }: StepResultProps) {
+    const router = useRouter();
+    const { ftueState, updateFtueProgress } = usePortfolio() as any;
+    const [showCelebration, setShowCelebration] = useState(false);
+
+    // Trigger celebration on first successful import
+    React.useEffect(() => {
+        if (result && result.imported > 0 && ftueState && !ftueState.checklistItems?.importHistory) {
+            updateFtueProgress({
+                checklistItems: {
+                    ...ftueState.checklistItems,
+                    importHistory: true,
+                },
+            });
+            setShowCelebration(true);
+        }
+    }, [result]); // eslint-disable-line react-hooks/exhaustive-deps
+
     if (!result) return null;
 
     const isSuccess = result.imported > 0;
@@ -95,6 +115,21 @@ export default function StepResult({ result, assetClass, onReset }: StepResultPr
                     View {assetClass} <ArrowRight size={16} />
                 </a>
             </div>
+
+            {/* First Import Celebration */}
+            {showCelebration && (
+                <CelebrationOverlay
+                    title="Data Imported! 🎉"
+                    subtitle={`${result.imported} transactions imported into ${assetClass}. Your portfolio is coming to life!`}
+                    metric={null}
+                    ctaLabel="🎸 View My Dashboard"
+                    onDismiss={() => {
+                        setShowCelebration(false);
+                        router.push('/dashboard');
+                    }}
+                    autoDismissMs={8000}
+                />
+            )}
         </motion.div>
     );
 }

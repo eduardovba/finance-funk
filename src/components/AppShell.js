@@ -17,6 +17,7 @@ import InstallPrompt from '@/components/InstallPrompt';
 import FTUEWizard from '@/components/ftue/FTUEWizard';
 import FTUEChecklist from '@/components/ftue/FTUEChecklist';
 import CurrencyQuickPicker from '@/components/ftue/CurrencyQuickPicker';
+import FirstVisitGreeting from '@/components/ftue/FirstVisitGreeting';
 
 function AppShellInner({ children }) {
     const {
@@ -105,7 +106,7 @@ function AppShellInner({ children }) {
 
     // Determine FTUE overlays
     const showWizardOverlay = ftueState && ftueState.wizardCompleted === false;
-    const showCurrencyPicker = ftueState?.showCurrencyPicker && !ftueState?.isTutorialActive;
+    const showCurrencyPicker = false; // Currency is now set during onboarding
     const showOnboardingSidebar = ftueState 
         && ftueState.wizardCompleted === true 
         && !ftueState.sidebarDismissed
@@ -214,9 +215,7 @@ function AppShellInner({ children }) {
 
                 {/* ═══════════ PWA INSTALL PROMPT ═══════════ */}
                 <InstallPrompt />
-
-                {/* ═══════════ PWA INSTALL PROMPT ═══════════ */}
-                <InstallPrompt />
+                <FirstVisitGreeting />
 
                 {/* ═══════════ FTUE WIZARD OVERLAY (on top of populated dashboard) ═══════════ */}
                 {showWizardOverlay && (

@@ -15,6 +15,9 @@ const DEFAULT_STATE = {
     netWorthTarget: null,
     targetReturn: null,
     usingDemoData: false,
+    isTutorialActive: false,
+    tutorialStep: 0,
+    showCurrencyPicker: false,
     checklistItems: {
         setCurrencies: false,
         chooseAssets: false,
@@ -30,7 +33,11 @@ const DEFAULT_STATE = {
     },
     checklistDismissed: false,
     sidebarDismissed: false,
-    pageTutorials: {}  // { equity: true, crypto: true, ... } — tracks which pages have shown their tutorial
+    pageTutorials: {},
+    // New fields from onboarding revamp
+    onboardingGoal: null,
+    onboardingExperience: null,
+    showFirstVisitGreeting: false,
 };
 
 const PostFtueSchema = z.object({
@@ -45,10 +52,17 @@ const PatchFtueSchema = z.object({
     netWorthTarget: z.coerce.number().optional().nullable(),
     targetReturn: z.coerce.number().optional().nullable(),
     usingDemoData: z.boolean().optional(),
+    isTutorialActive: z.boolean().optional(),
+    tutorialStep: z.coerce.number().optional(),
+    showCurrencyPicker: z.boolean().optional(),
     checklistItems: z.record(z.string(), z.boolean()).optional(),
     checklistDismissed: z.boolean().optional(),
     sidebarDismissed: z.boolean().optional(),
-    pageTutorials: z.record(z.string(), z.boolean()).optional()
+    pageTutorials: z.record(z.string(), z.boolean()).optional(),
+    // New onboarding fields
+    onboardingGoal: z.string().optional().nullable(),
+    onboardingExperience: z.string().optional().nullable(),
+    showFirstVisitGreeting: z.boolean().optional(),
 }).passthrough();
 
 // Auto-detect which checklist items are already completed based on real data

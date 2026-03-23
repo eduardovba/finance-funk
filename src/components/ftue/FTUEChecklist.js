@@ -33,22 +33,29 @@ export default function FTUEChecklist({ mode = 'sidebar' }) {
     const items = ftueState.checklistItems || {};
     const selectedAssets = ftueState.selectedAssetClasses || [];
 
+    const userGoal = ftueState?.onboardingGoal || 'both';
+    const showPortfolioSection = userGoal === 'investments' || userGoal === 'both';
+    const showBudgetSection = userGoal === 'budget' || userGoal === 'both';
+
     // Filter dynamic portfolio items
     const portfolioList = PORTFOLIO_MAP
         .filter(item => !item.asset || selectedAssets.includes(item.asset))
         .map(item => ({ ...item, isDone: !!items[item.id] }));
 
     const trackGrowList = TRACK_GROW_MAP
+        .filter(item => {
+            if ((item.id === 'recordFirstSnapshot' || item.id === 'exploreForecast') && !showPortfolioSection) return false;
+            return true;
+        })
         .map(item => ({ ...item, isDone: !!items[item.id] }));
 
-    // Data connection tasks
     const dataTasks = [
         { id: 'connectBank', label: 'Connect bank account', isDone: !!items.connectBank },
         { id: 'importHistory', label: 'Import transactions', isDone: !!items.importHistory },
-        { id: 'importBudget', label: 'Import budget data', isDone: !!items.importBudget }
+        ...(showBudgetSection ? [{ id: 'importBudget', label: 'Import budget data', isDone: !!items.importBudget }] : []),
     ];
 
-    const allItemsList = [...dataTasks, ...portfolioList, ...trackGrowList];
+    const allItemsList = [...dataTasks, ...(showPortfolioSection ? portfolioList : []), ...trackGrowList];
     const total = allItemsList.length;
     const completedCount = allItemsList.filter(i => i.isDone).length;
     const progressPerc = total === 0 ? 0 : Math.round((completedCount / total) * 100);
@@ -133,6 +140,7 @@ export default function FTUEChecklist({ mode = 'sidebar' }) {
                     </div>
 
                     {/* Import Budget */}
+                    {showBudgetSection && (
                     <div 
                         onClick={() => router.push('/budget/import')}
                         className={`flex items-center gap-[10px] px-3 py-2.5 bg-[#1A0F2E]/80 hover:bg-[#1A0F2E] hover:border-[#D4AF37]/30 border border-[#D4AF37]/10 rounded-[10px] cursor-pointer transition-all ${items.importBudget ? 'opacity-60' : ''}`}
@@ -145,15 +153,18 @@ export default function FTUEChecklist({ mode = 'sidebar' }) {
                         <span className="font-space text-[0.75rem] text-[#F5F5DC]/80 flex-1">Import budget data</span>
                         <ChevronRight size={14} className="text-[#F5F5DC]/30" />
                     </div>
+                    )}
                 </div>
 
                 {/* Section: Set up your portfolio */}
+                {showPortfolioSection && (
                 <div className="mb-6">
                     <h4 className="font-bebas text-[0.75rem] tracking-[0.06em] text-[#F5F5DC]/40 uppercase mb-1">Set up your portfolio</h4>
                     <div className="flex flex-col">
                         {portfolioList.map(renderSimpleRow)}
                     </div>
                 </div>
+                )}
 
                 {/* Section: Track & grow */}
                 <div className="mb-6">
@@ -282,6 +293,7 @@ export default function FTUEChecklist({ mode = 'sidebar' }) {
                                                 <ChevronRight size={16} className="text-[#F5F5DC]/30" />
                                             </div>
 
+                                            {showBudgetSection && (
                                             <div 
                                                 onClick={() => { router.push('/budget/import'); setIsMobileOpen(false); }}
                                                 className={`flex items-center gap-[12px] px-4 py-3 bg-[#1A0F2E]/80 border border-[#D4AF37]/10 rounded-[12px] active:bg-[#1A0F2E] ${items.importBudget ? 'opacity-60' : ''}`}
@@ -290,9 +302,11 @@ export default function FTUEChecklist({ mode = 'sidebar' }) {
                                                 <span className="font-space text-[0.8rem] text-[#F5F5DC]/80 flex-1">Import budget data</span>
                                                 <ChevronRight size={16} className="text-[#F5F5DC]/30" />
                                             </div>
+                                            )}
                                         </div>
 
                                         {/* Section: Set up your portfolio */}
+                                        {showPortfolioSection && (
                                         <div className="mb-6">
                                             <h4 className="font-bebas text-[0.85rem] tracking-[0.06em] text-[#F5F5DC]/40 uppercase mb-2">Set up your portfolio</h4>
                                             <div className="flex flex-col gap-1">
@@ -304,6 +318,7 @@ export default function FTUEChecklist({ mode = 'sidebar' }) {
                                                 ))}
                                             </div>
                                         </div>
+                                        )}
 
                                         {/* Section: Track & grow */}
                                         <div className="mb-8">
