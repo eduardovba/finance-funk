@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 import { CURRENCY_LIST, SUPPORTED_CURRENCIES } from "@/lib/currency";
@@ -618,9 +618,12 @@ function StepAccount({
 /* ═══════════════════════════════════════════
    Progress Bar
    ═══════════════════════════════════════════ */
-const STEPS = ["Vibe", "Setup", "Preview", "Account"];
+const STEPS = ["Vibe", "Setup"];
 
 function ProgressBar({ step }) {
+    // Hide progress bar on direct signup (step 4)
+    if (step >= 4) return null;
+
     return (
         <div className="progress-bar">
             {STEPS.map((label, i) => {
@@ -644,8 +647,10 @@ function ProgressBar({ step }) {
    ═══════════════════════════════════════════ */
 function OnboardingFlow() {
     const router = useRouter();
+    const searchParams = useSearchParams();
 
-    const [step, setStep] = useState(1);
+    const initialStep = searchParams.get('step') === 'signup' ? 4 : 1;
+    const [step, setStep] = useState(initialStep);
     const [selectedGoal, setSelectedGoal] = useState(null);
     const [primaryCurrency, setPrimaryCurrency] = useState("USD");
     const [secondaryCurrency, setSecondaryCurrency] = useState(null);
@@ -662,6 +667,31 @@ function OnboardingFlow() {
     useEffect(() => {
         setPrimaryCurrency(detectCurrencyFromLocale());
     }, []);
+
+    // When coming from ?step=signup, load saved onboarding data from sessionStorage
+    useEffect(() => {
+        if (initialStep === 4) {
+            try {
+                const saved = JSON.parse(sessionStorage.getItem('ff_onboarding') || '{}');
+                if (saved.goal) setSelectedGoal(saved.goal);
+                if (saved.primaryCurrency) setPrimaryCurrency(saved.primaryCurrency);
+                if (saved.secondaryCurrency) setSecondaryCurrency(saved.secondaryCurrency);
+                if (saved.experienceLevel) setExperienceLevel(saved.experienceLevel);
+            } catch {}
+        }
+    }, [initialStep]);
+
+    const handleStep2Continue = () => {
+        // Save choices to sessionStorage for the demo page to read
+        sessionStorage.setItem('ff_onboarding', JSON.stringify({
+            goal: selectedGoal,
+            primaryCurrency,
+            secondaryCurrency,
+            experienceLevel,
+        }));
+        // Go to live demo
+        router.push('/demo');
+    };
 
     const isWideStep = step === 3;
 
@@ -693,17 +723,8 @@ function OnboardingFlow() {
                             setSecondaryCurrency={setSecondaryCurrency}
                             experienceLevel={experienceLevel}
                             setExperienceLevel={setExperienceLevel}
-                            onContinue={() => setStep(3)}
+                            onContinue={handleStep2Continue}
                             onBack={() => setStep(1)}
-                        />
-                    )}
-
-                    {step === 3 && (
-                        <StepPreview
-                            selectedGoal={selectedGoal}
-                            primaryCurrency={primaryCurrency}
-                            onContinue={() => setStep(4)}
-                            onBack={() => setStep(2)}
                         />
                     )}
 

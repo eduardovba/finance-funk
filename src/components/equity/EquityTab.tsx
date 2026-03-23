@@ -3,7 +3,7 @@ import { Button } from '@/components/ui';
 import _ConfirmationModal from '../ConfirmationModal';
 import _TransactionTimeline from '../TransactionTimeline';
 import _FloatingActionButton from '../FloatingActionButton';
-import _EmptyState from '../EmptyState';
+import _PersonalizedEmptyState from '../ftue/PersonalizedEmptyState';
 import _AssetCardSkeleton from '../AssetCardSkeleton';
 import _ContextPane from '../ContextPane';
 import _AssetLogo from '../AssetLogo';
@@ -12,7 +12,7 @@ import _PullToRefresh from '../PullToRefresh';
 const ConfirmationModal = _ConfirmationModal as any;
 const TransactionTimeline = _TransactionTimeline as any;
 const FloatingActionButton = _FloatingActionButton as any;
-const EmptyState = _EmptyState as any;
+const PersonalizedEmptyState = _PersonalizedEmptyState as any;
 const AssetCardSkeleton = _AssetCardSkeleton as any;
 const ContextPane = _ContextPane as any;
 const AssetLogo = _AssetLogo as any;
@@ -152,10 +152,8 @@ export default function EquityTab({ transactions = [], marketData: globalMarketD
                         </>
                     ) : (
                         <div id="ftue-equity-empty">
-                        <EmptyState
-                            icon="📈"
-                            title="No Equity Assets"
-                            message="You have no equity assets yet. Add a broker to log your first stock or ETF transaction."
+                        <PersonalizedEmptyState
+                            copyKey="emptyEquity"
                             actionLabel="Add Broker"
                             onAction={() => setRightPaneMode('add-broker')}
                         />

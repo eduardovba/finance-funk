@@ -4,7 +4,7 @@ import { Button } from '@/components/ui';
 import _ConfirmationModal from '../ConfirmationModal';
 import _TransactionTimeline from '../TransactionTimeline';
 import _FloatingActionButton from '../FloatingActionButton';
-import _EmptyState from '../EmptyState';
+import _PersonalizedEmptyState from '../ftue/PersonalizedEmptyState';
 import _PullToRefresh from '../PullToRefresh';
 import _ContextPane from '../ContextPane';
 import _BrokerForm from '../BrokerForm';
@@ -12,7 +12,7 @@ import _PageTutorialOverlay from '../ftue/PageTutorialOverlay';
 const ConfirmationModal = _ConfirmationModal as any;
 const TransactionTimeline = _TransactionTimeline as any;
 const FloatingActionButton = _FloatingActionButton as any;
-const EmptyState = _EmptyState as any;
+const PersonalizedEmptyState = _PersonalizedEmptyState as any;
 const PullToRefresh = _PullToRefresh as any;
 const ContextPane = _ContextPane as any;
 const BrokerForm = _BrokerForm as any;
@@ -97,10 +97,8 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }: 
                         </>
                     ) : (
                         <div id="ftue-fi-empty">
-                        <EmptyState
-                            icon="🏦"
-                            title="No Fixed Income Assets"
-                            message="You have no fixed income accounts yet. Add an account to start tracking deposits, bonds, and interest."
+                        <PersonalizedEmptyState
+                            copyKey="emptyFixedIncome"
                             actionLabel="Add Account"
                             onAction={() => h.setRightPaneMode('add-broker')}
                         />

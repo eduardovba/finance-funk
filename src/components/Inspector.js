@@ -15,22 +15,18 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 const BACKGROUNDS = [
-    { id: 'concrete', name: 'Concrete' },
-    { id: 'copper-flow', name: 'Copper Flow' },
+    { id: 'concretely-funky', name: 'Concretely Funky' },
     { id: 'copper-rise', name: 'Copper Rise' },
-    { id: 'cream-linen', name: 'Cream Linen' },
-    { id: 'crystal-large', name: 'Crystal Large' },
-    { id: 'crystal-minimal', name: 'Crystal Minimal' },
+    { id: 'creamy-linen', name: 'Creamy Linen' },
+    { id: 'crystal-of-groove', name: 'Crystal of Groove' },
+    { id: 'envelope-of-funk-light', name: 'Envelope of Funk Light' },
+    { id: 'envelope-of-funk', name: 'Envelope of Funk' },
+    { id: 'frosted-funk', name: 'Frosted Funk' },
     { id: 'frosted-glass', name: 'Frosted Glass' },
-    { id: 'leather', name: 'Leather' },
-    { id: 'linen-detail-large', name: 'Linen Detail Large' },
-    { id: 'linen-detail-minimal', name: 'Linen Detail Minimal' },
-    { id: 'mosaic-large', name: 'Mosaic Large' },
-    { id: 'mosaic-medium', name: 'Mosaic Medium' },
-    { id: 'mosaic-minimal', name: 'Mosaic Minimal' },
-    { id: 'paper-large', name: 'Paper Large' },
-    { id: 'paper-small', name: 'Paper Small' },
-    { id: 'walnut', name: 'Walnut' },
+    { id: 'linen-funk-light', name: 'Linen Funk Light' },
+    { id: 'linen-funk', name: 'Linen Funk' },
+    { id: 'mosaic-dance', name: 'Mosaic Dance' },
+    { id: 'walnut-grooves', name: 'Walnut Grooves' },
 ];
 
 const NAV_LINKS = [
@@ -74,7 +70,7 @@ function SectionHeader({ title, icon: Icon }) {
 function BackgroundMiniSelect({ value, onChange }) {
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
-    const selected = BACKGROUNDS.find(b => b.id === value) || BACKGROUNDS.find(b => b.id === 'frosted-glass');
+    const selected = BACKGROUNDS.find(b => b.id === value) || BACKGROUNDS.find(b => b.id === 'linen-funk');
 
     useEffect(() => {
         const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
@@ -572,7 +568,7 @@ export default function Inspector() {
                                 <div className="mt-2.5">
                                     <div className="text-[0.75rem] text-parchment/30 font-space mb-1.5 px-1">Background</div>
                                     <BackgroundMiniSelect
-                                        value={appSettings?.backgroundSelection || 'frosted-glass'}
+                                        value={appSettings?.backgroundSelection || 'linen-funk'}
                                         onChange={(val) => handleUpdateAppSettings({ ...appSettings, backgroundSelection: val })}
                                     />
                                 </div>

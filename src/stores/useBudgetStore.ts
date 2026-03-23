@@ -15,6 +15,8 @@ export interface BudgetState {
     currentMonth: string;
     loading: boolean;
     toastError: string | null;
+    demoMode: boolean;
+    _allDemoTransactions: BudgetTransaction[];
     // FX & Currency
     displayCurrency: string;
     fxRates: Record<string, number>;
@@ -27,6 +29,12 @@ export interface BudgetState {
 export interface BudgetActions {
     setCurrentMonth: (month: string) => void;
     clearToast: () => void;
+    setDemoMode: (v: boolean) => void;
+    setCategories: (cats: BudgetCategory[]) => void;
+    setTransactions: (txns: BudgetTransaction[]) => void;
+    setCurrentRollup: (rollup: BudgetMonthlyRollup | null) => void;
+    setRollupHistory: (rollups: BudgetMonthlyRollup[]) => void;
+    setDisplayCurrency: (currency: string) => void;
     fetchCategories: () => Promise<void>;
     addCategory: (body: Omit<BudgetCategory, 'id' | 'user_id'>) => Promise<void>;
     updateCategory: (body: BudgetCategory) => Promise<void>;
@@ -109,13 +117,22 @@ const useBudgetStore = create<BudgetState & BudgetActions>((set, get) => ({
     fxRates: MOCK_FX_RATES,
     categoryRules: {},
     ignoreRules: [],
+    demoMode: false,
+    _allDemoTransactions: [],
 
     // ═══════════ ACTIONS ═══════════
 
     setCurrentMonth: (month) => set({ currentMonth: month }),
     clearToast: () => set({ toastError: null }),
+    setDemoMode: (v) => set({ demoMode: v }),
+    setCategories: (cats) => set({ categories: cats, loading: false }),
+    setTransactions: (txns) => set({ transactions: txns, loading: false }),
+    setCurrentRollup: (rollup) => set({ currentRollup: rollup }),
+    setRollupHistory: (rollups) => set({ rollupHistory: rollups }),
+    setDisplayCurrency: (currency) => set({ displayCurrency: currency }),
 
     fetchCategories: async () => {
+        if (get().demoMode) return;
         try {
             set({ loading: true });
             const res = await fetch('/api/budget/categories');
@@ -245,6 +262,14 @@ const useBudgetStore = create<BudgetState & BudgetActions>((set, get) => ({
     },
 
     fetchTransactions: async (month?: string) => {
+        if (get().demoMode) {
+            // Filter the seeded demo transactions to the requested month
+            const m = month ?? get().currentMonth;
+            const all = get()._allDemoTransactions ?? get().transactions;
+            const filtered = all.filter((t: BudgetTransaction) => t.date.startsWith(m));
+            set({ transactions: filtered });
+            return;
+        }
         try {
             set({ loading: true });
             const m = month ?? get().currentMonth;
@@ -386,6 +411,12 @@ const useBudgetStore = create<BudgetState & BudgetActions>((set, get) => ({
     },
 
     fetchRollup: async (month?: string) => {
+        if (get().demoMode) {
+            const m = month ?? get().currentMonth;
+            const match = get().rollupHistory.find(r => r.month === m) ?? null;
+            set({ currentRollup: match });
+            return;
+        }
         try {
             const m = month ?? get().currentMonth;
             const res = await fetch(`/api/budget/rollups?month=${m}`);
@@ -398,6 +429,7 @@ const useBudgetStore = create<BudgetState & BudgetActions>((set, get) => ({
     },
 
     fetchRollupRange: async (endMonth?: string, count: number = 6) => {
+        if (get().demoMode) return;
         try {
             const end = endMonth ?? get().currentMonth;
             const start = offsetMonth(end, -(count - 1));

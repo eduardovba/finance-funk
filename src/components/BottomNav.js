@@ -286,10 +286,24 @@ export default function BottomNav() {
 
     const isBudgetRoute = pathname.startsWith('/budget');
 
+    const isDemoRoute = pathname.startsWith('/demo');
+
     const tabs = [
         { id: 'home', href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, color: '#D4AF37' },
-        { id: 'budget', href: null, label: 'Budget', icon: Wallet, color: '#34D399', action: () => { setAssetsOpen(false); setPlanningOpen(false); setLedgerOpen(false); setBudgetOpen(true); } },
-        { id: 'assets', href: null, label: 'Assets', icon: PieChart, color: '#CC5500', action: () => { setBudgetOpen(false); setPlanningOpen(false); setLedgerOpen(false); setAssetsOpen(true); } },
+        { id: 'budget', href: null, label: 'Budget', icon: Wallet, color: '#34D399', action: () => { 
+            if (isDemoRoute) {
+                window.dispatchEvent(new CustomEvent('switchDemoGoal', { detail: 'budget' }));
+            } else {
+                setAssetsOpen(false); setPlanningOpen(false); setLedgerOpen(false); setBudgetOpen(true); 
+            }
+        } },
+        { id: 'assets', href: null, label: 'Assets', icon: PieChart, color: '#CC5500', action: () => { 
+            if (isDemoRoute) {
+                window.dispatchEvent(new CustomEvent('switchDemoGoal', { detail: 'both' }));
+            } else {
+                setBudgetOpen(false); setPlanningOpen(false); setLedgerOpen(false); setAssetsOpen(true); 
+            }
+        } },
         { id: 'planning', href: null, label: 'Planning', icon: TrendingUp, color: '#A78BFA', action: () => { setBudgetOpen(false); setAssetsOpen(false); setLedgerOpen(false); setPlanningOpen(true); } },
         { id: 'ledger', href: null, label: 'Ledger', icon: BookOpen, color: '#D4AF37', action: () => { setBudgetOpen(false); setAssetsOpen(false); setPlanningOpen(false); setLedgerOpen(true); } },
     ];

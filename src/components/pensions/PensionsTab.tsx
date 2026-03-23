@@ -4,7 +4,7 @@ import _ConfirmationModal from '../ConfirmationModal';
 import { formatCurrency } from '@/lib/currency';
 import _TransactionTimeline from '../TransactionTimeline';
 import _FloatingActionButton from '../FloatingActionButton';
-import _EmptyState from '../EmptyState';
+import _PersonalizedEmptyState from '../ftue/PersonalizedEmptyState';
 import _ContextPane from '../ContextPane';
 import _AssetLogo from '../AssetLogo';
 import _PageTutorialOverlay from '../ftue/PageTutorialOverlay';
@@ -12,7 +12,7 @@ import _PullToRefresh from '../PullToRefresh';
 const ConfirmationModal = _ConfirmationModal as any;
 const TransactionTimeline = _TransactionTimeline as any;
 const FloatingActionButton = _FloatingActionButton as any;
-const EmptyState = _EmptyState as any;
+const PersonalizedEmptyState = _PersonalizedEmptyState as any;
 const ContextPane = _ContextPane as any;
 const AssetLogo = _AssetLogo as any;
 const PageTutorialOverlay = _PageTutorialOverlay as any;
@@ -130,10 +130,8 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                         </>
                     ) : (
                         <div id="ftue-pensions-empty">
-                            <EmptyState
-                                icon="🛡️"
-                                title="No Pension Accounts"
-                                message="You have no pension accounts yet. Add a provider to start tracking your retirement funds."
+                            <PersonalizedEmptyState
+                                copyKey="emptyPensions"
                                 actionLabel="Add Pension Provider"
                                 onAction={() => setRightPaneMode('add-broker')}
                             />

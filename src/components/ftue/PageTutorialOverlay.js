@@ -54,7 +54,20 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
         if (alreadySeen || steps.length === 0) return;
 
         const timer = setTimeout(() => {
-            const available = steps.filter(s => document.getElementById(s.targetId));
+            // Filter by DOM availability
+            let available = steps.filter(s => document.getElementById(s.targetId));
+
+            // Experience-based tutorial density
+            const experience = ftueState?.onboardingExperience || 'beginner';
+            if (experience === 'advanced') {
+                // Skip tutorials entirely for advanced users
+                available = [];
+            } else if (experience === 'intermediate' && available.length > 2) {
+                // Quick overview: first and last steps only
+                available = [available[0], available[available.length - 1]];
+            }
+            // beginner: full tutorial (all available steps)
+
             setActiveSteps(available);
             if (available.length > 0) {
                 setCurrentStep(0);
@@ -62,7 +75,7 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
             }
         }, 800);
         return () => clearTimeout(timer);
-    }, [alreadySeen, isMobile, steps]);
+    }, [alreadySeen, isMobile, steps, ftueState?.onboardingExperience]);
 
     const totalSteps = activeSteps.length;
 

@@ -55,7 +55,7 @@ export default function ContextPane({
     };
 
     // Modes that render inline within renderDetails (not as separate pane content)
-    const inlineModes = ['default', 'add-rental-month', 'add-mortgage-payment', 'add-transaction', 'edit-transaction', 'update-value'];
+    const inlineModes = ['default', 'add-rental-month', 'add-mortgage-payment', 'add-transaction', 'update-value'];
     const showDetails = selectedAsset && inlineModes.includes(rightPaneMode);
 
     if (!showDetails) {

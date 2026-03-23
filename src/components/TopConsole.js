@@ -24,6 +24,8 @@ export default function TopConsole() {
     const [isBudgetHovered, setIsBudgetHovered] = useState(false);
     const { data: session } = useSession();
 
+    const isDemoRoute = pathname.startsWith('/demo');
+
     const trackingTabs = [
         { id: 'dashboard', href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     ];
@@ -125,9 +127,15 @@ export default function TopConsole() {
                 })}
 
                 {/* BUDGET DROPDOWN */}
-                <div className="relative" onMouseEnter={() => setIsBudgetHovered(true)} onMouseLeave={() => setIsBudgetHovered(false)}>
+                <div className="relative" onMouseEnter={() => !isDemoRoute && setIsBudgetHovered(true)} onMouseLeave={() => setIsBudgetHovered(false)}>
                     <button
-                        onClick={() => setIsBudgetDropdownOpen(!isBudgetDropdownOpen)}
+                        onClick={() => {
+                            if (isDemoRoute) {
+                                window.dispatchEvent(new CustomEvent('switchDemoGoal', { detail: 'budget' }));
+                            } else {
+                                setIsBudgetDropdownOpen(!isBudgetDropdownOpen);
+                            }
+                        }}
                         className={`
               group flex items-center gap-1.5 px-3 py-1.5 text-[0.75rem] font-space font-medium tracking-widest uppercase whitespace-nowrap
               transition-all duration-200 bg-transparent
@@ -211,9 +219,15 @@ export default function TopConsole() {
                 </div>
 
                 {/* ASSETS DROPDOWN */}
-                <div className="relative" onMouseEnter={() => setIsAssetsHovered(true)} onMouseLeave={() => setIsAssetsHovered(false)}>
+                <div className="relative" onMouseEnter={() => !isDemoRoute && setIsAssetsHovered(true)} onMouseLeave={() => setIsAssetsHovered(false)}>
                     <button
-                        onClick={() => setIsAssetsDropdownOpen(!isAssetsDropdownOpen)}
+                        onClick={() => {
+                            if (isDemoRoute) {
+                                window.dispatchEvent(new CustomEvent('switchDemoGoal', { detail: 'both' }));
+                            } else {
+                                setIsAssetsDropdownOpen(!isAssetsDropdownOpen);
+                            }
+                        }}
                         className={`
               group flex items-center gap-1.5 px-3 py-1.5 text-[0.75rem] font-space font-medium tracking-widest uppercase whitespace-nowrap
               transition-all duration-200 bg-transparent

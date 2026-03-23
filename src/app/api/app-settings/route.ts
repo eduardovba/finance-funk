@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { validateBody } from '@/lib/validation';
 
 const KEY = 'app_settings';
-const DEFAULTS = { autoMonthlyCloseEnabled: true, backgroundSelection: 'frosted-glass', budgetCurrency: 'BRL' };
+const DEFAULTS = { autoMonthlyCloseEnabled: true, backgroundSelection: 'linen-funk', budgetCurrency: 'BRL' };
 
 const PostAppSettingsSchema = z.object({
     autoMonthlyCloseEnabled: z.boolean().optional(),

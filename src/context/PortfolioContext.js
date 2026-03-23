@@ -807,7 +807,7 @@ export function PortfolioProvider({ children }) {
 
     // ═══════════ BACKGROUND SYNC ═══════════
     useEffect(() => {
-        const bg = appSettings?.backgroundSelection || 'frosted-glass';
+        const bg = appSettings?.backgroundSelection || 'linen-funk';
         document.body.setAttribute('data-bg', bg);
     }, [appSettings?.backgroundSelection]);
 
@@ -882,6 +882,8 @@ export function PortfolioProvider({ children }) {
         </PortfolioContext.Provider>
     );
 }
+
+export { PortfolioContext };
 
 export function usePortfolio() {
     const context = useContext(PortfolioContext);

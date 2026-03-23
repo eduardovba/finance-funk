@@ -34,6 +34,8 @@ export default function FTUEChecklist({ mode = 'sidebar' }) {
     const selectedAssets = ftueState.selectedAssetClasses || [];
 
     const userGoal = ftueState?.onboardingGoal || 'both';
+    const experience = ftueState?.onboardingExperience || 'beginner';
+    const isCompact = experience === 'advanced';
     const showPortfolioSection = userGoal === 'investments' || userGoal === 'both';
     const showBudgetSection = userGoal === 'budget' || userGoal === 'both';
 
@@ -90,12 +92,19 @@ export default function FTUEChecklist({ mode = 'sidebar' }) {
                         <div className="w-9 h-9 rounded-full bg-[#D4AF37]/10 flex items-center justify-center overflow-hidden border border-[#D4AF37] shrink-0">
                             <Image src="/ftue/funk-master-avatar.png" alt="Funk Master" width={36} height={36} className="object-cover" />
                         </div>
+                        {!isCompact && (
                         <div>
                             <h3 className="font-bebas text-[1rem] tracking-[0.04em] text-[#D4AF37] leading-none mb-1">Getting Started</h3>
                             <p className="font-space text-[0.7rem] text-[#F5F5DC]/50 leading-none">
                                 {allDone ? "You're all set up!" : `${completedCount} of ${total} complete`}
                             </p>
                         </div>
+                        )}
+                        {isCompact && (
+                        <div>
+                            <h3 className="font-bebas text-[0.85rem] tracking-[0.04em] text-[#D4AF37] leading-none">{completedCount}/{total}</h3>
+                        </div>
+                        )}
                     </div>
                     {mode === 'sidebar' && (
                         <button onClick={handleDismiss} className="text-[#F5F5DC]/30 hover:text-[#F5F5DC]/70 transition-colors p-1" title="Dismiss forever">
@@ -116,7 +125,7 @@ export default function FTUEChecklist({ mode = 'sidebar' }) {
 
                 {/* Section: Connect your data */}
                 <div className="mb-6">
-                    <h4 className="font-bebas text-[0.75rem] tracking-[0.06em] text-[#F5F5DC]/40 uppercase mb-2">Connect your data</h4>
+                    {!isCompact && <h4 className="font-bebas text-[0.75rem] tracking-[0.06em] text-[#F5F5DC]/40 uppercase mb-2">Connect your data</h4>}
                     
                     {/* Connect Bank (WIP) */}
                     <div className="flex items-center gap-[10px] px-3 py-2.5 bg-[#1A0F2E]/50 border border-[#D4AF37]/10 rounded-[10px] mb-1.5 opacity-60 cursor-default">
@@ -159,7 +168,7 @@ export default function FTUEChecklist({ mode = 'sidebar' }) {
                 {/* Section: Set up your portfolio */}
                 {showPortfolioSection && (
                 <div className="mb-6">
-                    <h4 className="font-bebas text-[0.75rem] tracking-[0.06em] text-[#F5F5DC]/40 uppercase mb-1">Set up your portfolio</h4>
+                    {!isCompact && <h4 className="font-bebas text-[0.75rem] tracking-[0.06em] text-[#F5F5DC]/40 uppercase mb-1">Set up your portfolio</h4>}
                     <div className="flex flex-col">
                         {portfolioList.map(renderSimpleRow)}
                     </div>
@@ -168,7 +177,7 @@ export default function FTUEChecklist({ mode = 'sidebar' }) {
 
                 {/* Section: Track & grow */}
                 <div className="mb-6">
-                    <h4 className="font-bebas text-[0.75rem] tracking-[0.06em] text-[#F5F5DC]/40 uppercase mb-1">Track & grow</h4>
+                    {!isCompact && <h4 className="font-bebas text-[0.75rem] tracking-[0.06em] text-[#F5F5DC]/40 uppercase mb-1">Track & grow</h4>}
                     <div className="flex flex-col">
                         {trackGrowList.map(renderSimpleRow)}
                     </div>

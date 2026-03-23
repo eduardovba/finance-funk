@@ -10,22 +10,18 @@ import { usePortfolio } from '@/context/PortfolioContext';
    ═══════════════════════════════════════════════════════════════ */
 
 const IMAGE_WALLPAPERS = {
-    'concrete': '/backgrounds/Concrete.jpeg',
-    'copper-flow': '/backgrounds/Copper Flow.jpeg',
+    'concretely-funky': '/backgrounds/Concretely Funky.jpeg',
     'copper-rise': '/backgrounds/Copper Rise.jpeg',
-    'cream-linen': '/backgrounds/Cream Linen.jpeg',
-    'crystal-large': '/backgrounds/Crystal Large.jpeg',
-    'crystal-minimal': '/backgrounds/Crystal Minimal.jpeg',
+    'creamy-linen': '/backgrounds/Creamy Linen.jpeg',
+    'crystal-of-groove': '/backgrounds/Crystal of Groove.jpeg',
+    'envelope-of-funk-light': '/backgrounds/Envelope of Funk Light.jpeg',
+    'envelope-of-funk': '/backgrounds/Envelope of Funk.jpeg',
+    'frosted-funk': '/backgrounds/Frosted Funk.jpeg',
     'frosted-glass': '/backgrounds/Frosted Glass.jpeg',
-    'leather': '/backgrounds/Leather.jpeg',
-    'linen-detail-large': '/backgrounds/Linen Detail Large.jpeg',
-    'linen-detail-minimal': '/backgrounds/Linen Detail Minimal.jpeg',
-    'mosaic-large': '/backgrounds/Mosaic Large.jpeg',
-    'mosaic-medium': '/backgrounds/Mosaic Medium.jpeg',
-    'mosaic-minimal': '/backgrounds/Mosaic Minimal.jpeg',
-    'paper-large': '/backgrounds/Paper Large.jpeg',
-    'paper-small': '/backgrounds/Paper Small.jpeg',
-    'walnut': '/backgrounds/Walnut.jpeg',
+    'linen-funk-light': '/backgrounds/Linen Funk Light.jpeg',
+    'linen-funk': '/backgrounds/Linen Funk.jpeg',
+    'mosaic-dance': '/backgrounds/Mosaic Dance.jpeg',
+    'walnut-grooves': '/backgrounds/Walnut Grooves.jpeg',
 };
 
 /* Tiny inline SVG noise texture — eliminates color banding in glass effects */
@@ -33,9 +29,9 @@ const NOISE_SVG = `data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http:/
 
 export default function AnimatedBackground() {
     const { appSettings } = usePortfolio();
-    const themeId = appSettings?.backgroundSelection || 'frosted-glass';
+    const themeId = appSettings?.backgroundSelection || 'linen-funk';
 
-    const imagePath = IMAGE_WALLPAPERS[themeId] || IMAGE_WALLPAPERS['frosted-glass'];
+    const imagePath = IMAGE_WALLPAPERS[themeId] || IMAGE_WALLPAPERS['linen-funk'];
 
     return (
         <>

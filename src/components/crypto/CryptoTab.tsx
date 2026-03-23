@@ -3,7 +3,7 @@ import { Button } from '@/components/ui';
 import _ConfirmationModal from '../ConfirmationModal';
 import _TransactionTimeline from '../TransactionTimeline';
 import _FloatingActionButton from '../FloatingActionButton';
-import _EmptyState from '../EmptyState';
+import _PersonalizedEmptyState from '../ftue/PersonalizedEmptyState';
 import _AssetCardSkeleton from '../AssetCardSkeleton';
 import _ContextPane from '../ContextPane';
 import _AssetLogo from '../AssetLogo';
@@ -12,7 +12,7 @@ import _PullToRefresh from '../PullToRefresh';
 const ConfirmationModal = _ConfirmationModal as any;
 const TransactionTimeline = _TransactionTimeline as any;
 const FloatingActionButton = _FloatingActionButton as any;
-const EmptyState = _EmptyState as any;
+const PersonalizedEmptyState = _PersonalizedEmptyState as any;
 const AssetCardSkeleton = _AssetCardSkeleton as any;
 const ContextPane = _ContextPane as any;
 const AssetLogo = _AssetLogo as any;
@@ -154,15 +154,11 @@ export default function CryptoTab({ transactions = [], marketData: globalMarketD
                     ) : (
                         <>
                             <h2 className="text-xl font-bold font-bebas tracking-widest text-[#D4AF37]">CRYPTO PORTFOLIO</h2>
-                            <div id="ftue-crypto-empty">
-                            <EmptyState
-                                icon="💎"
-                                title="No Crypto Assets"
-                                message="You have no crypto assets yet. Add an exchange to log your first transaction."
+                            <PersonalizedEmptyState
+                                copyKey="emptyCrypto"
                                 actionLabel="Add Exchange"
                                 onAction={() => setRightPaneMode('add-broker')}
                             />
-                            </div>
                         </>
                     )}
                     </div>

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useCallback } from 'react';
-import { usePathname } from 'next/navigation';
+import React, { useState, useEffect, useCallback } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus } from 'lucide-react';
 import { PortfolioProvider, usePortfolio } from '@/context/PortfolioContext';
@@ -39,6 +39,7 @@ function AppShellInner({ children }) {
     } = usePortfolio();
 
     const pathname = usePathname();
+    const router = useRouter();
 
     // Auth pages get a clean layout without the app shell chrome
     const isAuthPage = pathname === '/login' || pathname === '/register' || pathname === '/onboarding';
@@ -47,6 +48,15 @@ function AppShellInner({ children }) {
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [pathname]);
+
+    // Goal-based landing redirect — budget users land on /budget instead of /dashboard
+    useEffect(() => {
+        if (!ftueState) return;
+        if (ftueState.onboardingGoal !== 'budget') return;
+        if (!ftueState.showFirstVisitGreeting) return;
+        if (pathname !== '/dashboard') return;
+        router.replace('/budget');
+    }, [ftueState, pathname, router]);
 
     // Tracking mouse position for background interactivity
     useEffect(() => {
@@ -296,6 +306,14 @@ function PullToRefreshWrapper({ children }) {
 }
 
 export default function AppShell({ children }) {
+    const pathname = usePathname();
+
+    // Demo routes use their own DemoAppShell with DemoPortfolioProvider
+    // Don't wrap them in PortfolioProvider to avoid context conflicts
+    if (pathname?.startsWith('/demo')) {
+        return <>{children}</>;
+    }
+
     return (
         <PortfolioProvider>
             <AppShellInner>{children}</AppShellInner>

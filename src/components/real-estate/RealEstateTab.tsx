@@ -7,7 +7,7 @@ import _TransactionTimeline from '../TransactionTimeline';
 import _FloatingActionButton from '../FloatingActionButton';
 import _PullToRefresh from '../PullToRefresh';
 import _ContextPane from '../ContextPane';
-import _EmptyState from '../EmptyState';
+import _PersonalizedEmptyState from '../ftue/PersonalizedEmptyState';
 import _BrokerForm from '../BrokerForm';
 import _CurrencySelector from '../CurrencySelector';
 import _NumberInput from '../NumberInput';
@@ -18,7 +18,7 @@ const TransactionTimeline = _TransactionTimeline as any;
 const FloatingActionButton = _FloatingActionButton as any;
 const PullToRefresh = _PullToRefresh as any;
 const ContextPane = _ContextPane as any;
-const EmptyState = _EmptyState as any;
+const PersonalizedEmptyState = _PersonalizedEmptyState as any;
 const BrokerForm = _BrokerForm as any;
 const CurrencySelector = _CurrencySelector as any;
 const NumberInput = _NumberInput as any;
@@ -81,10 +81,9 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                             </>
                         ) : (
                             <div id="ftue-re-empty">
-                                <EmptyState icon="🏠" title="No Real Estate Assets"
-                                    message="You have no real estate assets yet. Add a property or fund broker to start tracking your portfolio."
+                                <PersonalizedEmptyState copyKey="emptyRealEstate"
                                     actionLabel="Add Property" onAction={() => h.setRightPaneMode('add-property')}
-                                    secondaryActionLabel="Add Fund Broker" onSecondaryAction={() => h.setRightPaneMode('add-broker')} />
+                                    secondaryLabel="Add Fund Broker" onSecondaryAction={() => h.setRightPaneMode('add-broker')} />
                             </div>
                         )}
                     </div>

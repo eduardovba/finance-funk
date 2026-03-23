@@ -24,13 +24,16 @@ export default function FirstVisitGreeting() {
         }, 400);
     }, [updateFtueProgress]);
 
-    // Auto-dismiss after 8 seconds
+    // Auto-dismiss — duration varies by experience level
     useEffect(() => {
         if (visible) {
-            const timer = setTimeout(handleDismiss, 8000);
+            const experience = ftueState?.onboardingExperience || 'beginner';
+            const durations = { advanced: 3000, intermediate: 6000, beginner: 8000 };
+            const ms = durations[experience] || 8000;
+            const timer = setTimeout(handleDismiss, ms);
             return () => clearTimeout(timer);
         }
-    }, [visible, handleDismiss]);
+    }, [visible, handleDismiss, ftueState?.onboardingExperience]);
 
     if (!ftueState?.showFirstVisitGreeting) return null;
 
