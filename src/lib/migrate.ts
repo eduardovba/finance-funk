@@ -360,5 +360,13 @@ function getMigrations(): Migration[] {
                 `ALTER TABLE budget_transactions ADD COLUMN source TEXT`,
             ],
         },
+        {
+            version: 14,
+            name: 'add_onboarding_fields',
+            sql: [
+                "ALTER TABLE users ADD COLUMN onboarding_completed INTEGER DEFAULT 0",
+                "ALTER TABLE users ADD COLUMN onboarding_goal TEXT",
+            ],
+        },
     ];
 }

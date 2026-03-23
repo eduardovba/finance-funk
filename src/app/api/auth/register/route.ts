@@ -7,7 +7,8 @@ export const RegisterSchema = z.object({
     name: z.string().min(1, 'Name is required').max(100),
     email: z.string().email('Valid email required'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z.string()
+    confirmPassword: z.string(),
+    onboarding_goal: z.string().nullable().optional()
 }).refine(data => data!.password === data!.confirmPassword, {
     message: 'Passwords do not match',
     path: ['confirmPassword']
@@ -29,7 +30,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         }
 
         // Create user
-        const user = await createUser({ name: data!.name, email: data!.email, password: data!.password });
+        const user = await createUser({
+            name: data!.name,
+            email: data!.email,
+            password: data!.password,
+            onboarding_goal: data!.onboarding_goal
+        });
 
         return NextResponse.json(
             { message: "Account created successfully.", user: { id: user.id, name: user.name, email: user.email } },

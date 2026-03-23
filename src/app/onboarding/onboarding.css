@@ -1,0 +1,436 @@
+/* ═══════════════════════════════════════════
+   FTUE Onboarding — Multi-step Flow
+   ═══════════════════════════════════════════ */
+
+/* ───── Layout ───── */
+.onboarding-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.onboarding-backdrop {
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(204, 85, 0, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(29, 17, 53, 0.5) 0%, transparent 100%),
+        #0B061A;
+    z-index: -1;
+}
+
+/* ───── Shared Card ───── */
+.onboarding-card {
+    width: 100%;
+    max-width: 520px;
+    background: rgba(13, 8, 20, 0.9);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: 20px;
+    padding: 40px 36px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 80px rgba(212, 175, 55, 0.04);
+    animation: cardEntry 0.6s cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+.onboarding-card.wide {
+    max-width: 640px;
+}
+
+@keyframes cardEntry {
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ───── Progress Bar ───── */
+.progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 32px;
+}
+
+.progress-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 40px;
+}
+
+.progress-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(245, 245, 220, 0.15);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.progress-dot.active,
+.progress-dot.completed {
+    background: #D4AF37;
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+}
+
+.progress-label {
+    font-family: var(--font-space), monospace;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(245, 245, 220, 0.3);
+    transition: color 0.3s ease;
+    position: absolute;
+    margin-top: 18px;
+    white-space: nowrap;
+}
+
+.progress-label.active {
+    color: #D4AF37;
+}
+
+.progress-line {
+    width: 60px;
+    height: 2px;
+    background: rgba(245, 245, 220, 0.1);
+    transition: background 0.3s ease;
+    margin-bottom: 20px; /* offset for label */
+}
+
+.progress-line.completed {
+    background: rgba(212, 175, 55, 0.4);
+}
+
+/* ───── Shared Typography ───── */
+.onboarding-heading {
+    font-family: var(--font-bebas), sans-serif;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #F5F5DC 30%, #D4AF37 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    margin: 0;
+    line-height: 1.1;
+}
+
+.onboarding-subtitle {
+    font-family: var(--font-inter), sans-serif;
+    font-size: 0.85rem;
+    color: rgba(245, 245, 220, 0.5);
+    text-align: center;
+    margin-top: 8px;
+    margin-bottom: 32px;
+}
+
+/* ═══════════════════════════════════════════
+   STEP 1: GOAL SELECTION
+   ═══════════════════════════════════════════ */
+.goal-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.goal-card {
+    background: rgba(26, 15, 46, 0.6);
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    border-radius: 14px;
+    padding: 24px 20px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-align: center;
+    position: relative;
+}
+
+.goal-card:hover {
+    border-color: rgba(212, 175, 55, 0.25);
+    background: rgba(26, 15, 46, 0.8);
+}
+
+.goal-card.selected {
+    border-color: rgba(212, 175, 55, 0.5);
+    background: rgba(212, 175, 55, 0.08);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+}
+
+.goal-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.goal-title {
+    font-family: var(--font-bebas), sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.04em;
+    color: #F5F5DC;
+    margin: 0;
+}
+
+.goal-desc {
+    font-family: var(--font-inter), sans-serif;
+    font-size: 0.75rem;
+    color: rgba(245, 245, 220, 0.5);
+    line-height: 1.4;
+    margin-top: 6px;
+}
+
+.goal-check {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 20px;
+    height: 20px;
+    background: #D4AF37;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1A0F2E;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.2s ease;
+}
+
+.goal-card.selected .goal-check {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* ───── Step 1 CTAs ───── */
+.btn-primary {
+    background: linear-gradient(135deg, #CC5500 0%, #D4AF37 100%);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 12px;
+    color: #1A0F2E;
+    font-family: var(--font-space), monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 13px 20px;
+    width: 100%;
+    margin-top: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(204, 85, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+}
+
+.btn-primary:hover:not(:disabled) {
+    filter: brightness(1.12);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(204, 85, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+.btn-primary:disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.link-skip {
+    font-family: var(--font-space), monospace;
+    font-size: 0.75rem;
+    color: rgba(245, 245, 220, 0.35);
+    cursor: pointer;
+    text-align: center;
+    margin-top: 16px;
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    transition: color 0.2s ease;
+}
+
+.link-skip:hover {
+    color: rgba(245, 245, 220, 0.6);
+}
+
+/* ═══════════════════════════════════════════
+   STEP 2: DASHBOARD PREVIEW
+   ═══════════════════════════════════════════ */
+.preview-screenshot {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    display: block;
+}
+
+.preview-callouts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+    margin-bottom: 8px;
+}
+
+.preview-callout {
+    font-family: var(--font-space), monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(245, 245, 220, 0.7);
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.12);
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.link-back {
+    font-family: var(--font-space), monospace;
+    font-size: 0.8rem;
+    color: rgba(245, 245, 220, 0.4);
+    cursor: pointer;
+    text-align: center;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    background: none;
+    border: none;
+    transition: color 0.2s ease;
+}
+
+.link-back:hover {
+    color: #F5F5DC;
+}
+
+/* ═══════════════════════════════════════════
+   STEP 3: ACCOUNT CREATION
+   ═══════════════════════════════════════════ */
+.onboarding-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.onboarding-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.onboarding-field label {
+    color: rgba(245, 245, 220, 0.6);
+    font-size: 0.78rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-family: var(--font-space), monospace;
+}
+
+.onboarding-field input {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(11, 6, 26, 0.6);
+    border: 1px solid rgba(212, 175, 55, 0.12);
+    border-radius: 10px;
+    color: #F5F5DC;
+    font-size: 0.9rem;
+    font-family: var(--font-space), monospace;
+    outline: none;
+    transition: all 0.25s ease;
+}
+
+.onboarding-field input::placeholder {
+    color: rgba(245, 245, 220, 0.25);
+}
+
+.onboarding-field input:focus {
+    border-color: rgba(212, 175, 55, 0.4);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
+    background: rgba(11, 6, 26, 0.8);
+}
+
+.onboarding-error {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #fca5a5;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-space), monospace;
+}
+
+.onboarding-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(26, 15, 46, 0.3);
+    border-top: 2px solid #1A0F2E;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.onboarding-footer-link {
+    text-align: center;
+    margin-top: 24px;
+    color: rgba(245, 245, 220, 0.45);
+    font-size: 0.83rem;
+    font-family: var(--font-space), monospace;
+}
+
+.onboarding-footer-link a {
+    color: #D4AF37;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.onboarding-footer-link a:hover {
+    color: #e8c84a;
+    text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
+@media (max-width: 480px) {
+    .onboarding-container {
+        padding: 16px;
+    }
+
+    .onboarding-card {
+        padding: 28px 20px;
+    }
+
+    .onboarding-heading {
+        font-size: 1.4rem !important;
+    }
+    
+    .progress-line {
+        width: 40px;
+    }
+}
+
+@media (max-width: 400px) {
+    .goal-cards {
+        grid-template-columns: 1fr;
+    }
+}

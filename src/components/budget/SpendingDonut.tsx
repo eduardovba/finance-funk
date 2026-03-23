@@ -266,7 +266,7 @@ export default function SpendingDonut({ categories, transactions }: Props) {
                             </motion.div>
                         ))}
                         {/* Also show zero-spend categories */}
-                        {categories.filter(c => c.is_income === 0 && !slices.some(s => s.name === c.name)).map((cat, i) => (
+                        {categories.filter(c => c.is_income === 0 && !slices.some(s => s.name === c.name)).sort((a, b) => b.monthly_target_cents - a.monthly_target_cents).map((cat, i) => (
                             <div key={cat.id} className="flex flex-col gap-2">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2 min-w-0">

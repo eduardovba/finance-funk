@@ -17,7 +17,6 @@ import InstallPrompt from '@/components/InstallPrompt';
 import FTUEWizard from '@/components/ftue/FTUEWizard';
 import FTUEChecklist from '@/components/ftue/FTUEChecklist';
 import CurrencyQuickPicker from '@/components/ftue/CurrencyQuickPicker';
-import FTUEImportBubble from '@/components/ftue/FTUEImportBubble';
 
 function AppShellInner({ children }) {
     const {
@@ -41,7 +40,7 @@ function AppShellInner({ children }) {
     const pathname = usePathname();
 
     // Auth pages get a clean layout without the app shell chrome
-    const isAuthPage = pathname === '/login' || pathname === '/register';
+    const isAuthPage = pathname === '/login' || pathname === '/register' || pathname === '/onboarding';
 
     // Scroll to top on route change
     useEffect(() => {
@@ -107,6 +106,11 @@ function AppShellInner({ children }) {
     // Determine FTUE overlays
     const showWizardOverlay = ftueState && ftueState.wizardCompleted === false;
     const showCurrencyPicker = ftueState?.showCurrencyPicker && !ftueState?.isTutorialActive;
+    const showOnboardingSidebar = ftueState 
+        && ftueState.wizardCompleted === true 
+        && !ftueState.sidebarDismissed
+        && !ftueState.checklistDismissed 
+        && !isAuthPage;
 
     return (
         <PullToRefreshWrapper>
@@ -115,8 +119,16 @@ function AppShellInner({ children }) {
                 <AnimatedBackground />
                 <TopConsole />
 
+                {/* Mobile version of checklist banner */}
+                {showOnboardingSidebar && (
+                    <div className="md:hidden">
+                        <FTUEChecklist mode="mobile" />
+                    </div>
+                )}
+
                 {/* ═══════════ MAIN STAGE ═══════════ */}
-                <main id="main-scroll" className="flex-1 overflow-y-auto p-3 md:p-6 lg:p-8 pb-24 md:pb-8 w-full">
+                <div className="flex flex-1 overflow-hidden">
+                    <main id="main-scroll" className="flex-1 overflow-y-auto p-3 md:p-6 lg:p-8 pb-24 md:pb-8 w-full">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={pathname}
@@ -186,6 +198,14 @@ function AppShellInner({ children }) {
                     />
                 </main>
 
+                {/* Onboarding sidebar — only on desktop */}
+                {showOnboardingSidebar && (
+                    <div className="hidden md:block shrink-0">
+                        <FTUEChecklist mode="sidebar" />
+                    </div>
+                )}
+            </div>
+
                 {/* ═══════════ INSPECTOR DRAWER ═══════════ */}
                 <Inspector />
 
@@ -195,11 +215,8 @@ function AppShellInner({ children }) {
                 {/* ═══════════ PWA INSTALL PROMPT ═══════════ */}
                 <InstallPrompt />
 
-                {/* ═══════════ FTUE PROGRESS CHECKLIST ═══════════ */}
-                <FTUEChecklist />
-
-                {/* ═══════════ FTUE IMPORT DATA BUBBLE ═══════════ */}
-                <FTUEImportBubble />
+                {/* ═══════════ PWA INSTALL PROMPT ═══════════ */}
+                <InstallPrompt />
 
                 {/* ═══════════ FTUE WIZARD OVERLAY (on top of populated dashboard) ═══════════ */}
                 {showWizardOverlay && (

@@ -13,11 +13,21 @@ export async function findUserByEmail(email: string): Promise<User | undefined> 
  * Create a new user with email/password credentials.
  * Password is hashed with bcrypt before storage.
  */
-export async function createUser({ name, email, password }: { name: string; email: string; password: string }): Promise<Pick<User, 'id' | 'name' | 'email' | 'provider'>> {
+export async function createUser({
+    name,
+    email,
+    password,
+    onboarding_goal
+}: {
+    name: string;
+    email: string;
+    password: string;
+    onboarding_goal?: string | null;
+}): Promise<Pick<User, 'id' | 'name' | 'email' | 'provider'>> {
     const passwordHash = await bcrypt.hash(password, 12);
     const result = await run(
-        'INSERT INTO users (name, email, password_hash, provider) VALUES (?, ?, ?, ?)',
-        [name, email.toLowerCase(), passwordHash, 'credentials']
+        'INSERT INTO users (name, email, password_hash, provider, onboarding_goal, onboarding_completed) VALUES (?, ?, ?, ?, ?, 1)',
+        [name, email.toLowerCase(), passwordHash, 'credentials', onboarding_goal || null]
     );
     return {
         id: result.lastID,

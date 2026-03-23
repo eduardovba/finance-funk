@@ -25,9 +25,11 @@ const DEFAULT_STATE = {
         exploreForecast: false,
         connectBank: false,
         importHistory: false,
+        importBudget: false,
         customiseDashboard: false
     },
     checklistDismissed: false,
+    sidebarDismissed: false,
     pageTutorials: {}  // { equity: true, crypto: true, ... } — tracks which pages have shown their tutorial
 };
 
@@ -45,6 +47,7 @@ const PatchFtueSchema = z.object({
     usingDemoData: z.boolean().optional(),
     checklistItems: z.record(z.string(), z.boolean()).optional(),
     checklistDismissed: z.boolean().optional(),
+    sidebarDismissed: z.boolean().optional(),
     pageTutorials: z.record(z.string(), z.boolean()).optional()
 }).passthrough();
 
