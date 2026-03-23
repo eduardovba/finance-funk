@@ -79,7 +79,7 @@ export default function GrooveCheck() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[9998] flex items-center justify-center"
+                    className="fixed inset-0 z-[990] flex items-center justify-center"
                 >
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleDismiss} />
 
@@ -100,7 +100,7 @@ export default function GrooveCheck() {
                             </div>
                             <div>
                                 <h3 className="text-lg font-bebas tracking-wider text-[#D4AF37] m-0">Groove Check! 🎸</h3>
-                                <p className="text-[0.7rem] text-[#F5F5DC]/40 font-space m-0">Your first week with Finance Funk</p>
+                                <p className="text-xs text-[#F5F5DC]/40 font-space m-0">Your first week with Finance Funk</p>
                             </div>
                         </div>
 
@@ -109,7 +109,7 @@ export default function GrooveCheck() {
                                 <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5">
                                     <Wallet size={20} className="text-[#D4AF37] shrink-0" />
                                     <div>
-                                        <p className="text-[0.7rem] text-[#F5F5DC]/40 font-space m-0">You spent this week</p>
+                                        <p className="text-xs text-[#F5F5DC]/40 font-space m-0">You spent this week</p>
                                         <p className="text-base font-bebas text-[#F5F5DC] tracking-wider m-0">
                                             {formatCurrency(insights.totalSpent, primaryCurrency)} across {insights.transactionCount} transactions
                                         </p>
@@ -121,7 +121,7 @@ export default function GrooveCheck() {
                                 <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5">
                                     <span className="text-xl shrink-0">{insights.topCategoryIcon}</span>
                                     <div>
-                                        <p className="text-[0.7rem] text-[#F5F5DC]/40 font-space m-0">Top spending category</p>
+                                        <p className="text-xs text-[#F5F5DC]/40 font-space m-0">Top spending category</p>
                                         <p className="text-base font-bebas text-[#F5F5DC] tracking-wider m-0">{insights.topCategory}</p>
                                     </div>
                                 </div>
@@ -131,14 +131,14 @@ export default function GrooveCheck() {
                                 <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5">
                                     <TrendingUp size={20} className="text-[#34D399] shrink-0" />
                                     <div>
-                                        <p className="text-[0.7rem] text-[#F5F5DC]/40 font-space m-0">Your portfolio is worth</p>
+                                        <p className="text-xs text-[#F5F5DC]/40 font-space m-0">Your portfolio is worth</p>
                                         <p className="text-base font-bebas text-[#F5F5DC] tracking-wider m-0">{insights.netWorthFormatted}</p>
                                     </div>
                                 </div>
                             )}
                         </div>
 
-                        <p className="text-[0.8rem] text-[#F5F5DC]/50 font-space text-center mb-4">
+                        <p className="text-sm text-[#F5F5DC]/50 font-space text-center mb-4">
                             Keep the groove going — the more data you add, the smarter Finance Funk gets! 🎶
                         </p>
 

@@ -16,7 +16,7 @@ interface ForecastChartProps {
 const ChartTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload?.length) return null;
     return (
-        <div className="bg-[#121418]/90 border border-white/[0.06] rounded-lg p-3 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl font-mono tabular-nums text-xs">
+        <div className="bg-[#121418]/90 border border-white/[0.06] rounded-lg p-3 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl font-space  text-data-xs">
             <p className="text-[#D4AF37] font-bold mb-1.5">{label}</p>
             {payload.filter((e: any) => e.value != null).map((entry: any, i: number) => {
                 const isGbp = entry.dataKey?.toLowerCase().includes('gbp');

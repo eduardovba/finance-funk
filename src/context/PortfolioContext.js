@@ -807,7 +807,7 @@ export function PortfolioProvider({ children }) {
 
     // ═══════════ BACKGROUND SYNC ═══════════
     useEffect(() => {
-        const bg = appSettings?.backgroundSelection || 'linen-funk';
+        const bg = appSettings?.backgroundSelection || 'vinyl-voyage';
         document.body.setAttribute('data-bg', bg);
     }, [appSettings?.backgroundSelection]);
 

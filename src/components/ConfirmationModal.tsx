@@ -42,12 +42,12 @@ export default function ConfirmationModal({
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xl animate-[fadeIn_200ms_ease-out]"
+        className="fixed inset-0 z-[999] bg-black/60 backdrop-blur-xl animate-[fadeIn_200ms_ease-out]"
         onClick={onCancel}
       />
       {/* Modal */}
       <div
-        className="fixed left-1/2 top-1/2 z-[10000] -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-sm bg-[rgba(18,20,24,0.80)] backdrop-blur-[40px] backdrop-saturate-[180%] border border-[rgba(255,255,255,0.12)] border-t-[rgba(255,255,255,0.2)] rounded-[20px] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.5),0_0_1px_rgba(255,255,255,0.1)] animate-[slideUp_250ms_cubic-bezier(0.16,1,0.3,1)]"
+        className="fixed left-1/2 top-1/2 z-[999] -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-sm bg-[rgba(18,20,24,0.80)] backdrop-blur-[40px] backdrop-saturate-[180%] border border-[rgba(255,255,255,0.12)] border-t-[rgba(255,255,255,0.2)] rounded-[20px] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.5),0_0_1px_rgba(255,255,255,0.1)] animate-[slideUp_250ms_cubic-bezier(0.16,1,0.3,1)]"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-semibold text-[rgba(245,245,220,0.92)] tracking-tight text-gradient">

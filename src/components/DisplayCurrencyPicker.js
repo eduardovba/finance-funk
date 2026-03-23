@@ -66,11 +66,11 @@ export default function DisplayCurrencyPicker({ topCurrency, category }) {
                 title="Change display currency"
             >
                 <span className="text-xs">{meta?.flag}</span>
-                <span className="text-[0.75rem] font-space font-bold text-white/60 group-hover:text-white/90 tracking-wider transition-colors">
+                <span className="text-xs font-space font-bold text-white/60 group-hover:text-white/90 tracking-wider transition-colors">
                     {effectiveCurrency}
                 </span>
                 {isAutoMode && (
-                    <span className="text-[0.6875rem] text-white/30 font-space uppercase tracking-widest">auto</span>
+                    <span className="text-2xs text-white/30 font-space uppercase tracking-widest">auto</span>
                 )}
                 <svg className={`w-2.5 h-2.5 text-white/30 group-hover:text-white/50 transition-all duration-200 ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
@@ -80,7 +80,7 @@ export default function DisplayCurrencyPicker({ topCurrency, category }) {
             {/* Dropdown */}
             {isOpen && (
                 <div
-                    className="absolute top-full mt-2 right-0 w-52 bg-[#0B0611] backdrop-blur-xl border border-[#D4AF37]/20 rounded-xl shadow-2xl z-[1000] overflow-hidden"
+                    className="absolute top-full mt-2 right-0 w-52 bg-[#0B0611] backdrop-blur-xl border border-[#D4AF37]/20 rounded-xl shadow-2xl z-[900] overflow-hidden"
                     style={{ animation: 'fadeIn 0.15s ease-out' }}
                     onClick={(e) => e.stopPropagation()}
                 >
@@ -109,7 +109,7 @@ export default function DisplayCurrencyPicker({ topCurrency, category }) {
                                 >
                                     <span className="text-base">🔄</span>
                                     <span className="text-xs font-space font-bold tracking-wider">Auto</span>
-                                    <span className="text-[0.75rem] text-parchment/40 ml-auto">Use native ({topCurrency})</span>
+                                    <span className="text-xs text-parchment/40 ml-auto">Use native ({topCurrency})</span>
                                 </button>
                                 <div className="h-px bg-white/5 mx-2" />
                             </>
@@ -127,7 +127,7 @@ export default function DisplayCurrencyPicker({ topCurrency, category }) {
                             >
                                 <span className="text-base">{c.flag}</span>
                                 <span className="text-xs font-space font-bold tracking-wider">{c.code}</span>
-                                <span className="text-[0.75rem] text-parchment/40 ml-auto">{c.name}</span>
+                                <span className="text-xs text-parchment/40 ml-auto">{c.name}</span>
                             </button>
                         ))}
 

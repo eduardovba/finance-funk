@@ -81,11 +81,11 @@ export default function CategoryBreakdown({ categories, transactions }: Category
                                 )}
                             </div>
                             <div className="flex items-center gap-1.5 flex-shrink-0">
-                                <span className={`text-sm font-mono tabular-nums ${item.isOverBudget ? 'text-red-400' : 'text-[#F5F5DC]/60'}`}>
+                                <span className={`text-data-sm font-space  ${item.isOverBudget ? 'text-red-400' : 'text-[#F5F5DC]/60'}`}>
                                     {formatCents(fx(item.spentCents), displayCurrency)}
                                 </span>
                                 {item.targetCents > 0 && (
-                                    <span className="text-xs font-mono tabular-nums text-[#F5F5DC]/25">
+                                    <span className="text-data-xs font-space  text-[#F5F5DC]/25">
                                         / {formatCents(item.targetCents, displayCurrency)}
                                     </span>
                                 )}

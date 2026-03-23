@@ -266,7 +266,7 @@ export default function TutorialOverlay() {
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="fixed inset-0 z-[9998] flex items-center justify-center"
+                className="fixed inset-0 z-[990] flex items-center justify-center"
             >
                 {/* Dark backdrop */}
                 <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
@@ -309,7 +309,7 @@ export default function TutorialOverlay() {
                                     flex flex-col items-center gap-0.5"
                             >
                                 <span>🎸 Import My Data</span>
-                                <span className="text-[0.75rem] font-normal opacity-60">Start with your real portfolio</span>
+                                <span className="text-xs font-normal opacity-60">Start with your real portfolio</span>
                             </motion.button>
 
                             <motion.button
@@ -322,7 +322,7 @@ export default function TutorialOverlay() {
                                     flex flex-col items-center gap-0.5"
                             >
                                 <span>🎧 Keep Exploring</span>
-                                <span className="text-[0.75rem] font-normal opacity-40">Stay with demo data</span>
+                                <span className="text-xs font-normal opacity-40">Stay with demo data</span>
                             </motion.button>
                         </div>
                     </div>
@@ -337,7 +337,7 @@ export default function TutorialOverlay() {
     const tooltipStyle = getTooltipStyle();
 
     const content = (
-        <div className="fixed inset-0 z-[9998] pointer-events-none">
+        <div className="fixed inset-0 z-[990] pointer-events-none">
             {/* SVG Mask Overlay */}
             <svg
                 className="absolute inset-0 w-full h-full pointer-events-auto"
@@ -421,13 +421,13 @@ export default function TutorialOverlay() {
                                 </div>
                                 <div>
                                     <h3 className="text-[#D4AF37] font-space font-bold text-sm m-0">{step.title}</h3>
-                                    <span className="text-[0.6875rem] text-[#F5F5DC]/30 font-space uppercase tracking-[2px]">
+                                    <span className="text-2xs text-[#F5F5DC]/30 font-space uppercase tracking-[2px]">
                                         Step {currentStep + 1} of {totalSteps}
                                     </span>
                                 </div>
                             </div>
 
-                            <p className="text-[13px] text-[#F5F5DC]/70 font-space leading-relaxed m-0 mb-4">
+                            <p className="text-sm text-[#F5F5DC]/70 font-space leading-relaxed m-0 mb-4">
                                 {step.message}
                             </p>
 
@@ -435,7 +435,7 @@ export default function TutorialOverlay() {
                             <div className="flex items-center justify-between">
                                 <button
                                     onClick={skipTour}
-                                    className="text-[0.75rem] text-[#F5F5DC]/30 hover:text-[#F5F5DC]/60 font-space tracking-wide uppercase transition-colors bg-transparent border-none cursor-pointer"
+                                    className="text-xs text-[#F5F5DC]/30 hover:text-[#F5F5DC]/60 font-space tracking-wide uppercase transition-colors bg-transparent border-none cursor-pointer"
                                 >
                                     Skip Tour
                                 </button>
@@ -460,7 +460,7 @@ export default function TutorialOverlay() {
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={goNext}
-                                    className="px-4 py-1.5 rounded-lg font-space text-[0.75rem] tracking-wide font-bold transition-all duration-300
+                                    className="px-4 py-1.5 rounded-lg font-space text-xs tracking-wide font-bold transition-all duration-300
                                         bg-gradient-to-r from-[#D4AF37] to-[#B8962E] text-[#0B0611]
                                         hover:shadow-md hover:shadow-[#D4AF37]/20 border-none cursor-pointer"
                                 >

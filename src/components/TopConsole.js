@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -91,16 +92,18 @@ export default function TopConsole() {
 
             {/* Left: Logo */}
             <Link href="/dashboard" className="relative flex items-center w-[60px] md:w-[90px] h-full flex-shrink-0 no-underline group z-[100]">
-                <img
+                <Image
                     src="/logos/ff-logo.png"
                     alt="Finance Funk"
+                    width={120}
+                    height={96}
                     className="absolute -top-2 left-0 md:left-2 h-16 md:h-24 w-auto drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)] group-hover:scale-[1.05] transition-all duration-500 pointer-events-none"
                     style={{ maxHeight: 'none', maxWidth: 'none' }}
                 />
             </Link>
 
             {/* Navigation Tabs — left-aligned beside logo, hidden on mobile (BottomNav handles it) */}
-            <nav id="ftue-nav" className="hidden md:flex items-center gap-0 mr-auto ml-2">
+            <nav id="ftue-nav" aria-label="Main navigation" className="hidden md:flex items-center gap-0 mr-auto ml-2">
                 {/* DASHBOARD */}
                 {trackingTabs.map(tab => {
                     const Icon = tab.icon;
@@ -111,7 +114,7 @@ export default function TopConsole() {
                             key={tab.id}
                             href={tab.href}
                             className={`
-                flex items-center gap-1.5 px-3 py-1.5 text-[0.75rem] font-space font-medium tracking-widest uppercase whitespace-nowrap
+                flex items-center gap-1.5 px-3 py-1.5 text-xs font-space font-medium tracking-widest uppercase whitespace-nowrap
                 transition-all duration-200 bg-transparent no-underline
                 ${isActive
                                     ? ''
@@ -137,13 +140,14 @@ export default function TopConsole() {
                             }
                         }}
                         className={`
-              group flex items-center gap-1.5 px-3 py-1.5 text-[0.75rem] font-space font-medium tracking-widest uppercase whitespace-nowrap
+              group flex items-center gap-1.5 px-3 py-1.5 text-xs font-space font-medium tracking-widest uppercase whitespace-nowrap
               transition-all duration-200 bg-transparent
               ${isBudgetRoute
                                 ? 'text-[#34D399]'
                                 : 'text-[#F5F5DC]/40 hover:text-[#F5F5DC]/70'
                             }
             `}
+                        aria-expanded={isBudgetDropdownOpen}
                     >
                         <Wallet size={13} strokeWidth={isBudgetRoute ? 2 : 1.5} />
                         <span className="opacity-70 font-normal">Budget</span>
@@ -162,7 +166,7 @@ export default function TopConsole() {
                                     animate={{ width: 'auto', opacity: 0.5, rotate: isBudgetDropdownOpen ? 180 : 0 }}
                                     exit={{ width: 0, opacity: 0 }}
                                     transition={{ duration: 0.15, ease: 'easeOut' }}
-                                    className="text-[0.6875rem] overflow-hidden inline-flex items-center justify-center ml-0.5"
+                                    className="text-2xs overflow-hidden inline-flex items-center justify-center ml-0.5"
                                 >
                                     ▼
                                 </motion.span>
@@ -198,7 +202,7 @@ export default function TopConsole() {
                                                     href={tab.href}
                                                     onClick={() => setIsBudgetDropdownOpen(false)}
                                                     className={`
-                            flex items-center gap-3 px-3 py-2.5 text-[0.75rem] font-space font-bold tracking-widest uppercase
+                            flex items-center gap-3 px-3 py-2.5 text-xs font-space font-bold tracking-widest uppercase
                             rounded-lg transition-all duration-200 text-left border-none no-underline
                             ${isActive
                                                             ? 'bg-[#34D399]/20 text-[#34D399]'
@@ -229,13 +233,14 @@ export default function TopConsole() {
                             }
                         }}
                         className={`
-              group flex items-center gap-1.5 px-3 py-1.5 text-[0.75rem] font-space font-medium tracking-widest uppercase whitespace-nowrap
+              group flex items-center gap-1.5 px-3 py-1.5 text-xs font-space font-medium tracking-widest uppercase whitespace-nowrap
               transition-all duration-200 bg-transparent
               ${isAssetRoute
                                 ? 'text-[#CC5500]'
                                 : 'text-[#F5F5DC]/40 hover:text-[#F5F5DC]/70'
                             }
             `}
+                        aria-expanded={isAssetsDropdownOpen}
                     >
                         <LayoutDashboard size={13} strokeWidth={isAssetRoute ? 2 : 1.5} />
                         <span className="opacity-70 font-normal">Assets</span>
@@ -255,7 +260,7 @@ export default function TopConsole() {
                                     animate={{ width: 'auto', opacity: 0.5, rotate: isAssetsDropdownOpen ? 180 : 0 }}
                                     exit={{ width: 0, opacity: 0 }}
                                     transition={{ duration: 0.15, ease: 'easeOut' }}
-                                    className="text-[0.6875rem] overflow-hidden inline-flex items-center justify-center ml-0.5"
+                                    className="text-2xs overflow-hidden inline-flex items-center justify-center ml-0.5"
                                 >
                                     ▼
                                 </motion.span>
@@ -289,7 +294,7 @@ export default function TopConsole() {
                                                     href={tab.href}
                                                     onClick={() => setIsAssetsDropdownOpen(false)}
                                                     className={`
-                            flex items-center gap-3 px-3 py-2.5 text-[0.75rem] font-space font-bold tracking-widest uppercase
+                            flex items-center gap-3 px-3 py-2.5 text-xs font-space font-bold tracking-widest uppercase
                             rounded-lg transition-all duration-200 text-left border-none no-underline
                             ${isActive
                                                             ? 'bg-[#CC5500]/20 text-[#CC5500]'
@@ -314,13 +319,14 @@ export default function TopConsole() {
                     <button
                         onClick={() => setIsPlanningDropdownOpen(!isPlanningDropdownOpen)}
                         className={`
-              group flex items-center gap-1.5 px-3 py-1.5 text-[0.75rem] font-space font-medium tracking-widest uppercase whitespace-nowrap
+              group flex items-center gap-1.5 px-3 py-1.5 text-xs font-space font-medium tracking-widest uppercase whitespace-nowrap
               transition-all duration-200 bg-transparent
               ${isPlanningRoute
                                 ? 'text-[#A78BFA]'
                                 : 'text-[#F5F5DC]/40 hover:text-[#F5F5DC]/70'
                             }
             `}
+                        aria-expanded={isPlanningDropdownOpen}
                     >
                         <TrendingUp size={13} strokeWidth={isPlanningRoute ? 2 : 1.5} />
                         <span className="opacity-70 font-normal">Planning</span>
@@ -340,7 +346,7 @@ export default function TopConsole() {
                                     animate={{ width: 'auto', opacity: 0.5, rotate: isPlanningDropdownOpen ? 180 : 0 }}
                                     exit={{ width: 0, opacity: 0 }}
                                     transition={{ duration: 0.15, ease: 'easeOut' }}
-                                    className="text-[0.6875rem] overflow-hidden inline-flex items-center justify-center ml-0.5"
+                                    className="text-2xs overflow-hidden inline-flex items-center justify-center ml-0.5"
                                 >
                                     ▼
                                 </motion.span>
@@ -374,7 +380,7 @@ export default function TopConsole() {
                                                     href={tab.href}
                                                     onClick={() => setIsPlanningDropdownOpen(false)}
                                                     className={`
-                             flex items-center gap-3 px-3 py-2.5 text-[0.75rem] font-space font-bold tracking-widest uppercase
+                             flex items-center gap-3 px-3 py-2.5 text-xs font-space font-bold tracking-widest uppercase
                              rounded-lg transition-all duration-200 text-left border-none no-underline
                              ${isActive
                                                             ? 'bg-[#A78BFA]/20 text-[#A78BFA]'
@@ -399,13 +405,14 @@ export default function TopConsole() {
                     <button
                         onClick={() => setIsLedgerDropdownOpen(!isLedgerDropdownOpen)}
                         className={`
-              group flex items-center gap-1.5 px-3 py-1.5 text-[0.75rem] font-space font-medium tracking-widest uppercase whitespace-nowrap
+              group flex items-center gap-1.5 px-3 py-1.5 text-xs font-space font-medium tracking-widest uppercase whitespace-nowrap
               transition-all duration-200 bg-transparent
               ${isLedgerRoute
                                 ? 'text-[#D4AF37]'
                                 : 'text-[#F5F5DC]/40 hover:text-[#F5F5DC]/70'
                             }
             `}
+                        aria-expanded={isLedgerDropdownOpen}
                     >
                         <BookOpen size={13} strokeWidth={isLedgerRoute ? 2 : 1.5} />
                         <span className="opacity-70 font-normal">Ledger</span>
@@ -425,7 +432,7 @@ export default function TopConsole() {
                                     animate={{ width: 'auto', opacity: 0.5, rotate: isLedgerDropdownOpen ? 180 : 0 }}
                                     exit={{ width: 0, opacity: 0 }}
                                     transition={{ duration: 0.15, ease: 'easeOut' }}
-                                    className="text-[0.6875rem] overflow-hidden inline-flex items-center justify-center ml-0.5"
+                                    className="text-2xs overflow-hidden inline-flex items-center justify-center ml-0.5"
                                 >
                                     ▼
                                 </motion.span>
@@ -459,7 +466,7 @@ export default function TopConsole() {
                                                     href={tab.href}
                                                     onClick={() => setIsLedgerDropdownOpen(false)}
                                                     className={`
-                            flex items-center gap-3 px-3 py-2.5 text-[0.75rem] font-space font-bold tracking-widest uppercase
+                            flex items-center gap-3 px-3 py-2.5 text-xs font-space font-bold tracking-widest uppercase
                             rounded-lg transition-all duration-200 text-left border-none no-underline
                             ${isActive
                                                             ? 'bg-[#D4AF37]/20 text-[#D4AF37]'
@@ -512,7 +519,7 @@ export default function TopConsole() {
                             title={session.user.name || session.user.email}
                         >
                             {session.user.image ? (
-                                <img src={session.user.image} alt={session.user.name} className="w-full h-full object-cover" />
+                                <Image src={session.user.image} alt={session.user.name || 'User'} width={32} height={32} className="w-full h-full object-cover" unoptimized />
                             ) : (
                                 <span className="text-[#D4AF37] text-xs font-bold font-space">
                                     {(session.user.name || session.user.email)?.[0]?.toUpperCase()}
@@ -537,13 +544,13 @@ export default function TopConsole() {
                                         {/* User info header */}
                                         <div className="px-4 py-3 border-b border-white/5">
                                             <p className="text-xs font-space font-bold text-parchment/80 m-0 truncate">{session.user.name || 'User'}</p>
-                                            <p className="text-[0.75rem] font-space text-parchment/30 m-0 truncate">{session.user.email}</p>
+                                            <p className="text-xs font-space text-parchment/30 m-0 truncate">{session.user.email}</p>
                                         </div>
                                         <div className="p-1.5">
                                             <Link
                                                 href="/profile"
                                                 onClick={() => setIsUserMenuOpen(false)}
-                                                className="flex items-center gap-2.5 px-3 py-2.5 text-[0.75rem] font-space font-medium tracking-wide rounded-lg text-parchment/60 hover:text-parchment hover:bg-white/5 transition-all no-underline"
+                                                className="flex items-center gap-2.5 px-3 py-2.5 text-xs font-space font-medium tracking-wide rounded-lg text-parchment/60 hover:text-parchment hover:bg-white/5 transition-all no-underline"
                                             >
                                                 <Settings size={14} className="text-[#D4AF37]/60" />
                                                 Profile & Settings
@@ -551,7 +558,7 @@ export default function TopConsole() {
                                             <Link
                                                 href="/import"
                                                 onClick={() => setIsUserMenuOpen(false)}
-                                                className="flex items-center gap-2.5 px-3 py-2.5 text-[0.75rem] font-space font-medium tracking-wide rounded-lg text-parchment/60 hover:text-parchment hover:bg-white/5 transition-all no-underline"
+                                                className="flex items-center gap-2.5 px-3 py-2.5 text-xs font-space font-medium tracking-wide rounded-lg text-parchment/60 hover:text-parchment hover:bg-white/5 transition-all no-underline"
                                             >
                                                 <FileSpreadsheet size={14} className="text-[#D4AF37]/60" />
                                                 Import Spreadsheet
@@ -560,7 +567,7 @@ export default function TopConsole() {
                                                 <Link
                                                     href="/admin"
                                                     onClick={() => setIsUserMenuOpen(false)}
-                                                    className="flex items-center gap-2.5 px-3 py-2.5 text-[0.75rem] font-space font-medium tracking-wide rounded-lg text-[#D4AF37]/70 hover:text-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all no-underline"
+                                                    className="flex items-center gap-2.5 px-3 py-2.5 text-xs font-space font-medium tracking-wide rounded-lg text-[#D4AF37]/70 hover:text-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all no-underline"
                                                 >
                                                     <Shield size={14} className="text-[#D4AF37]/60" />
                                                     Admin Dashboard
@@ -571,7 +578,7 @@ export default function TopConsole() {
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => { setIsUserMenuOpen(false); signOut({ callbackUrl: '/login' }); }}
-                                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[0.75rem] font-space font-medium tracking-wide rounded-lg text-red-400/70 hover:text-red-400 hover:bg-red-500/10 text-left"
+                                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-space font-medium tracking-wide rounded-lg text-red-400/70 hover:text-red-400 hover:bg-red-500/10 text-left"
                                             >
                                                 <LogOut size={14} />
                                                 Sign Out

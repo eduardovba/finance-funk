@@ -50,12 +50,12 @@ function CurrencyDropdown({ selected, onSelect, otherSelected, side, isOpen, onT
                 <span className="text-xs font-space font-bold tracking-wider text-[#D4AF37] drop-shadow-[0_0_8px_rgba(212,175,55,0.8)]">
                     {selected}
                 </span>
-                <span className="text-[0.6875rem] text-parchment/40 ml-0.5">▼</span>
+                <span className="text-2xs text-parchment/40 ml-0.5">▼</span>
             </button>
 
             {isOpen && (
                 <div
-                    className={`absolute top-full mt-2 w-56 bg-[#0B0611] backdrop-blur-xl border border-[#D4AF37]/20 rounded-xl shadow-2xl z-[1000] overflow-hidden ${side === 'left' ? 'left-0' : 'right-0'}`}
+                    className={`absolute top-full mt-2 w-56 bg-[#0B0611] backdrop-blur-xl border border-[#D4AF37]/20 rounded-xl shadow-2xl z-[900] overflow-hidden ${side === 'left' ? 'left-0' : 'right-0'}`}
                     style={{ animation: 'fadeIn 0.15s ease-out' }}
                 >
                     {/* Search */}
@@ -85,7 +85,7 @@ function CurrencyDropdown({ selected, onSelect, otherSelected, side, isOpen, onT
                                     >
                                         <span className="text-base">{c.flag}</span>
                                         <span className="text-xs font-space font-bold tracking-wider">{c.code}</span>
-                                        <span className="text-[0.75rem] text-parchment/40 ml-auto">{c.name}</span>
+                                        <span className="text-xs text-parchment/40 ml-auto">{c.name}</span>
                                     </button>
                                 ))}
                                 {otherItems.length > 0 && (
@@ -106,7 +106,7 @@ function CurrencyDropdown({ selected, onSelect, otherSelected, side, isOpen, onT
                             >
                                 <span className="text-base">{c.flag}</span>
                                 <span className="text-xs font-space font-bold tracking-wider">{c.code}</span>
-                                <span className="text-[0.75rem] text-parchment/40 ml-auto">{c.name}</span>
+                                <span className="text-xs text-parchment/40 ml-auto">{c.name}</span>
                             </button>
                         ))}
 
@@ -167,12 +167,12 @@ export default function CurrencyPill() {
                 {/* Left Side: Primary Flag + Code */}
                 <div className="flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
                     <span className="text-[14px] md:text-sm">{primaryMeta?.flag}</span>
-                    <span className="text-[0.75rem] md:text-[0.75rem] font-space font-bold text-parchment/80 group-hover:text-[#D4AF37] transition-colors">{primaryCurrency}</span>
+                    <span className="text-xs md:text-xs font-space font-bold text-parchment/80 group-hover:text-[#D4AF37] transition-colors">{primaryCurrency}</span>
                 </div>
 
                 <div className="hidden md:block w-px h-3 bg-white/10" />
 
-                <div className="md:hidden text-[0.6875rem] text-parchment/50 group-hover:text-[#D4AF37] pl-0.5 transition-colors">▼</div>
+                <div className="md:hidden text-2xs text-parchment/50 group-hover:text-[#D4AF37] pl-0.5 transition-colors">▼</div>
 
                 {/* Center: Flip Rate Button */}
                 <button
@@ -182,17 +182,17 @@ export default function CurrencyPill() {
                     }}
                     className="hidden md:flex bg-transparent border-none p-0 flex items-center gap-1 cursor-pointer"
                 >
-                    <span className="text-xs font-mono tabular-nums font-bold text-[#D4AF37] drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">
+                    <span className="text-data-xs font-space  font-bold text-[#D4AF37] drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">
                         {loadingRates ? '...' : liveRate.toFixed(2)}
                     </span>
-                    <span className="text-[0.6875rem] text-parchment/30 group-hover:text-parchment/50">⇅</span>
+                    <span className="text-2xs text-parchment/30 group-hover:text-parchment/50">⇅</span>
                 </button>
 
                 <div className="hidden md:block w-px h-3 bg-white/10" />
 
                 {/* Right Side: Secondary Code + Flag */}
                 <div className="hidden md:flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
-                    <span className="text-[0.75rem] font-space font-bold text-parchment/60 group-hover:text-[#D4AF37] transition-colors">{secondaryCurrency}</span>
+                    <span className="text-xs font-space font-bold text-parchment/60 group-hover:text-[#D4AF37] transition-colors">{secondaryCurrency}</span>
                     <span className="text-sm">{secondaryMeta?.flag}</span>
                 </div>
             </div>
@@ -200,14 +200,14 @@ export default function CurrencyPill() {
             {/* Expanded Mini Menu */}
             {isMenuOpen && (
                 <div
-                    className="absolute top-full right-0 mt-3 w-64 bg-[#0B0611] backdrop-blur-2xl border border-[#D4AF37]/20 rounded-2xl shadow-2xl p-4 z-[1001]"
+                    className="absolute top-full right-0 mt-3 w-64 bg-[#0B0611] backdrop-blur-2xl border border-[#D4AF37]/20 rounded-2xl shadow-2xl p-4 z-[900]"
                     style={{ animation: 'pillExpand 0.25s cubic-bezier(0.16, 1, 0.3, 1)' }}
                 >
                     <div className="flex flex-col gap-4">
                         {/* Currency Selectors */}
                         <div className="flex items-center justify-between pb-3 border-b border-white/5">
                             <div className="flex flex-col gap-1">
-                                <span className="text-[0.6875rem] font-space text-parchment/40 uppercase tracking-widest pl-2">Primary</span>
+                                <span className="text-2xs font-space text-parchment/40 uppercase tracking-widest pl-2">Primary</span>
                                 <CurrencyDropdown
                                     selected={primaryCurrency}
                                     onSelect={setPrimaryCurrency}
@@ -218,7 +218,7 @@ export default function CurrencyPill() {
                                 />
                             </div>
                             <div className="flex flex-col items-end gap-1">
-                                <span className="text-[0.6875rem] font-space text-parchment/40 uppercase tracking-widest pr-2">Secondary</span>
+                                <span className="text-2xs font-space text-parchment/40 uppercase tracking-widest pr-2">Secondary</span>
                                 <CurrencyDropdown
                                     selected={secondaryCurrency}
                                     onSelect={setSecondaryCurrency}
@@ -233,9 +233,9 @@ export default function CurrencyPill() {
                         {/* Detailed Rate Info */}
                         <div className="space-y-3 px-1">
                             <div>
-                                <div className="text-[0.6875rem] font-space text-parchment/40 uppercase tracking-widest mb-1.5">Exchange Rate</div>
+                                <div className="text-2xs font-space text-parchment/40 uppercase tracking-widest mb-1.5">Exchange Rate</div>
                                 <div className="flex items-center justify-between px-2 py-1.5 bg-white/5 rounded-lg border border-white/5">
-                                    <div className="text-[0.75rem] font-medium text-parchment">
+                                    <div className="text-xs font-medium text-parchment">
                                         {rateFlipped ? (
                                             <>1 {secondaryCurrency} = {liveRate.toFixed(4)} {primaryCurrency}</>
                                         ) : (
@@ -244,7 +244,7 @@ export default function CurrencyPill() {
                                     </div>
                                     <button
                                         onClick={() => setRateFlipped(!rateFlipped)}
-                                        className="text-[0.75rem] text-[#D4AF37]/60 hover:text-[#D4AF37] transition-colors bg-transparent border-none cursor-pointer font-bold"
+                                        className="text-xs text-[#D4AF37]/60 hover:text-[#D4AF37] transition-colors bg-transparent border-none cursor-pointer font-bold"
                                     >
                                         Flip
                                     </button>
@@ -253,15 +253,15 @@ export default function CurrencyPill() {
 
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
-                                    <div className="text-[0.6875rem] font-space text-parchment/40 uppercase tracking-widest mb-1">Source</div>
-                                    <div className="text-[0.75rem] text-parchment font-medium flex items-center gap-1.5">
+                                    <div className="text-2xs font-space text-parchment/40 uppercase tracking-widest mb-1">Source</div>
+                                    <div className="text-xs text-parchment font-medium flex items-center gap-1.5">
                                         <span className="grayscale opacity-50 text-xs">📈</span>
                                         Google
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-[0.6875rem] font-space text-parchment/40 uppercase tracking-widest mb-1">Updated</div>
-                                    <div className="text-[0.75rem] text-parchment font-medium">{formattedTime}</div>
+                                    <div className="text-2xs font-space text-parchment/40 uppercase tracking-widest mb-1">Updated</div>
+                                    <div className="text-xs text-parchment font-medium">{formattedTime}</div>
                                 </div>
                             </div>
                         </div>

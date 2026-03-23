@@ -35,7 +35,7 @@ export default function CategoryPicker({ categories, selectedId, onSelect }: Cat
                             }`}
                     >
                         <span className="text-xl">{cat.icon || '📦'}</span>
-                        <span className={`text-[0.6875rem] font-space truncate w-full text-center
+                        <span className={`text-2xs font-space truncate w-full text-center
                             ${isSelected ? 'text-[#D4AF37]' : 'text-[#F5F5DC]/50'}`}>
                             {cat.name}
                         </span>

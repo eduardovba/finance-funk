@@ -91,7 +91,7 @@ export default function QuickAddSheet({ isOpen, onClose, categories, onSubmit }:
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[500]"
                         onClick={onClose}
                     />
 
@@ -102,7 +102,7 @@ export default function QuickAddSheet({ isOpen, onClose, categories, onSubmit }:
                         exit={{ y: '100%', x: 0 }}
                         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
                         className="
-                            fixed z-[70] overflow-y-auto
+                            fixed z-[500] overflow-y-auto
                             bottom-0 left-0 right-0 max-h-[85vh] rounded-t-3xl
                             md:bottom-auto md:top-0 md:left-auto md:right-0 md:w-[420px] md:h-full md:max-h-full md:rounded-t-none md:rounded-l-3xl
                             bg-[#0D0F12]/95 backdrop-blur-xl border-t border-white/[0.08]
@@ -130,7 +130,7 @@ export default function QuickAddSheet({ isOpen, onClose, categories, onSubmit }:
                         <form onSubmit={handleSubmit} className="px-6 pb-8 flex flex-col gap-5">
                             {/* Amount */}
                             <div>
-                                <label className="text-[0.75rem] text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">
+                                <label className="text-xs text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">
                                     Amount (R$)
                                 </label>
                                 <input
@@ -146,7 +146,7 @@ export default function QuickAddSheet({ isOpen, onClose, categories, onSubmit }:
 
                             {/* Category Picker */}
                             <div>
-                                <label className="text-[0.75rem] text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">
+                                <label className="text-xs text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">
                                     Category
                                 </label>
                                 <CategoryPicker
@@ -158,7 +158,7 @@ export default function QuickAddSheet({ isOpen, onClose, categories, onSubmit }:
 
                             {/* Description */}
                             <div>
-                                <label className="text-[0.75rem] text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">
+                                <label className="text-xs text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">
                                     Description
                                 </label>
                                 <input
@@ -172,7 +172,7 @@ export default function QuickAddSheet({ isOpen, onClose, categories, onSubmit }:
 
                             {/* Date */}
                             <div>
-                                <label className="text-[0.75rem] text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">
+                                <label className="text-xs text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">
                                     Date
                                 </label>
                                 <input

@@ -31,7 +31,7 @@ const ModalOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xl",
+      "fixed inset-0 z-[999] bg-black/60 backdrop-blur-xl",
       "data-[state=open]:animate-[fadeIn_200ms_ease-out]",
       "data-[state=closed]:animate-[fadeOut_150ms_ease-in]",
       className
@@ -57,7 +57,7 @@ const ModalContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-1/2 top-1/2 z-[10000] -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)]",
+        "fixed left-1/2 top-1/2 z-[999] -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)]",
         sizeClasses[size],
         // Glass-elevated styling
         "bg-[rgba(18,20,24,0.80)] backdrop-blur-[40px] backdrop-saturate-[180%]",

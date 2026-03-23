@@ -70,11 +70,11 @@ export default function CategoryCard({ category, onEdit, onDelete }: CategoryCar
                 </span>
                 <div className="flex items-center gap-2">
                     {category.monthly_target_cents > 0 && (
-                        <span className="text-[0.6875rem] font-mono tabular-nums text-[#F5F5DC]/30">
+                        <span className="text-2xs font-space tabular-nums text-[#F5F5DC]/30">
                             {formatCents(displayTarget, displayCurrency)}/mo
                         </span>
                     )}
-                    <span className={`text-[0.6rem] uppercase tracking-[1.5px] font-space px-1.5 py-0.5 rounded-md border
+                    <span className={`text-2xs uppercase tracking-[1.5px] font-space px-1.5 py-0.5 rounded-lg border
                         ${isIncome
                             ? 'text-emerald-400 border-emerald-400/20 bg-emerald-400/10'
                             : 'text-[#F5F5DC]/30 border-white/[0.06] bg-white/[0.02]'

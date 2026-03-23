@@ -16,7 +16,7 @@ const badgeVariants = cva(
         muted: "bg-white/10 text-white/50 border border-white/5",
       },
       size: {
-        sm: "px-2 py-0.5 text-[0.75rem]",
+        sm: "px-2 py-0.5 text-xs",
         md: "px-2.5 py-0.5 text-[var(--text-xs)]",
       },
     },

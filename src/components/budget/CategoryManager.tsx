@@ -208,7 +208,7 @@ function CategorySection({ title, categories, sensors, onDragEnd, onEdit, onDele
 
     return (
         <div className="mb-6">
-            <h3 className="text-[0.75rem] text-[#F5F5DC]/35 uppercase tracking-[2px] font-space mb-3 px-1">
+            <h3 className="text-xs text-[#F5F5DC]/35 uppercase tracking-[2px] font-space mb-3 px-1">
                 {title} Categories
             </h3>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>

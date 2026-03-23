@@ -29,7 +29,7 @@ export default function SavingsRateBar({ savingsRateBasisPoints }: SavingsRateBa
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                     <TrendingUp size={16} className="text-[#D4AF37]/70" />
-                    <span className="text-[0.75rem] text-[#F5F5DC]/50 uppercase tracking-[2px] font-space">
+                    <span className="text-xs text-[#F5F5DC]/50 uppercase tracking-[2px] font-space">
                         Savings Rate
                     </span>
                 </div>

@@ -199,7 +199,7 @@ export default function BudgetPlanner() {
             {/* Top-Down Summary Card */}
             <div className="rounded-2xl bg-[#121418]/80 backdrop-blur-xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.6)] p-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h2 className="text-[0.7rem] text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-1">
+                    <h2 className="text-xs text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-1">
                         Total Budgeted
                     </h2>
                     <p className="text-3xl font-bebas text-[#D4AF37] tracking-wide">
@@ -210,18 +210,18 @@ export default function BudgetPlanner() {
                 {avgMonthlyIncomeCents > 0 && (
                     <div className="flex flex-col md:items-end border-t md:border-t-0 md:border-l border-white/[0.06] pt-4 md:pt-0 md:pl-8">
                         <div className="flex md:flex-col justify-between items-center md:items-end w-full mb-1">
-                            <span className="text-[0.65rem] text-[#F5F5DC]/30 uppercase tracking-[2px] font-space">
+                            <span className="text-2xs text-[#F5F5DC]/30 uppercase tracking-[2px] font-space">
                                 90-Day Avg Income
                             </span>
-                            <span className="text-sm font-mono text-[#F5F5DC]/80">
+                            <span className="text-sm font-space text-[#F5F5DC]/80">
                                 {formatCents(avgMonthlyIncomeCents, displayCurrency)}
                             </span>
                         </div>
                         <div className="flex md:flex-col justify-between items-center md:items-end w-full">
-                            <span className="text-[0.65rem] text-[#F5F5DC]/30 uppercase tracking-[2px] font-space">
+                            <span className="text-2xs text-[#F5F5DC]/30 uppercase tracking-[2px] font-space">
                                 {isDeficit ? 'Deficit' : 'Surplus'}
                             </span>
-                            <span className={`text-sm font-mono font-bold ${isDeficit ? 'text-red-400' : 'text-[#34D399]'}`}>
+                            <span className={`text-sm font-space font-bold ${isDeficit ? 'text-red-400' : 'text-[#34D399]'}`}>
                                 {formatCents(Math.abs(surplusCents), displayCurrency)}
                             </span>
                         </div>
@@ -238,9 +238,9 @@ export default function BudgetPlanner() {
                     {/* ─── Expense Categories ─────────────────────── */}
                     {expenseCategories.length > 0 && (
                         <div className="mb-8">
-                            <h3 className="text-[0.75rem] text-[#F5F5DC]/35 uppercase tracking-[2px] font-space mb-3 px-1 flex justify-between items-center">
+                            <h3 className="text-xs text-[#F5F5DC]/35 uppercase tracking-[2px] font-space mb-3 px-1 flex justify-between items-center">
                                 <span>Expense Categories</span>
-                                <span className="text-[#F5F5DC]/20 text-[0.65rem]">TARGET ({currencyMeta.symbol})</span>
+                                <span className="text-[#F5F5DC]/20 text-2xs">TARGET ({currencyMeta.symbol})</span>
                             </h3>
                             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, expenseCategories)}>
                                 <SortableContext items={expenseCategories.map(c => c.id)} strategy={verticalListSortingStrategy}>
@@ -266,7 +266,7 @@ export default function BudgetPlanner() {
                     {/* ─── Income Categories ──────────────────────── */}
                     {incomeCategories.length > 0 && (
                         <div className="mb-6">
-                            <h3 className="text-[0.75rem] text-[#F5F5DC]/35 uppercase tracking-[2px] font-space mb-3 px-1">
+                            <h3 className="text-xs text-[#F5F5DC]/35 uppercase tracking-[2px] font-space mb-3 px-1">
                                 Income Categories
                             </h3>
                             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, incomeCategories)}>
@@ -299,7 +299,7 @@ export default function BudgetPlanner() {
             )}
 
             {/* Sticky Action Bar */}
-            <div className="fixed bottom-[88px] left-0 right-0 px-4 pointer-events-none z-[60]">
+            <div className="fixed bottom-[88px] left-0 right-0 px-4 pointer-events-none z-[500]">
                 <div className="max-w-3xl mx-auto flex gap-3 pointer-events-auto">
                     <button
                         onClick={handleAutoSuggest}
@@ -415,11 +415,11 @@ function PlannerRow({ category, draftValue, suggestionCents, currencyMeta, onCha
 
                 <div className="flex flex-col min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                        <span className="text-[15px] font-space text-[#F5F5DC]/90 truncate tracking-wide">
+                        <span className="text-base font-space text-[#F5F5DC]/90 truncate tracking-wide">
                             {category.name}
                         </span>
                         {isIncome && (
-                            <span className="text-[0.6rem] uppercase tracking-[1.5px] font-space px-1.5 py-0.5 rounded-md border text-emerald-400 border-emerald-400/20 bg-emerald-400/10">
+                            <span className="text-2xs uppercase tracking-[1.5px] font-space px-1.5 py-0.5 rounded-lg border text-emerald-400 border-emerald-400/20 bg-emerald-400/10">
                                 Income
                             </span>
                         )}
@@ -447,7 +447,7 @@ function PlannerRow({ category, draftValue, suggestionCents, currencyMeta, onCha
                         </button>
                         
                         <div className="flex items-center w-24 sm:w-[110px] px-2 py-1.5 rounded-lg bg-white/[0.02] border border-transparent hover:border-white/[0.06] focus-within:border-[#D4AF37]/40 focus-within:bg-white/[0.05] transition-colors">
-                            <span className="text-[#D4AF37]/50 font-mono text-sm sm:text-base mr-1 pointer-events-none select-none">
+                            <span className="text-[#D4AF37]/50 font-space text-sm sm:text-base mr-1 pointer-events-none select-none">
                                 {currencyMeta.symbol}
                             </span>
                             <input
@@ -455,7 +455,7 @@ function PlannerRow({ category, draftValue, suggestionCents, currencyMeta, onCha
                                 inputMode="decimal"
                                 value={draftValue}
                                 onChange={(e) => onChangeDraft(e.target.value)}
-                                className="w-full bg-transparent text-[#D4AF37] font-mono text-sm sm:text-base text-right focus:outline-none"
+                                className="w-full bg-transparent text-[#D4AF37] font-space text-sm sm:text-base text-right focus:outline-none"
                             />
                         </div>
 

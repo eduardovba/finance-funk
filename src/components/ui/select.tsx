@@ -78,7 +78,7 @@ const SelectContent = React.forwardRef<
       ref={ref}
       position={position}
       className={cn(
-        "z-[10000] overflow-hidden",
+        "z-[999] overflow-hidden",
         // Glass-card dropdown
         "bg-[rgba(18,20,24,0.92)] backdrop-blur-2xl",
         "border border-white/10 rounded-xl",

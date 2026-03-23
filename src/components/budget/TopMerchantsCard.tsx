@@ -43,16 +43,16 @@ function RankedList({ items, maxCents, fx, displayCurrency }: {
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 min-w-0">
                                 <span className="text-base flex-shrink-0">{m.category?.icon || '💸'}</span>
-                                <span className="text-[0.8rem] font-space text-[#F5F5DC]/70 truncate">
+                                <span className="text-sm font-space text-[#F5F5DC]/70 truncate">
                                     {m.name}
                                 </span>
                                 {m.count > 1 && (
-                                    <span className="text-[0.55rem] text-[#F5F5DC]/25 font-space flex-shrink-0">
+                                    <span className="text-2xs text-[#F5F5DC]/25 font-space flex-shrink-0">
                                         ×{m.count}
                                     </span>
                                 )}
                             </div>
-                            <span className="text-[0.8rem] font-mono tabular-nums text-[#F5F5DC]/60 flex-shrink-0 ml-2">
+                            <span className="text-data-sm font-space  text-[#F5F5DC]/60 flex-shrink-0 ml-2">
                                 {formatCents(fx(m.totalCents), displayCurrency)}
                             </span>
                         </div>

@@ -95,7 +95,7 @@ export default function AssetCard({
                         )
                     )}
                     <div className="flex flex-col">
-                        <span className="font-semibold text-[0.95rem] text-white tracking-wide">{title}</span>
+                        <span className="font-semibold text-base text-white tracking-wide">{title}</span>
                         <span className="text-sm text-white/50">{subtitle}</span>
                     </div>
                 </div>
@@ -103,7 +103,7 @@ export default function AssetCard({
                 <div className="flex flex-col items-end">
                     <span className="font-bold text-[1.1rem] text-white">{value}</span>
                     {performance && (
-                        <span className={`text-xs font-semibold px-1.5 py-0.5 mt-0.5 rounded-md flex items-center gap-1 ${isPositive ? 'bg-emerald-500/10 text-emerald-400' : isPositive === false ? 'bg-rose-500/10 text-rose-400' : 'text-white/50'}`}>
+                        <span className={`text-xs font-semibold px-1.5 py-0.5 mt-0.5 rounded-lg flex items-center gap-1 ${isPositive ? 'bg-emerald-500/10 text-emerald-400' : isPositive === false ? 'bg-rose-500/10 text-rose-400' : 'text-white/50'}`}>
                             {performance}
                         </span>
                     )}

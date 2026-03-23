@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, Loader2 } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 interface StepUploadProps {
     onFile: (f: File | undefined) => void;
@@ -28,7 +29,7 @@ export default function StepUpload({ onFile, onDrop, onDragOver, fileInputRef, p
                 onDragOver={(e) => { onDragOver(e); setDragActive(true); }}
                 onDragLeave={() => setDragActive(false)}
                 onClick={() => fileInputRef.current?.click()}
-                className={`glass-card cursor-pointer text-center py-20 px-8 transition-all duration-300 group
+                className={`cursor-pointer text-center py-20 px-8 transition-all duration-300 group
                     ${dragActive ? 'border-[#D4AF37]/60 bg-[#D4AF37]/5 scale-[1.01]' : 'hover:border-[#D4AF37]/30'}`}
             >
                 {parsing ? (
@@ -95,7 +96,7 @@ export default function StepUpload({ onFile, onDrop, onDragOver, fileInputRef, p
                                 key={t.file}
                                 href={`/templates/${t.file}`}
                                 download={t.file}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/10 text-parchment/50 text-[0.75rem] font-space hover:border-[#D4AF37]/30 hover:text-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all no-underline"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/10 text-parchment/50 text-xs font-space hover:border-[#D4AF37]/30 hover:text-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all no-underline"
                             >
                                 <span>{t.icon}</span> {t.label}
                             </a>

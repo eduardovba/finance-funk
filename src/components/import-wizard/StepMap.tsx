@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, ArrowLeft, Check, AlertCircle, Sparkles, ChevronDown } from 'lucide-react';
 import { getFieldsForAssetClass, FIELD_LABELS } from '@/lib/spreadsheetParser';
 import type { SheetConfig } from './types';
+import { Card } from '@/components/ui/card';
 
 interface StepMapProps {
     sheetsConfig: SheetConfig[];
@@ -76,7 +77,7 @@ export default function StepMap({ sheetsConfig, setSheetsConfig, onNext, onBack 
             )}
 
             {/* AI Detection Banner */}
-            <div className="glass-card flex items-center gap-3 !py-3">
+            <div className="flex items-center gap-3 !py-3">
                 <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center flex-shrink-0">
                     <Sparkles size={16} className="text-[#D4AF37]" />
                 </div>
@@ -92,14 +93,14 @@ export default function StepMap({ sheetsConfig, setSheetsConfig, onNext, onBack 
             </div>
 
             {/* Mapping Table */}
-            <div className="glass-card !p-0 overflow-hidden">
+            <div className="!p-0 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-white/5">
-                                <th className="text-left px-4 py-3 text-[0.75rem] uppercase tracking-widest text-parchment/40 font-space font-medium">Your Column</th>
-                                <th className="text-left px-4 py-3 text-[0.75rem] uppercase tracking-widest text-parchment/40 font-space font-medium">Maps To</th>
-                                <th className="text-left px-4 py-3 text-[0.75rem] uppercase tracking-widest text-parchment/40 font-space font-medium">Sample Data</th>
+                                <th className="text-left px-4 py-3 text-xs uppercase tracking-widest text-parchment/40 font-space font-medium">Your Column</th>
+                                <th className="text-left px-4 py-3 text-xs uppercase tracking-widest text-parchment/40 font-space font-medium">Maps To</th>
+                                <th className="text-left px-4 py-3 text-xs uppercase tracking-widest text-parchment/40 font-space font-medium">Sample Data</th>
                             </tr>
                         </thead>
                         <tbody>

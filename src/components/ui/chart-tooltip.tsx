@@ -59,7 +59,7 @@ export function ChartTooltip({
       }}
     >
       {formattedLabel && (
-        <p className="text-[13px] font-semibold text-[rgba(245,245,220,0.92)] mb-2 tracking-tight">
+        <p className="text-sm font-semibold text-[rgba(245,245,220,0.92)] mb-2 tracking-tight">
           {formattedLabel}
         </p>
       )}
@@ -78,12 +78,12 @@ export function ChartTooltip({
                   className="w-2 h-2 rounded-full shrink-0"
                   style={{ backgroundColor: dotColor }}
                 />
-                <span className="text-[12px] text-[rgba(245,245,220,0.55)] truncate">
+                <span className="text-xs text-[rgba(245,245,220,0.55)] truncate">
                   {entry.name}
                 </span>
               </div>
               <span
-                className="text-[12px] font-medium text-[rgba(245,245,220,0.92)] tabular-nums shrink-0"
+                className="text-data-xs font-medium text-[rgba(245,245,220,0.92)]  shrink-0"
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
                 {formattedValue}
@@ -97,11 +97,11 @@ export function ChartTooltip({
         <>
           <div className="h-px bg-[rgba(212,175,55,0.15)] my-2" />
           <div className="flex items-center justify-between">
-            <span className="text-[12px] font-semibold text-[rgba(245,245,220,0.7)]">
+            <span className="text-xs font-semibold text-[rgba(245,245,220,0.7)]">
               {totalLabel}
             </span>
             <span
-              className="text-[13px] font-bold text-[#D4AF37]"
+              className="text-sm font-bold text-[#D4AF37]"
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
               {totalValue}

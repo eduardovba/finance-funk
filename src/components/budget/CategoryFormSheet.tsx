@@ -130,7 +130,7 @@ export default function CategoryFormSheet({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[500]"
                         onClick={onClose}
                     />
 
@@ -141,7 +141,7 @@ export default function CategoryFormSheet({
                         exit={{ y: '100%', x: 0 }}
                         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
                         className="
-                            fixed z-[70] overflow-y-auto
+                            fixed z-[500] overflow-y-auto
                             bottom-0 left-0 right-0 max-h-[90vh] rounded-t-3xl
                             md:bottom-auto md:top-0 md:left-auto md:right-0 md:w-[420px] md:h-full md:max-h-full md:rounded-t-none md:rounded-l-3xl
                             bg-[#0D0F12]/95 backdrop-blur-xl border-t border-white/[0.08]
@@ -168,7 +168,7 @@ export default function CategoryFormSheet({
                         <form onSubmit={handleSubmit} className="px-6 pb-8 flex flex-col gap-5">
                             {/* Name */}
                             <div>
-                                <label className="text-[0.75rem] text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">Name</label>
+                                <label className="text-xs text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">Name</label>
                                 <input
                                     type="text"
                                     placeholder="e.g. Groceries"
@@ -181,19 +181,19 @@ export default function CategoryFormSheet({
 
                             {/* Icon */}
                             <div>
-                                <label className="text-[0.75rem] text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">Icon</label>
+                                <label className="text-xs text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">Icon</label>
                                 <EmojiPicker selected={icon} onSelect={setIcon} />
                             </div>
 
                             {/* Color */}
                             <div>
-                                <label className="text-[0.75rem] text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">Color</label>
+                                <label className="text-xs text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">Color</label>
                                 <ColorPicker selected={color} onSelect={setColor} />
                             </div>
 
                             {/* Monthly Target */}
                             <div>
-                                <label className="text-[0.75rem] text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">
+                                <label className="text-xs text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">
                                     Monthly Target ({currencySymbol})
                                 </label>
                                 <input
@@ -209,7 +209,7 @@ export default function CategoryFormSheet({
                             {/* Type toggle (create only) */}
                             {!isEdit && (
                                 <div>
-                                    <label className="text-[0.75rem] text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">Type</label>
+                                    <label className="text-xs text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">Type</label>
                                     <div className="flex gap-2">
                                         <button
                                             type="button"

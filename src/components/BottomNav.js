@@ -58,14 +58,14 @@ function AssetsSheet({ isOpen, onClose }) {
             {isOpen && (
                 <>
                     <motion.div
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[998]"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[900]"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
                     />
                     <motion.div
-                        className="fixed bottom-0 left-0 right-0 bg-[#0B0611] border-t border-[#CC5500]/20 rounded-t-3xl z-[999] pb-safe"
+                        className="fixed bottom-0 left-0 right-0 bg-[#0B0611] border-t border-[#CC5500]/20 rounded-t-3xl z-[900] pb-safe"
                         initial={{ y: '100%' }}
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
@@ -103,7 +103,7 @@ function AssetsSheet({ isOpen, onClose }) {
                                                 {tab.label}
                                             </span>
                                         </div>
-                                        <span className="text-parchment/50 text-[0.75rem] font-mono tabular-nums pl-0.5">
+                                        <span className="text-parchment/50 text-data-xs font-space  pl-0.5">
                                             {value ? formatCurrency(value, 'BRL') : '—'}
                                         </span>
                                     </Link>
@@ -126,14 +126,14 @@ function PlanningSheet({ isOpen, onClose }) {
             {isOpen && (
                 <>
                     <motion.div
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[998]"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[900]"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
                     />
                     <motion.div
-                        className="fixed bottom-0 left-0 right-0 bg-[#0B0611] border-t border-[#A78BFA]/20 rounded-t-3xl z-[999] pb-safe"
+                        className="fixed bottom-0 left-0 right-0 bg-[#0B0611] border-t border-[#A78BFA]/20 rounded-t-3xl z-[900] pb-safe"
                         initial={{ y: '100%' }}
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
@@ -178,14 +178,14 @@ function LedgerSheet({ isOpen, onClose }) {
             {isOpen && (
                 <>
                     <motion.div
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[998]"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[900]"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
                     />
                     <motion.div
-                        className="fixed bottom-0 left-0 right-0 bg-[#0B0611] border-t border-[#D4AF37]/20 rounded-t-3xl z-[999] pb-safe"
+                        className="fixed bottom-0 left-0 right-0 bg-[#0B0611] border-t border-[#D4AF37]/20 rounded-t-3xl z-[900] pb-safe"
                         initial={{ y: '100%' }}
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
@@ -229,14 +229,14 @@ function BudgetSheet({ isOpen, onClose }) {
             {isOpen && (
                 <>
                     <motion.div
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[998]"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[900]"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
                     />
                     <motion.div
-                        className="fixed bottom-0 left-0 right-0 bg-[#0B0611] border-t border-[#34D399]/20 rounded-t-3xl z-[999] pb-safe"
+                        className="fixed bottom-0 left-0 right-0 bg-[#0B0611] border-t border-[#34D399]/20 rounded-t-3xl z-[900] pb-safe"
                         initial={{ y: '100%' }}
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
@@ -342,7 +342,7 @@ export default function BottomNav() {
 
     return (
         <>
-            <nav id="ftue-nav-mobile" className="md:hidden fixed bottom-0 left-0 right-0 z-[997] bg-[#0B0611]/95 backdrop-blur-xl border-t border-white/10"
+            <nav id="ftue-nav-mobile" aria-label="Main navigation" className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-[#0B0611]/95 backdrop-blur-xl border-t border-white/10"
                 style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
             >
                 <div className="flex items-center justify-around h-16">
@@ -359,13 +359,15 @@ export default function BottomNav() {
                                         tab.id === 'assets' ? 'ftue-sidebar-mobile' : undefined
                                     }
                                     onClick={tab.action}
+                                    aria-label={tab.label}
+                                    aria-current={active ? 'page' : undefined}
                                     className="flex flex-col items-center justify-center gap-0.5 flex-1 w-full max-w-[20%] h-full bg-transparent border-none active:scale-[0.9] transition-transform relative"
                                 >
                                     {active && (
                                         <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 60% 80% at 50% 100%, ${activeColor}15, transparent)` }} />
                                     )}
                                     <Icon size={22} style={active ? { color: activeColor, filter: `drop-shadow(0 0 8px ${activeColor}80)` } : {}} className={active ? '' : 'text-parchment/40'} strokeWidth={active ? 2.5 : 1.5} />
-                                    <span className={`text-[0.75rem] font-space tracking-wider ${active ? 'font-bold' : 'text-parchment/40'}`} style={active ? { color: activeColor } : {}}>
+                                    <span className={`text-xs font-space tracking-wider ${active ? 'font-bold' : 'text-parchment/40'}`} style={active ? { color: activeColor } : {}}>
                                         {tab.label}
                                     </span>
                                 </button>
@@ -376,13 +378,15 @@ export default function BottomNav() {
                             <Link
                                 key={tab.id}
                                 href={tab.href}
+                                aria-label={tab.label}
+                                aria-current={active ? 'page' : undefined}
                                 className="flex flex-col items-center justify-center gap-0.5 flex-1 w-full max-w-[20%] h-full no-underline active:scale-[0.9] transition-transform relative"
                             >
                                 {active && (
                                     <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 60% 80% at 50% 100%, ${activeColor}15, transparent)` }} />
                                 )}
                                 <Icon size={22} style={active ? { color: activeColor, filter: `drop-shadow(0 0 8px ${activeColor}80)` } : {}} className={active ? '' : 'text-parchment/40'} strokeWidth={active ? 2.5 : 1.5} />
-                                <span className={`text-[0.75rem] font-space tracking-wider ${active ? 'font-bold' : 'text-parchment/40'}`} style={active ? { color: activeColor } : {}}>
+                                <span className={`text-xs font-space tracking-wider ${active ? 'font-bold' : 'text-parchment/40'}`} style={active ? { color: activeColor } : {}}>
                                     {tab.label}
                                 </span>
                             </Link>

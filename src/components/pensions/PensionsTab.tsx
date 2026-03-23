@@ -150,8 +150,8 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                                 <div className="flex flex-col">
                                     {!nameHandledByContextPane && <h3 className="text-xl font-bold text-white/90 tracking-tight">{asset.asset}</h3>}
                                     <div className="flex items-center gap-2 mt-2">
-                                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[0.75rem] uppercase font-mono tabular-nums tracking-wider">{asset.broker}</span>
-                                        {asset.ticker && <span className="px-2 py-0.5 rounded bg-white/10 text-white/70 text-[0.75rem] font-mono tabular-nums tracking-wider">{asset.ticker}</span>}
+                                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-data-xs uppercase font-space  tracking-wider">{asset.broker}</span>
+                                        {asset.ticker && <span className="px-2 py-0.5 rounded bg-white/10 text-white/70 text-data-xs font-space  tracking-wider">{asset.ticker}</span>}
                                     </div>
                                 </div>
                             )}
@@ -163,27 +163,27 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                                         {!isCash && (
                                             <>
                                                 <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                                                    <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">Units</span>
-                                                    <span className="text-sm font-medium text-white/90 font-mono tabular-nums">{Math.abs(asset.qty).toLocaleString(undefined, { maximumFractionDigits: 4 })}</span>
+                                                    <span className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Units</span>
+                                                    <span className="text-data-sm font-medium text-white/90 font-space ">{Math.abs(asset.qty).toLocaleString(undefined, { maximumFractionDigits: 4 })}</span>
                                                 </div>
                                                 <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                                                    <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">Unit Price</span>
-                                                    <span className="text-sm font-medium text-white/90 font-mono tabular-nums">{formatCurrency(asset.valuePerShare, cur)}</span>
+                                                    <span className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Unit Price</span>
+                                                    <span className="text-data-sm font-medium text-white/90 font-space ">{formatCurrency(asset.valuePerShare, cur)}</span>
                                                 </div>
                                             </>
                                         )}
                                         <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                                            <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">Cost Basis</span>
-                                            <span className="text-sm font-medium text-white/90 font-mono tabular-nums">{formatCurrency(asset.totalCost, cur)}</span>
+                                            <span className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Cost Basis</span>
+                                            <span className="text-data-sm font-medium text-white/90 font-space ">{formatCurrency(asset.totalCost, cur)}</span>
                                         </div>
                                         <div className="bg-[#D4AF37]/5 border border-[#D4AF37]/20 rounded-xl p-3">
-                                            <span className="block text-[0.75rem] text-[#D4AF37]/60 uppercase tracking-widest mb-1.5">Current Value</span>
-                                            <span className="text-sm font-bold text-[#D4AF37] font-mono tabular-nums drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">{formatCurrency(asset.currentValue, cur)}</span>
+                                            <span className="block text-xs text-[#D4AF37]/60 uppercase tracking-widest mb-1.5">Current Value</span>
+                                            <span className="text-data-sm font-bold text-[#D4AF37] font-space  drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">{formatCurrency(asset.currentValue, cur)}</span>
                                         </div>
                                         {!isCash && (
                                             <div className="col-span-2 bg-white/[0.02] border border-white/5 rounded-xl p-3 flex justify-between items-center">
-                                                <span className="text-[0.75rem] text-white/40 uppercase tracking-widest">P&L</span>
-                                                <span className={`text-sm font-bold tracking-wider rounded-md font-mono tabular-nums ${asset.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                <span className="text-xs text-white/40 uppercase tracking-widest">P&L</span>
+                                                <span className={`text-data-sm font-bold tracking-wider rounded-lg font-space  ${asset.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                                     {asset.pnl >= 0 ? '+' : ''}{formatCurrency(asset.pnl, cur)} ({asset.roi >= 0 ? '+' : ''}{asset.roi.toFixed(1)}%)
                                                 </span>
                                             </div>
@@ -214,11 +214,11 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                                                 <>
                                                     <div className="flex items-center gap-2 mb-1.5">
                                                         <div className={`w-1.5 h-1.5 rounded-full ${!isSell ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                                                        <span className="font-medium text-[0.75rem] text-white/90 uppercase tracking-wider font-space">{tr.type}</span>
+                                                        <span className="font-medium text-xs text-white/90 uppercase tracking-wider font-space">{tr.type}</span>
                                                     </div>
                                                     <div className="flex flex-col gap-1">
-                                                        <span className="text-sm font-bold text-white tracking-tight font-mono tabular-nums">{formatCurrency(parseFloat(tr.value) || parseFloat(tr.amount) || 0, cur)}</span>
-                                                        <span className="text-[0.75rem] text-white/40 font-mono tabular-nums tracking-tight leading-relaxed">{tr.date} {tr.quantity ? `• ${tr.quantity} units` : ''}</span>
+                                                        <span className="text-data-sm font-bold text-white tracking-tight font-space ">{formatCurrency(parseFloat(tr.value) || parseFloat(tr.amount) || 0, cur)}</span>
+                                                        <span className="text-data-xs text-white/40 font-space  tracking-tight leading-relaxed">{tr.date} {tr.quantity ? `• ${tr.quantity} units` : ''}</span>
                                                     </div>
                                                 </>
                                             );
@@ -265,7 +265,7 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                         </Button>
                     </div>
                     {ledgerOpen && (
-                        <div className="bg-white/5 backdrop-blur-md border border-white/5 rounded-3xl p-4 sm:p-6 mb-24">
+                        <div className="bg-white/5 backdrop-blur-md border border-white/5 rounded-2xl p-4 sm:p-6 mb-24">
                             <TransactionTimeline
                                 transactions={(() => {
                                     const trs = [...transactions];
@@ -305,7 +305,7 @@ export default function PensionsTab({ transactions = [], rates, onRefresh, marke
                                             </div>
                                             {isSell && tr.pnl !== null && tr.pnl !== undefined && (
                                                 <div className="mt-1.5">
-                                                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${parseFloat(tr.pnl) >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                                                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-lg ${parseFloat(tr.pnl) >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
                                                         P&L: {parseFloat(tr.pnl) >= 0 ? '+' : ''}{formatCurrency(parseFloat(tr.pnl), cur)}
                                                         {tr.roiPercent !== null && tr.roiPercent !== undefined ? ` (${parseFloat(tr.roiPercent) >= 0 ? '+' : ''}${parseFloat(tr.roiPercent).toFixed(1)}%)` : ''}
                                                     </span>

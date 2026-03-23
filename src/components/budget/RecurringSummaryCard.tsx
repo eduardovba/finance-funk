@@ -54,7 +54,7 @@ export default function RecurringSummaryCard({ categories, transactions }: Props
                     <span className="text-xs font-space text-[#F5F5DC]/35">
                         {recurringTxs.length} bill{recurringTxs.length !== 1 ? 's' : ''}
                     </span>
-                    <span className="text-sm font-mono tabular-nums text-[#F5F5DC]/60">
+                    <span className="text-data-sm font-space  text-[#F5F5DC]/60">
                         {formatCents(fx(totalCents), displayCurrency)}
                     </span>
                 </div>
@@ -71,9 +71,9 @@ export default function RecurringSummaryCard({ categories, transactions }: Props
                     >
                         <div className="flex items-center gap-1.5">
                             <span className="text-sm">{item.category?.icon || '📄'}</span>
-                            <span className="text-[0.7rem] font-space text-[#F5F5DC]/50 truncate">{item.name}</span>
+                            <span className="text-xs font-space text-[#F5F5DC]/50 truncate">{item.name}</span>
                         </div>
-                        <span className="text-sm font-mono tabular-nums text-[#F5F5DC]/70">
+                        <span className="text-data-sm font-space  text-[#F5F5DC]/70">
                             {formatCents(fx(item.cents), displayCurrency)}
                         </span>
                     </motion.div>

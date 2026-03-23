@@ -324,7 +324,7 @@ export default function MonthlyCloseModal({
                                                 .map((asset, idx) => (
                                                     <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
                                                         <span style={{ color: 'var(--fg-primary)', opacity: 0.8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>{asset.name}</span>
-                                                        <span style={{ color: 'var(--fg-secondary)', fontFamily: 'var(--font-mono tabular-nums)', fontSize: '0.75rem' }}>{primaryMeta?.symbol}{asset.brl?.toLocaleString(primaryMeta?.locale, { maximumFractionDigits: 0 })}</span>
+                                                        <span style={{ color: 'var(--fg-secondary)', fontFamily: 'var(--font-space tabular-nums)', fontSize: '0.75rem' }}>{primaryMeta?.symbol}{asset.brl?.toLocaleString(primaryMeta?.locale, { maximumFractionDigits: 0 })}</span>
                                                     </div>
                                                 ))}
                                             {(snapshotData.assetDetails?.[cat.id.toLowerCase().replace('fixedincome', 'fixed-income')]?.length === 0) && (

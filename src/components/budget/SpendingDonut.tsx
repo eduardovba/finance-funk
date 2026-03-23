@@ -183,7 +183,7 @@ export default function SpendingDonut({ categories, transactions }: Props) {
                             {/* Centre label (static — shows total when no slice is hovered) */}
                             {activeIndex === undefined && (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                    <span className="text-[0.65rem] text-[#F5F5DC]/35 uppercase tracking-[2px] font-space">Total Spent</span>
+                                    <span className="text-2xs text-[#F5F5DC]/35 uppercase tracking-[2px] font-space">Total Spent</span>
                                     <span className="text-xl font-bebas tracking-wider text-[#F5F5DC]/80">
                                         {formatCents(fx(totalExpenseCents), displayCurrency)}
                                     </span>
@@ -205,10 +205,10 @@ export default function SpendingDonut({ categories, transactions }: Props) {
                                         className="w-2 h-2 rounded-full flex-shrink-0"
                                         style={{ backgroundColor: s.color }}
                                     />
-                                    <span className="text-[0.6875rem] font-space text-[#F5F5DC]/50">
+                                    <span className="text-2xs font-space text-[#F5F5DC]/50">
                                         {s.icon} {s.name}
                                     </span>
-                                    <span className="text-[0.6875rem] font-mono tabular-nums text-[#F5F5DC]/30">
+                                    <span className="text-2xs font-space tabular-nums text-[#F5F5DC]/30">
                                         {(s.percent * 100).toFixed(0)}%
                                     </span>
                                 </button>
@@ -240,11 +240,11 @@ export default function SpendingDonut({ categories, transactions }: Props) {
                                         {item.isOverBudget && <AlertTriangle size={14} className="text-red-400 flex-shrink-0" />}
                                     </div>
                                     <div className="flex items-center gap-1.5 flex-shrink-0">
-                                        <span className={`text-sm font-mono tabular-nums ${item.isOverBudget ? 'text-red-400' : 'text-[#F5F5DC]/60'}`}>
+                                        <span className={`text-data-sm font-space  ${item.isOverBudget ? 'text-red-400' : 'text-[#F5F5DC]/60'}`}>
                                             {formatCents(fx(item.spentCents), displayCurrency)}
                                         </span>
                                         {item.targetCents > 0 && (
-                                            <span className="text-xs font-mono tabular-nums text-[#F5F5DC]/25">
+                                            <span className="text-data-xs font-space  text-[#F5F5DC]/25">
                                                 / {formatCents(item.targetCents, displayCurrency)}
                                             </span>
                                         )}
@@ -274,11 +274,11 @@ export default function SpendingDonut({ categories, transactions }: Props) {
                                         <span className="text-sm font-space text-[#F5F5DC]/70 truncate">{cat.name}</span>
                                     </div>
                                     <div className="flex items-center gap-1.5 flex-shrink-0">
-                                        <span className="text-sm font-mono tabular-nums text-[#F5F5DC]/60">
+                                        <span className="text-data-sm font-space  text-[#F5F5DC]/60">
                                             {formatCents(0, displayCurrency)}
                                         </span>
                                         {cat.monthly_target_cents > 0 && (
-                                            <span className="text-xs font-mono tabular-nums text-[#F5F5DC]/25">
+                                            <span className="text-data-xs font-space  text-[#F5F5DC]/25">
                                                 / {formatCents(cat.monthly_target_cents, displayCurrency)}
                                             </span>
                                         )}

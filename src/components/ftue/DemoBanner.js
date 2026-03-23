@@ -14,7 +14,7 @@ export default function DemoBanner({ onCreateAccount }) {
         >
             <div className="flex items-center gap-2 min-w-0">
                 <Sparkles size={14} className="text-[#D4AF37] shrink-0" />
-                <p className="text-[0.75rem] text-[#F5F5DC]/70 font-space truncate">
+                <p className="text-xs text-[#F5F5DC]/70 font-space truncate">
                     <span className="hidden sm:inline">You&apos;re exploring Finance Funk with demo data. </span>
                     <span className="sm:hidden">Demo mode — </span>
                     <span className="text-[#D4AF37]/80">Create an account to track your own finances!</span>
@@ -24,7 +24,7 @@ export default function DemoBanner({ onCreateAccount }) {
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={onCreateAccount}
-                className="shrink-0 px-4 py-1.5 rounded-lg font-space text-[0.7rem] tracking-wide font-bold bg-gradient-to-r from-[#D4AF37] to-[#B8962E] text-[#0B0611] hover:shadow-md hover:shadow-[#D4AF37]/20 border-none cursor-pointer transition-all"
+                className="shrink-0 px-4 py-1.5 rounded-lg font-space text-xs tracking-wide font-bold bg-gradient-to-r from-[#D4AF37] to-[#B8962E] text-[#0B0611] hover:shadow-md hover:shadow-[#D4AF37]/20 border-none cursor-pointer transition-all"
             >
                 Create Account →
             </motion.button>

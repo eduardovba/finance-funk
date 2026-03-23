@@ -109,12 +109,12 @@ export default function ConnectedInstitutionsList() {
                                             {conn.institution_name}
                                         </h5>
                                         {pendingAssets.length > 0 && (
-                                            <span className="px-1.5 py-0.5 rounded bg-[#D4AF37] text-black text-[0.6875rem] font-bold animate-pulse">
+                                            <span className="px-1.5 py-0.5 rounded bg-[#D4AF37] text-black text-2xs font-bold animate-pulse">
                                                 {pendingAssets.length} NEW
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-[0.75rem] font-space text-parchment/40 m-0 uppercase flex items-center gap-2">
+                                    <p className="text-xs font-space text-parchment/40 m-0 uppercase flex items-center gap-2">
                                         Last Synced: {new Date(conn.last_sync_at).toLocaleString()}
                                     </p>
                                 </div>
@@ -124,7 +124,7 @@ export default function ConnectedInstitutionsList() {
                                 {pendingAssets.length > 0 && (
                                     <button
                                         onClick={() => setReviewModal({ isOpen: true, assets: pendingAssets, institution: conn.institution_name })}
-                                        className="px-3 py-1.5 rounded-lg bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#D4AF37] text-[0.75rem] font-bebas tracking-widest transition-all mr-2"
+                                        className="px-3 py-1.5 rounded-lg bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#D4AF37] text-xs font-bebas tracking-widest transition-all mr-2"
                                     >
                                         Review
                                     </button>
@@ -155,10 +155,10 @@ export default function ConnectedInstitutionsList() {
                                         <div key={asset.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-all group/asset">
                                             <div className="flex flex-col">
                                                 <span className="text-xs font-space text-parchment/80">{asset.name}</span>
-                                                <span className="text-[0.75rem] text-parchment/30 uppercase tracking-tighter">{asset.broker}</span>
+                                                <span className="text-xs text-parchment/30 uppercase tracking-tighter">{asset.broker}</span>
                                             </div>
                                             <div className="flex items-center gap-3">
-                                                <span className={`text-[0.6875rem] font-bold px-2 py-0.5 rounded uppercase tracking-widest ${asset.category === 'Cash' ? 'bg-blue-500/10 text-blue-400' :
+                                                <span className={`text-2xs font-bold px-2 py-0.5 rounded uppercase tracking-widest ${asset.category === 'Cash' ? 'bg-blue-500/10 text-blue-400' :
                                                     asset.category === 'Equity' ? 'bg-emerald-500/10 text-emerald-400' :
                                                         asset.category === 'Fixed Income' ? 'bg-orange-500/10 text-orange-400' :
                                                             asset.category === 'Real Estate' ? 'bg-indigo-500/10 text-indigo-400' :
@@ -173,7 +173,7 @@ export default function ConnectedInstitutionsList() {
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="text-[0.75rem] text-parchment/20 text-center py-2 uppercase tracking-widest">
+                                    <p className="text-xs text-parchment/20 text-center py-2 uppercase tracking-widest">
                                         {pendingAssets.length > 0 ? 'Review pending assets to see them here' : 'No active assets found'}
                                     </p>
                                 )}

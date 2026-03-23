@@ -105,28 +105,28 @@ export default function REPropertyDetails(props: REPropertyDetailsProps) {
             <>
                 <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                        <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">{isSold ? 'Sale Price' : (asset.mortgage ? 'Property Value' : 'Current Value')}</span>
-                        <span className="text-sm font-medium text-white/90 font-mono tabular-nums">{formatCurrency(isSold ? (asset.salePrice || 0) : d.currentValue, asset.currency)}</span>
+                        <span className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">{isSold ? 'Sale Price' : (asset.mortgage ? 'Property Value' : 'Current Value')}</span>
+                        <span className="text-data-sm font-medium text-white/90 font-space ">{formatCurrency(isSold ? (asset.salePrice || 0) : d.currentValue, asset.currency)}</span>
                     </div>
                     <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                        <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">Investment</span>
-                        <span className="text-sm font-medium text-white/90 font-mono tabular-nums">{formatCurrency(d.investment, asset.currency)}</span>
+                        <span className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Investment</span>
+                        <span className="text-data-sm font-medium text-white/90 font-space ">{formatCurrency(d.investment, asset.currency)}</span>
                     </div>
                     {d.taxes > 0 && (
                         <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                            <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">Taxes & Fees</span>
-                            <span className="text-sm font-medium text-white/90 font-mono tabular-nums">{formatCurrency(d.taxes, asset.currency)}</span>
+                            <span className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Taxes & Fees</span>
+                            <span className="text-data-sm font-medium text-white/90 font-space ">{formatCurrency(d.taxes, asset.currency)}</span>
                         </div>
                     )}
                     {asset.mortgage && (
                         <div className="bg-[#D4AF37]/5 border border-[#D4AF37]/20 rounded-xl p-3">
-                            <span className="block text-[0.75rem] text-[#D4AF37]/60 uppercase tracking-widest mb-1.5">Equity</span>
-                            <span className="text-sm font-bold text-[#D4AF37] font-mono tabular-nums">{formatCurrency(d.equity, asset.currency)}</span>
+                            <span className="block text-xs text-[#D4AF37]/60 uppercase tracking-widest mb-1.5">Equity</span>
+                            <span className="text-data-sm font-bold text-[#D4AF37] font-space ">{formatCurrency(d.equity, asset.currency)}</span>
                         </div>
                     )}
                     <div className="col-span-2 bg-white/[0.02] border border-white/5 rounded-xl p-3 flex justify-between items-center">
-                        <span className="text-[0.75rem] text-white/40 uppercase tracking-widest">{isSold ? 'Realised P&L' : 'Total P&L'}</span>
-                        <span className={`text-sm font-bold font-mono tabular-nums ${d.profitLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        <span className="text-xs text-white/40 uppercase tracking-widest">{isSold ? 'Realised P&L' : 'Total P&L'}</span>
+                        <span className={`text-data-sm font-bold font-space  ${d.profitLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {d.profitLoss >= 0 ? '+' : ''}{formatCurrency(d.profitLoss, asset.currency)} ({d.roi >= 0 ? '+' : ''}{d.roi.toFixed(1)}%)
                         </span>
                     </div>
@@ -139,12 +139,12 @@ export default function REPropertyDetails(props: REPropertyDetailsProps) {
                                 <h4 className="text-xs uppercase tracking-wider text-white/40 mb-1">Edit Values</h4>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">Investment</label>
+                                        <label className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Investment</label>
                                         <NumberInput value={editingValues.investment} onChange={(val: any) => setEditingValues((p: any) => ({ ...p, investment: val }))}
                                             className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500/50" placeholder="Investment" />
                                     </div>
                                     <div>
-                                        <label className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">Current Value</label>
+                                        <label className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Current Value</label>
                                         <NumberInput value={editingValues.currentValue} onChange={(val: any) => setEditingValues((p: any) => ({ ...p, currentValue: val }))}
                                             className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500/50" placeholder="Valuation" />
                                     </div>
@@ -163,18 +163,18 @@ export default function REPropertyDetails(props: REPropertyDetailsProps) {
                 {/* Property Transactions */}
                 {asset.ledger && asset.ledger.length > 0 && (
                     <div className="pt-4 border-t border-white/5 mt-4">
-                        <h4 className="text-[0.75rem] text-white/40 uppercase tracking-[2px] mb-3">Property Transactions</h4>
+                        <h4 className="text-xs text-white/40 uppercase tracking-[2px] mb-3">Property Transactions</h4>
                         <div className="bg-black/20 rounded-xl p-4 border border-white/[0.03]">
                             <TransactionTimeline transactions={asset.ledger.slice(0, 10)} onDelete={handleDeleteEntry}
                                 renderItem={(tx: any) => (
                                     <>
                                         <div className="flex items-center gap-2 mb-1.5">
                                             <div className={`w-1.5 h-1.5 rounded-full ${tx.amount >= 0 ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                                            <span className="font-medium text-[0.75rem] text-white/90 uppercase tracking-wider font-space">{tx.type || tx.notes || 'Transaction'}</span>
+                                            <span className="font-medium text-xs text-white/90 uppercase tracking-wider font-space">{tx.type || tx.notes || 'Transaction'}</span>
                                         </div>
                                         <div className="flex flex-col gap-1">
-                                            <span className="text-sm font-bold text-white tracking-tight font-mono tabular-nums">{formatCurrency(Math.abs(tx.amount), asset.currency)}</span>
-                                            <span className="text-[0.75rem] text-white/40 font-mono tabular-nums tracking-tight">{tx.date}</span>
+                                            <span className="text-data-sm font-bold text-white tracking-tight font-space ">{formatCurrency(Math.abs(tx.amount), asset.currency)}</span>
+                                            <span className="text-data-xs text-white/40 font-space  tracking-tight">{tx.date}</span>
                                         </div>
                                     </>
                                 )} />
@@ -184,7 +184,7 @@ export default function REPropertyDetails(props: REPropertyDetailsProps) {
                 {/* Sell / Delete Actions */}
                 {!isSold && (
                     <div className="pt-4 border-t border-white/5 mt-4">
-                        <h4 className="text-[0.75rem] text-white/40 uppercase tracking-[2px] mb-3">Property Actions</h4>
+                        <h4 className="text-xs text-white/40 uppercase tracking-[2px] mb-3">Property Actions</h4>
                         {sellPropertyData && sellPropertyData.name === asset.name ? (
                             <SellPropertyForm asset={asset} d={d} sellPropertyData={sellPropertyData} setSellPropertyData={setSellPropertyData} setSelectedAsset={setSelectedAsset} onRefresh={onRefresh} />
                         ) : (
@@ -216,20 +216,20 @@ export default function REPropertyDetails(props: REPropertyDetailsProps) {
             <>
                 <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                        <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">Original Amount</span>
-                        <span className="text-sm font-medium text-white/90 font-mono tabular-nums">{formatCurrency(m.originalAmount, asset.currency)}</span>
+                        <span className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Original Amount</span>
+                        <span className="text-data-sm font-medium text-white/90 font-space ">{formatCurrency(m.originalAmount, asset.currency)}</span>
                     </div>
                     <div className="bg-rose-500/5 border border-rose-500/20 rounded-xl p-3">
-                        <span className="block text-[0.75rem] text-rose-400/60 uppercase tracking-widest mb-1.5">Balance</span>
-                        <span className="text-sm font-bold text-rose-400 font-mono tabular-nums">{formatCurrency(m.balance, asset.currency)}</span>
+                        <span className="block text-xs text-rose-400/60 uppercase tracking-widest mb-1.5">Balance</span>
+                        <span className="text-data-sm font-bold text-rose-400 font-space ">{formatCurrency(m.balance, asset.currency)}</span>
                     </div>
                     <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3">
-                        <span className="block text-[0.75rem] text-emerald-400/60 uppercase tracking-widest mb-1.5">Principal Paid</span>
-                        <span className="text-sm font-bold text-emerald-400 font-mono tabular-nums">{formatCurrency(m.totalPrincipalPaid, asset.currency)}</span>
+                        <span className="block text-xs text-emerald-400/60 uppercase tracking-widest mb-1.5">Principal Paid</span>
+                        <span className="text-data-sm font-bold text-emerald-400 font-space ">{formatCurrency(m.totalPrincipalPaid, asset.currency)}</span>
                     </div>
                     <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                        <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">Interest Paid</span>
-                        <span className="text-sm font-medium text-white/90 font-mono tabular-nums">{formatCurrency(m.totalInterestPaid, asset.currency)}</span>
+                        <span className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Interest Paid</span>
+                        <span className="text-data-sm font-medium text-white/90 font-space ">{formatCurrency(m.totalInterestPaid, asset.currency)}</span>
                     </div>
                 </div>
                 {rightPaneMode !== 'add-mortgage-payment' ? (
@@ -271,7 +271,7 @@ export default function REPropertyDetails(props: REPropertyDetailsProps) {
                     </div>
                 )}
                 <div className="pt-4 border-t border-white/5 mt-4">
-                    <h4 className="text-[0.75rem] text-white/40 uppercase tracking-[2px] mb-3">Payment History</h4>
+                    <h4 className="text-xs text-white/40 uppercase tracking-[2px] mb-3">Payment History</h4>
                     <div className="bg-black/20 rounded-xl p-4 border border-white/[0.03] max-h-[300px] overflow-y-auto custom-scrollbar">
                         <TransactionTimeline transactions={mortgagePayments.slice(0, 20)}
                             onEdit={(tx: any) => { const entryId = tx.id?.split(',')?.[0] || tx.id; handleEditTransaction({ id: entryId, date: tx.rawDate, amount: tx.costs, notes: tx.month, type: 'Mortgage', category: 'mortgage' }); }}
@@ -280,13 +280,13 @@ export default function REPropertyDetails(props: REPropertyDetailsProps) {
                                 <>
                                     <div className="flex items-center gap-2 mb-1.5">
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                        <span className="font-medium text-[0.75rem] text-white/90 uppercase tracking-wider font-space">
+                                        <span className="font-medium text-xs text-white/90 uppercase tracking-wider font-space">
                                             {tx.rawDate ? new Date(tx.rawDate + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : tx.month}
                                         </span>
                                     </div>
                                     <div className="flex flex-col gap-1">
-                                        <span className="text-sm font-bold text-white tracking-tight font-mono tabular-nums">{formatCurrency(tx.costs, asset.currency)}</span>
-                                        <span className="text-[0.75rem] text-white/40 font-mono tabular-nums tracking-tight">Principal: {formatCurrency(tx.principal, asset.currency)}</span>
+                                        <span className="text-data-sm font-bold text-white tracking-tight font-space ">{formatCurrency(tx.costs, asset.currency)}</span>
+                                        <span className="text-data-xs text-white/40 font-space  tracking-tight">Principal: {formatCurrency(tx.principal, asset.currency)}</span>
                                     </div>
                                 </>
                             )} />
@@ -319,20 +319,20 @@ export default function REPropertyDetails(props: REPropertyDetailsProps) {
             <>
                 <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                        <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">Total Revenue</span>
-                        <span className="text-sm font-medium text-emerald-400 font-mono tabular-nums">{formatCurrency(r.totalRevenue, asset.currency)}</span>
+                        <span className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Total Revenue</span>
+                        <span className="text-data-sm font-medium text-emerald-400 font-space ">{formatCurrency(r.totalRevenue, asset.currency)}</span>
                     </div>
                     <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                        <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">Total Costs</span>
-                        <span className="text-sm font-medium text-rose-400 font-mono tabular-nums">{formatCurrency(r.totalCosts, asset.currency)}</span>
+                        <span className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Total Costs</span>
+                        <span className="text-data-sm font-medium text-rose-400 font-space ">{formatCurrency(r.totalCosts, asset.currency)}</span>
                     </div>
                     <div className={`${r.totalProfit >= 0 ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-rose-500/5 border-rose-500/20'} border rounded-xl p-3`}>
-                        <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">Net Profit</span>
-                        <span className={`text-sm font-bold font-mono tabular-nums ${r.totalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{formatCurrency(r.totalProfit, asset.currency)}</span>
+                        <span className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Net Profit</span>
+                        <span className={`text-data-sm font-bold font-space  ${r.totalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{formatCurrency(r.totalProfit, asset.currency)}</span>
                     </div>
                     <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                        <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">ROI</span>
-                        <span className="text-sm font-medium text-white/90 font-mono tabular-nums">{roi.toFixed(1)}%</span>
+                        <span className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">ROI</span>
+                        <span className="text-data-sm font-medium text-white/90 font-space ">{roi.toFixed(1)}%</span>
                     </div>
                 </div>
                 {rightPaneMode !== 'add-rental-month' ? (
@@ -344,7 +344,7 @@ export default function REPropertyDetails(props: REPropertyDetailsProps) {
                 <div className="flex gap-1.5 flex-wrap mt-4">
                     {['month', 'costs', 'revenue', 'profit'].map(key => (
                         <button key={key} onClick={() => handleAirbnbSort(key)}
-                            className={`px-2.5 py-1 rounded-lg text-[0.75rem] font-semibold uppercase cursor-pointer transition-colors border ${airbnbSortConfig.key === key ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' : 'bg-white/5 border-white/10 text-white/40'}`}>
+                            className={`px-2.5 py-1 rounded-lg text-xs font-semibold uppercase cursor-pointer transition-colors border ${airbnbSortConfig.key === key ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' : 'bg-white/5 border-white/10 text-white/40'}`}>
                             {key}{airbnbSortConfig.key === key ? (airbnbSortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
                         </button>
                     ))}
@@ -363,8 +363,8 @@ export default function REPropertyDetails(props: REPropertyDetailsProps) {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-[0.75rem] text-white/40">Rev: <span className="text-emerald-400 font-semibold">{formatCurrency(entry.revenue, asset.currency)}</span></div>
-                                        <div className="text-[0.75rem] text-white/40 mt-0.5">Cost: <span className="font-semibold">{formatCurrency(entry.costs, asset.currency)}</span></div>
+                                        <div className="text-xs text-white/40">Rev: <span className="text-emerald-400 font-semibold">{formatCurrency(entry.revenue, asset.currency)}</span></div>
+                                        <div className="text-xs text-white/40 mt-0.5">Cost: <span className="font-semibold">{formatCurrency(entry.costs, asset.currency)}</span></div>
                                     </div>
                                 </div>
                             </div>
@@ -374,7 +374,7 @@ export default function REPropertyDetails(props: REPropertyDetailsProps) {
                 {/* Individual Entries */}
                 {r.entries && r.entries.length > 0 && (
                     <div className="pt-4 border-t border-white/5 mt-4">
-                        <h4 className="text-[0.75rem] text-white/40 uppercase tracking-[2px] mb-3">All Entries</h4>
+                        <h4 className="text-xs text-white/40 uppercase tracking-[2px] mb-3">All Entries</h4>
                         <div className="bg-black/20 rounded-xl p-4 border border-white/[0.03] max-h-[300px] overflow-y-auto custom-scrollbar">
                             <TransactionTimeline transactions={[...r.entries].sort((a: any, b: any) => b.date.localeCompare(a.date))}
                                 onEdit={(tx: any) => handleEditTransaction({ ...tx, category: 'rental' })}
@@ -383,13 +383,13 @@ export default function REPropertyDetails(props: REPropertyDetailsProps) {
                                     <>
                                         <div className="flex items-center gap-2 mb-1.5">
                                             <div className={`w-1.5 h-1.5 rounded-full ${tx.type === 'Income' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                                            <span className="font-medium text-[0.75rem] text-white/90 uppercase tracking-wider font-space">{tx.type === 'Income' ? 'Revenue' : 'Cost'}</span>
+                                            <span className="font-medium text-xs text-white/90 uppercase tracking-wider font-space">{tx.type === 'Income' ? 'Revenue' : 'Cost'}</span>
                                         </div>
                                         <div className="flex flex-col gap-1">
-                                            <span className={`text-sm font-bold tracking-tight font-mono tabular-nums ${tx.type === 'Income' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                            <span className={`text-data-sm font-bold tracking-tight font-space  ${tx.type === 'Income' ? 'text-emerald-400' : 'text-rose-400'}`}>
                                                 {tx.type === 'Income' ? '+' : '-'}{formatCurrency(Math.abs(tx.amount), asset.currency)}
                                             </span>
-                                            <span className="text-[0.75rem] text-white/40 font-mono tabular-nums tracking-tight">{tx.date}{tx.notes ? ` · ${tx.notes}` : ''}</span>
+                                            <span className="text-data-xs text-white/40 font-space  tracking-tight">{tx.date}{tx.notes ? ` · ${tx.notes}` : ''}</span>
                                         </div>
                                     </>
                                 )} />
@@ -444,12 +444,12 @@ function SellPropertyForm({ asset, d, sellPropertyData, setSellPropertyData, set
                     return (
                         <div className="p-3 rounded-lg bg-black/30 border border-white/5">
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-[0.75rem] text-white/40 uppercase tracking-widest">Est. Profit</span>
-                                <span className={`text-sm font-bold font-mono tabular-nums ${profit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{profit >= 0 ? '+' : ''}{formatCurrency(profit, asset.currency)}</span>
+                                <span className="text-xs text-white/40 uppercase tracking-widest">Est. Profit</span>
+                                <span className={`text-data-sm font-bold font-space  ${profit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{profit >= 0 ? '+' : ''}{formatCurrency(profit, asset.currency)}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-[0.75rem] text-white/40 uppercase tracking-widest">ROI</span>
-                                <span className={`text-sm font-bold font-mono tabular-nums ${roiCalc >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{roiCalc >= 0 ? '+' : ''}{roiCalc.toFixed(1)}%</span>
+                                <span className="text-xs text-white/40 uppercase tracking-widest">ROI</span>
+                                <span className={`text-data-sm font-bold font-space  ${roiCalc >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{roiCalc >= 0 ? '+' : ''}{roiCalc.toFixed(1)}%</span>
                             </div>
                         </div>
                     );

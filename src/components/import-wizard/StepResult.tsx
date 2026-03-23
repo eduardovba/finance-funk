@@ -6,6 +6,7 @@ import { ArrowRight, AlertCircle, CheckCircle2, RotateCcw } from 'lucide-react';
 import { usePortfolio } from '@/context/PortfolioContext';
 import CelebrationOverlay from '@/components/ftue/CelebrationOverlay';
 import { useRouter } from 'next/navigation';
+import { Card } from '@/components/ui/card';
 
 interface StepResultProps {
     result: any;
@@ -45,7 +46,7 @@ export default function StepResult({ result, assetClass, onReset }: StepResultPr
             className="space-y-6"
         >
             {/* Hero Result */}
-            <div className="glass-card text-center py-12 px-8">
+            <div className="text-center py-12 px-8">
                 <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
@@ -67,22 +68,22 @@ export default function StepResult({ result, assetClass, onReset }: StepResultPr
                 <div className="grid grid-cols-3 gap-6 max-w-sm mx-auto mt-8">
                     <div>
                         <div className="text-3xl font-bebas tracking-wider text-emerald-400">{result.imported}</div>
-                        <div className="text-[0.75rem] text-parchment/40 font-space uppercase tracking-widest">Imported</div>
+                        <div className="text-xs text-parchment/40 font-space uppercase tracking-widest">Imported</div>
                     </div>
                     <div>
                         <div className="text-3xl font-bebas tracking-wider text-amber-400">{result.skipped}</div>
-                        <div className="text-[0.75rem] text-parchment/40 font-space uppercase tracking-widest">Skipped</div>
+                        <div className="text-xs text-parchment/40 font-space uppercase tracking-widest">Skipped</div>
                     </div>
                     <div>
                         <div className="text-3xl font-bebas tracking-wider text-[#D4AF37]">{result.assetsCreated}</div>
-                        <div className="text-[0.75rem] text-parchment/40 font-space uppercase tracking-widest">New Assets</div>
+                        <div className="text-xs text-parchment/40 font-space uppercase tracking-widest">New Assets</div>
                     </div>
                 </div>
             </div>
 
             {/* Errors */}
             {result.errors?.length > 0 && (
-                <div className="glass-card">
+                <div className="">
                     <h3 className="font-bebas text-lg tracking-widest text-amber-400 mb-3">
                         {result.errors.length} Issue{result.errors.length > 1 ? 's' : ''} Found
                     </h3>

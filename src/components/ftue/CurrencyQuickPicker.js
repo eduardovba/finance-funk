@@ -22,7 +22,7 @@ export default function CurrencyQuickPicker({ onDone }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] flex items-center justify-center"
+            className="fixed inset-0 z-[999] flex items-center justify-center"
         >
             {/* Backdrop */}
             <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
@@ -33,7 +33,7 @@ export default function CurrencyQuickPicker({ onDone }) {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.92, y: 20 }}
                 transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                className="relative z-10 bg-gradient-to-br from-[#1A0F2E] to-[#0B0611] border border-[#D4AF37]/25 rounded-3xl p-6 max-w-sm mx-4 shadow-2xl shadow-black/50 w-full"
+                className="relative z-10 bg-gradient-to-br from-[#1A0F2E] to-[#0B0611] border border-[#D4AF37]/25 rounded-2xl p-6 max-w-sm mx-4 shadow-2xl shadow-black/50 w-full"
             >
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-5">
@@ -42,7 +42,7 @@ export default function CurrencyQuickPicker({ onDone }) {
                     </div>
                     <div>
                         <h3 className="text-lg font-bebas tracking-wider text-[#D4AF37] m-0">One quick thing</h3>
-                        <p className="text-[0.75rem] text-[#F5F5DC]/40 font-space m-0">Set your base currencies — takes 5 seconds</p>
+                        <p className="text-xs text-[#F5F5DC]/40 font-space m-0">Set your base currencies — takes 5 seconds</p>
                     </div>
                 </div>
 
@@ -50,7 +50,7 @@ export default function CurrencyQuickPicker({ onDone }) {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                     {/* Primary */}
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-[0.6875rem] uppercase tracking-[3px] text-[#D4AF37]/50 font-space text-center">Primary</label>
+                        <label className="text-2xs uppercase tracking-[3px] text-[#D4AF37]/50 font-space text-center">Primary</label>
                         <div className="flex flex-col gap-1">
                             {CURRENCY_LIST.map(c => (
                                 <button
@@ -70,8 +70,8 @@ export default function CurrencyQuickPicker({ onDone }) {
                                 >
                                     <span className="text-lg">{c.flag}</span>
                                     <div className="flex flex-col">
-                                        <span className="text-[0.75rem] font-bold font-space">{c.code}</span>
-                                        <span className="text-[0.6875rem] opacity-50">{c.name}</span>
+                                        <span className="text-xs font-bold font-space">{c.code}</span>
+                                        <span className="text-2xs opacity-50">{c.name}</span>
                                     </div>
                                 </button>
                             ))}
@@ -80,7 +80,7 @@ export default function CurrencyQuickPicker({ onDone }) {
 
                     {/* Secondary */}
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-[0.6875rem] uppercase tracking-[3px] text-[#CC5500]/50 font-space text-center">Secondary</label>
+                        <label className="text-2xs uppercase tracking-[3px] text-[#CC5500]/50 font-space text-center">Secondary</label>
                         <div className="flex flex-col gap-1">
                             {CURRENCY_LIST.map(c => (
                                 <button
@@ -97,8 +97,8 @@ export default function CurrencyQuickPicker({ onDone }) {
                                 >
                                     <span className="text-lg">{c.flag}</span>
                                     <div className="flex flex-col">
-                                        <span className="text-[0.75rem] font-bold font-space">{c.code}</span>
-                                        <span className="text-[0.6875rem] opacity-50">{c.name}</span>
+                                        <span className="text-xs font-bold font-space">{c.code}</span>
+                                        <span className="text-2xs opacity-50">{c.name}</span>
                                     </div>
                                 </button>
                             ))}

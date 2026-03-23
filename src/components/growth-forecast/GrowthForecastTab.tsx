@@ -104,13 +104,13 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
                         className="flex items-center gap-2 text-left hover:opacity-80 transition-opacity rounded-none bg-transparent p-0"
                     >
                         <span className="font-bebas text-lg tracking-widest text-[#D4AF37]">Planning Ledger</span>
-                        <span className="font-mono tabular-nums text-[0.75rem] text-white/30">{h.forecastData.length} rows</span>
+                        <span className="font-space  text-data-xs text-white/30">{h.forecastData.length} rows</span>
                         {h.ledgerOpen ? <ChevronUp size={16} className="text-white/40" /> : <ChevronDown size={16} className="text-white/40" />}
                     </button>
                     {h.ledgerOpen && (
                         <button
                             onClick={() => document.getElementById('live-row')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-                            className="flex items-center gap-1.5 bg-[#34D399]/10 border border-[#34D399]/20 rounded-lg px-3 py-1.5 text-[0.75rem] font-mono tabular-nums text-[#34D399] hover:bg-[#34D399]/20 transition-colors"
+                            className="flex items-center gap-1.5 bg-[#34D399]/10 border border-[#34D399]/20 rounded-lg px-3 py-1.5 text-data-xs font-space  text-[#34D399] hover:bg-[#34D399]/20 transition-colors"
                         >
                             <MapPin size={10} /> Jump to Live
                         </button>
@@ -122,12 +122,12 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
                         <table className="w-full border-collapse text-xs">
                             <thead className="sticky top-0 z-10 bg-[#121418] shadow-md">
                                 <tr>
-                                    <th className="p-3 text-left text-white/50 font-mono tabular-nums font-normal">Date</th>
-                                    <th className="p-3 text-left text-white/50 font-mono tabular-nums font-normal">Type</th>
-                                    <th className="p-3 text-right text-white/50 font-mono tabular-nums font-normal">Contr.</th>
-                                    <th className="p-3 text-right text-white/50 font-mono tabular-nums font-normal">Total</th>
-                                    <th className="p-3 text-right text-[#D4AF37]/60 font-mono tabular-nums font-normal">Target</th>
-                                    <th className="p-3 text-right text-white/50 font-mono tabular-nums font-normal">Diff</th>
+                                    <th className="p-3 text-left text-white/50 font-space tabular-nums font-normal">Date</th>
+                                    <th className="p-3 text-left text-white/50 font-space tabular-nums font-normal">Type</th>
+                                    <th className="p-3 text-right text-white/50 font-space tabular-nums font-normal">Contr.</th>
+                                    <th className="p-3 text-right text-white/50 font-space tabular-nums font-normal">Total</th>
+                                    <th className="p-3 text-right text-[#D4AF37]/60 font-space tabular-nums font-normal">Target</th>
+                                    <th className="p-3 text-right text-white/50 font-space tabular-nums font-normal">Diff</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -143,9 +143,9 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
                                             ${isLive ? 'bg-[#34D399]/5 border-[#34D399]/20' : ''}
                                             ${isTarget ? 'bg-[#D4AF37]/5' : ''}
                                         `}>
-                                            <td className={`px-3 font-mono tabular-nums ${isTarget ? 'text-[#D4AF37] font-bold' : 'text-white/50'}`}>{row.date}</td>
+                                            <td className={`px-3 font-space tabular-nums ${isTarget ? 'text-[#D4AF37] font-bold' : 'text-white/50'}`}>{row.date}</td>
                                             <td className="px-3">
-                                                <span className={`px-2 py-0.5 rounded text-[0.75rem] font-mono tabular-nums font-semibold uppercase border
+                                                <span className={`px-2 py-0.5 rounded text-data-xs font-space  font-semibold uppercase border
                                                     ${row.type === 'actual' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
                                                         isLive ? 'bg-[#34D399]/10 text-[#34D399] border-[#34D399]/20' :
                                                             'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/20'}
@@ -157,7 +157,7 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
                                             <td className={`px-3 text-right font-medium ${diff >= 0 ? 'text-[#34D399]' : 'text-[#ef4444]'}`}>
                                                 {formatCurrency(total, 'BRL')}
                                             </td>
-                                            <td className="px-3 text-right text-white/30 font-mono tabular-nums">{row.targetBrl ? formatCurrency(row.targetBrl, 'BRL').replace('R$', '') : '—'}</td>
+                                            <td className="px-3 text-right text-white/30 font-space tabular-nums">{row.targetBrl ? formatCurrency(row.targetBrl, 'BRL').replace('R$', '') : '—'}</td>
                                             <td className={`px-3 text-right font-medium ${diff >= 0 ? 'text-[#34D399]' : 'text-[#ef4444]'}`}>
                                                 {row.targetBrl ? `${diff > 0 ? '+' : ''}${formatCurrency(diff, 'BRL').replace('R$', '')}` : '—'}
                                             </td>

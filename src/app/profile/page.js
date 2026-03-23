@@ -318,6 +318,7 @@ function BackgroundSelect({ label, value, onChange }) {
     const ref = useRef(null);
     
     const backgrounds = [
+        { id: 'collection', name: 'Collection' },
         { id: 'concretely-funky', name: 'Concretely Funky' },
         { id: 'copper-rise', name: 'Copper Rise' },
         { id: 'creamy-linen', name: 'Creamy Linen' },
@@ -326,13 +327,19 @@ function BackgroundSelect({ label, value, onChange }) {
         { id: 'envelope-of-funk', name: 'Envelope of Funk' },
         { id: 'frosted-funk', name: 'Frosted Funk' },
         { id: 'frosted-glass', name: 'Frosted Glass' },
+        { id: 'funky-ledger', name: 'Funky Ledger' },
+        { id: 'groove-vault', name: 'Groove Vault' },
         { id: 'linen-funk-light', name: 'Linen Funk Light' },
         { id: 'linen-funk', name: 'Linen Funk' },
+        { id: 'lux-swing', name: 'Lux Swing' },
         { id: 'mosaic-dance', name: 'Mosaic Dance' },
+        { id: 'type-f', name: 'Type F' },
+        { id: 'velvet-medal', name: 'Velvet Medal' },
+        { id: 'vinyl-voyage', name: 'Vinyl Voyage' },
         { id: 'walnut-grooves', name: 'Walnut Grooves' },
     ];
     
-    const selected = backgrounds.find(b => b.id === value) || backgrounds.find(b => b.id === 'linen-funk');
+    const selected = backgrounds.find(b => b.id === value) || backgrounds.find(b => b.id === 'vinyl-voyage');
 
     useEffect(() => {
         const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
@@ -682,7 +689,7 @@ export default function ProfilePage() {
                             />
                             <BackgroundSelect
                                 label="App Background"
-                                value={appSettings?.backgroundSelection || 'linen-funk'}
+                                value={appSettings?.backgroundSelection || 'vinyl-voyage'}
                                 onChange={handleBackgroundChange}
                             />
 

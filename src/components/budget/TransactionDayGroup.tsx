@@ -20,7 +20,7 @@ export default function TransactionDayGroup({ date, transactions, categories, se
     return (
         <div className="mb-5">
             {/* Day header */}
-            <h4 className="text-[0.75rem] text-[#F5F5DC]/35 uppercase tracking-[2px] font-space mb-2 px-1">
+            <h4 className="text-xs text-[#F5F5DC]/35 uppercase tracking-[2px] font-space mb-2 px-1">
                 {formatDayLabel(date)}
             </h4>
 

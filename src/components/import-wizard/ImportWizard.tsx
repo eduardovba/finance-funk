@@ -87,7 +87,7 @@ export default function ImportWizard() {
                                 }`}
                             animate={{ scale: i === step ? 1 : 0.95 }}
                         >
-                            {i < step ? <Check size={12} /> : <span className="text-[0.75rem] opacity-60">{i + 1}</span>}
+                            {i < step ? <Check size={12} /> : <span className="text-xs opacity-60">{i + 1}</span>}
                             <span className="hidden md:inline">{s.title}</span>
                         </motion.div>
                         {i < STEPS.length - 1 && (
@@ -152,7 +152,7 @@ export default function ImportWizard() {
                             </span>
                             <button
                                 onClick={handleSwitchToGeneric}
-                                className="text-[0.75rem] text-emerald-400/50 hover:text-emerald-400 transition-colors bg-transparent border-none cursor-pointer underline"
+                                className="text-xs text-emerald-400/50 hover:text-emerald-400 transition-colors bg-transparent border-none cursor-pointer underline"
                             >
                                 Switch to manual mapping
                             </button>

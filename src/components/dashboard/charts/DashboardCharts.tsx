@@ -406,8 +406,8 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
         if (mainSource === 'allocation-current') {
             return (
                 <div className="flex items-center gap-2 bg-black/40 border border-white/10 rounded-full px-3 py-1">
-                    <span className="text-[0.75rem] font-mono tabular-nums text-parchment/40 uppercase tracking-widest">Total Drift</span>
-                    <span className={`text-xs font-mono tabular-nums font-bold ${totalDrift > 0.1 ? 'text-red-400' : 'text-vu-green'}`}>{totalDrift.toFixed(1)}%</span>
+                    <span className="text-data-xs font-space  text-parchment/40 uppercase tracking-widest">Total Drift</span>
+                    <span className={`text-data-xs font-space  font-bold ${totalDrift > 0.1 ? 'text-red-400' : 'text-vu-green'}`}>{totalDrift.toFixed(1)}%</span>
                 </div>
             );
         }
@@ -417,7 +417,7 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
     const renderBottomLegend = () => {
         if (mainSource === 'networth-history') {
             return (
-                <div className="mt-3 flex justify-center gap-4 text-[0.6875rem] font-space shrink-0 flex-wrap">
+                <div className="mt-3 flex justify-center gap-4 text-2xs font-space shrink-0 flex-wrap">
                     <span className="text-[#D4AF37]">● {primaryCurrency}</span>
                     <span className="text-[#A0A0A0]">● Target ({primaryCurrency})</span>
                     <span className="text-[#CC5500]">● {secondaryCurrency}</span>
@@ -426,7 +426,7 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
         }
         if (mainSource === 'allocation-current') {
             return (
-                <div className="mt-3 flex justify-center gap-4 text-[0.6875rem] font-space shrink-0 flex-wrap">
+                <div className="mt-3 flex justify-center gap-4 text-2xs font-space shrink-0 flex-wrap">
                     <span className="text-[#D4AF37]">■ Actual %</span>
                     <span className="text-[#F5F5DC]/40">▪ Target %</span>
                 </div>
@@ -434,7 +434,7 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
         }
         if (mainSource === 'roi-history' && dataSources.includes('fx-rate-history')) {
             return (
-                <div className="mt-3 flex justify-center gap-4 text-[0.6875rem] font-space shrink-0 flex-wrap">
+                <div className="mt-3 flex justify-center gap-4 text-2xs font-space shrink-0 flex-wrap">
                     <span className="text-[#D4AF37]">● ROI (%)</span>
                     <span className="text-[#CC5500]">● FX Rate</span>
                 </div>
@@ -442,7 +442,7 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
         }
         if (mainSource === 'wealth-trajectory') {
             return (
-                <div className="mt-3 flex justify-center gap-4 text-[0.6875rem] font-space shrink-0 flex-wrap">
+                <div className="mt-3 flex justify-center gap-4 text-2xs font-space shrink-0 flex-wrap">
                     <span className="text-vu-green">● Above Target</span>
                     <span className="text-red-500">● Below Target</span>
                     <span className="text-[#A0A0A0]">● Target ({primaryCurrency})</span>
@@ -645,7 +645,7 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
                     {data.map((entry: any) => (
                         <div key={entry.name} className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                            <span className="text-[0.6875rem] font-space" style={{ color: 'rgba(245,245,220,0.5)' }}>
+                            <span className="text-2xs font-space" style={{ color: 'rgba(245,245,220,0.5)' }}>
                                 {entry.name}: <span className="font-bold">{((entry.value / totalCurrencyTokensPrimary) * 100).toFixed(1)}%</span>
                             </span>
                         </div>
@@ -667,14 +667,14 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
                     <div className="mt-3 flex justify-center gap-3 shrink-0 flex-wrap">
                         {sortedKeys.map(key => (
                             <div key={key} className="flex items-center gap-1">
-                                <div className="w-2 h-2 rounded-sm" style={{ background: COMP_COLORS_LEGEND[key], boxShadow: `0 0 6px ${COMP_COLORS_LEGEND[key]}50` }} />
-                                <span className="text-[0.6875rem] font-space" style={{ color: 'rgba(245,245,220,0.4)', fontWeight: 500 }}>{COMP_LABELS_LEGEND[key]}</span>
+                                <div className="w-2 h-2 rounded-lg" style={{ background: COMP_COLORS_LEGEND[key], boxShadow: `0 0 6px ${COMP_COLORS_LEGEND[key]}50` }} />
+                                <span className="text-2xs font-space" style={{ color: 'rgba(245,245,220,0.4)', fontWeight: 500 }}>{COMP_LABELS_LEGEND[key]}</span>
                             </div>
                         ))}
                         {series.includes('Debt') && (
                             <div className="flex items-center gap-1">
                                 <div className="w-3 h-0 border-t-[2px] border-dashed border-[#ec4899]" />
-                                <span className="text-[0.6875rem] font-space" style={{ color: 'rgba(245,245,220,0.4)', fontWeight: 500 }}>Debt</span>
+                                <span className="text-2xs font-space" style={{ color: 'rgba(245,245,220,0.4)', fontWeight: 500 }}>Debt</span>
                             </div>
                         )}
                     </div>

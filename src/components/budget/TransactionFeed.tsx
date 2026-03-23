@@ -153,19 +153,19 @@ export default function TransactionFeed() {
                 <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-5 mb-4">
                     <div className="grid grid-cols-3 gap-4">
                         <div className="flex flex-col">
-                            <span className="text-[0.6rem] text-[#F5F5DC]/25 uppercase tracking-[2px] font-space mb-1">Income</span>
+                            <span className="text-2xs text-[#F5F5DC]/25 uppercase tracking-[2px] font-space mb-1">Income</span>
                             <span className="text-lg font-bebas tracking-wider text-[#34D399]">
                                 {formatCents(incomeCents, displayCurrency)}
                             </span>
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[0.6rem] text-[#F5F5DC]/25 uppercase tracking-[2px] font-space mb-1">Spent</span>
+                            <span className="text-2xs text-[#F5F5DC]/25 uppercase tracking-[2px] font-space mb-1">Spent</span>
                             <span className="text-lg font-bebas tracking-wider text-[#F5F5DC]/50">
                                 {formatCents(expenseCents, displayCurrency)}
                             </span>
                         </div>
                         <div className="flex flex-col items-end">
-                            <span className="text-[0.6rem] text-[#F5F5DC]/25 uppercase tracking-[2px] font-space mb-1">Net</span>
+                            <span className="text-2xs text-[#F5F5DC]/25 uppercase tracking-[2px] font-space mb-1">Net</span>
                             <span className={`text-lg font-bebas tracking-wider ${netCents >= 0 ? 'text-[#34D399] drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]' : 'text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.3)]'}`}>
                                 {netCents < 0 ? '-' : '+'}{formatCents(Math.abs(netCents), displayCurrency)}
                             </span>

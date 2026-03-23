@@ -139,7 +139,7 @@ export default function EquityForm({
                             )}
                             {isFetchingPrice && (
                                 <div className="text-xs text-[#D4AF37] mt-1.5 flex items-center gap-1.5 font-medium">
-                                    <span className="animate-spin text-[0.75rem]">⏳</span> Fetching price...
+                                    <span className="animate-spin text-xs">⏳</span> Fetching price...
                                 </div>
                             )}
                         </div>
@@ -283,7 +283,7 @@ export default function EquityForm({
                     <Button variant="ghost" size="sm" onClick={() => { setRightPaneMode('default'); setSellData(null); }} className="rounded-full ml-auto"><X size={16} /></Button>
                 </div>
                 <p className="mb-6 text-white/60 text-sm">
-                    {sellData.broker} · {sellData.sharesHeld.toLocaleString(undefined, { maximumFractionDigits: 4 })} shares held · Avg cost: <span className="font-mono tabular-nums text-white/80">{formatCurrency(sellData.avgCost, sellData.currency)}</span>
+                    {sellData.broker} · {sellData.sharesHeld.toLocaleString(undefined, { maximumFractionDigits: 4 })} shares held · Avg cost: <span className="font-space tabular-nums text-white/80">{formatCurrency(sellData.avgCost, sellData.currency)}</span>
                 </p>
 
                 <div className="flex flex-col gap-5 flex-1 pb-4">
@@ -295,7 +295,7 @@ export default function EquityForm({
                         </div>
                         <div className="flex-1">
                             <label className="block text-white/60 text-xs mb-1">Currency</label>
-                            <div className="w-full p-2.5 bg-white/[0.02] border border-white/5 rounded-xl text-white/50 text-sm font-mono tabular-nums">{sellData.currency}</div>
+                            <div className="w-full p-2.5 bg-white/[0.02] border border-white/5 rounded-xl text-white/50 text-data-sm font-space ">{sellData.currency}</div>
                         </div>
                     </div>
 
@@ -304,13 +304,13 @@ export default function EquityForm({
                             <label className="block text-white/60 text-xs mb-1">Quantity to Sell</label>
                             <input type="number" value={sellData.qtyToSell} onChange={e => updateSellCalc('qtyToSell', e.target.value)}
                                 max={sellData.sharesHeld} step="any"
-                                className="w-full p-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm outline-none focus:border-rose-500/50 font-mono tabular-nums" />
+                                className="w-full p-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-data-sm outline-none focus:border-rose-500/50 font-space " />
                         </div>
                         <div className="flex-1">
                             <label className="block text-white/60 text-xs mb-1">Sell Price / Share</label>
                             <input type="number" value={sellData.sellPricePerShare} onChange={e => updateSellCalc('sellPricePerShare', e.target.value)}
                                 step="any"
-                                className="w-full p-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm outline-none focus:border-rose-500/50 font-mono tabular-nums" />
+                                className="w-full p-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-data-sm outline-none focus:border-rose-500/50 font-space " />
                         </div>
                     </div>
 
@@ -318,20 +318,20 @@ export default function EquityForm({
                         <div>
                             <label className="block mb-1 text-white/70 text-xs font-medium uppercase tracking-wider">Total Sale Value (Proceeds)</label>
                             <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50 font-mono tabular-nums">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50 font-space tabular-nums">
                                     {sellData.currency === 'BRL' ? 'R$' : (sellData.currency === 'USD' ? '$' : '£')}
                                 </span>
                                 <input type="number" value={sellData.totalProceeds} onChange={e => updateSellCalc('totalProceeds', e.target.value)}
-                                    step="any" className="w-full py-2.5 pl-8 pr-3 bg-white/5 border border-rose-500/30 rounded-lg text-white text-base font-bold outline-none focus:border-rose-500 transition-all font-mono tabular-nums" />
+                                    step="any" className="w-full py-2.5 pl-8 pr-3 bg-white/5 border border-rose-500/30 rounded-lg text-white text-data-base font-bold outline-none focus:border-rose-500 transition-all font-space " />
                             </div>
                         </div>
                         <div className="flex justify-between items-center bg-white/5 rounded-lg p-3">
                             <span className="text-white/60 text-sm">Cost Basis</span>
-                            <span className="text-white/80 font-mono tabular-nums text-sm">{formatCurrency(sellData.avgCost * (parseFloat(sellData.qtyToSell) || 0), sellData.currency)}</span>
+                            <span className="text-white/80 font-space  text-data-sm">{formatCurrency(sellData.avgCost * (parseFloat(sellData.qtyToSell) || 0), sellData.currency)}</span>
                         </div>
                         <div className="flex justify-between items-center bg-white/5 border border-white/10 rounded-lg p-3">
                             <span className="text-white text-sm font-bold">P&L</span>
-                            <span className={`text-sm font-bold font-mono tabular-nums ${sellData.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            <span className={`text-data-sm font-bold font-space  ${sellData.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                 {sellData.pnl >= 0 ? '+' : ''}{formatCurrency(sellData.pnl, sellData.currency)} ({sellData.roi >= 0 ? '+' : ''}{sellData.roi.toFixed(1)}%)
                             </span>
                         </div>

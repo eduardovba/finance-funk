@@ -10,7 +10,7 @@ export default function FTUEWizard({ onTakeTour, onSkipTour }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9998] flex items-center justify-center"
+            className="fixed inset-0 z-[990] flex items-center justify-center"
         >
             {/* Frosted backdrop — dashboard is visible behind */}
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -35,7 +35,7 @@ export default function FTUEWizard({ onTakeTour, onSkipTour }) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3 }}
-                    className="text-[#F5F5DC]/40 text-[0.75rem] uppercase tracking-[5px] font-space mb-6"
+                    className="text-[#F5F5DC]/40 text-xs uppercase tracking-[5px] font-space mb-6"
                 >
                     Put some funk in your funds
                 </motion.p>
@@ -64,7 +64,7 @@ export default function FTUEWizard({ onTakeTour, onSkipTour }) {
                             flex flex-col items-center gap-0.5 border-none cursor-pointer"
                     >
                         <span>🎸 Show Me Around</span>
-                        <span className="text-[0.75rem] font-normal opacity-60">Quick guided tour</span>
+                        <span className="text-xs font-normal opacity-60">Quick guided tour</span>
                     </motion.button>
 
                     <motion.button
@@ -77,7 +77,7 @@ export default function FTUEWizard({ onTakeTour, onSkipTour }) {
                             flex flex-col items-center gap-0.5 cursor-pointer"
                     >
                         <span>Skip, I&apos;ll figure it out</span>
-                        <span className="text-[0.75rem] font-normal opacity-40">Dive right in</span>
+                        <span className="text-xs font-normal opacity-40">Dive right in</span>
                     </motion.button>
                 </motion.div>
             </motion.div>

@@ -56,12 +56,12 @@ export default function CurrencySelector({ value, onChange, label = "" }) {
 
     return (
         <div ref={containerRef} className="relative w-full">
-            {label && <label className="block text-[0.8rem] text-parchment/60 mb-2">{label}</label>}
+            {label && <label className="block text-sm text-parchment/60 mb-2">{label}</label>}
 
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all text-white font-mono tabular-nums"
+                className="w-full flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all text-white font-space tabular-nums"
             >
                 <div className="flex items-center gap-3">
                     <span className="text-xl">{selectedCurrency.flag}</span>
@@ -73,7 +73,7 @@ export default function CurrencySelector({ value, onChange, label = "" }) {
             </button>
 
             {isOpen && (
-                <div className="absolute z-[1100] mt-2 w-full bg-[#1A0F2E] border border-record/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute z-[900] mt-2 w-full bg-[#1A0F2E] border border-record/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="p-2 border-b border-white/5">
                         <input
                             autoFocus
@@ -81,14 +81,14 @@ export default function CurrencySelector({ value, onChange, label = "" }) {
                             placeholder="Search currency..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-record/50 font-mono tabular-nums"
+                            className="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-data-sm text-white focus:outline-none focus:border-record/50 font-space "
                         />
                     </div>
 
                     <div className="max-h-[250px] overflow-y-auto custom-scrollbar">
                         {sortedCurrencies.pinned.length > 0 && (
                             <div className="p-1">
-                                <div className="px-3 py-1 text-[0.75rem] uppercase tracking-widest text-[#D4AF37] opacity-60 font-bold">Preferred</div>
+                                <div className="px-3 py-1 text-xs uppercase tracking-widest text-[#D4AF37] opacity-60 font-bold">Preferred</div>
                                 {sortedCurrencies.pinned.map(c => (
                                     <button
                                         key={`pinned-${c.code}`}
@@ -126,7 +126,7 @@ export default function CurrencySelector({ value, onChange, label = "" }) {
                                     <div className="flex items-center gap-3">
                                         <span className="text-lg">{c.flag}</span>
                                         <span className="font-bold text-sm">{c.code}</span>
-                                        <span className="text-[0.75rem] opacity-40 truncate max-w-[80px]">{c.name}</span>
+                                        <span className="text-xs opacity-40 truncate max-w-[80px]">{c.name}</span>
                                     </div>
                                     {value === c.code && <div className="w-1.5 h-1.5 rounded-full bg-record" />}
                                 </button>

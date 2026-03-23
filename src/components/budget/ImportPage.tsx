@@ -342,11 +342,11 @@ export default function ImportPage() {
 
                         {/* Detected format badge */}
                         {detectedAdapter && (
-                            <span className="px-2.5 py-1 rounded-lg bg-[#34D399]/10 border border-[#34D399]/20 text-[#34D399] text-[0.65rem] font-space font-medium uppercase tracking-wider">
+                            <span className="px-2.5 py-1 rounded-lg bg-[#34D399]/10 border border-[#34D399]/20 text-[#34D399] text-2xs font-space font-medium uppercase tracking-wider">
                                 Detected: {detectedAdapter.label}
                             </span>
                         )}
-                        <div className="flex items-center gap-3 ml-auto text-[0.8rem] font-mono tabular-nums">
+                        <div className="flex items-center gap-3 ml-auto text-data-sm font-space ">
                             <span className="text-[#34D399]">
                                 ↑ {formatCents(incomeTotal, detectedAdapter?.currency ?? 'GBP')}
                             </span>
@@ -412,12 +412,12 @@ export default function ImportPage() {
                             >
                                 {/* Duplicate badge */}
                                 {duplicateIds.has(row.id) && (
-                                    <span className="text-[0.55rem] uppercase tracking-[1.5px] font-space font-bold px-1.5 py-0.5 rounded-md bg-red-400/15 border border-red-400/30 text-red-400 flex-shrink-0">
+                                    <span className="text-2xs uppercase tracking-[1.5px] font-space font-bold px-1.5 py-0.5 rounded-lg bg-red-400/15 border border-red-400/30 text-red-400 flex-shrink-0">
                                         Dupe
                                     </span>
                                 )}
                                 {/* Date */}
-                                <span className="text-[0.7rem] font-mono tabular-nums text-[#F5F5DC]/30 w-20 flex-shrink-0">
+                                <span className="text-data-xs font-space  text-[#F5F5DC]/30 w-20 flex-shrink-0">
                                     {row.date}
                                 </span>
 
@@ -427,14 +427,14 @@ export default function ImportPage() {
                                 </span>
 
                                 {/* Amount */}
-                                <span className={`text-sm font-mono tabular-nums flex-shrink-0 ${
+                                <span className={`text-data-sm font-space  flex-shrink-0 ${
                                     row.is_income ? 'text-[#34D399]' : 'text-[#F5F5DC]/60'
                                 }`}>
                                     {row.is_income ? '+' : '-'}{formatCents(row.amount_cents, row.currency)}
                                 </span>
 
                                 {/* Type badge */}
-                                <span className={`text-[0.6rem] uppercase tracking-[1.5px] font-space px-1.5 py-0.5 rounded-md border flex-shrink-0
+                                <span className={`text-2xs uppercase tracking-[1.5px] font-space px-1.5 py-0.5 rounded-lg border flex-shrink-0
                                     ${row.is_income
                                         ? 'text-emerald-400 border-emerald-400/20 bg-emerald-400/10'
                                         : 'text-[#F5F5DC]/30 border-white/[0.06] bg-white/[0.02]'

@@ -30,7 +30,7 @@ export interface SettingsActions {
 
 const useSettingsStore = create<SettingsState & SettingsActions>((set) => ({
     // ═══════════ STATE ═══════════
-    appSettings: { autoMonthlyCloseEnabled: true, backgroundSelection: 'linen-funk' },
+    appSettings: { autoMonthlyCloseEnabled: true, backgroundSelection: 'vinyl-voyage' },
     forecastSettings: {},
     dashboardConfig: null,
     allocationTargets: {},

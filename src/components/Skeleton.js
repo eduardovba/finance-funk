@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { Card } from '@/components/ui/card';
 
 export default function Skeleton({ width = '100%', height = '1rem', className = '', rounded = 'rounded-lg' }) {
     return (
@@ -13,7 +14,7 @@ export default function Skeleton({ width = '100%', height = '1rem', className = 
 
 export function SkeletonCard({ className = '' }) {
     return (
-        <div className={`glass-card p-4 md:p-6 flex flex-col gap-3 ${className}`}>
+        <div className={`p-4 md:p-6 flex flex-col gap-3 ${className}`}>
             <Skeleton width="60%" height="0.75rem" />
             <Skeleton width="80%" height="2rem" />
             <Skeleton width="50%" height="0.75rem" />

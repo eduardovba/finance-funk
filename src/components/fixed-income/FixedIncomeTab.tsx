@@ -117,7 +117,7 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }: 
                                     <div className="flex flex-col">
                                         {!nameHandledByContextPane && <h3 className="text-xl font-bold text-white/90 tracking-tight">{asset.name}</h3>}
                                         <div className="flex items-center gap-2 mt-2">
-                                            <span className="px-2 py-0.5 rounded bg-white/10 text-white/70 text-[0.75rem] font-mono tabular-nums tracking-wider">{asset.broker}</span>
+                                            <span className="px-2 py-0.5 rounded bg-white/10 text-white/70 text-data-xs font-space  tracking-wider">{asset.broker}</span>
                                         </div>
                                     </div>
                                 )}
@@ -128,16 +128,16 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }: 
                                     return (
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                                                <span className="block text-[0.75rem] text-white/40 uppercase tracking-widest mb-1.5">Principal</span>
-                                                <span className="text-sm font-medium text-white/90 font-mono tabular-nums">{formatCurrency(asset.investment, asset.currency || 'BRL')}</span>
+                                                <span className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Principal</span>
+                                                <span className="text-data-sm font-medium text-white/90 font-space ">{formatCurrency(asset.investment, asset.currency || 'BRL')}</span>
                                             </div>
                                             <div className="bg-[#D4AF37]/5 border border-[#D4AF37]/20 rounded-xl p-3">
-                                                <span className="block text-[0.75rem] text-[#D4AF37]/60 uppercase tracking-widest mb-1.5">Current Value</span>
-                                                <span className="text-sm font-bold text-[#D4AF37] font-mono tabular-nums drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">{formatCurrency(asset.currentValue, asset.currency || 'BRL')}</span>
+                                                <span className="block text-xs text-[#D4AF37]/60 uppercase tracking-widest mb-1.5">Current Value</span>
+                                                <span className="text-data-sm font-bold text-[#D4AF37] font-space  drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">{formatCurrency(asset.currentValue, asset.currency || 'BRL')}</span>
                                             </div>
                                             <div className="col-span-2 bg-white/[0.02] border border-white/5 rounded-xl p-3 flex justify-between items-center">
-                                                <span className="text-[0.75rem] text-white/40 uppercase tracking-widest">Accrued Interest</span>
-                                                <span className={`text-sm font-bold tracking-wider rounded-md font-mono tabular-nums ${asset.interest >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                <span className="text-xs text-white/40 uppercase tracking-widest">Accrued Interest</span>
+                                                <span className={`text-data-sm font-bold tracking-wider rounded-lg font-space  ${asset.interest >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                                     {asset.interest >= 0 ? '+' : ''}{formatCurrency(asset.interest, asset.currency || 'BRL')} ({asset.roi >= 0 ? '+' : ''}{asset.roi.toFixed(1)}%)
                                                 </span>
                                             </div>
@@ -175,11 +175,11 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }: 
                                                     <>
                                                         <div className="flex items-center gap-2 mb-1.5">
                                                             <div className={`w-1.5 h-1.5 rounded-full ${isInterest ? 'bg-emerald-500' : isWithdrawal ? 'bg-rose-500' : 'bg-blue-400'}`} />
-                                                            <span className="font-medium text-[0.75rem] text-white/90 uppercase tracking-wider font-space">{tr.type}</span>
+                                                            <span className="font-medium text-xs text-white/90 uppercase tracking-wider font-space">{tr.type}</span>
                                                         </div>
                                                         <div className="flex flex-col gap-1">
-                                                            <span className="text-sm font-bold text-white tracking-tight font-mono tabular-nums">{formatCurrency(amount, asset.currency || 'BRL')}</span>
-                                                            <span className="text-[0.75rem] text-white/40 font-mono tabular-nums tracking-tight leading-relaxed">{tr.date}</span>
+                                                            <span className="text-data-sm font-bold text-white tracking-tight font-space ">{formatCurrency(amount, asset.currency || 'BRL')}</span>
+                                                            <span className="text-data-xs text-white/40 font-space  tracking-tight leading-relaxed">{tr.date}</span>
                                                         </div>
                                                     </>
                                                 )
@@ -244,7 +244,7 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }: 
                     </div>
 
                     {h.ledgerOpen && (
-                        <div className="bg-white/5 backdrop-blur-md border border-white/5 rounded-3xl p-4 sm:p-6 mb-24">
+                        <div className="bg-white/5 backdrop-blur-md border border-white/5 rounded-2xl p-4 sm:p-6 mb-24">
                             <TransactionTimeline
                                 transactions={[...transactions].sort((a, b) => b.date.localeCompare(a.date))}
                                 onEdit={h.handleEditClick}

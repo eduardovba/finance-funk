@@ -10,6 +10,7 @@ import { usePortfolio } from '@/context/PortfolioContext';
    ═══════════════════════════════════════════════════════════════ */
 
 const IMAGE_WALLPAPERS = {
+    'collection': '/backgrounds/Collection.jpeg',
     'concretely-funky': '/backgrounds/Concretely Funky.jpeg',
     'copper-rise': '/backgrounds/Copper Rise.jpeg',
     'creamy-linen': '/backgrounds/Creamy Linen.jpeg',
@@ -18,9 +19,15 @@ const IMAGE_WALLPAPERS = {
     'envelope-of-funk': '/backgrounds/Envelope of Funk.jpeg',
     'frosted-funk': '/backgrounds/Frosted Funk.jpeg',
     'frosted-glass': '/backgrounds/Frosted Glass.jpeg',
+    'funky-ledger': '/backgrounds/Funky Ledger.jpeg',
+    'groove-vault': '/backgrounds/Groove Vault.jpeg',
     'linen-funk-light': '/backgrounds/Linen Funk Light.jpeg',
     'linen-funk': '/backgrounds/Linen Funk.jpeg',
+    'lux-swing': '/backgrounds/Lux Swing.jpeg',
     'mosaic-dance': '/backgrounds/Mosaic Dance.jpeg',
+    'type-f': '/backgrounds/Type F.jpeg',
+    'velvet-medal': '/backgrounds/Velvet Medal.jpeg',
+    'vinyl-voyage': '/backgrounds/Vinyl Voyage.jpeg',
     'walnut-grooves': '/backgrounds/Walnut Grooves.jpeg',
 };
 
@@ -29,9 +36,9 @@ const NOISE_SVG = `data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http:/
 
 export default function AnimatedBackground() {
     const { appSettings } = usePortfolio();
-    const themeId = appSettings?.backgroundSelection || 'linen-funk';
+    const themeId = appSettings?.backgroundSelection || 'vinyl-voyage';
 
-    const imagePath = IMAGE_WALLPAPERS[themeId] || IMAGE_WALLPAPERS['linen-funk'];
+    const imagePath = IMAGE_WALLPAPERS[themeId] || IMAGE_WALLPAPERS['vinyl-voyage'];
 
     return (
         <>

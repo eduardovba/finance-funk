@@ -132,7 +132,7 @@ export default function SmartInsights({
             </h4>
 
             {insights.length === 0 ? (
-                <p className="font-mono tabular-nums text-xs text-white/30 italic">Not enough data to generate insights.</p>
+                <p className="font-space  text-data-xs text-white/30 italic">Not enough data to generate insights.</p>
             ) : (
                 <div className="space-y-4">
                     {insights.map((insight, i) => (
@@ -140,7 +140,7 @@ export default function SmartInsights({
                             <div className="mt-0.5 p-1 rounded bg-white/5 group-hover:bg-white/10 transition-colors shrink-0">
                                 <insight.icon size={14} style={{ color: insight.color }} />
                             </div>
-                            <p className="font-mono tabular-nums text-xs text-white/60 leading-relaxed">
+                            <p className="font-space  text-data-xs text-white/60 leading-relaxed">
                                 {renderText(insight.text)}
                             </p>
                         </div>

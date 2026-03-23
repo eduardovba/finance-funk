@@ -170,7 +170,7 @@ const HardwareDial = ({
                     {label}
                 </div>
                 {subtitle && (
-                    <div className="font-mono tabular-nums text-[0.75rem] text-parchment/60 tracking-widest uppercase font-bold drop-shadow-[0_1px_rgba(0,0,0,0.8)]">
+                    <div className="font-space  text-data-xs text-parchment/60 tracking-widest uppercase font-bold drop-shadow-[0_1px_rgba(0,0,0,0.8)]">
                         {subtitle}
                     </div>
                 )}
@@ -219,13 +219,13 @@ const HardwareDial = ({
                     <div className="absolute inset-[15%] rounded-full bg-[#22153b] border border-white/5 shadow-inner"></div>
 
                     {/* The Indicator Notch (Flat neon slit) */}
-                    <div className="absolute top-[5%] left-1/2 -translate-x-1/2 w-[2px] h-[15%] rounded-sm z-10" style={{ backgroundColor: glowColor, boxShadow: `0 0 4px ${glowColor}` }}></div>
+                    <div className="absolute top-[5%] left-1/2 -translate-x-1/2 w-[2px] h-[15%] rounded-lg z-10" style={{ backgroundColor: glowColor, boxShadow: `0 0 4px ${glowColor}` }}></div>
                 </motion.div>
             </div>
 
             {/* Readout Display (Minimal flat pill) */}
             <div
-                className={`mt-4 bg-black/40 border border-white/10 px-4 py-1.5 rounded-md min-w-[100px] text-center transition-all ${!isEditing ? 'hover:border-white/30 cursor-text' : 'ring-1 ring-white/20'}`}
+                className={`mt-4 bg-black/40 border border-white/10 px-4 py-1.5 rounded-lg min-w-[100px] text-center transition-all ${!isEditing ? 'hover:border-white/30 cursor-text' : 'ring-1 ring-white/20'}`}
                 onClick={handleReadoutClick}
             >
                 {isEditing ? (
@@ -236,11 +236,11 @@ const HardwareDial = ({
                         onChange={(e) => setTempValue(e.target.value)}
                         onBlur={handleInputBlur}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-transparent border-none outline-none text-center font-mono tabular-nums text-sm tracking-wider font-bold p-0"
+                        className="w-full bg-transparent border-none outline-none text-center font-space  text-data-sm tracking-wider font-bold p-0"
                         style={{ color: glowColor }}
                     />
                 ) : (
-                    <span className="font-mono tabular-nums text-sm tracking-wider font-bold" style={{ color: glowColor }}>
+                    <span className="font-space  text-data-sm tracking-wider font-bold" style={{ color: glowColor }}>
                         {formatValue(displayValue)}
                     </span>
                 )}

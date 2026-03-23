@@ -18,6 +18,16 @@
     --text-lg: 1.125rem;    /* 18px — section headings */
     --text-xl: 1.5rem;      /* 24px — page titles */
     --text-hero: clamp(2.5rem, 6vw, 4rem); /* hero net worth */
+
+    /* ─── Z-Index Scale ─── */
+    --z-base: 0;
+    --z-dropdown: 50;
+    --z-sticky: 100;
+    --z-overlay: 500;
+    --z-modal: 900;
+    --z-toast: 950;
+    --z-tutorial: 990;
+    --z-max: 999;
   }
 
   body {
@@ -75,6 +85,20 @@
 
 /* ─── Backward-compat utilities used by 31+ components not yet migrated ─── */
 @layer components {
+  /* ─── Standardized Type Scale Utilities ─── */
+  .text-2xs { font-size: var(--text-2xs); line-height: 1.4; }
+  .text-data-xs { font-size: var(--text-xs); line-height: 1.3; font-variant-numeric: tabular-nums; }
+  .text-data-sm { font-size: var(--text-sm); line-height: 1.3; font-variant-numeric: tabular-nums; }
+  .text-data-base { font-size: var(--text-base); line-height: 1.3; font-variant-numeric: tabular-nums; }
+
+  /* ─── Z-Index Utilities ─── */
+  .z-dropdown { z-index: var(--z-dropdown); }
+  .z-sticky { z-index: var(--z-sticky); }
+  .z-overlay { z-index: var(--z-overlay); }
+  .z-modal { z-index: var(--z-modal); }
+  .z-toast { z-index: var(--z-toast); }
+  .z-tutorial { z-index: var(--z-tutorial); }
+  .z-max { z-index: var(--z-max); }
 
   /* CSS Variables for backward compatibility */
   :root {

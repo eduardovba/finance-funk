@@ -260,7 +260,7 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
     const isLastStep = currentStep === totalSteps - 1;
 
     const content = (
-        <div className="fixed inset-0 z-[9998] pointer-events-none">
+        <div className="fixed inset-0 z-[990] pointer-events-none">
             {/* SVG Mask Overlay */}
             <svg
                 className="absolute inset-0 w-full h-full pointer-events-auto"
@@ -341,24 +341,24 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
                                 </div>
                                 <div>
                                     <h3 className="text-[#D4AF37] font-space font-bold text-sm m-0">{step.title}</h3>
-                                    <span className="text-[0.6875rem] text-[#F5F5DC]/30 font-space uppercase tracking-[2px]">
+                                    <span className="text-2xs text-[#F5F5DC]/30 font-space uppercase tracking-[2px]">
                                         Step {currentStep + 1} of {totalSteps}
                                     </span>
                                 </div>
                             </div>
 
-                            <p className="text-[13px] text-[#F5F5DC]/70 font-space leading-relaxed m-0 mb-1">
+                            <p className="text-sm text-[#F5F5DC]/70 font-space leading-relaxed m-0 mb-1">
                                 {step.message}
                             </p>
 
                             {/* Action step prompt */}
                             {isActionStep && !actionCompleted && (
-                                <p className="text-[0.75rem] text-[#D4AF37]/60 font-space italic m-0 mb-3">
+                                <p className="text-xs text-[#D4AF37]/60 font-space italic m-0 mb-3">
                                     👆 Complete the action above to continue...
                                 </p>
                             )}
                             {isActionStep && actionCompleted && (
-                                <p className="text-[0.75rem] text-emerald-400/80 font-space font-semibold m-0 mb-3">
+                                <p className="text-xs text-emerald-400/80 font-space font-semibold m-0 mb-3">
                                     ✓ Done! Click Next to continue.
                                 </p>
                             )}
@@ -366,7 +366,7 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
 
                             {/* Reset tip on last step */}
                             {isLastStep && (
-                                <p className="text-[0.75rem] text-[#F5F5DC]/30 font-space m-0 mb-3 italic">
+                                <p className="text-xs text-[#F5F5DC]/30 font-space m-0 mb-3 italic">
                                     You can replay this tour anytime from Profile → Replay Tutorial.
                                 </p>
                             )}
@@ -375,7 +375,7 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
                             <div className="flex items-center justify-between">
                                 <button
                                     onClick={skipTour}
-                                    className="text-[0.75rem] text-[#F5F5DC]/30 hover:text-[#F5F5DC]/60 font-space tracking-wide uppercase transition-colors bg-transparent border-none cursor-pointer"
+                                    className="text-xs text-[#F5F5DC]/30 hover:text-[#F5F5DC]/60 font-space tracking-wide uppercase transition-colors bg-transparent border-none cursor-pointer"
                                 >
                                     Skip
                                 </button>
@@ -401,7 +401,7 @@ export default function PageTutorialOverlay({ pageId, steps = [] }) {
                                     whileTap={canProceed ? { scale: 0.95 } : {}}
                                     onClick={canProceed ? goNext : undefined}
                                     disabled={!canProceed}
-                                    className={`px-4 py-1.5 rounded-lg font-space text-[0.75rem] tracking-wide font-bold transition-all duration-300 border-none cursor-pointer
+                                    className={`px-4 py-1.5 rounded-lg font-space text-xs tracking-wide font-bold transition-all duration-300 border-none cursor-pointer
                                         ${canProceed
                                             ? 'bg-gradient-to-r from-[#D4AF37] to-[#B8962E] text-[#0B0611] hover:shadow-md hover:shadow-[#D4AF37]/20'
                                             : 'bg-white/10 text-white/30 cursor-not-allowed'

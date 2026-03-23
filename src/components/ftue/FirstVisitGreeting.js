@@ -87,7 +87,7 @@ export default function FirstVisitGreeting() {
 
                             <div className="flex-1 min-w-0 pr-4">
                                 <h4 className="text-[#D4AF37] font-space font-bold text-sm m-0 mb-1">Professor F</h4>
-                                <p className="text-[13px] text-[#F5F5DC]/80 font-space leading-snug m-0">
+                                <p className="text-sm text-[#F5F5DC]/80 font-space leading-snug m-0">
                                     {message}
                                 </p>
                             </div>

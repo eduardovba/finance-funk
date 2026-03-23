@@ -107,7 +107,7 @@ export default function SpendingTrendChart({ rollupHistory }: SpendingTrendChart
                     </div>
 
                     {/* Legend */}
-                    <div className="mt-3 flex justify-center gap-4 text-[0.6875rem] font-space shrink-0 flex-wrap">
+                    <div className="mt-3 flex justify-center gap-4 text-2xs font-space shrink-0 flex-wrap">
                         <span className="text-[#34D399]">● Income</span>
                         <span className="text-[#D4AF37]">● Expenses</span>
                     </div>

@@ -51,6 +51,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} ${bebasNeue.variable} ${spaceMono.variable}`}>
       <body className={`bg-midnight text-parchment antialiased font-sans min-h-screen`}>
+        <a href="#main-scroll" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[#D4AF37] focus:text-[#0B0611] focus:font-bold focus:text-sm focus:font-space">
+            Skip to content
+        </a>
         <Providers>
           <AppShell>{children}</AppShell>
         </Providers>

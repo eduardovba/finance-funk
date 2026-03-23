@@ -93,10 +93,10 @@ export default function GoalProgressRing({
                     <span className="font-bebas text-3xl tracking-wider" style={{ color: actualColor }}>
                         {actualPct.toFixed(0)}%
                     </span>
-                    <span className="text-[0.75rem] font-mono tabular-nums text-white/60 font-bold tracking-wide">
+                    <span className="text-data-xs font-space  text-white/60 font-bold tracking-wide">
                         to {fmt(goalValue)}
                     </span>
-                    <span className="text-[0.6875rem] font-mono tabular-nums mt-0.5 text-white/25">
+                    <span className="text-2xs font-space tabular-nums mt-0.5 text-white/25">
                         {targetPct.toFixed(0)}% target
                     </span>
                 </div>
@@ -105,17 +105,17 @@ export default function GoalProgressRing({
             {/* Status & ETA Label */}
             <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: actualColor }} />
-                <span className="font-mono tabular-nums text-xs" style={{ color: actualColor }}>{statusLabel}</span>
+                <span className="font-space  text-data-xs" style={{ color: actualColor }}>{statusLabel}</span>
                 {etaLabel && (
                     <>
                         <span className="text-white/20 mx-1">·</span>
-                        <span className={`font-mono tabular-nums text-xs font-bold ${etaMonths >= 0 ? 'text-[#34D399]' : 'text-[#ef4444]'}`}>
+                        <span className={`font-space  text-data-xs font-bold ${etaMonths >= 0 ? 'text-[#34D399]' : 'text-[#ef4444]'}`}>
                             {etaLabel}
                         </span>
                     </>
                 )}
                 <span className="text-white/20 mx-1">·</span>
-                <span className="font-mono tabular-nums text-xs text-white/40">{daysRemaining.toLocaleString()} days left</span>
+                <span className="font-space  text-data-xs text-white/40">{daysRemaining.toLocaleString()} days left</span>
             </div>
         </div>
     );

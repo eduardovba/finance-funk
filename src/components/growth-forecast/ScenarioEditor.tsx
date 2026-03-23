@@ -31,7 +31,7 @@ function EditableValue({ value, onChange, min = 0, max = 100000000, step = 1, fo
                 onChange={e => setDraft(e.target.value)}
                 onBlur={handleCommit}
                 onKeyDown={e => { if (e.key === 'Enter') handleCommit(); if (e.key === 'Escape') setEditing(false); }}
-                className="bg-transparent border-b border-[#D4AF37]/50 text-[#D4AF37] font-mono tabular-nums text-sm font-bold outline-none w-24 text-right"
+                className="bg-transparent border-b border-[#D4AF37]/50 text-[#D4AF37] font-space  text-data-sm font-bold outline-none w-24 text-right"
                 autoFocus
             />
         );
@@ -40,7 +40,7 @@ function EditableValue({ value, onChange, min = 0, max = 100000000, step = 1, fo
     return (
         <span
             onClick={handleStartEdit}
-            className="font-mono tabular-nums text-sm text-[#D4AF37] font-bold cursor-pointer hover:text-[#D4AF37]/80 transition-colors border-b border-transparent hover:border-[#D4AF37]/30"
+            className="font-space  text-data-sm text-[#D4AF37] font-bold cursor-pointer hover:text-[#D4AF37]/80 transition-colors border-b border-transparent hover:border-[#D4AF37]/30"
             title="Click to type a value"
         >
             {formatDisplay ? formatDisplay(value) : value}{suffix}
@@ -88,7 +88,7 @@ function MonthCombobox({ value, onChange, placeholder = "Select month..." }: any
                 onClick={() => setIsOpen(!isOpen)}
             >
                 <Calendar size={12} className="text-[#D4AF37]" />
-                <span className={`font-mono tabular-nums text-sm ${value ? 'text-[#D4AF37]' : 'text-white/40'}`}>
+                <span className={`font-space  text-data-sm ${value ? 'text-[#D4AF37]' : 'text-white/40'}`}>
                     {value || placeholder}
                 </span>
             </div>
@@ -113,7 +113,7 @@ function MonthCombobox({ value, onChange, placeholder = "Select month..." }: any
                                 <button
                                     key={m}
                                     onClick={() => handleSelectMonth(i)}
-                                    className={`py-1.5 rounded-lg font-mono tabular-nums text-[0.75rem] transition-all duration-200
+                                    className={`py-1.5 rounded-lg font-space  text-data-xs transition-all duration-200
                                         ${isSelected
                                             ? 'bg-[#D4AF37] text-[#0D0814] font-bold shadow-[0_0_10px_rgba(212,175,55,0.4)]'
                                             : isCurrent
@@ -178,7 +178,7 @@ export default function ScenarioEditor(props: ScenarioEditorProps) {
                         {isLocked ? 'Locked Plan' : 'Scenario Builder'}
                     </h3>
                     {isLocked && lockedAt && (
-                        <span className="font-mono tabular-nums text-[0.75rem] text-white/30">
+                        <span className="font-space  text-data-xs text-white/30">
                             Locked {new Date(lockedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </span>
                     )}
@@ -189,28 +189,28 @@ export default function ScenarioEditor(props: ScenarioEditorProps) {
                 <div className="flex flex-wrap gap-6 items-center">
                     <div className="flex items-center gap-2">
                         <Lock size={12} className="text-white/30" />
-                        <span className="font-mono tabular-nums text-xs text-white/50">Monthly:</span>
-                        <span className="font-mono tabular-nums text-sm text-[#D4AF37]">{formatK(lockedPlan?.monthlyContribution || monthlyContribution, 'BRL')}/mo</span>
+                        <span className="font-space  text-data-xs text-white/50">Monthly:</span>
+                        <span className="font-space  text-data-sm text-[#D4AF37]">{formatK(lockedPlan?.monthlyContribution || monthlyContribution, 'BRL')}/mo</span>
                     </div>
                     <div className="h-4 w-px bg-white/10" />
                     <div className="flex items-center gap-2">
-                        <span className="font-mono tabular-nums text-xs text-white/50">Yield:</span>
-                        <span className="font-mono tabular-nums text-sm text-[#D4AF37]">{lockedPlan?.annualInterestRate || annualInterestRate}%</span>
+                        <span className="font-space  text-data-xs text-white/50">Yield:</span>
+                        <span className="font-space  text-data-sm text-[#D4AF37]">{lockedPlan?.annualInterestRate || annualInterestRate}%</span>
                     </div>
                     <div className="h-4 w-px bg-white/10" />
                     <div className="flex items-center gap-2">
-                        <span className="font-mono tabular-nums text-xs text-white/50">Goal:</span>
-                        <span className="font-mono tabular-nums text-sm text-[#D4AF37]">{formatK(lockedPlan?.goal2031 || target2031, 'BRL')}</span>
+                        <span className="font-space  text-data-xs text-white/50">Goal:</span>
+                        <span className="font-space  text-data-sm text-[#D4AF37]">{formatK(lockedPlan?.goal2031 || target2031, 'BRL')}</span>
                     </div>
                     <div className="h-4 w-px bg-white/10" />
                     <div className="flex items-center gap-2">
                         <Calendar size={12} className="text-white/30" />
-                        <span className="font-mono tabular-nums text-xs text-white/50">From:</span>
-                        <span className="font-mono tabular-nums text-sm text-[#D4AF37]">{lockedPlan?.startMonth || startMonth}</span>
+                        <span className="font-space  text-data-xs text-white/50">From:</span>
+                        <span className="font-space  text-data-sm text-[#D4AF37]">{lockedPlan?.startMonth || startMonth}</span>
                     </div>
                     <div className="ml-auto">
                         <button onClick={() => handleSave('unlock')}
-                            className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-xs font-mono tabular-nums text-white/60 hover:text-white hover:border-[#D4AF37]/30 transition-all">
+                            className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-data-xs font-space  text-white/60 hover:text-white hover:border-[#D4AF37]/30 transition-all">
                             <Unlock size={12} /> Edit Plan
                         </button>
                     </div>
@@ -221,22 +221,22 @@ export default function ScenarioEditor(props: ScenarioEditorProps) {
                         {/* Start Month */}
                         <div className="bg-[#121418]/50 backdrop-blur-lg border border-white/[0.06] rounded-xl p-4 hover:border-[#D4AF37]/20 transition-colors">
                             <div className="flex justify-between items-center mb-3">
-                                <span className="font-mono tabular-nums text-[0.75rem] text-white/40 uppercase tracking-widest flex items-center gap-1.5"><Calendar size={10} /> Start Month</span>
+                                <span className="font-space  text-data-xs text-white/40 uppercase tracking-widest flex items-center gap-1.5"><Calendar size={10} /> Start Month</span>
                             </div>
                             <MonthCombobox value={startMonth} onChange={(v: string) => { setLastInteraction('inputs'); setStartMonth(v); }} />
-                            <div className="mt-2 font-mono tabular-nums text-[0.75rem] text-white/30">Starting: {formatK(startingValueBrl, 'BRL')}</div>
+                            <div className="mt-2 font-space  text-data-xs text-white/30">Starting: {formatK(startingValueBrl, 'BRL')}</div>
                         </div>
 
                         {/* Monthly Contribution */}
                         <div className="bg-[#121418]/50 backdrop-blur-lg border border-white/[0.06] rounded-xl p-4 hover:border-[#D4AF37]/20 transition-colors">
                             <div className="flex justify-between items-center mb-3">
-                                <span className="font-mono tabular-nums text-[0.75rem] text-white/40 uppercase tracking-widest">Monthly Gain</span>
+                                <span className="font-space  text-data-xs text-white/40 uppercase tracking-widest">Monthly Gain</span>
                                 <EditableValue value={monthlyContribution} onChange={(v: number) => { setLastInteraction('inputs'); setMonthlyContribution(Math.round(v / 100) * 100); }} min={0} max={100000} step={100} formatDisplay={(v: number) => formatK(v, 'BRL')} suffix="/mo" />
                             </div>
                             <input type="range" min={0} max={50000} step={1000} value={monthlyContribution} onChange={(e) => { setLastInteraction('inputs'); setMonthlyContribution(parseInt(e.target.value)); }} className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#D4AF37]" />
-                            <div className="mt-2 font-mono tabular-nums text-[0.75rem] text-white/30">Required: {formatK(requiredContributionHint, 'BRL')}/mo</div>
+                            <div className="mt-2 font-space  text-data-xs text-white/30">Required: {formatK(requiredContributionHint, 'BRL')}/mo</div>
                             {budgetSurplusBrl != null && budgetSurplusBrl > 0 && (
-                                <div className="mt-1.5 font-mono tabular-nums text-[0.625rem] text-[#D4AF37]/50 flex items-center gap-1">
+                                <div className="mt-1.5 font-space tabular-nums text-2xs text-[#D4AF37]/50 flex items-center gap-1">
                                     <span className="inline-block w-1 h-1 rounded-full bg-[#D4AF37]/40" />
                                     Based on your {formatK(budgetSurplusBrl, 'BRL')} budget surplus this month
                                 </div>
@@ -246,29 +246,29 @@ export default function ScenarioEditor(props: ScenarioEditorProps) {
                         {/* Expected Yield */}
                         <div className="bg-[#121418]/50 backdrop-blur-lg border border-white/[0.06] rounded-xl p-4 hover:border-[#D4AF37]/20 transition-colors">
                             <div className="flex justify-between items-center mb-3">
-                                <span className="font-mono tabular-nums text-[0.75rem] text-white/40 uppercase tracking-widest">Expected Yield</span>
+                                <span className="font-space  text-data-xs text-white/40 uppercase tracking-widest">Expected Yield</span>
                                 <EditableValue value={annualInterestRate} onChange={(v: number) => { setLastInteraction('inputs'); setAnnualInterestRate(Math.round(v * 10) / 10); }} min={0} max={30} step={0.5} formatDisplay={(v: number) => `${v}%`} suffix=" p.a." />
                             </div>
                             <input type="range" min={0} max={25} step={0.5} value={annualInterestRate} onChange={(e) => { setLastInteraction('inputs'); setAnnualInterestRate(parseFloat(e.target.value)); }} className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#D4AF37]" />
-                            <div className="mt-2 font-mono tabular-nums text-[0.75rem] text-white/30">Monthly: {(annualInterestRate / 12).toFixed(2)}%</div>
+                            <div className="mt-2 font-space  text-data-xs text-white/30">Monthly: {(annualInterestRate / 12).toFixed(2)}%</div>
                         </div>
 
                         {/* 2031 Goal */}
                         <div className="bg-[#121418]/50 backdrop-blur-lg border border-white/[0.06] rounded-xl p-4 hover:border-[#D4AF37]/20 transition-colors">
                             <div className="flex justify-between items-center mb-3">
-                                <span className="font-mono tabular-nums text-[0.75rem] text-white/40 uppercase tracking-widest">2031 Goal</span>
+                                <span className="font-space  text-data-xs text-white/40 uppercase tracking-widest">2031 Goal</span>
                                 <EditableValue value={target2031} onChange={(v: number) => handleGoal2031Change(Math.round(v / 10000) * 10000)} min={100000} max={100000000} step={100000} formatDisplay={(v: number) => formatK(v, 'BRL')} />
                             </div>
                             <input type="range" min={100000} max={50000000} step={100000} value={target2031} onChange={(e) => handleGoal2031Change(parseInt(e.target.value))} className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#D4AF37]" />
-                            <div className="mt-2 font-mono tabular-nums text-[0.75rem] text-white/30">Drag or click to set target</div>
+                            <div className="mt-2 font-space  text-data-xs text-white/30">Drag or click to set target</div>
                         </div>
                     </div>
 
                     <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-white/5">
-                        <button onClick={() => handleSave(null)} className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-xs font-mono tabular-nums text-white/60 hover:text-white hover:border-white/20 transition-all">
+                        <button onClick={() => handleSave(null)} className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-data-xs font-space  text-white/60 hover:text-white hover:border-white/20 transition-all">
                             <Save size={12} /> Save Draft
                         </button>
-                        <button onClick={() => handleSave('lock')} className="flex items-center gap-1.5 bg-gradient-to-r from-[#D4AF37]/20 to-[#CC5500]/20 border border-[#D4AF37]/30 rounded-lg px-5 py-2 text-xs font-mono tabular-nums text-[#D4AF37] font-bold hover:border-[#D4AF37]/50 transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.15)]">
+                        <button onClick={() => handleSave('lock')} className="flex items-center gap-1.5 bg-gradient-to-r from-[#D4AF37]/20 to-[#CC5500]/20 border border-[#D4AF37]/30 rounded-lg px-5 py-2 text-data-xs font-space  text-[#D4AF37] font-bold hover:border-[#D4AF37]/50 transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.15)]">
                             <Lock size={12} /> Lock In Plan
                         </button>
                     </div>
@@ -281,7 +281,7 @@ export default function ScenarioEditor(props: ScenarioEditorProps) {
             <div className="flex justify-between items-center mb-6">
                 <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] m-0">Forecasting Assumptions</h3>
                 <button onClick={handleAddPhase}
-                    className="flex items-center gap-1.5 text-[0.75rem] font-mono tabular-nums uppercase bg-white/5 border border-white/10 rounded-md px-3 py-1.5 hover:bg-white/10 hover:border-[#D4AF37]/30 transition-colors text-white/70">
+                    className="flex items-center gap-1.5 text-data-xs font-space  uppercase bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 hover:bg-white/10 hover:border-[#D4AF37]/30 transition-colors text-white/70">
                     <Plus size={12} /> Add Phase
                 </button>
             </div>
@@ -299,11 +299,11 @@ export default function ScenarioEditor(props: ScenarioEditorProps) {
 
                         <div className="flex-1 bg-[#121418]/50 backdrop-blur-lg border border-white/[0.06] rounded-xl p-4 flex flex-col sm:flex-row gap-4 sm:items-center justify-between hover:border-[#D4AF37]/20 transition-all">
                             <div className="flex flex-col gap-1 w-[160px] shrink-0">
-                                <span className="font-mono tabular-nums text-[0.6875rem] text-white/40 uppercase tracking-widest">
+                                <span className="font-space tabular-nums text-2xs text-white/40 uppercase tracking-widest">
                                     Phase {index + 1} &bull; Start Month
                                 </span>
                                 {index === 0 ? (
-                                    <span className="font-mono tabular-nums text-sm text-white/80">Current (Now)</span>
+                                    <span className="font-space  text-data-sm text-white/80">Current (Now)</span>
                                 ) : (
                                     <MonthCombobox value={phase.startMonth} onChange={(v: string) => handleUpdatePhase(phase.id, 'startMonth', v)} placeholder="Select month..." />
                                 )}
@@ -311,11 +311,11 @@ export default function ScenarioEditor(props: ScenarioEditorProps) {
 
                             <div className="flex-1 grid grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1">
-                                    <span className="font-mono tabular-nums text-[0.6875rem] text-white/40 uppercase tracking-widest">Contribution</span>
+                                    <span className="font-space tabular-nums text-2xs text-white/40 uppercase tracking-widest">Contribution</span>
                                     <EditableValue value={phase.contribution} onChange={(v: number) => handleUpdatePhase(phase.id, 'contribution', v)} min={0} max={1000000} step={100} formatDisplay={(v: number) => formatK(v, 'BRL')} suffix="/mo" />
                                 </div>
                                 <div className="flex flex-col gap-1">
-                                    <span className="font-mono tabular-nums text-[0.6875rem] text-white/40 uppercase tracking-widest">Yield</span>
+                                    <span className="font-space tabular-nums text-2xs text-white/40 uppercase tracking-widest">Yield</span>
                                     <EditableValue value={phase.yield} onChange={(v: number) => handleUpdatePhase(phase.id, 'yield', v)} min={0} max={30} step={0.5} formatDisplay={(v: number) => `${v}%`} suffix=" p.a." />
                                 </div>
                             </div>

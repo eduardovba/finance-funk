@@ -19,7 +19,7 @@ export default function DesktopAssetTable({
     return (
         <div className="w-full overflow-x-auto custom-scrollbar border border-white/5 rounded-xl bg-black/40 backdrop-blur-sm shadow-xl">
             <table className="w-full text-sm text-left whitespace-nowrap">
-                <thead className="text-[0.75rem] uppercase tracking-wider text-parchment/40 bg-white/[0.02] border-b border-white/5 sticky top-0 z-10 backdrop-blur-md">
+                <thead className="text-xs uppercase tracking-wider text-parchment/40 bg-white/[0.02] border-b border-white/5 sticky top-0 z-10 backdrop-blur-md">
                     <tr>
                         {columns.map((col, idx) => (
                             <th

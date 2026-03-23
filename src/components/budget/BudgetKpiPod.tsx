@@ -56,7 +56,7 @@ export default function BudgetKpiPod() {
                         <Wallet size={18} className={isHealthy ? 'text-[#D4AF37]' : 'text-[#F5F5DC]/40'} />
                     </div>
                     <div className="min-w-0">
-                        <span className="text-[0.6875rem] text-[#F5F5DC]/35 uppercase tracking-[2px] font-space block">
+                        <span className="text-2xs text-[#F5F5DC]/35 uppercase tracking-[2px] font-space block">
                             Investable Surplus
                         </span>
                         <span className={`text-xl font-bebas tracking-wider block
@@ -76,7 +76,7 @@ export default function BudgetKpiPod() {
                         <TrendingUp size={18} className={isHealthy ? 'text-[#D4AF37]' : 'text-[#F5F5DC]/40'} />
                     </div>
                     <div className="min-w-0">
-                        <span className="text-[0.6875rem] text-[#F5F5DC]/35 uppercase tracking-[2px] font-space block">
+                        <span className="text-2xs text-[#F5F5DC]/35 uppercase tracking-[2px] font-space block">
                             {getJargon('savingsRate', experience)}
                         </span>
                         <div className="flex items-baseline gap-2">
@@ -85,7 +85,7 @@ export default function BudgetKpiPod() {
                                 {savingsRatePercent}%
                             </span>
                             {isHealthy && (
-                                <span className="text-[0.625rem] text-[#D4AF37]/60 font-space uppercase tracking-wider">
+                                <span className="text-2xs text-[#D4AF37]/60 font-space uppercase tracking-wider">
                                     Healthy
                                 </span>
                             )}

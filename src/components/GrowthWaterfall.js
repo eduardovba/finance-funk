@@ -39,8 +39,8 @@ export default function GrowthWaterfall({ startingCapital = 0, totalDeposits = 0
                         <div key={i} className="absolute left-0 right-0" style={{ top: topY }}>
                             {/* Label row */}
                             <div className="flex justify-between items-center mb-1" style={{ height: labelHeight }}>
-                                <span className="font-mono tabular-nums text-[0.75rem] text-white/50 uppercase tracking-widest">{seg.label}</span>
-                                <span className="font-mono tabular-nums text-xs text-white/70">{fmt(seg.value)}</span>
+                                <span className="font-space  text-data-xs text-white/50 uppercase tracking-widest">{seg.label}</span>
+                                <span className="font-space  text-data-xs text-white/70">{fmt(seg.value)}</span>
                             </div>
                             {/* Waterfall bar */}
                             <div className="relative w-full" style={{ height: barHeight }}>
@@ -53,7 +53,7 @@ export default function GrowthWaterfall({ startingCapital = 0, totalDeposits = 0
                                 )}
                                 {/* Bar */}
                                 <div
-                                    className="absolute rounded-md transition-all duration-1000 ease-out"
+                                    className="absolute rounded-lg transition-all duration-1000 ease-out"
                                     style={{
                                         left: `${leftPct}%`,
                                         width: `${widthPct}%`,
@@ -82,14 +82,14 @@ export default function GrowthWaterfall({ startingCapital = 0, totalDeposits = 0
                 {/* Total bar — full width */}
                 <div className="absolute left-0 right-0" style={{ top: segments.length * rowHeight }}>
                     <div className="flex justify-between items-center mb-1" style={{ height: labelHeight }}>
-                        <span className="font-mono tabular-nums text-xs text-white/60 uppercase tracking-widest">= Projected Total</span>
+                        <span className="font-space  text-data-xs text-white/60 uppercase tracking-widest">= Projected Total</span>
                         <span className="font-bebas text-xl tracking-wider text-[#D4AF37] drop-shadow-[0_0_8px_rgba(212,175,55,0.3)]">
                             {fmt(projectedTotal)}
                         </span>
                     </div>
                     <div className="relative w-full" style={{ height: barHeight }}>
                         <div
-                            className="absolute rounded-md transition-all duration-1000 ease-out"
+                            className="absolute rounded-lg transition-all duration-1000 ease-out"
                             style={{
                                 left: 0,
                                 width: '100%',
@@ -106,7 +106,7 @@ export default function GrowthWaterfall({ startingCapital = 0, totalDeposits = 0
             {projectedTotal > 0 && compoundGrowth > 0 && (
                 <div className="mt-3 flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
-                    <span className="font-mono tabular-nums text-[0.75rem] text-[#34D399]/70">
+                    <span className="font-space  text-data-xs text-[#34D399]/70">
                         {((compoundGrowth / projectedTotal) * 100).toFixed(0)}% of your projected wealth comes from compound growth
                     </span>
                 </div>

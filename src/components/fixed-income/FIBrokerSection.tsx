@@ -145,7 +145,7 @@ export default function FIBrokerSection({
                                         {/* Name & Subtitle */}
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-semibold text-white/90 truncate leading-tight">{displayName}</p>
-                                            <p className="text-[0.75rem] text-white/40 mt-0.5 font-mono tabular-nums">
+                                            <p className="text-data-xs text-white/40 mt-0.5 font-space ">
                                                 Principal: {formatCurrency(item.investment, cur)}
                                             </p>
                                         </div>
@@ -153,7 +153,7 @@ export default function FIBrokerSection({
                                         {/* Value & Interest */}
                                         <div className="text-right shrink-0">
                                             <p className="text-sm font-bold text-white tracking-tight leading-tight">{formatCurrency(item.currentValue, cur)}</p>
-                                            <p className={`text-[0.75rem] mt-0.5 font-semibold ${item.interest >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                            <p className={`text-xs mt-0.5 font-semibold ${item.interest >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                                 {item.interest >= 0 ? '+' : ''}{formatCurrency(item.interest, cur)} ({item.roi >= 0 ? '+' : ''}{item.roi.toFixed(1)}%)
                                             </p>
                                         </div>

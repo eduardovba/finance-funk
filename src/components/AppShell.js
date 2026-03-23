@@ -48,6 +48,8 @@ function AppShellInner({ children }) {
     // Scroll to top on route change
     useEffect(() => {
         window.scrollTo(0, 0);
+        const main = document.getElementById('main-scroll');
+        if (main) main.focus({ preventScroll: true });
     }, [pathname]);
 
     // Goal-based landing redirect — budget users land on /budget instead of /dashboard
@@ -140,7 +142,7 @@ function AppShellInner({ children }) {
 
                 {/* ═══════════ MAIN STAGE ═══════════ */}
                 <div className="flex flex-1 overflow-hidden">
-                    <main id="main-scroll" className="flex-1 overflow-y-auto p-3 md:p-6 lg:p-8 pb-24 md:pb-8 w-full">
+                    <main id="main-scroll" role="main" tabIndex={-1} className="flex-1 overflow-y-auto p-3 md:p-6 lg:p-8 pb-24 md:pb-8 w-full">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={pathname}
@@ -154,9 +156,9 @@ function AppShellInner({ children }) {
                     </AnimatePresence>
 
                     {isFormOpen && (
-                        <div style={{ position: 'fixed', inset: 0, zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div className="fixed inset-0 z-[900] flex items-center justify-center">
                             <div
-                                style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+                                className="absolute inset-0 bg-black/70 backdrop-blur-[4px]"
                                 onClick={() => setIsFormOpen(false)}
                             />
                             <TransactionForm
@@ -294,7 +296,7 @@ function PullToRefreshWrapper({ children }) {
             {/* Pull indicator */}
             {(pullDistance > 10 || refreshing) && (
                 <div
-                    className="fixed top-12 left-1/2 -translate-x-1/2 z-[996] flex items-center justify-center md:hidden"
+                    className="fixed top-12 left-1/2 -translate-x-1/2 z-[100] flex items-center justify-center md:hidden"
                     style={{ opacity: Math.min(pullDistance / threshold, 1) }}
                 >
                     <div className={`w-8 h-8 rounded-full border-2 border-[#D4AF37]/50 border-t-[#D4AF37] ${refreshing ? 'animate-spin' : ''}`}

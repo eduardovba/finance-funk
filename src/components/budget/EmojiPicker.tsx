@@ -207,7 +207,7 @@ export default function EmojiPicker({ selected, onSelect }: EmojiPickerProps) {
                     <button
                         type="button"
                         onClick={() => setSearch('')}
-                        className="text-[0.6rem] text-[#F5F5DC]/25 hover:text-[#F5F5DC]/50 font-space transition-colors"
+                        className="text-2xs text-[#F5F5DC]/25 hover:text-[#F5F5DC]/50 font-space transition-colors"
                     >
                         ✕
                     </button>
@@ -242,7 +242,7 @@ export default function EmojiPicker({ selected, onSelect }: EmojiPickerProps) {
 
             {/* Result count hint */}
             {showingResults && displayEmojis.length > 0 && (
-                <p className="text-[0.6rem] text-[#F5F5DC]/15 font-space text-center">
+                <p className="text-2xs text-[#F5F5DC]/15 font-space text-center">
                     {displayEmojis.length} result{displayEmojis.length !== 1 ? 's' : ''}
                 </p>
             )}

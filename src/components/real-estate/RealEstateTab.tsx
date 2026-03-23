@@ -103,11 +103,11 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                                         {asset.type === 'fund' ? asset.fund : asset.name}
                                     </h3>}
                                     <div className="flex items-center gap-2 mt-2">
-                                        <span className="px-2 py-0.5 rounded bg-white/10 text-white/60 text-[0.75rem] font-mono tabular-nums tracking-wider">
+                                        <span className="px-2 py-0.5 rounded bg-white/10 text-white/60 text-data-xs font-space  tracking-wider">
                                             {asset.type === 'fund' ? asset.ticker : asset.currency}
                                         </span>
                                         {asset.type === 'property' && (
-                                            <span className={`px-2 py-0.5 rounded text-[0.75rem] font-bold ${asset.status === 'Sold' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                                            <span className={`px-2 py-0.5 rounded text-xs font-bold ${asset.status === 'Sold' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-emerald-500/20 text-emerald-400'}`}>
                                                 {asset.status}
                                             </span>
                                         )}
@@ -287,24 +287,24 @@ function PropertyOptionsSection({ h }: { h: any }) {
                 <label className="flex items-center gap-3 cursor-pointer group">
                     <input type="checkbox" checked={h.newPropertyData.hasMortgage} onChange={(e: any) => h.setNewPropertyData((p: any) => ({ ...p, hasMortgage: e.target.checked }))}
                         className="w-4 h-4 rounded bg-white/5 border-white/20 text-[#D4AF37] focus:ring-[#D4AF37]/50" />
-                    <div><span className="text-sm font-semibold text-white/80 group-hover:text-white transition-colors">Mortgage</span><p className="text-[0.75rem] text-white/40">Track mortgage payments, principal, and interest</p></div>
+                    <div><span className="text-sm font-semibold text-white/80 group-hover:text-white transition-colors">Mortgage</span><p className="text-xs text-white/40">Track mortgage payments, principal, and interest</p></div>
                 </label>
                 {h.newPropertyData.hasMortgage && (
                     <div className="ml-7 flex flex-col gap-3 p-3 bg-white/[0.03] border border-white/5 rounded-xl">
                         <div className="grid grid-cols-2 gap-3">
-                            <div><label className="block text-[0.75rem] text-white/50 uppercase tracking-wider mb-1">Original Amount</label><NumberInput value={h.newPropertyData.mortgageAmount || ''} onChange={(val: any) => h.setNewPropertyData((p: any) => ({ ...p, mortgageAmount: val }))} className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="0" /></div>
-                            <div><label className="block text-[0.75rem] text-white/50 uppercase tracking-wider mb-1">Deposit</label><NumberInput value={h.newPropertyData.mortgageDeposit || ''} onChange={(val: any) => h.setNewPropertyData((p: any) => ({ ...p, mortgageDeposit: val }))} className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="0" /></div>
+                            <div><label className="block text-xs text-white/50 uppercase tracking-wider mb-1">Original Amount</label><NumberInput value={h.newPropertyData.mortgageAmount || ''} onChange={(val: any) => h.setNewPropertyData((p: any) => ({ ...p, mortgageAmount: val }))} className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="0" /></div>
+                            <div><label className="block text-xs text-white/50 uppercase tracking-wider mb-1">Deposit</label><NumberInput value={h.newPropertyData.mortgageDeposit || ''} onChange={(val: any) => h.setNewPropertyData((p: any) => ({ ...p, mortgageDeposit: val }))} className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="0" /></div>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
-                            <div><label className="block text-[0.75rem] text-white/50 uppercase tracking-wider mb-1">Duration (months)</label><NumberInput value={h.newPropertyData.mortgageDuration || ''} onChange={(val: any) => h.setNewPropertyData((p: any) => ({ ...p, mortgageDuration: val }))} className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="e.g. 360" /></div>
-                            <div><label className="block text-[0.75rem] text-white/50 uppercase tracking-wider mb-1">Interest Rate (%)</label><NumberInput value={h.newPropertyData.mortgageRate || ''} onChange={(val: any) => h.setNewPropertyData((p: any) => ({ ...p, mortgageRate: val }))} className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="e.g. 5.5" /></div>
+                            <div><label className="block text-xs text-white/50 uppercase tracking-wider mb-1">Duration (months)</label><NumberInput value={h.newPropertyData.mortgageDuration || ''} onChange={(val: any) => h.setNewPropertyData((p: any) => ({ ...p, mortgageDuration: val }))} className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="e.g. 360" /></div>
+                            <div><label className="block text-xs text-white/50 uppercase tracking-wider mb-1">Interest Rate (%)</label><NumberInput value={h.newPropertyData.mortgageRate || ''} onChange={(val: any) => h.setNewPropertyData((p: any) => ({ ...p, mortgageRate: val }))} className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="e.g. 5.5" /></div>
                         </div>
                     </div>
                 )}
                 <label className="flex items-center gap-3 cursor-pointer group">
                     <input type="checkbox" checked={h.newPropertyData.hasRental} onChange={(e: any) => h.setNewPropertyData((p: any) => ({ ...p, hasRental: e.target.checked }))}
                         className="w-4 h-4 rounded bg-white/5 border-white/20 text-[#D4AF37] focus:ring-[#D4AF37]/50" />
-                    <div><span className="text-sm font-semibold text-white/80 group-hover:text-white transition-colors">Rental Income</span><p className="text-[0.75rem] text-white/40">Track monthly revenue, costs, and ROI</p></div>
+                    <div><span className="text-sm font-semibold text-white/80 group-hover:text-white transition-colors">Rental Income</span><p className="text-xs text-white/40">Track monthly revenue, costs, and ROI</p></div>
                 </label>
             </div>
         </div>
@@ -449,15 +449,15 @@ function SellFundTransactionForm({ h }: { h: any }) {
                 <div className="bg-white/[0.03] border border-white/10 rounded-xl p-4 flex flex-col gap-3">
                     <div className="flex justify-between items-center">
                         <span className="text-xs text-white/50 uppercase tracking-wider">Proceeds</span>
-                        <span className="text-base font-bold text-[#D4AF37] font-mono tabular-nums">{formatCurrency(h.fundSellData.totalProceeds || 0, 'BRL')}</span>
+                        <span className="text-data-base font-bold text-[#D4AF37] font-space ">{formatCurrency(h.fundSellData.totalProceeds || 0, 'BRL')}</span>
                     </div>
                     <div className="flex justify-between items-center bg-white/5 rounded-lg p-3">
                         <span className="text-white/60 text-sm">Cost Basis</span>
-                        <span className="text-white/80 font-mono tabular-nums text-sm">{formatCurrency(h.fundSellData.avgCost * (parseFloat(h.fundSellData.qtyToSell) || 0), 'BRL')}</span>
+                        <span className="text-white/80 font-space  text-data-sm">{formatCurrency(h.fundSellData.avgCost * (parseFloat(h.fundSellData.qtyToSell) || 0), 'BRL')}</span>
                     </div>
                     <div className="flex justify-between items-center bg-white/5 border border-white/10 rounded-lg p-3">
                         <span className="text-white text-sm font-bold">P&L</span>
-                        <span className={`text-sm font-bold font-mono tabular-nums ${h.fundSellData.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        <span className={`text-data-sm font-bold font-space  ${h.fundSellData.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {formatCurrency(h.fundSellData.pnl || 0, 'BRL')} ({(h.fundSellData.roi || 0).toFixed(1)}%)
                         </span>
                     </div>
@@ -482,7 +482,7 @@ function ActivityHistory({ h, data }: { h: any; data: any }) {
                 </Button>
             </div>
             {h.ledgerOpen && (
-                <div className="bg-white/5 backdrop-blur-md border border-white/5 rounded-3xl p-4 sm:p-6 mb-24">
+                <div className="bg-white/5 backdrop-blur-md border border-white/5 rounded-2xl p-4 sm:p-6 mb-24">
                     <TransactionTimeline
                         transactions={[
                             ...h.properties.flatMap((p: any) => (p.ledger || []).map((l: any) => ({ ...l, asset: p.name, broker: 'Manual', category: 'property', investment: l.amount, date: l.date, currency: p.currency }))),

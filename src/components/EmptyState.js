@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function EmptyState({ icon, title, message, actionLabel, onAction, secondaryActionLabel, onSecondaryAction }) {
     return (
-        <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-white/5 border border-white/5 rounded-3xl mt-8 mb-12 shadow-xl backdrop-blur-sm">
+        <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-white/5 border border-white/5 rounded-2xl mt-8 mb-12 shadow-xl backdrop-blur-sm">
             <div className="text-6xl mb-6 drop-shadow-lg" style={{ filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.5))' }}>
                 {icon}
             </div>

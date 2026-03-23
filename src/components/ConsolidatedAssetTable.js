@@ -69,7 +69,7 @@ export default function ConsolidatedAssetTable({ title, categoryId, assets, rate
 
                         {/* Card Footer (ROI) */}
                         <div className="mt-auto pt-2.5 border-t border-white/5 flex justify-between items-center z-10 relative">
-                            <span className="text-[0.6875rem] uppercase tracking-widest text-[#F5F5DC]/40">ROI</span>
+                            <span className="text-2xs uppercase tracking-widest text-[#F5F5DC]/40">ROI</span>
                             <span className={`text-xl font-bebas tracking-wider ${asset.roi >= 0 ? 'text-vu-green drop-shadow-[0_0_4px_rgba(74,222,128,0.3)]' : 'text-red-400 drop-shadow-[0_0_4px_rgba(248,113,113,0.3)]'}`}>
                                 {asset.roi !== null && asset.roi !== undefined ? (
                                     <>{asset.roi >= 0 ? '+' : ''}{asset.roi.toFixed(1)}%</>
@@ -90,11 +90,11 @@ export default function ConsolidatedAssetTable({ title, categoryId, assets, rate
                                 Current Holdings
                             </div>
                             <div className="flex flex-col md:items-end">
-                                <span className="text-[0.6875rem] uppercase text-[#F5F5DC]/40 md:hidden mb-0.5">{primaryCurrency}</span>
+                                <span className="text-2xs uppercase text-[#F5F5DC]/40 md:hidden mb-0.5">{primaryCurrency}</span>
                                 <span className="text-xs text-[#F5F5DC]/80">{formatPrimaryNoDecimals(toPrimary(subGbp))}</span>
                             </div>
                             <div className="flex flex-col md:items-end">
-                                <span className="text-[0.6875rem] uppercase text-[#F5F5DC]/40 md:hidden mb-0.5">{secondaryCurrency}</span>
+                                <span className="text-2xs uppercase text-[#F5F5DC]/40 md:hidden mb-0.5">{secondaryCurrency}</span>
                                 <span className="text-xs text-[#F5F5DC]/60">{formatSecondaryNoDecimals(toSecondary(subGbp))}</span>
                             </div>
                             <div className="flex flex-col md:items-end col-span-2 md:col-span-1 border-t border-white/5 md:border-t-0 pt-1.5 md:pt-0 mt-1.5 md:mt-0">
@@ -112,11 +112,11 @@ export default function ConsolidatedAssetTable({ title, categoryId, assets, rate
                                 {totalAsset.name}
                             </div>
                             <div className="flex flex-col md:items-end">
-                                <span className="text-[0.6875rem] uppercase text-[#D4AF37]/60 md:hidden mb-0.5">{primaryCurrency}</span>
+                                <span className="text-2xs uppercase text-[#D4AF37]/60 md:hidden mb-0.5">{primaryCurrency}</span>
                                 <span className="text-sm text-[#F5F5DC]/90 font-medium">{formatPrimaryNoDecimals(toPrimary(totalAsset.gbp))}</span>
                             </div>
                             <div className="flex flex-col md:items-end">
-                                <span className="text-[0.6875rem] uppercase text-[#D4AF37]/60 md:hidden mb-0.5">{secondaryCurrency}</span>
+                                <span className="text-2xs uppercase text-[#D4AF37]/60 md:hidden mb-0.5">{secondaryCurrency}</span>
                                 <span className="text-sm text-[#D4AF37] font-medium">{formatSecondaryNoDecimals(toSecondary(totalAsset.gbp))}</span>
                             </div>
                             <div className="flex flex-col md:items-end col-span-2 md:col-span-1 border-t border-[#D4AF37]/20 md:border-t-0 pt-2 md:pt-0 mt-1.5 md:mt-0">

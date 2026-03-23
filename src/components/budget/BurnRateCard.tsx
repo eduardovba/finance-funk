@@ -55,7 +55,7 @@ export default function BurnRateCard({ categories, transactions, currentMonth }:
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                     <Flame size={16} className="text-[#D4AF37]/70" />
-                    <span className="text-[0.75rem] text-[#F5F5DC]/50 uppercase tracking-[2px] font-space">
+                    <span className="text-xs text-[#F5F5DC]/50 uppercase tracking-[2px] font-space">
                         Daily Burn Rate
                     </span>
                 </div>
@@ -77,16 +77,16 @@ export default function BurnRateCard({ categories, transactions, currentMonth }:
             {/* Comparison */}
             <div className="flex items-baseline gap-3 mb-4">
                 <div className="flex flex-col">
-                    <span className="text-[0.6rem] text-[#F5F5DC]/30 uppercase tracking-wider font-space">Actual</span>
+                    <span className="text-2xs text-[#F5F5DC]/30 uppercase tracking-wider font-space">Actual</span>
                     <span className="text-lg font-bebas tracking-wider" style={{ color: statusColor }}>
-                        {formatCents(fx(Math.round(dailyBurn)), displayCurrency)}<span className="text-[0.65rem] text-[#F5F5DC]/30 font-space">/day</span>
+                        {formatCents(fx(Math.round(dailyBurn)), displayCurrency)}<span className="text-2xs text-[#F5F5DC]/30 font-space">/day</span>
                     </span>
                 </div>
                 <span className="text-[#F5F5DC]/15 text-sm font-space">vs</span>
                 <div className="flex flex-col">
-                    <span className="text-[0.6rem] text-[#F5F5DC]/30 uppercase tracking-wider font-space">Budget Pace</span>
+                    <span className="text-2xs text-[#F5F5DC]/30 uppercase tracking-wider font-space">Budget Pace</span>
                     <span className="text-lg font-bebas tracking-wider text-[#F5F5DC]/50">
-                        {formatCents(fx(Math.round(dailyBudget)), displayCurrency)}<span className="text-[0.65rem] text-[#F5F5DC]/30 font-space">/day</span>
+                        {formatCents(fx(Math.round(dailyBudget)), displayCurrency)}<span className="text-2xs text-[#F5F5DC]/30 font-space">/day</span>
                     </span>
                 </div>
             </div>
@@ -119,8 +119,8 @@ export default function BurnRateCard({ categories, transactions, currentMonth }:
 
             {/* Day progress */}
             <div className="flex justify-between mt-2">
-                <span className="text-[0.6rem] text-[#F5F5DC]/20 font-space">Day {dayOfMonth}</span>
-                <span className="text-[0.6rem] text-[#F5F5DC]/20 font-space">Day {daysInMonth}</span>
+                <span className="text-2xs text-[#F5F5DC]/20 font-space">Day {dayOfMonth}</span>
+                <span className="text-2xs text-[#F5F5DC]/20 font-space">Day {daysInMonth}</span>
             </div>
         </div>
     );

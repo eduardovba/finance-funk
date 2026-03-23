@@ -108,14 +108,14 @@ function DemoAppShellInner({ children }) {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-[9999] flex items-center justify-center"
+                            className="fixed inset-0 z-[999] flex items-center justify-center"
                         >
                             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSignUpModal(false)} />
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                                className="relative z-10 bg-gradient-to-br from-[#1A0F2E] to-[#0B0611] border border-[#D4AF37]/30 rounded-3xl p-8 max-w-sm mx-4 shadow-2xl text-center"
+                                className="relative z-10 bg-gradient-to-br from-[#1A0F2E] to-[#0B0611] border border-[#D4AF37]/30 rounded-2xl p-8 max-w-sm mx-4 shadow-2xl text-center"
                             >
                                 <h2 className="text-xl font-bebas tracking-wider text-[#D4AF37] mb-2">Create Your Account</h2>
                                 <p className="text-sm text-[#F5F5DC]/60 font-space mb-6">

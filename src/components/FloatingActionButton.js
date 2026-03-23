@@ -52,7 +52,7 @@ export default function FloatingActionButton({
     }, [isOpen]);
 
     const content = (
-        <div className="fixed bottom-[5.5rem] md:bottom-10 right-4 md:right-6 z-[9999] flex flex-col items-end gap-3">
+        <div className="fixed bottom-[5.5rem] md:bottom-10 right-4 md:right-6 z-[999] flex flex-col items-end gap-3">
             <AnimatePresence>
                 {isOpen && (
                     <motion.div

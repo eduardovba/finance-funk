@@ -88,12 +88,12 @@ export default function TransactionRow({ transaction, category, isSelected, onTo
                     </span>
                     <div className="flex items-center gap-2">
                         {transaction.description && category && (
-                            <span className="text-[0.6875rem] font-space text-[#F5F5DC]/30 truncate">
+                            <span className="text-2xs font-space text-[#F5F5DC]/30 truncate">
                                 {category.name}
                             </span>
                         )}
                         {transaction.source && (
-                            <span className="text-[0.5rem] uppercase tracking-[1px] font-space font-semibold px-1.5 py-px rounded bg-white/[0.04] border border-white/[0.06] text-[#F5F5DC]/25">
+                            <span className="text-2xs uppercase tracking-[1px] font-space font-semibold px-1.5 py-px rounded bg-white/[0.04] border border-white/[0.06] text-[#F5F5DC]/25">
                                 {transaction.source}
                             </span>
                         )}
@@ -101,7 +101,7 @@ export default function TransactionRow({ transaction, category, isSelected, onTo
                 </div>
 
                 {/* Amount */}
-                <span className={`text-sm font-mono tabular-nums flex-shrink-0 ${isIncome ? 'text-vu-green' : 'text-[#F5F5DC]/70'}`}>
+                <span className={`text-data-sm font-space  flex-shrink-0 ${isIncome ? 'text-vu-green' : 'text-[#F5F5DC]/70'}`}>
                     {isIncome ? '+' : '-'}{formatCents(displayCents, displayCurrency)}
                 </span>
 

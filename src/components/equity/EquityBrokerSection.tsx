@@ -165,7 +165,7 @@ export default function EquityBrokerSection({
                             );
                         })}
                         {lockedPnL[brokerName] && lockedPnL[brokerName] !== 0 && (
-                            <div className="bg-white/5 rounded-3xl p-4 border border-white/10 flex flex-col justify-center">
+                            <div className="bg-white/5 rounded-2xl p-4 border border-white/10 flex flex-col justify-center">
                                 <span className="text-xs text-white/40 mb-1 font-medium tracking-wide uppercase">Realised P&L</span>
                                 <span className={`text-lg font-bold ${lockedPnL[brokerName] >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                     {lockedPnL[brokerName] >= 0 ? '+' : ''}{formatCurrency(lockedPnL[brokerName], cur)}
@@ -198,14 +198,14 @@ export default function EquityBrokerSection({
                                         )}
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-semibold text-white/90 truncate leading-tight">{displayName}</p>
-                                            <p className="text-[0.75rem] text-white/40 mt-0.5 font-mono tabular-nums">
+                                            <p className="text-data-xs text-white/40 mt-0.5 font-space ">
                                                 {isCash ? 'Liquid' : `${Math.abs(r.qty).toLocaleString(undefined, { maximumFractionDigits: 4 })} shares${r.ticker ? ` · ${r.ticker}` : ''}`}
                                             </p>
                                         </div>
                                         <div className="text-right shrink-0">
                                             <p className="text-sm font-bold text-white tracking-tight leading-tight">{formatCurrency(r.currentValue, cur)}</p>
                                             {!isCash && (
-                                                <p className={`text-[0.75rem] mt-0.5 font-semibold ${r.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                <p className={`text-xs mt-0.5 font-semibold ${r.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                                     {r.pnl >= 0 ? '+' : ''}{formatCurrency(r.pnl, cur)} ({r.roi >= 0 ? '+' : ''}{(r.roi || 0).toFixed(1)}%)
                                                 </p>
                                             )}

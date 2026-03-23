@@ -51,7 +51,7 @@ export default function CelebrationOverlay({
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.4 }}
-                    className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-auto"
+                    className="fixed inset-0 z-[999] flex items-center justify-center pointer-events-auto"
                 >
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
@@ -97,7 +97,7 @@ export default function CelebrationOverlay({
 
                         {metric && (
                             <div className="mb-5 py-3 px-4 bg-[#D4AF37]/10 border border-[#D4AF37]/20 rounded-xl inline-block">
-                                <span className="text-[0.7rem] uppercase tracking-[3px] text-[#D4AF37]/60 font-space block mb-1">{metric.label}</span>
+                                <span className="text-xs uppercase tracking-[3px] text-[#D4AF37]/60 font-space block mb-1">{metric.label}</span>
                                 <span className="text-2xl font-bebas tracking-wider text-[#D4AF37]">{metric.value}</span>
                             </div>
                         )}

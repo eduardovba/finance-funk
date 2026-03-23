@@ -57,7 +57,7 @@ export default function BudgetTabs() {
                             key={tab.href}
                             href={tab.href}
                             className={`
-                                flex items-center gap-1.5 px-3 py-2 rounded-xl text-[0.75rem] font-space font-medium
+                                flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-space font-medium
                                 tracking-wider uppercase whitespace-nowrap no-underline transition-all duration-200
                                 ${active
                                     ? 'bg-[#34D399]/15 text-[#34D399] border border-[#34D399]/30 shadow-[0_0_12px_rgba(52,211,153,0.15)]'
@@ -76,7 +76,7 @@ export default function BudgetTabs() {
             <div ref={dropdownRef} className="relative flex-shrink-0">
                 <button
                     onClick={() => setCurrencyOpen(!currencyOpen)}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[0.75rem] font-space font-medium
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-space font-medium
                         tracking-wider uppercase bg-white/[0.04] border border-white/[0.06] hover:border-[#34D399]/30
                         text-[#F5F5DC]/60 hover:text-[#F5F5DC] transition-all duration-200"
                 >
@@ -112,8 +112,8 @@ export default function BudgetTabs() {
                                         >
                                             <span className="text-base">{c.flag}</span>
                                             <div className="flex flex-col">
-                                                <span className="text-[0.75rem] font-space font-bold tracking-wider">{c.code}</span>
-                                                <span className="text-[0.625rem] font-space text-inherit/50">{c.name}</span>
+                                                <span className="text-xs font-space font-bold tracking-wider">{c.code}</span>
+                                                <span className="text-2xs font-space text-inherit/50">{c.name}</span>
                                             </div>
                                             {selected && (
                                                 <span className="ml-auto text-[#34D399] text-xs">✓</span>

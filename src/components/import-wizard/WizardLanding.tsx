@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FileSpreadsheet, Building2, FileText } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 interface WizardLandingProps {
     onChooseProvider: () => void;
@@ -33,7 +34,7 @@ export default function WizardLanding({ onChooseProvider, onChooseGeneric }: Wiz
                     whileHover={{ scale: 1.02, y: -4 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={onChooseProvider}
-                    className="group glass-card text-left cursor-pointer border-white/10 hover:border-[#D4AF37]/40 transition-all"
+                    className="group text-left cursor-pointer border-white/10 hover:border-[#D4AF37]/40 transition-all"
                 >
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#D4AF37]/20 to-[#CC5500]/10 flex items-center justify-center mb-4 group-hover:from-[#D4AF37]/30 group-hover:to-[#CC5500]/20 transition-all">
                         <Building2 size={28} className="text-[#D4AF37]" />
@@ -46,7 +47,7 @@ export default function WizardLanding({ onChooseProvider, onChooseGeneric }: Wiz
                     </p>
                     <div className="flex items-center gap-1.5 flex-wrap">
                         {['Trading 212', 'B3/CEI', 'XP', 'IBKR', '+7 more'].map(name => (
-                            <span key={name} className="px-2 py-0.5 rounded text-[0.6875rem] font-space bg-white/[0.05] text-parchment/30">
+                            <span key={name} className="px-2 py-0.5 rounded text-2xs font-space bg-white/[0.05] text-parchment/30">
                                 {name}
                             </span>
                         ))}
@@ -60,7 +61,7 @@ export default function WizardLanding({ onChooseProvider, onChooseGeneric }: Wiz
                     whileHover={{ scale: 1.02, y: -4 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={onChooseGeneric}
-                    className="group glass-card text-left cursor-pointer border-white/10 hover:border-[#D4AF37]/40 transition-all"
+                    className="group text-left cursor-pointer border-white/10 hover:border-[#D4AF37]/40 transition-all"
                 >
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#D4AF37]/20 to-[#CC5500]/10 flex items-center justify-center mb-4 group-hover:from-[#D4AF37]/30 group-hover:to-[#CC5500]/20 transition-all">
                         <FileText size={28} className="text-[#D4AF37]" />
@@ -73,7 +74,7 @@ export default function WizardLanding({ onChooseProvider, onChooseGeneric }: Wiz
                     </p>
                     <div className="flex items-center gap-1.5 flex-wrap">
                         {['.csv', '.xlsx', '.xls', '.tsv', '.ods'].map(fmt => (
-                            <span key={fmt} className="px-2 py-0.5 rounded text-[0.6875rem] font-space bg-white/[0.05] text-parchment/30">
+                            <span key={fmt} className="px-2 py-0.5 rounded text-2xs font-space bg-white/[0.05] text-parchment/30">
                                 {fmt}
                             </span>
                         ))}
