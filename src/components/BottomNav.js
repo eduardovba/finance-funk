@@ -13,6 +13,7 @@ import {
 import { usePortfolio } from '@/context/PortfolioContext';
 import { useSession, signOut } from 'next-auth/react';
 import { formatCurrency } from '@/lib/currency';
+import { getPersonalization } from '@/lib/personalization';
 
 const ASSET_TABS = [
     { id: 'fixed-income', href: '/assets/fixed-income', label: 'Fixed Income', icon: Landmark, color: '#CC5500' },
@@ -275,6 +276,9 @@ function BudgetSheet({ isOpen, onClose }) {
 /* ─── Bottom Navigation Bar ─── */
 export default function BottomNav() {
     const pathname = usePathname();
+    const { ftueState } = usePortfolio();
+    const personalization = getPersonalization(ftueState);
+
     const [assetsOpen, setAssetsOpen] = useState(false);
     const [planningOpen, setPlanningOpen] = useState(false);
     const [ledgerOpen, setLedgerOpen] = useState(false);
@@ -308,6 +312,25 @@ export default function BottomNav() {
         { id: 'ledger', href: null, label: 'Ledger', icon: BookOpen, color: '#D4AF37', action: () => { setBudgetOpen(false); setAssetsOpen(false); setPlanningOpen(false); setLedgerOpen(true); } },
     ];
 
+    let orderedTabs = [...tabs];
+    if (personalization.goal === 'budget') {
+        const budget = orderedTabs.find(t => t.id === 'budget');
+        const rest = orderedTabs.filter(t => t.id !== 'budget');
+        orderedTabs = [budget, ...rest];
+    } else if (personalization.goal === 'investments') {
+        const budget = orderedTabs.find(t => t.id === 'budget');
+        const rest = orderedTabs.filter(t => t.id !== 'budget');
+        orderedTabs = [...rest, budget];
+    }
+
+    let filteredTabs = orderedTabs;
+    if (personalization.goal === 'budget') {
+        filteredTabs = filteredTabs.filter(t => t.id !== 'ledger');
+        if (personalization.experience === 'beginner') {
+            filteredTabs = filteredTabs.filter(t => t.id !== 'planning');
+        }
+    }
+
     const isActive = (tab) => {
         if (tab.id === 'home') return pathname === '/dashboard' || pathname === '/';
         if (tab.id === 'budget') return isBudgetRoute || budgetOpen;
@@ -323,7 +346,7 @@ export default function BottomNav() {
                 style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
             >
                 <div className="flex items-center justify-around h-16">
-                    {tabs.map(tab => {
+                    {filteredTabs.map(tab => {
                         const Icon = tab.icon;
                         const active = isActive(tab);
                         const activeColor = tab.color;

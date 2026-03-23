@@ -23,10 +23,10 @@ import PensionBrokerSection from './PensionBrokerSection';
 import PensionForm from './PensionForm';
 
 const PENSIONS_TUTORIAL_STEPS = [
-    { type: 'spotlight', targetId: 'ftue-pensions-header', title: 'Your Retirement Overview', message: "Visualize your total pension value, all contributions, precise growth figures, and a breakdown by provider. Select your preferred display currency.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-pensions-provider-section', title: 'Provider-Level Insights', message: "Expand a provider to review specific fund holdings, detailed P&L, and a complete history of contributions. Make buy/sell decisions directly.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-pensions-empty', title: 'Retirement Planning Start', message: "It looks like you haven\u2019t added any pension accounts. Secure your future by adding a provider to start tracking your retirement funds.", position: 'top' },
-    { type: 'spotlight', targetId: 'global-fab', title: 'Build Your Legacy', message: "Use \u2018+\u2019 to add a pension provider, buy into funds, or sell positions. We automatically track contributions versus growth for clear insight.", position: 'top', shape: 'circle', padding: 8 },
+    { type: 'spotlight', targetId: 'ftue-pensions-header', title: 'Pension Overview 🏖️', message: "Total pension value, contributions, and growth — by provider. Pick your display currency up top.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-pensions-provider-section', title: 'Provider Details 📋', message: "Expand a provider to see fund holdings, P&L, and contribution history. Buy or sell directly.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-pensions-empty', title: 'Plan Ahead 🎯', message: "No pension accounts yet. Add a provider to start tracking your retirement funds!", position: 'top' },
+    { type: 'spotlight', targetId: 'global-fab', title: 'Add Provider ➕', message: "Add a pension provider, buy into funds, or sell. Contributions vs growth are tracked automatically.", position: 'top', shape: 'circle', padding: 8 },
 ];
 
 export default function PensionsTab({ transactions = [], rates, onRefresh, marketData: globalMarketData, pensionPrices: globalPensionPrices }: any) {

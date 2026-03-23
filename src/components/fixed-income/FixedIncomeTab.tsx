@@ -25,11 +25,11 @@ import FIForm from './FIForm';
 import type { FixedIncomeTabProps } from './types';
 
 const FIXEDINCOME_TUTORIAL_STEPS = [
-    { type: 'spotlight', targetId: 'ftue-fi-header', title: 'Performance & Yield', message: "Your total fixed income valuation, total deposits, and cumulative interest earned, broken down by individual account. Switch your display currency easily.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-fi-account-section', title: 'Detailed Account View', message: "Expand any account to see precise holdings, maturity dates, and exact interest figures. Every transaction and interest payment is tracked.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-fi-ledger', title: 'Fixed Income Stream', message: "Your detailed transaction log, recording all deposits, withdrawals, and automatic interest payments. We handle the interest calculations seamlessly.", position: 'top' },
-    { type: 'spotlight', targetId: 'ftue-fi-empty', title: 'Ready to Grow?', message: "No fixed income accounts in the mix just yet. Add your first savings account, bond, or treasury product using the \u2018+\u2019 button.", position: 'top' },
-    { type: 'spotlight', targetId: 'global-fab', title: 'Add an Account', message: "Create a new account and start automatically tracking deposits, withdrawals, and interest. This is your foundation for safe growth.", position: 'top', shape: 'circle', padding: 8 },
+    { type: 'spotlight', targetId: 'ftue-fi-header', title: 'Fixed Income View 🏦', message: "Total value, deposits, and interest earned — broken down by account. Switch currencies whenever you need.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-fi-account-section', title: 'Account Deep Dive 📂', message: "Expand any account to see holdings, maturity dates, and exact interest. Every payment is tracked automatically.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-fi-ledger', title: 'Transaction Stream 💰', message: "Deposits, withdrawals, and interest payments — all logged here. Interest gets calculated for you.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-fi-empty', title: 'Grow Your Savings 🌱', message: "No fixed income yet! Hit '+' to add a savings account, bond, or treasury product.", position: 'top' },
+    { type: 'spotlight', targetId: 'global-fab', title: 'Add Account ➕', message: "Create an account to start tracking deposits, withdrawals, and auto-calculated interest.", position: 'top', shape: 'circle', padding: 8 },
 ];
 
 export default function FixedIncomeTab({ transactions = [], rates, onRefresh }: FixedIncomeTabProps) {

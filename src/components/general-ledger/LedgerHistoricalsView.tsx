@@ -81,8 +81,8 @@ export default function LedgerHistoricalsView({
                     }}
                 >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ fontSize: '14px' }}>📸</span>
-                        <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(245,245,220,0.7)', letterSpacing: '0.3px' }}>Monthly Snapshots</span>
+                        <span style={{ fontSize: '14px' }}>📖</span>
+                        <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(245,245,220,0.7)', letterSpacing: '0.3px' }}>General Ledger</span>
                         <span style={{ fontSize: '11px', color: 'rgba(245,245,220,0.3)', fontWeight: 400 }}>({combinedSnapshots.length} months)</span>
                     </div>
                     <span style={{ fontSize: '12px', color: 'rgba(245,245,220,0.35)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', transform: showHistoricalsLedger ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block' }}>▼</span>

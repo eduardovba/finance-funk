@@ -27,11 +27,11 @@ import CryptoForm from './CryptoForm';
 import type { CryptoTabProps } from './types';
 
 const CRYPTO_TUTORIAL_STEPS = [
-    { type: 'spotlight', targetId: 'ftue-crypto-header', title: 'Digital Wealth Snap', message: "Your total crypto value, cost basis, and detailed P&L \u2013 including a clear breakdown by exchange. Pick your display currency.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-crypto-exchange-section', title: 'Exchange-Specific Views', message: "Drill down into any exchange to review holdings, P&L, and specific wallet/cold storage entries. Your assets, tracked individually.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-crypto-ledger', title: 'Crypto Activity Ledger', message: "A complete transaction history with automated cost basis tracking. We record every buy and sell for absolute transparency.", position: 'top' },
-    { type: 'spotlight', targetId: 'ftue-crypto-empty', title: 'Entering the Market?', message: "Your crypto portfolio is currently a clean slate. Tap the \u2018+\u2019 button to integrate your first exchange, such as Binance or Coinbase.", position: 'top' },
-    { type: 'spotlight', targetId: 'global-fab', title: 'Add Exchange or Buy', message: "Link your crypto world with \u2018+\u2019. Add an exchange, record your first crypto buy, or log a sale. Start building your digital position.", position: 'top', shape: 'circle', padding: 8 },
+    { type: 'spotlight', targetId: 'ftue-crypto-header', title: 'Crypto Dashboard 🪙', message: "Total value, cost basis, and P&L across all your exchanges. Pick your display currency up top.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-crypto-exchange-section', title: 'Exchange Views 🔗', message: "Drill into any exchange to see individual holdings and P&L. Cold storage, hot wallets — all tracked.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-crypto-ledger', title: 'Transaction Log 📜', message: "Complete buy/sell history with automatic cost basis. Full transparency on every trade.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-crypto-empty', title: 'Into Crypto? 🚀', message: "Clean slate here! Tap '+' to add your first exchange — Binance, Coinbase, whatever your jam.", position: 'top' },
+    { type: 'spotlight', targetId: 'global-fab', title: 'Add Exchange ➕', message: "Link an exchange, log a buy, or record a sale. Let's get your crypto tracked!", position: 'top', shape: 'circle', padding: 8 },
 ];
 
 export default function CryptoTab({ transactions = [], marketData: globalMarketData, rates, onRefresh }: CryptoTabProps) {

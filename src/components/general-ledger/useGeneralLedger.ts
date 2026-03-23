@@ -21,9 +21,9 @@ export default function useGeneralLedger({
 }: GeneralLedgerTabProps) {
     const view = activeTab === 'totals' ? 'historicals' : activeTab;
     const [showExtraordinary, setShowExtraordinary] = useState(false);
-    const [showLedgerTable, setShowLedgerTable] = useState(false);
-    const [showInvestmentLedgerTable, setShowInvestmentLedgerTable] = useState(false);
-    const [showHistoricalsLedger, setShowHistoricalsLedger] = useState(false);
+    const [showLedgerTable, setShowLedgerTable] = useState(true);
+    const [showInvestmentLedgerTable, setShowInvestmentLedgerTable] = useState(true);
+    const [showHistoricalsLedger, setShowHistoricalsLedger] = useState(true);
     const [forecastSettings, setForecastSettings] = useState({ targetROI: 10, targetContribution: 12000 });
     const [incomeData, setIncomeData] = useState<IncomeRow[]>([]);
     const [investmentData, setInvestmentData] = useState<InvestmentRow[]>([]);

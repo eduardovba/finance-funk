@@ -15,6 +15,7 @@ import { StaggerList } from '@/components/ui/stagger-list';
 import BudgetKpiPod from '@/components/budget/BudgetKpiPod';
 import FirstGrooveFlow from '@/components/ftue/FirstGrooveFlow';
 import type { DashboardTabProps } from './types';
+import { getPersonalization } from '@/lib/personalization';
 
 export default function DashboardTab(props: DashboardTabProps) {
     const {
@@ -26,6 +27,7 @@ export default function DashboardTab(props: DashboardTabProps) {
     } = props;
 
     const h = useDashboard(props);
+    const personalization = getPersonalization(h.ftueState || { onboardingGoal: null, onboardingExperience: 'beginner' });
 
     return (
         <div className="pb-10">
@@ -159,19 +161,40 @@ export default function DashboardTab(props: DashboardTabProps) {
             </StaggerList>
 
             {/* Detailed Tables Section */}
-            <div id="ftue-tables" className="grid lg:grid-cols-2 gap-5 mt-4">
-                {data.categories.map((cat: any) => (
-                    <ConsolidatedAssetTable
-                        key={cat.id}
-                        categoryId={cat.id}
-                        title={cat.title}
-                        assets={cat.assets}
-                        rates={rates}
-                        hideInvestment={cat.id === 'debt'}
-                        onNavigate={onNavigate}
-                    />
-                ))}
-            </div>
+            {personalization.showAdvancedFeatures ? (
+                <div id="ftue-tables" className="grid lg:grid-cols-2 gap-5 mt-4">
+                    {data.categories.map((cat: any) => (
+                        <ConsolidatedAssetTable
+                            key={cat.id}
+                            categoryId={cat.id}
+                            title={cat.title}
+                            assets={cat.assets}
+                            rates={rates}
+                            hideInvestment={cat.id === 'debt'}
+                            onNavigate={onNavigate}
+                        />
+                    ))}
+                </div>
+            ) : (
+                <details className="mt-4">
+                    <summary className="text-sm text-[#F5F5DC]/40 font-space cursor-pointer hover:text-[#F5F5DC]/60 transition-colors py-2">
+                        Show detailed positions &rarr;
+                    </summary>
+                    <div id="ftue-tables" className="grid lg:grid-cols-2 gap-5 mt-2">
+                        {data.categories.map((cat: any) => (
+                            <ConsolidatedAssetTable
+                                key={cat.id}
+                                categoryId={cat.id}
+                                title={cat.title}
+                                assets={cat.assets}
+                                rates={rates}
+                                hideInvestment={cat.id === 'debt'}
+                                onNavigate={onNavigate}
+                            />
+                        ))}
+                    </div>
+                </details>
+            )}
 
             {/* Tutorial Overlay */}
             {h.ftueState?.isTutorialActive && <TutorialOverlay />}

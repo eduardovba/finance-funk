@@ -27,11 +27,11 @@ import EquityForm from './EquityForm';
 import type { EquityTabProps } from './types';
 
 const EQUITY_TUTORIAL_STEPS = [
-    { type: 'spotlight', targetId: 'ftue-equity-header', title: 'Portfolio Pulse', message: "Get a high-level view of your total equity value, invested capital, P&L, and broker breakdown, all in a single interface. Use the currency picker to instantly adjust your display.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-equity-broker-section', title: 'Broker Insights', message: "Each broker expands to reveal individual holdings, precise P&L, and available actions. Toggle \u2018Show Empty\u2019 to see brokers with no current positions.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-equity-ledger', title: 'Transparent Activity Stream', message: "Every buy, sell, and dividend payment is meticulously logged for your review. You have full edit and deletion control over any entry.", position: 'top' },
-    { type: 'spotlight', targetId: 'ftue-equity-empty', title: 'Ready to Invest?', message: "It seems your equity portfolio is a blank slate. Let\u2019s get you started. Make your first move with the \u2018+\u2019 button.", position: 'top' },
-    { type: 'spotlight', targetId: 'ftue-equity-fab', title: 'Action Required', message: "Click \u2018+\u2019 to add your first broker, execute your first stock or ETF buy, or record a sale. This is where your equity journey begins.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-equity-header', title: 'Portfolio Pulse 📈', message: "Your total equity value, what you put in, and what you've made — all in one view. Switch currencies to see it your way.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-equity-broker-section', title: 'Broker Breakdown 🏦', message: "Each broker opens up to show individual holdings, P&L, and actions. Toggle 'Show Empty' if you want to see everything.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-equity-ledger', title: 'Activity Feed 📋', message: "Every buy, sell, and dividend — all logged here. You can edit or delete any entry.", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-equity-empty', title: 'Ready to Roll? 🎸', message: "Your equity page is a blank canvas. Hit '+' to add your first stock or ETF!", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-equity-fab', title: 'Add Something! ➕', message: "Tap '+' to add a broker, buy your first stock, or record a sale. Let's build this portfolio!", position: 'top' },
 ];
 
 export default function EquityTab({ transactions = [], marketData: globalMarketData, rates, onRefresh }: EquityTabProps) {

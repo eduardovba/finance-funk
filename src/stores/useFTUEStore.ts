@@ -16,6 +16,7 @@ export interface FTUEData {
     showFirstVisitGreeting?: boolean;
     sidebarDismissed?: boolean;
     checklistDismissed?: boolean;
+    grooveCheckDismissed?: boolean;
     pageTutorials?: Record<string, boolean>;
     selectedAssetClasses?: string[];
     wizardStep?: number;

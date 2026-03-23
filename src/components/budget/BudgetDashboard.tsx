@@ -3,6 +3,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import useBudgetStore from '@/stores/useBudgetStore';
+import { usePortfolio } from '@/context/PortfolioContext';
+import { getJargon, type ExperienceLevel } from '@/lib/personalization';
 import MetricCard from '@/components/MetricCard';
 import MonthNavigator from '@/components/budget/MonthNavigator';
 import SavingsRateBar from '@/components/budget/SavingsRateBar';
@@ -21,6 +23,8 @@ const FloatingActionButton = _FloatingActionButton as any;
 
 export default function BudgetDashboard() {
     const router = useRouter();
+    const { ftueState } = usePortfolio() as any;
+    const experience = (ftueState?.onboardingExperience || 'beginner') as ExperienceLevel;
     const {
         categories,
         transactions,
@@ -97,7 +101,7 @@ export default function BudgetDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
                 <MetricCard
                     id="budget-income"
-                    title="Income"
+                    title={getJargon('income', experience)}
                     amount={fx(incomeCents) / 100}
                     percentage={incomeDelta.pct}
                     diffAmount={incomeDelta.diff}
@@ -111,7 +115,7 @@ export default function BudgetDashboard() {
                 />
                 <MetricCard
                     id="budget-spent"
-                    title="Spent"
+                    title={getJargon('expenses', experience)}
                     amount={fx(expensesCents) / 100}
                     percentage={expensesDelta.pct}
                     diffAmount={expensesDelta.diff}

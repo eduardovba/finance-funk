@@ -6,6 +6,97 @@ export interface PersonalizationConfig {
     experience: ExperienceLevel;
 }
 
+// ═══════════ JARGON MAPPING ═══════════
+
+export type JargonKey =
+    | 'netWorth' | 'monthlyChange' | 'roi' | 'costBasis'
+    | 'unrealizedPL' | 'realizedPL' | 'allocation'
+    | 'savingsRate' | 'income' | 'expenses'
+    | 'fixedIncome' | 'rebalance' | 'forecast'
+    | 'snapshot' | 'fxImpact';
+
+const JARGON_MAP: Record<JargonKey, Record<ExperienceLevel, string>> = {
+    netWorth: {
+        beginner: 'Total Money',
+        intermediate: 'Net Worth',
+        advanced: 'NAV',
+    },
+    monthlyChange: {
+        beginner: 'This Month',
+        intermediate: 'Monthly Change',
+        advanced: 'MoM Δ',
+    },
+    roi: {
+        beginner: 'Returns',
+        intermediate: 'ROI',
+        advanced: 'TWR',
+    },
+    costBasis: {
+        beginner: 'What You Paid',
+        intermediate: 'Cost Basis',
+        advanced: 'Adj. Cost Basis',
+    },
+    unrealizedPL: {
+        beginner: 'Paper Gains',
+        intermediate: 'Unrealized P&L',
+        advanced: 'Unrealized P&L',
+    },
+    realizedPL: {
+        beginner: 'Actual Gains',
+        intermediate: 'Realized P&L',
+        advanced: 'Realized P&L',
+    },
+    allocation: {
+        beginner: 'How Your Money Is Split',
+        intermediate: 'Asset Allocation',
+        advanced: 'Allocation',
+    },
+    savingsRate: {
+        beginner: 'Money Saved',
+        intermediate: 'Savings Rate',
+        advanced: 'Savings Rate',
+    },
+    income: {
+        beginner: 'Money In',
+        intermediate: 'Income',
+        advanced: 'Income',
+    },
+    expenses: {
+        beginner: 'Money Out',
+        intermediate: 'Expenses',
+        advanced: 'Expenses',
+    },
+    fixedIncome: {
+        beginner: 'Savings & Bonds',
+        intermediate: 'Fixed Income',
+        advanced: 'Fixed Income',
+    },
+    rebalance: {
+        beginner: 'Balance Your Mix',
+        intermediate: 'Rebalance',
+        advanced: 'Rebalance',
+    },
+    forecast: {
+        beginner: 'Future Predictions',
+        intermediate: 'Growth Forecast',
+        advanced: 'Forecast',
+    },
+    snapshot: {
+        beginner: 'Monthly Photo',
+        intermediate: 'Monthly Snapshot',
+        advanced: 'Snapshot',
+    },
+    fxImpact: {
+        beginner: 'Currency Effect',
+        intermediate: 'FX Impact',
+        advanced: 'FX Attribution',
+    },
+};
+
+export function getJargon(key: JargonKey, experience: ExperienceLevel): string {
+    return JARGON_MAP[key]?.[experience] || JARGON_MAP[key]?.intermediate || key;
+}
+
 // ═══════════ BEHAVIOR FLAGS ═══════════
 
 export function getPersonalizationFlags(config: PersonalizationConfig) {

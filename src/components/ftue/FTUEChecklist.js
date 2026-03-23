@@ -8,23 +8,23 @@ import { X, CheckCircle2, Circle, ChevronUp, ChevronDown, ListTodo, Building2, U
 import Image from 'next/image';
 
 const PORTFOLIO_MAP = [
-    { id: 'setCurrencies', label: 'Set base currencies' },
-    { id: 'chooseAssets', label: 'Choose asset classes' },
-    { id: 'setGoals', label: 'Define financial goals' },
-    { id: 'addFirstHolding', label: 'Add your first holding' },
-    { id: 'addCrypto', label: 'Connect your crypto wallet', asset: 'crypto' },
-    { id: 'addRealEstate', label: 'Add your first property', asset: 'real-estate' },
-    { id: 'addPensions', label: 'Link your pension provider', asset: 'pensions' },
+    { id: 'setCurrencies', label: 'Set base currencies', route: '/profile' },
+    { id: 'chooseAssets', label: 'Choose asset classes', route: '/profile' },
+    { id: 'setGoals', label: 'Define financial goals', route: '/planning/targets' },
+    { id: 'addFirstHolding', label: 'Add your first holding', route: '/assets/equity' },
+    { id: 'addCrypto', label: 'Connect your crypto wallet', asset: 'crypto', route: '/assets/crypto' },
+    { id: 'addRealEstate', label: 'Add your first property', asset: 'real-estate', route: '/assets/real-estate' },
+    { id: 'addPensions', label: 'Link your pension provider', asset: 'pensions', route: '/assets/pensions' },
 ];
 
 const TRACK_GROW_MAP = [
-    { id: 'recordFirstSnapshot', label: 'Record first monthly snapshot' },
-    { id: 'exploreForecast', label: 'Check the growth forecast' },
-    { id: 'customiseDashboard', label: 'Customise dashboard' },
+    { id: 'recordFirstSnapshot', label: 'Record first monthly snapshot', action: 'openMonthlyClose' },
+    { id: 'exploreForecast', label: 'Check the growth forecast', route: '/planning/forecast' },
+    { id: 'customiseDashboard', label: 'Customise dashboard', route: '/dashboard' },
 ];
 
 export default function FTUEChecklist({ mode = 'sidebar' }) {
-    const { ftueState, updateFtueProgress, refreshAllData } = usePortfolio();
+    const { ftueState, updateFtueProgress, refreshAllData, setIsMonthlyCloseModalOpen } = usePortfolio();
     const router = useRouter();
     const [isMobileOpen, setIsMobileOpen] = useState(false);
 
@@ -67,9 +67,25 @@ export default function FTUEChecklist({ mode = 'sidebar' }) {
         updateFtueProgress({ sidebarDismissed: true });
     };
 
+    const handleChecklistItemClick = (item) => {
+        if (item.isDone) return;
+        if (item.action === 'openMonthlyClose') {
+            setIsMonthlyCloseModalOpen?.(true);
+            return;
+        }
+        if (item.route) {
+            router.push(item.route);
+            if (mode === 'mobile') setIsMobileOpen(false);
+        }
+    };
+
     // Render simple checklist rows
     const renderSimpleRow = (item) => (
-        <div key={item.id} className="flex items-center gap-[10px] px-1 py-2">
+        <div 
+            key={item.id} 
+            className={`flex items-center gap-[10px] px-1 py-2 ${!item.isDone ? 'cursor-pointer hover:bg-white/5 rounded-lg transition-colors' : ''}`}
+            onClick={() => handleChecklistItemClick(item)}
+        >
             {item.isDone ? (
                 <CheckCircle2 size={16} className="text-[#D4AF37] shrink-0" />
             ) : (
@@ -78,6 +94,9 @@ export default function FTUEChecklist({ mode = 'sidebar' }) {
             <span className={`font-space text-[0.72rem] leading-tight ${item.isDone ? 'line-through text-[#F5F5DC]/50' : 'text-[#F5F5DC]/90'}`}>
                 {item.label}
             </span>
+            {!item.isDone && (item.route || item.action) && (
+                <ChevronRight size={12} className="text-[#F5F5DC]/20 ml-auto shrink-0" />
+            )}
         </div>
     );
 

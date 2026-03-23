@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AnimatedNumber } from '@/components/ui/animated-number';
+import { usePortfolio } from '@/context/PortfolioContext';
+import { getJargon, type ExperienceLevel } from '@/lib/personalization';
 
 interface DashboardHeroProps {
     data: any;
@@ -33,6 +35,8 @@ interface DashboardHeroProps {
 }
 
 export default function DashboardHero(props: DashboardHeroProps) {
+    const { ftueState } = usePortfolio() as any;
+    const experience = (ftueState?.onboardingExperience || 'beginner') as ExperienceLevel;
     const {
         data, isLoading, primaryMeta, secondaryMeta, primaryCurrency, secondaryCurrency,
         toPrimary, toSecondary, formatPrimaryNoDecimals, formatSecondaryNoDecimals,
@@ -73,7 +77,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                 <RefreshButton />
             </div>
 
-            <span className="text-[0.6875rem] text-[#F5F5DC]/40 uppercase tracking-[4px] font-space mb-3 text-center w-full block">Total Balance</span>
+            <span className="text-[0.6875rem] text-[#F5F5DC]/40 uppercase tracking-[4px] font-space mb-3 text-center w-full block">{getJargon('netWorth', experience)}</span>
 
             <div className="flex items-start justify-center gap-6 mb-1 relative">
                 <div className="flex items-start gap-1">
@@ -86,7 +90,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                 <motion.div whileTap={{ scale: 0.9 }} className="mt-0.5 relative group cursor-pointer w-16 h-16 shrink-0">
                     <div className={`absolute inset-0 rounded-full blur-md opacity-30 ${currentROI.percentage >= 0 ? 'bg-vu-green' : 'bg-red-400'}`} />
                     <div className={`relative z-10 w-full h-full rounded-full flex flex-col items-center justify-center bg-gradient-to-br from-black/80 to-[#1A0F2E]/80 border shadow-inner transition-colors duration-500 ${currentROI.percentage >= 0 ? 'border-vu-green/40 shadow-vu-green/20' : 'border-red-400/40 shadow-red-400/20'}`}>
-                        <span className="text-[0.6875rem] uppercase tracking-widest text-[#F5F5DC]/50 font-space mt-px">ROI</span>
+                        <span className="text-[0.6875rem] uppercase tracking-widest text-[#F5F5DC]/50 font-space mt-px">{getJargon('roi', experience)}</span>
                         <span className={`text-[13px] font-bold font-space leading-tight ${currentROI.percentage >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                             {currentROI.percentage >= 0 ? '+' : ''}{currentROI.percentage.toFixed(1)}%
                         </span>
@@ -101,7 +105,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
             <div className={`flex flex-wrap justify-center gap-3 transition-opacity duration-300 ${isLoading ? 'opacity-30' : 'opacity-100'}`}>
                 {/* MoM Pill */}
                 <div className={`px-2 py-1 rounded-xl font-medium text-[0.75rem] flex items-center gap-1.5 leading-none shadow-sm border ${(diffPrevMonth?.amount || 0) >= 0 ? 'text-vu-green bg-vu-green/[0.08] border-vu-green/20' : 'text-red-400 bg-red-400/[0.08] border-red-400/20'}`}>
-                    <span className="text-[0.6875rem] uppercase font-space tracking-widest opacity-70 hidden min-[400px]:block mt-0.5">MoM</span>
+                    <span className="text-[0.6875rem] uppercase font-space tracking-widest opacity-70 hidden min-[400px]:block mt-0.5">{getJargon('monthlyChange', experience)}</span>
                     <span className="font-mono tabular-nums tracking-tight opacity-90 text-[0.75rem]">
                         {(diffPrevMonth?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(diffPrevMonth?.amount || 0, 'BRL'))}
                     </span>
@@ -146,7 +150,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
 
                     {/* Main Balance */}
                     <div className="flex flex-col items-center justify-center pt-6 pb-3 xl:pt-8 xl:pb-4 px-6 relative z-10">
-                        <span className="text-[0.75rem] xl:text-xs text-[#F5F5DC]/30 uppercase tracking-[4px] font-space mb-2">Total Balance</span>
+                        <span className="text-[0.75rem] xl:text-xs text-[#F5F5DC]/30 uppercase tracking-[4px] font-space mb-2">{getJargon('netWorth', experience)}</span>
                         <div className={`flex items-start justify-center gap-1 transition-opacity duration-300 ${isLoading ? 'opacity-30' : 'opacity-100'}`}>
                             <span className="text-2xl xl:text-3xl text-[#F5F5DC]/50 font-medium font-space mt-2 xl:mt-3">{primaryMeta?.symbol}</span>
                             <span className="text-7xl xl:text-8xl 2xl:text-[7.5rem] leading-none font-normal tracking-wide text-[#D4AF37] drop-shadow-[0_0_20px_rgba(212,175,55,0.35)] font-bebas">
@@ -164,7 +168,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                     {!isLoading && (
                         <div className="grid grid-cols-4 relative z-10">
                             <div className="flex flex-col items-center py-4 xl:py-5 border-r border-white/[0.04]">
-                                <span className="text-xs xl:text-sm text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">ROI</span>
+                                <span className="text-xs xl:text-sm text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">{getJargon('roi', experience)}</span>
                                 <span className={`text-xl xl:text-2xl font-bold font-space ${currentROI.percentage >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                                     {currentROI.percentage >= 0 ? '+' : ''}{currentROI.percentage.toFixed(1)}%
                                 </span>
@@ -173,7 +177,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                                 </span>
                             </div>
                             <div className="flex flex-col items-center py-4 xl:py-5 border-r border-white/[0.04]">
-                                <span className="text-xs xl:text-sm text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">MoM</span>
+                                <span className="text-xs xl:text-sm text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">{getJargon('monthlyChange', experience)}</span>
                                 <span className={`text-xl xl:text-2xl font-bold font-space ${(diffPrevMonth?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                                     {(diffPrevMonth?.amount || 0) >= 0 ? '+' : ''}{Math.abs(diffPrevMonth?.percentage || 0).toFixed(1)}%
                                 </span>
@@ -191,7 +195,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                                 </span>
                             </div>
                             <div className="flex flex-col items-center py-4 xl:py-5">
-                                <span className="text-xs xl:text-sm text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">FX Impact</span>
+                                <span className="text-xs xl:text-sm text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">{getJargon('fxImpact', experience)}</span>
                                 <span className={`text-xl xl:text-2xl font-bold font-space ${(fxEffectBRL?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                                     {(fxEffectBRL?.amount || 0) >= 0 ? '+' : ''}{Math.abs(fxEffectBRL?.percentage || 0).toFixed(1)}%
                                 </span>
@@ -219,7 +223,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                                         <div className="flex flex-col gap-4">
                                             <span className="text-xs text-[#D4AF37]/50 uppercase tracking-[2px] font-space">{primaryCurrency} Details</span>
                                             <div className="flex items-center justify-between bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3">
-                                                <span className="text-[0.75rem] uppercase font-space tracking-[1.5px] text-[#F5F5DC]/40">MoM</span>
+                                                <span className="text-[0.75rem] uppercase font-space tracking-[1.5px] text-[#F5F5DC]/40">{getJargon('monthlyChange', experience)}</span>
                                                 <div className={`flex items-center gap-2 ${(diffPrevMonth?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                                                     <span className="font-mono tabular-nums text-[13px] xl:text-sm font-medium">{(diffPrevMonth?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(diffPrevMonth?.amount || 0, 'BRL'))}</span>
                                                     <span className="text-[0.75rem] font-space opacity-70">{Math.abs(diffPrevMonth?.percentage || 0).toFixed(1)}%</span>
@@ -235,7 +239,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center justify-between">
-                                                        <span className="text-[0.75rem] font-space text-[#F5F5DC]/40 flex items-center gap-1.5"><span className="text-[0.6875rem]">↳</span> FX Effect</span>
+                                                        <span className="text-[0.75rem] font-space text-[#F5F5DC]/40 flex items-center gap-1.5"><span className="text-[0.6875rem]">↳</span> {getJargon('fxImpact', experience)}</span>
                                                         <div className={`flex items-center gap-1.5 ${(fxEffectBRL?.amount || 0) >= 0 ? 'text-vu-green/80' : 'text-red-400/80'}`}>
                                                             <span className="font-mono tabular-nums text-[0.75rem]">{(fxEffectBRL?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(fxEffectBRL?.amount || 0, 'BRL'))}</span>
                                                             <span className="font-space text-[0.75rem] opacity-70">{Math.abs(fxEffectBRL?.percentage || 0).toFixed(1)}%</span>
@@ -271,7 +275,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                                         <div className="flex flex-col gap-4">
                                             <span className="text-xs text-[#CC5500]/70 uppercase tracking-[2px] font-space">{secondaryCurrency} Details</span>
                                             <div className="flex items-center justify-between bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3">
-                                                <span className="text-[0.75rem] uppercase font-space tracking-[1.5px] text-[#F5F5DC]/40">MoM</span>
+                                                <span className="text-[0.75rem] uppercase font-space tracking-[1.5px] text-[#F5F5DC]/40">{getJargon('monthlyChange', experience)}</span>
                                                 <div className={`flex items-center gap-2 ${(diffPrevMonthGBP?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                                                     <span className="font-mono tabular-nums text-[13px] xl:text-sm font-medium">{(diffPrevMonthGBP?.amount || 0) >= 0 ? '+' : '-'}{formatSecondaryNoDecimals(Math.abs(diffPrevMonthGBP?.amount || 0))}</span>
                                                     <span className="text-[0.75rem] font-space opacity-70">{Math.abs(diffPrevMonthGBP?.percentage || 0).toFixed(1)}%</span>
@@ -287,7 +291,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center justify-between">
-                                                        <span className="text-[0.75rem] font-space text-[#F5F5DC]/40 flex items-center gap-1.5"><span className="text-[0.6875rem]">↳</span> FX Effect</span>
+                                                        <span className="text-[0.75rem] font-space text-[#F5F5DC]/40 flex items-center gap-1.5"><span className="text-[0.6875rem]">↳</span> {getJargon('fxImpact', experience)}</span>
                                                         <div className={`flex items-center gap-1.5 ${(fxEffectGBP?.amount || 0) >= 0 ? 'text-vu-green/80' : 'text-red-400/80'}`}>
                                                             <span className="font-mono tabular-nums text-[0.75rem]">{(fxEffectGBP?.amount || 0) >= 0 ? '+' : '-'}{formatSecondaryNoDecimals(Math.abs(fxEffectGBP?.amount || 0))}</span>
                                                             <span className="font-space text-[0.75rem] opacity-70">{Math.abs(fxEffectGBP?.percentage || 0).toFixed(1)}%</span>

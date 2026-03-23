@@ -25,11 +25,11 @@ import DebtForm from './DebtForm';
 import type { DebtTabProps } from './types';
 
 const DEBT_TUTORIAL_STEPS = [
-    { type: 'spotlight', targetId: 'ftue-debt-header', title: 'Consolidated Debt Picture', message: "View your total outstanding debt across all lenders, including a complete breakdown. Monitor mortgages, personal loans, and credit lines.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-debt-lender-section', title: 'Detailed Lender View', message: "Access specific details for each lender: individual debt lines, current balances, and repayment schedules.", position: 'bottom' },
-    { type: 'spotlight', targetId: 'ftue-debt-ledger', title: 'Repayment Stream', message: "Every payment is precisely logged here. Witness and track the consistent reduction of your debt over time.", position: 'top' },
-    { type: 'spotlight', targetId: 'ftue-debt-empty', title: 'Debt-Free Journey', message: "It appears you have no debts currently tracked. Use \u2018+\u2019 to add a lender for any mortgages, personal loans, or credit lines.", position: 'top' },
-    { type: 'spotlight', targetId: 'global-fab', title: 'Action Required', message: "Add a lender to start meticulously logging your debts and repayments. This is step one on your path to financial freedom.", position: 'top', shape: 'circle', padding: 8 },
+    { type: 'spotlight', targetId: 'ftue-debt-header', title: 'Debt Dashboard 💳', message: "Total outstanding debt across all lenders. Mortgages, loans, credit — everything in one place.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-debt-lender-section', title: 'Lender Breakdown 🏦', message: "Details for each lender — individual lines, balances, and repayment info.", position: 'bottom' },
+    { type: 'spotlight', targetId: 'ftue-debt-ledger', title: 'Payment History 📉', message: "Every payment logged. Watch your debt shrink over time — that's the groove!", position: 'top' },
+    { type: 'spotlight', targetId: 'ftue-debt-empty', title: 'Debt-Free Zone 🎉', message: "No debts tracked. If you have loans or mortgages, add a lender to get the full picture of your net worth.", position: 'top' },
+    { type: 'spotlight', targetId: 'global-fab', title: 'Add Lender ➕', message: "Add a lender to start tracking debts and repayments. Step one on the road to financial freedom!", position: 'top', shape: 'circle', padding: 8 },
 ];
 
 export default function DebtTab({ transactions = [], rates, onRefresh }: DebtTabProps) {

@@ -38,6 +38,7 @@ const DEFAULT_STATE = {
     onboardingGoal: null,
     onboardingExperience: null,
     showFirstVisitGreeting: false,
+    grooveCheckDismissed: false,
 };
 
 const PostFtueSchema = z.object({
@@ -63,6 +64,7 @@ const PatchFtueSchema = z.object({
     onboardingGoal: z.string().optional().nullable(),
     onboardingExperience: z.string().optional().nullable(),
     showFirstVisitGreeting: z.boolean().optional(),
+    grooveCheckDismissed: z.boolean().optional(),
 }).passthrough();
 
 // Auto-detect which checklist items are already completed based on real data

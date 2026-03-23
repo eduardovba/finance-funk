@@ -6,17 +6,22 @@ import { Wallet, TrendingUp } from 'lucide-react';
 import useBudgetStore from '@/stores/useBudgetStore';
 import { formatCents } from '@/lib/budgetUtils';
 import { convertCurrency } from '@/lib/fxConvert';
+import { usePortfolio } from '@/context/PortfolioContext';
+import { getJargon, type ExperienceLevel } from '@/lib/personalization';
 
 /**
  * Dashboard KPI pod showing this month's Investable Surplus and Savings Rate.
  * All arithmetic remains in integer cents — formatCents is called only at render.
  */
 export default function BudgetKpiPod() {
-    const { currentRollup, fetchRollup, displayCurrency, fxRates } = useBudgetStore();
+    const { currentRollup, fetchRollup, hydrateSettings, displayCurrency, fxRates } = useBudgetStore();
+    const { ftueState } = usePortfolio() as any;
+    const experience = (ftueState?.onboardingExperience || 'beginner') as ExperienceLevel;
 
     useEffect(() => {
         fetchRollup();
-    }, [fetchRollup]);
+        hydrateSettings();
+    }, [fetchRollup, hydrateSettings]);
 
     if (!currentRollup) return null;
 
@@ -72,7 +77,7 @@ export default function BudgetKpiPod() {
                     </div>
                     <div className="min-w-0">
                         <span className="text-[0.6875rem] text-[#F5F5DC]/35 uppercase tracking-[2px] font-space block">
-                            Savings Rate
+                            {getJargon('savingsRate', experience)}
                         </span>
                         <div className="flex items-baseline gap-2">
                             <span className={`text-xl font-bebas tracking-wider

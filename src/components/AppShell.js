@@ -18,6 +18,7 @@ import FTUEWizard from '@/components/ftue/FTUEWizard';
 import FTUEChecklist from '@/components/ftue/FTUEChecklist';
 import CurrencyQuickPicker from '@/components/ftue/CurrencyQuickPicker';
 import FirstVisitGreeting from '@/components/ftue/FirstVisitGreeting';
+import GrooveCheck from '@/components/ftue/GrooveCheck';
 
 function AppShellInner({ children }) {
     const {
@@ -226,6 +227,7 @@ function AppShellInner({ children }) {
                 {/* ═══════════ PWA INSTALL PROMPT ═══════════ */}
                 <InstallPrompt />
                 <FirstVisitGreeting />
+                <GrooveCheck />
 
                 {/* ═══════════ FTUE WIZARD OVERLAY (on top of populated dashboard) ═══════════ */}
                 {showWizardOverlay && (

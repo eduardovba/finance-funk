@@ -149,7 +149,7 @@ export default function LedgerIncomeView({
                     >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <span style={{ fontSize: '14px' }}>📋</span>
-                            <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(245,245,220,0.7)', letterSpacing: '0.3px' }}>Revenue Ledger</span>
+                            <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(245,245,220,0.7)', letterSpacing: '0.3px' }}>Income Ledger</span>
                             <span style={{ fontSize: '11px', color: 'rgba(245,245,220,0.3)', fontWeight: 400 }}>({incomeData.length} months)</span>
                         </div>
                         <span style={{ fontSize: '12px', color: 'rgba(245,245,220,0.35)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', transform: showLedgerTable ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block' }}>▼</span>
