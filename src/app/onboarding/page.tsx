@@ -22,7 +22,7 @@ function detectCurrencyFromLocale() {
         "de-CH": "CHF",
         "en-AU": "AUD",
     };
-    return localeMap[lang] || localeMap[lang.split("-")[0]] || "USD";
+    return (localeMap as any)[lang] || (localeMap as any)[lang.split("-")[0]] || "USD";
 }
 
 const CURRENCY_SYMBOLS = { BRL: "R$", GBP: "£", USD: "$", EUR: "€", AUD: "A$", JPY: "¥", CHF: "CHF" };
@@ -32,11 +32,11 @@ const stepTransition = {
     initial: { opacity: 0, x: 30, scale: 0.98 },
     animate: { opacity: 1, x: 0, scale: 1 },
     exit: { opacity: 0, x: -30, scale: 0.98 },
-    transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] as any },
 };
 
 /* ─── SVG Icons ─── */
-function WalletIcon({ color }) {
+function WalletIcon({ color }: any) {
     return (
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
@@ -46,7 +46,7 @@ function WalletIcon({ color }) {
     );
 }
 
-function ChartIcon({ color }) {
+function ChartIcon({ color }: any) {
     return (
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
@@ -55,7 +55,7 @@ function ChartIcon({ color }) {
     );
 }
 
-function GuitarIcon({ color }) {
+function GuitarIcon({ color }: any) {
     return (
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20 4v5" />
@@ -89,9 +89,9 @@ function GoogleIcon() {
 /* ═══════════════════════════════════════════
    Animated Counter
    ═══════════════════════════════════════════ */
-function AnimatedCount({ value, prefix = "", duration = 1.2 }) {
+function AnimatedCount({ value, prefix = "", duration = 1.2 }: any) {
     const [count, setCount] = useState(0);
-    const ref = useRef(null);
+    const ref = useRef<any>(null);
 
     useEffect(() => {
         let start = 0;
@@ -99,7 +99,7 @@ function AnimatedCount({ value, prefix = "", duration = 1.2 }) {
         const startTime = performance.now();
         const ms = duration * 1000;
 
-        function tick(now) {
+        function tick(now: number) {
             const elapsed = now - startTime;
             const progress = Math.min(elapsed / ms, 1);
             const eased = 1 - Math.pow(1 - progress, 3);
@@ -116,8 +116,8 @@ function AnimatedCount({ value, prefix = "", duration = 1.2 }) {
 /* ═══════════════════════════════════════════
    STEP 1: What's Your Vibe?
    ═══════════════════════════════════════════ */
-function StepGoal({ selectedGoal, setSelectedGoal, onContinue, onSkip }) {
-    const firstCardRef = useRef(null);
+function StepGoal({ selectedGoal, setSelectedGoal, onContinue, onSkip }: any) {
+    const firstCardRef = useRef<any>(null);
 
     useEffect(() => {
         firstCardRef.current?.focus();
@@ -129,7 +129,7 @@ function StepGoal({ selectedGoal, setSelectedGoal, onContinue, onSkip }) {
         both: "Going all in! I like your style! 🎸",
     };
 
-    const handleKeyDown = (e, goal) => {
+    const handleKeyDown = (e: any, goal: string) => {
         if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             setSelectedGoal(goal);
@@ -152,7 +152,7 @@ function StepGoal({ selectedGoal, setSelectedGoal, onContinue, onSkip }) {
                     className="onboarding-subtitle"
                     style={{ minHeight: '2em', marginBottom: 0 }}
                 >
-                    {GOAL_MESSAGES[selectedGoal] || "Welcome to Finance Funk! What are you looking to do?"}
+                    {(GOAL_MESSAGES as any)[selectedGoal] || "Welcome to Finance Funk! What are you looking to do?"}
                 </motion.p>
             </AnimatePresence>
 
@@ -236,8 +236,8 @@ function StepSetup({
     secondaryCurrency, setSecondaryCurrency,
     experienceLevel, setExperienceLevel,
     onContinue, onBack,
-}) {
-    const firstBtnRef = useRef(null);
+}: any) {
+    const firstBtnRef = useRef<any>(null);
 
     useEffect(() => {
         firstBtnRef.current?.focus();
@@ -251,7 +251,7 @@ function StepSetup({
 
     const canContinue = primaryCurrency && experienceLevel;
 
-    const handleExpKeyDown = (e, level) => {
+    const handleExpKeyDown = (e: any, level: string) => {
         if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             setExperienceLevel(level);
@@ -262,7 +262,7 @@ function StepSetup({
         <motion.div key="step-2" {...stepTransition}>
             <ProfessorF
                 pose="thinking"
-                message={EXP_MESSAGES[experienceLevel] || "Let's personalize your setup — this takes 10 seconds"}
+                message={(EXP_MESSAGES as any)[experienceLevel] || "Let's personalize your setup — this takes 10 seconds"}
                 animate
             />
 
@@ -360,7 +360,7 @@ function StepSetup({
    ═══════════════════════════════════════════ */
 const BUDGET_BARS = [35, 55, 40, 72, 48, 30, 64, 38, 58, 70, 42, 52];
 
-function BudgetMockup({ symbol }) {
+function BudgetMockup({ symbol }: any) {
     return (
         <div className="preview-mockup">
             <div className="preview-mockup-header">
@@ -378,7 +378,7 @@ function BudgetMockup({ symbol }) {
     );
 }
 
-function InvestmentMockup({ symbol }) {
+function InvestmentMockup({ symbol }: any) {
     return (
         <div className="preview-mockup">
             <div className="preview-mockup-header">
@@ -402,14 +402,14 @@ function InvestmentMockup({ symbol }) {
     );
 }
 
-function StepPreview({ selectedGoal, primaryCurrency, onContinue, onBack }) {
-    const ctaRef = useRef(null);
+function StepPreview({ selectedGoal, primaryCurrency, onContinue, onBack }: any) {
+    const ctaRef = useRef<any>(null);
 
     useEffect(() => {
         ctaRef.current?.focus();
     }, []);
 
-    const symbol = CURRENCY_SYMBOLS[primaryCurrency] || primaryCurrency;
+    const symbol = (CURRENCY_SYMBOLS as any)[primaryCurrency] || primaryCurrency;
 
     const PREVIEW_MESSAGES = {
         budget: "Here's how you'll master your spending",
@@ -430,7 +430,7 @@ function StepPreview({ selectedGoal, primaryCurrency, onContinue, onBack }) {
         <motion.div key="step-3" {...stepTransition}>
             <ProfessorF
                 pose="celebrating"
-                message={PREVIEW_MESSAGES[selectedGoal] || PREVIEW_MESSAGES.both}
+                message={(PREVIEW_MESSAGES as any)[selectedGoal] || PREVIEW_MESSAGES.both}
                 animate
             />
 
@@ -446,7 +446,7 @@ function StepPreview({ selectedGoal, primaryCurrency, onContinue, onBack }) {
             {showInvestments && <InvestmentMockup symbol={symbol} />}
 
             <div className="preview-callouts">
-                {(CALLOUTS[selectedGoal] || CALLOUTS.both).map((c) => (
+                {((CALLOUTS as any)[selectedGoal] || CALLOUTS.both).map((c: any) => (
                     <span key={c} className="preview-callout">{c}</span>
                 ))}
             </div>
@@ -469,8 +469,8 @@ function StepAccount({
     name, setName, email, setEmail, password, setPassword,
     showPassword, setShowPassword, isLoading, setIsLoading,
     errorMsg, setErrorMsg, router,
-}) {
-    const nameRef = useRef(null);
+}: any) {
+    const nameRef = useRef<any>(null);
 
     useEffect(() => {
         nameRef.current?.focus();
@@ -486,7 +486,7 @@ function StepAccount({
         signIn("google", { callbackUrl: "/dashboard" });
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: any) => {
         e.preventDefault();
         setErrorMsg("");
 
@@ -521,7 +521,7 @@ function StepAccount({
                 return;
             }
 
-            const signInResult = await signIn("credentials", {
+            const signInResult: any = await signIn("credentials", {
                 email,
                 password,
                 callbackUrl: "/dashboard",
@@ -642,7 +642,7 @@ function StepAccount({
    ═══════════════════════════════════════════ */
 const STEPS = ["Vibe", "Setup"];
 
-function ProgressBar({ step }) {
+function ProgressBar({ step }: any) {
     // Hide progress bar on direct signup (step 4)
     if (step >= 4) return null;
 
@@ -673,10 +673,10 @@ function OnboardingFlow() {
 
     const initialStep = searchParams.get('step') === 'signup' ? 4 : 1;
     const [step, setStep] = useState(initialStep);
-    const [selectedGoal, setSelectedGoal] = useState(null);
+    const [selectedGoal, setSelectedGoal] = useState<any>(null);
     const [primaryCurrency, setPrimaryCurrency] = useState("USD");
-    const [secondaryCurrency, setSecondaryCurrency] = useState(null);
-    const [experienceLevel, setExperienceLevel] = useState(null);
+    const [secondaryCurrency, setSecondaryCurrency] = useState<any>(null);
+    const [experienceLevel, setExperienceLevel] = useState<any>(null);
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");

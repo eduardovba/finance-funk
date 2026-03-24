@@ -12,7 +12,7 @@ const DEBUG_SYNC = process.env.DEBUG_PLUGGY === 'true';
  * For server actions called from the UI, this will always have a session.
  * For webhook-like calls, we fall back to looking up user_id from connections.
  */
-async function getCurrentUserId(itemId = null) {
+async function getCurrentUserId(itemId: string | null = null) {
     const session = await auth();
     if (session?.user?.id) return session.user.id;
 
@@ -28,7 +28,7 @@ async function getCurrentUserId(itemId = null) {
 /**
  * Update Asset Sync Status
  */
-export async function updateAssetSyncStatus(assetId, status, category = null) {
+export async function updateAssetSyncStatus(assetId: any, status: string, category: string | null = null) {
     try {
         const userId = await getCurrentUserId();
         if (category) {
@@ -43,14 +43,14 @@ export async function updateAssetSyncStatus(assetId, status, category = null) {
         return { success: true };
     } catch (error) {
         console.error('Update Asset Sync Status Error:', error);
-        return { error: error.message };
+        return { error: (error as any).message };
     }
 }
 
 /**
  * Batch Verify Assets
  */
-export async function batchVerifyAssets(assetIds) {
+export async function batchVerifyAssets(assetIds: any[]) {
     if (!Array.isArray(assetIds) || assetIds.length === 0) return { success: true };
 
     try {
@@ -61,11 +61,11 @@ export async function batchVerifyAssets(assetIds) {
         return { success: true };
     } catch (error) {
         console.error('Batch Verify Error:', error);
-        return { error: error.message };
+        return { error: (error as any).message };
     }
 }
 
-function logSync(data) {
+function logSync(data: any) {
     if (DEBUG_SYNC) console.log(`[Pluggy Sync] ${JSON.stringify(data)}`);
 }
 
@@ -77,14 +77,14 @@ export async function createConnectToken() {
         return { token: response.accessToken };
     } catch (error) {
         console.error('Pluggy Connect Token Error:', error);
-        throw new Error(`Pluggy Auth Error: ${error.message || 'Unknown error'}`);
+        throw new Error(`Pluggy Auth Error: ${(error as any).message || 'Unknown error'}`);
     }
 }
 
 /**
  * Sync Item Server Action
  */
-export async function syncItem(itemId) {
+export async function syncItem(itemId: string) {
     if (!itemId) throw new Error('itemId is required');
 
     try {
@@ -102,7 +102,7 @@ export async function syncItem(itemId) {
                 const connector = await client.fetchConnector(institutionId);
                 institutionLogoUrl = connector.imageUrl;
                 institutionName = connector.name;
-            } catch (e) {
+            } catch (e: any) {
                 console.warn('Could not fetch connector details:', e.message);
             }
         }
@@ -114,7 +114,7 @@ export async function syncItem(itemId) {
              status = EXCLUDED.status, 
              institution_logo_url = COALESCE(EXCLUDED.institution_logo_url, connections.institution_logo_url),
              last_sync_at = CURRENT_TIMESTAMP`,
-            [crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36), itemId, institutionName, item.status, institutionLogoUrl, userId]
+            [crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36), itemId, institutionName, item.status, institutionLogoUrl, userId as any]
         );
 
         // 2. Fetch Accounts (Cash)
@@ -123,12 +123,12 @@ export async function syncItem(itemId) {
 
         if (accounts.results) {
             for (const account of accounts.results) {
-                if (account.type === 'CREDIT_CARD' || account.subtype === 'CREDIT_CARD') {
+                if ((account as any).type === 'CREDIT_CARD' || (account as any).subtype === 'CREDIT_CARD') {
                     if (DEBUG_SYNC) console.log(`- Skipping credit card account: ${account.name}`);
                     continue;
                 }
 
-                const mapped = mapPluggyToFinanceFunk(account);
+                const mapped: any = mapPluggyToFinanceFunk(account as any, institutionName);
                 mapped.category = 'Cash';
                 await upsertAsset(mapped, institutionName, itemId, userId);
             }
@@ -144,18 +144,18 @@ export async function syncItem(itemId) {
 
             for (const investment of investments.results) {
                 try {
-                    const hasValue = (investment.balance > 0) || (investment.quantity > 0) || (investment.amount > 0);
+                    const hasValue = (investment.balance > 0) || ((investment as any).quantity > 0) || ((investment as any).amount > 0);
                     if (!hasValue) {
                         if (DEBUG_SYNC) console.log(`- Skipping ghost asset: ${investment.name}`);
                         continue;
                     }
 
-                    const mapped = mapPluggyToFinanceFunk(investment);
+                    const mapped: any = mapPluggyToFinanceFunk(investment as any, institutionName);
                     if (DEBUG_SYNC) console.log(`- Mapping ${investment.name} (${investment.type}/${investment.subtype}) -> FF:${mapped.category}`);
                     await upsertAsset(mapped, institutionName, itemId, userId);
                 } catch (assetErr) {
                     console.error(`Failed to sync asset ${investment.name}:`, assetErr);
-                    logSync({ error: assetErr.message, asset: investment.name, stage: 'asset_loop' });
+                    logSync({ error: (assetErr as any).message, asset: investment.name, stage: 'asset_loop' });
                 }
             }
         }
@@ -164,30 +164,30 @@ export async function syncItem(itemId) {
         return { success: true };
     } catch (error) {
         console.error('Pluggy Sync Error:', error);
-        return { success: false, error: error.message };
+        return { success: false, error: (error as any).message };
     }
 }
 
 /**
  * Delete Connection
  */
-export async function deleteConnection(itemId) {
+export async function deleteConnection(itemId: string) {
     if (!itemId) throw new Error('itemId is required');
 
     try {
         const userId = await getCurrentUserId(itemId);
         const client = await getPluggyClient();
-        try { await client.deleteItem(itemId); } catch (e) { console.warn('Failed to delete Pluggy item:', e.message); }
+        try { await client.deleteItem(itemId); } catch (e: any) { console.warn('Failed to delete Pluggy item:', e.message); }
 
-        await run(`DELETE FROM ledger WHERE asset_id IN (SELECT id FROM assets WHERE pluggy_item_id = ? AND user_id = ?) AND user_id = ?`, [itemId, userId, userId]);
-        await run(`DELETE FROM assets WHERE pluggy_item_id = ? AND user_id = ?`, [itemId, userId]);
-        await run(`DELETE FROM connections WHERE pluggy_item_id = ? AND user_id = ?`, [itemId, userId]);
+        await run(`DELETE FROM ledger WHERE asset_id IN (SELECT id FROM assets WHERE pluggy_item_id = ? AND user_id = ?) AND user_id = ?`, [itemId, userId as any, userId as any]);
+        await run(`DELETE FROM assets WHERE pluggy_item_id = ? AND user_id = ?`, [itemId, userId as any]);
+        await run(`DELETE FROM connections WHERE pluggy_item_id = ? AND user_id = ?`, [itemId, userId as any]);
 
         revalidatePath('/');
         return { success: true };
     } catch (error) {
         console.error('Delete Connection Error:', error);
-        return { error: error.message };
+        return { error: (error as any).message };
     }
 }
 
@@ -195,7 +195,7 @@ export async function deleteConnection(itemId) {
 /**
  * UPSERT Logic for Assets
  */
-async function upsertAsset(mapped, brokerName, itemId, userId) {
+async function upsertAsset(mapped: any, brokerName: string, itemId: string, userId: any) {
     const { name, ticker, category, balance, currency, pluggy_asset_id } = mapped;
 
     const uniqueTicker = `${ticker || name} [${pluggy_asset_id}]`;

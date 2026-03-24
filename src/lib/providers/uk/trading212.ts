@@ -37,16 +37,16 @@ export const trading212 = {
         'Select your date range and download the CSV file',
     ],
 
-    detect(headers) {
+    detect(headers: any[]) {
         return matchHeaderPatterns(headers, REQUIRED_HEADERS);
     },
 
-    parse(headers, rows, options = {}) {
+    parse(headers: any[], rows: any[], options: any = {}) {
         const { defaultCurrency = 'GBP' } = options;
         const transactions = [];
         const summary = { total: rows.length, skipped: 0, assetClasses: new Set() };
 
-        for (const row of rows) {
+        for (const row of rows as any[]) {
             const action = String(row['Action'] || '').trim().toLowerCase();
 
             // Skip non-trade actions (deposits, withdrawals, interest, etc.)
@@ -93,7 +93,7 @@ export const trading212 = {
             });
         }
 
-        summary.assetClasses = [...summary.assetClasses];
+        summary.assetClasses = [...summary.assetClasses] as any;
         return { transactions, summary };
     },
 };

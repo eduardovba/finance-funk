@@ -28,7 +28,7 @@ export const interactiveBrokers = {
         'Download the generated file',
     ],
 
-    detect(headers) {
+    detect(headers: any[]) {
         // IBKR files have these distinctive first columns
         const hasSection = headers.some(h => /statement\s*section/i.test(String(h)));
         const hasRowType = headers.some(h => /row\s*type/i.test(String(h)));
@@ -39,9 +39,9 @@ export const interactiveBrokers = {
         return 0;
     },
 
-    parse(headers, rows, options = {}) {
+    parse(headers: any[], rows: any[], options: any = {}) {
         const { defaultCurrency = 'USD' } = options;
-        const transactions = [];
+        const transactions: any[] = [];
         const summary = { total: 0, skipped: 0, assetClasses: new Set() };
 
         // IBKR CSV is multi-section: we need to find the "Trades" section
@@ -49,7 +49,7 @@ export const interactiveBrokers = {
         let inTradesSection = false;
         let tradeHeaders = null;
 
-        for (const row of rows) {
+        for (const row of rows as any[]) {
             const values = Object.values(row);
             const section = String(values[0] || '').trim();
             const rowType = String(values[1] || '').trim();
@@ -64,7 +64,7 @@ export const interactiveBrokers = {
                 }
                 if (/^data$/i.test(rowType) && inTradesSection && tradeHeaders) {
                     const data = values.slice(2);
-                    const tradeRow = {};
+                    const tradeRow: Record<string, any> = {};
                     tradeHeaders.forEach((h, i) => { tradeRow[h] = data[i]; });
 
                     summary.total++;
@@ -110,7 +110,7 @@ export const interactiveBrokers = {
 
         // If we couldn't find a multi-section structure, try parsing as a flat Flex Query
         if (transactions.length === 0) {
-            for (const row of rows) {
+            for (const row of rows as any[]) {
                 const symbol = row['Symbol'] || row['symbol'] || '';
                 const dateStr = row['TradeDate'] || row['Date/Time'] || row['DateTime'] || '';
                 const date = normalizeDate(dateStr.split(',')[0]?.trim() || dateStr.split(' ')[0]);
@@ -141,7 +141,7 @@ export const interactiveBrokers = {
             }
         }
 
-        summary.assetClasses = [...summary.assetClasses];
+        summary.assetClasses = [...summary.assetClasses] as any;
         return { transactions, summary };
     },
 };

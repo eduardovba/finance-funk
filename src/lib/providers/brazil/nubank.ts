@@ -31,25 +31,25 @@ export const nubank = {
         'Escolha formato CSV — o arquivo será enviado ao seu e-mail',
     ],
 
-    detect(headers) {
+    detect(headers: any[]) {
         const score = matchHeaderPatterns(headers, REQUIRED_HEADERS);
         // Nubank CSVs are very simple; boost if we DON'T see complex headers
         const isSimple = headers.length <= 5;
         return isSimple ? Math.min(score + 0.1, 1) : score * 0.8;
     },
 
-    parse(headers, rows, options = {}) {
+    parse(headers: any[], rows: any[], options: any = {}) {
         const transactions = [];
         const summary = { total: rows.length, skipped: 0, assetClasses: new Set() };
 
-        const findCol = (row, patterns) => {
+        const findCol = (row: any, patterns: any[]) => {
             for (const key of Object.keys(row)) {
                 if (patterns.some(p => p.test(key))) return row[key];
             }
             return undefined;
         };
 
-        for (const row of rows) {
+        for (const row of rows as any[]) {
             const dateStr = findCol(row, [/data/i]) || '';
             const date = parseDateBR(dateStr);
             if (!date) { summary.skipped++; continue; }
@@ -90,7 +90,7 @@ export const nubank = {
             });
         }
 
-        summary.assetClasses = [...summary.assetClasses];
+        summary.assetClasses = [...summary.assetClasses] as any;
         return { transactions, summary };
     },
 };

@@ -14,7 +14,7 @@ import { getJargon, type ExperienceLevel } from '@/lib/personalization';
  * All arithmetic remains in integer cents — formatCents is called only at render.
  */
 export default function BudgetKpiPod() {
-    const { currentRollup, fetchRollup, hydrateSettings, displayCurrency, fxRates } = useBudgetStore();
+    const { currentRollup, fetchRollup, hydrateSettings, displayCurrency, fxRates, rollupHistory, currentMonth, categories } = useBudgetStore();
     const { ftueState } = usePortfolio() as any;
     const experience = (ftueState?.onboardingExperience || 'beginner') as ExperienceLevel;
 
@@ -23,12 +23,28 @@ export default function BudgetKpiPod() {
         hydrateSettings();
     }, [fetchRollup, hydrateSettings]);
 
+    const prevRollup = React.useMemo(() => {
+        const [y, m] = currentMonth.split('-').map(Number);
+        const prevDate = new Date(y, m - 2, 1);
+        const prevKey = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}`;
+        return rollupHistory.find(r => r.month === prevKey) ?? null;
+    }, [currentMonth, rollupHistory]);
+
     if (!currentRollup) return null;
 
-    // ─── Integer-only arithmetic ────────────────────────────
-    const surplusCents = currentRollup.total_income_cents - currentRollup.total_expenses_cents;
+    // ─── Zero-Based Budgeting Math ────────────────────────────
+    const prevIncome = prevRollup?.total_income_cents ?? 0;
+    const currIncome = currentRollup.total_income_cents ?? 0;
+    const fundingIncome = prevIncome > 0 ? prevIncome : currIncome;
+
+    const totalBudgetedTargets = categories
+        .filter(c => c.is_income === 0)
+        .reduce((sum, c) => sum + c.monthly_target_cents, 0);
+
+    const surplusCents = fundingIncome - totalBudgetedTargets;
     const displaySurplusCents = convertCurrency(Math.abs(surplusCents), displayCurrency, displayCurrency, fxRates);
-    const savingsRateBps = currentRollup.savings_rate_basis_points ?? 0;
+    
+    const savingsRateBps = fundingIncome > 0 ? Math.round(((fundingIncome - totalBudgetedTargets) / fundingIncome) * 10000) : 0;
     const savingsRatePercent = Math.round(savingsRateBps / 100);
     const isHealthy = savingsRateBps > 3000; // > 30%
 

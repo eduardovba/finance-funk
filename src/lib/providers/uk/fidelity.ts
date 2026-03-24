@@ -32,18 +32,18 @@ export const fidelity = {
         'Export as CSV and download',
     ],
 
-    detect(headers) {
+    detect(headers: any[]) {
         const score = matchHeaderPatterns(headers, REQUIRED_HEADERS);
         const hasFidelity = headers.some(h => /fidelity/i.test(String(h)));
         return hasFidelity ? Math.min(score + 0.2, 1) : score;
     },
 
-    parse(headers, rows, options = {}) {
+    parse(headers: any[], rows: any[], options: any = {}) {
         const { defaultCurrency = 'GBP' } = options;
         const transactions = [];
         const summary = { total: rows.length, skipped: 0, assetClasses: new Set() };
 
-        for (const row of rows) {
+        for (const row of rows as any[]) {
             const dateStr = row['Date'] || row['Trade Date'] || '';
             const date = normalizeDate(dateStr) || parseDateUK(dateStr);
             if (!date) { summary.skipped++; continue; }
@@ -79,7 +79,7 @@ export const fidelity = {
             });
         }
 
-        summary.assetClasses = [...summary.assetClasses];
+        summary.assetClasses = [...summary.assetClasses] as any;
         return { transactions, summary };
     },
 };

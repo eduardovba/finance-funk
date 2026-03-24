@@ -58,7 +58,7 @@ export default function Sidebar({ activeItem, onNavigate }: SidebarProps) {
                 {title}
             </h3>
             <ul className="list-none p-0 m-0">
-                {items.map(item => {
+                {items.map((item: NavItem) => {
                     const Icon = iconMap[item.id] || LayoutDashboard;
                     const isActive = activeItem === item.id;
                     return (
@@ -87,7 +87,7 @@ export default function Sidebar({ activeItem, onNavigate }: SidebarProps) {
     // Avatar: session image → fallback to initials
     const userName = session?.user?.name || 'User';
     const userImage = session?.user?.image;
-    const initials = userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    const initials = userName.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2);
 
     return (
         <aside className="h-[calc(100vh-64px)] w-[260px] sticky top-8 p-6 flex-shrink-0 overflow-y-auto flex flex-col border-r border-[#D4AF37]/20">

@@ -12,7 +12,7 @@ const viewTransition = {
     initial: { opacity: 0, y: 12 },
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -12 },
-    transition: { duration: 0.3, ease: "easeInOut" },
+    transition: { duration: 0.3, ease: "easeInOut" as const },
 };
 
 /* ─── Bar chart data ─── */
@@ -61,7 +61,7 @@ function GoogleIcon() {
 /* ═══════════════════════════════════════════
    Welcome View
    ═══════════════════════════════════════════ */
-function WelcomeView({ onLogin, callbackUrl }) {
+function WelcomeView({ onLogin, callbackUrl }: any) {
     const router = useRouter();
 
     return (
@@ -157,7 +157,7 @@ function WelcomeView({ onLogin, callbackUrl }) {
 /* ═══════════════════════════════════════════
    Login View
    ═══════════════════════════════════════════ */
-function LoginView({ onBack, callbackUrl }) {
+function LoginView({ onBack, callbackUrl }: any) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -168,12 +168,12 @@ function LoginView({ onBack, callbackUrl }) {
         error === "CredentialsSignin" ? "Invalid email or password." : ""
     );
 
-    const handleCredentialsLogin = async (e) => {
+    const handleCredentialsLogin = async (e: any) => {
         e.preventDefault();
         setIsLoading(true);
         setErrorMsg("");
 
-        const result = await signIn("credentials", {
+        const result: any = await signIn("credentials", {
             email,
             password,
             callbackUrl,

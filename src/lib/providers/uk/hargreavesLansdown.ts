@@ -43,7 +43,7 @@ export const hargreavesLansdown = {
         'Note: You may need to remove the preamble rows (name, client number)',
     ],
 
-    detect(headers) {
+    detect(headers: any[]) {
         // Try statement format
         const stmtScore = matchHeaderPatterns(headers, STATEMENT_HEADERS);
         // Try portfolio format
@@ -54,12 +54,12 @@ export const hargreavesLansdown = {
         return hasHLMarker ? Math.min(bestScore + 0.3, 1) : bestScore;
     },
 
-    parse(headers, rows, options = {}) {
+    parse(headers: any[], rows: any[], options: any = {}) {
         const { defaultCurrency = 'GBP' } = options;
         const transactions = [];
         const summary = { total: rows.length, skipped: 0, assetClasses: new Set() };
 
-        for (const row of rows) {
+        for (const row of rows as any[]) {
             const dateStr = row['Date'] || row['Trade Date'] || '';
             const date = normalizeDate(dateStr) || parseDateUK(dateStr);
             if (!date) { summary.skipped++; continue; }
@@ -98,7 +98,7 @@ export const hargreavesLansdown = {
             });
         }
 
-        summary.assetClasses = [...summary.assetClasses];
+        summary.assetClasses = [...summary.assetClasses] as any;
         return { transactions, summary };
     },
 };

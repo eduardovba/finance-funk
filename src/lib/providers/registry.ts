@@ -49,14 +49,14 @@ export function getAllProviders() {
 /**
  * Get providers filtered by country code ('BR' or 'UK').
  */
-export function getProvidersByCountry(country) {
+export function getProvidersByCountry(country: string) {
     return PROVIDERS.filter(p => p.country === country);
 }
 
 /**
  * Get a single provider by its unique ID.
  */
-export function getProviderById(id) {
+export function getProviderById(id: string) {
     return PROVIDERS.find(p => p.id === id) || null;
 }
 
@@ -68,13 +68,13 @@ export function getProviderById(id) {
  * @param {object[]} sampleRows - First ~10 rows of data
  * @returns {{ provider: object|null, confidence: number }}
  */
-export function detectProvider(headers, sampleRows) {
+export function detectProvider(headers: string[], sampleRows: any[]) {
     let bestMatch = null;
     let bestScore = 0;
 
     for (const provider of PROVIDERS) {
         try {
-            const score = provider.detect(headers, sampleRows);
+            const score = (provider as any).detect(headers, sampleRows);
             if (score > bestScore) {
                 bestScore = score;
                 bestMatch = provider;
@@ -99,7 +99,7 @@ export function detectProvider(headers, sampleRows) {
  * @param {object} options - { defaultCurrency, defaultBroker }
  * @returns {{ transactions: object[], summary: object }}
  */
-export function parseWithProvider(providerId, headers, rows, options = {}) {
+export function parseWithProvider(providerId: string, headers: string[], rows: any[], options: any = {}) {
     const provider = getProviderById(providerId);
     if (!provider) {
         throw new Error(`Unknown provider: ${providerId}`);

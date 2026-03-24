@@ -34,23 +34,23 @@ export const b3Cei = {
         'Clique em "Baixar" → "Arquivo em Excel"',
     ],
 
-    detect(headers) {
+    detect(headers: any[]) {
         return matchHeaderPatterns(headers, REQUIRED_HEADERS);
     },
 
-    parse(headers, rows, options = {}) {
+    parse(headers: any[], rows: any[], options: any = {}) {
         const transactions = [];
         const summary = { total: rows.length, skipped: 0, assetClasses: new Set() };
 
         // Find columns flexibly
-        const findCol = (row, patterns) => {
+        const findCol = (row: any, patterns: any[]) => {
             for (const key of Object.keys(row)) {
                 if (patterns.some(p => p.test(key))) return row[key];
             }
             return undefined;
         };
 
-        for (const row of rows) {
+        for (const row of rows as any[]) {
             const dateStr = findCol(row, [/data/i]) || '';
             const date = parseDateBR(dateStr);
             if (!date) { summary.skipped++; continue; }
@@ -89,7 +89,7 @@ export const b3Cei = {
             });
         }
 
-        summary.assetClasses = [...summary.assetClasses];
+        summary.assetClasses = [...summary.assetClasses] as any;
         return { transactions, summary };
     },
 };

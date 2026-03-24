@@ -8,7 +8,7 @@ import actualsData from '@/data/forecast_actuals.json';
 
 export default function PlanningPage() {
     const params = useParams();
-    const activeTab = params?.tab || 'targets';
+    const activeTab = (params?.tab as string) || 'targets';
     const {
         forecastSettings,
         setForecastSettings,
@@ -60,7 +60,7 @@ export default function PlanningPage() {
         const sortedKeys = Array.from(dataMap.keys()).sort();
 
         // 4. Reconstruct array and dynamically calculate interest (organic growth)
-        const finalActuals = [];
+        const finalActuals: any[] = [];
         let prevBRL = 0;
         let prevGBP = 0;
 
@@ -104,7 +104,7 @@ export default function PlanningPage() {
             activeTab={activeTab}
             data={null}
             settings={forecastSettings}
-            onSaveSettings={(s) => {
+            onSaveSettings={(s: any) => {
                 fetch('/api/forecast-settings', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

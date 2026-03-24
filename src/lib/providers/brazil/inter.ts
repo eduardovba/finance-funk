@@ -30,24 +30,24 @@ export const inter = {
         'Exporte em formato CSV ou Excel',
     ],
 
-    detect(headers) {
+    detect(headers: any[]) {
         const score = matchHeaderPatterns(headers, REQUIRED_HEADERS);
         const hasInterMarker = headers.some(h => /inter|banco inter/i.test(String(h)));
         return hasInterMarker ? Math.min(score + 0.3, 1) : score;
     },
 
-    parse(headers, rows, options = {}) {
+    parse(headers: any[], rows: any[], options: any = {}) {
         const transactions = [];
         const summary = { total: rows.length, skipped: 0, assetClasses: new Set() };
 
-        const findCol = (row, patterns) => {
+        const findCol = (row: any, patterns: any[]) => {
             for (const key of Object.keys(row)) {
                 if (patterns.some(p => p.test(key))) return row[key];
             }
             return undefined;
         };
 
-        for (const row of rows) {
+        for (const row of rows as any[]) {
             const dateStr = findCol(row, [/data/i]) || '';
             const date = parseDateBR(dateStr);
             if (!date) { summary.skipped++; continue; }
@@ -107,7 +107,7 @@ export const inter = {
             });
         }
 
-        summary.assetClasses = [...summary.assetClasses];
+        summary.assetClasses = [...summary.assetClasses] as any;
         return { transactions, summary };
     },
 };

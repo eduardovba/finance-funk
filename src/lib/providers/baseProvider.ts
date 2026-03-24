@@ -11,7 +11,7 @@ import { normalizeDate, parseNumeric } from '@/lib/spreadsheetParser';
  * Parse a number in Brazilian format (period = thousands, comma = decimal)
  * Falls back to standard parseNumeric for non-BR formats.
  */
-export function parseNumericBR(value) {
+export function parseNumericBR(value: any) {
     if (typeof value === 'number') return value;
     if (value === null || value === undefined || value === '') return 0;
     const s = String(value).trim().replace(/[R$\s]/g, '');
@@ -27,7 +27,7 @@ export function parseNumericBR(value) {
  * Parse a date in DD/MM/YYYY format (common in Brazil)
  * Returns YYYY-MM-DD string.
  */
-export function parseDateBR(value) {
+export function parseDateBR(value: any) {
     if (!value) return null;
     const s = String(value).trim();
     const match = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
@@ -56,7 +56,7 @@ export const parseDateUK = parseDateBR;
  * @param {string[]} requiredHeaders - Headers that must all be present
  * @returns {number} Score 0-1 based on how many required headers match
  */
-export function matchHeaders(fileHeaders, requiredHeaders) {
+export function matchHeaders(fileHeaders: any[], requiredHeaders: string[]) {
     const normalised = fileHeaders.map(h => String(h).trim().toLowerCase());
     let matches = 0;
     for (const req of requiredHeaders) {
@@ -74,7 +74,7 @@ export function matchHeaders(fileHeaders, requiredHeaders) {
  * @param {RegExp[]} patterns
  * @returns {number} Score 0-1
  */
-export function matchHeaderPatterns(fileHeaders, patterns) {
+export function matchHeaderPatterns(fileHeaders: any[], patterns: RegExp[]) {
     const normalised = fileHeaders.map(h => String(h).trim());
     let matches = 0;
     for (const pattern of patterns) {
@@ -89,7 +89,7 @@ export function matchHeaderPatterns(fileHeaders, patterns) {
  * Infer Buy/Sell type from raw text.
  * Supports English and Portuguese.
  */
-export function inferTransactionType(rawType, amount) {
+export function inferTransactionType(rawType: any, amount: number) {
     if (!rawType) {
         return amount < 0 ? 'Sell' : 'Buy';
     }

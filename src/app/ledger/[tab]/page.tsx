@@ -6,7 +6,7 @@ import GeneralLedgerTab from '@/components/general-ledger';
 
 export default function LedgerPage() {
     const params = useParams();
-    const activeTab = params?.tab || 'income';
+    const activeTab = (params?.tab as string) || 'income';
     const {
         equityTransactions,
         cryptoTransactions,
@@ -30,7 +30,7 @@ export default function LedgerPage() {
         setIsMonthlyCloseModalOpen
     } = usePortfolio();
 
-    const handleSaveAssetClasses = async (overrides) => {
+    const handleSaveAssetClasses = async (overrides: any) => {
         try {
             const res = await fetch('/api/asset-classes', {
                 method: 'POST',
@@ -68,7 +68,7 @@ export default function LedgerPage() {
             pensionPrices={pensionPrices}
             ledgerData={ledgerData}
             fxHistory={fxHistory}
-            assetClasses={assetClasses}
+            assetClasses={assetClasses as any}
             onSaveAssetClasses={handleSaveAssetClasses}
             appSettings={appSettings}
             onUpdateAppSettings={handleUpdateAppSettings}

@@ -127,7 +127,7 @@ export default function TransactionForm({ onAdd, onCancel, initialData = null, i
                             className=""
                             style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         >
-                            {brokers.map(b => (
+                            {brokers.map((b: string) => (
                                 <option key={b} value={b} style={{ background: '#111' }}>{b}</option>
                             ))}
                         </select>

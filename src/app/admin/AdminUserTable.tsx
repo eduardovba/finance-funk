@@ -5,8 +5,8 @@ import { toggleAdminAction, removeUserAction } from './actions';
 import { Shield, ShieldOff, Trash2 } from 'lucide-react';
 import styles from './admin.module.css';
 
-export default function AdminUserTable({ users, currentUserId, isSuperAdmin }) {
-    const [confirmAction, setConfirmAction] = useState(null); // { type, user }
+export default function AdminUserTable({ users, currentUserId, isSuperAdmin }: any) {
+    const [confirmAction, setConfirmAction] = useState<any>(null); // { type, user }
     const [loading, setLoading] = useState(false);
 
     const handleConfirm = async () => {
@@ -27,7 +27,7 @@ export default function AdminUserTable({ users, currentUserId, isSuperAdmin }) {
         setConfirmAction(null);
     };
 
-    const isSelf = (user) => String(user.id) === String(currentUserId);
+    const isSelf = (user: any) => String(user.id) === String(currentUserId);
 
     return (
         <>
@@ -48,7 +48,7 @@ export default function AdminUserTable({ users, currentUserId, isSuperAdmin }) {
                                 <td colSpan={5} className={styles.emptyState}>No users found.</td>
                             </tr>
                         )}
-                        {users.map(user => (
+                        {users.map((user: any) => (
                             <tr key={user.id}>
                                 <td>
                                     <div className={styles.userCell}>

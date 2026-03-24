@@ -10,9 +10,9 @@ export const normalizeTransactions = (
         funds = [], // from Real Estate funds or Fixed Income
         fixedIncome = [], // from manual bank/fixed income
         realEstate = null // real estate object
-    },
-    rates = { GBP: 1, BRL: 1, USD: 1 },
-    fxHistory = {}
+    }: any,
+    rates: any = { GBP: 1, BRL: 1, USD: 1 },
+    fxHistory: any = {}
 ) => {
     let all = [];
 

@@ -8,28 +8,28 @@ const currentYear = TODAY.getFullYear();
 const currentMonth = TODAY.getMonth() + 1; // 1-12
 
 // Helper to format date strings 'YYYY-MM-DD'
-const d = (monthsAgo) => {
+const d = (monthsAgo: number) => {
     const date = new Date(TODAY);
     date.setMonth(date.getMonth() - monthsAgo);
     return date.toISOString().split('T')[0];
 };
 
 // Helper for 'YYYY-MM'
-const m = (monthsAgo) => {
+const m = (monthsAgo: number) => {
     const date = new Date(TODAY);
     date.setMonth(date.getMonth() - monthsAgo);
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 };
 
 // ── Deterministic pseudo-random using a sine-based hash ──
-const sineRand = (seed) => {
+const sineRand = (seed: number) => {
     const x = Math.sin(seed * 9301 + 49297) * 49297;
     return x - Math.floor(x); // 0..1
 };
 
 // ── Generate 36 months of FX history ──
 const generateFxHistory = () => {
-    const history = {};
+    const history: Record<string, any> = {};
     for (let i = 36; i >= 0; i--) {
         const t = (36 - i) / 36;
         history[m(i)] = {
@@ -285,7 +285,7 @@ export default {
     ],
 
     budgetTransactions: (() => {
-        const txns = [];
+        const txns: any[] = [];
         let id = 1;
         const now = new Date();
 
@@ -363,7 +363,7 @@ export default {
                     const amount = pattern.catId === 1 || pattern.catId === 7
                         ? baseAmount // rent & subscriptions are fixed
                         : Math.round(baseAmount * seasonalMult);
-                    const descList = descriptions[pattern.catId] || ['Expense'];
+                    const descList = (descriptions as any)[pattern.catId] || ['Expense'];
 
                     txns.push({
                         id: id++, user_id: 0, category_id: pattern.catId,
@@ -441,7 +441,7 @@ export default {
     // Each asset class has INDEPENDENT growth dynamics with dramatic peaks/troughs.
     // Scaled so final net worth ≈ £1.8M GBP / R$12.8M.
     get historicalSnapshots() {
-        const snapshots = [];
+        const snapshots: any[] = [];
         const fxHist = generateFxHistory();
 
         // Starting values (GBP) at month -36
@@ -647,7 +647,7 @@ export default {
 
             catKeys.forEach(k => {
                 const raw = s.categories[k] || 0;
-                const target = targetCats[k];
+                const target = (targetCats as Record<string, number>)[k];
                 if (raw > 0 && target > 0) {
                     const factor = 1 + t * ((target / raw) - 1);
                     s.categories[k] = Math.round(s.categories[k] * factor);

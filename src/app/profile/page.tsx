@@ -16,11 +16,11 @@ import { SUPPORTED_CURRENCIES } from '@/lib/currency';
 import { usePortfolio } from '@/context/PortfolioContext';
 
 /* ─── Avatar with fallback ─── */
-function ProfileAvatar({ src, name, size = 96 }) {
+function ProfileAvatar({ src, name, size = 96 }: any) {
     const [imgError, setImgError] = useState(false);
     const initials = (name || '?')
         .split(' ')
-        .map(w => w[0])
+        .map((w: string) => w[0])
         .join('')
         .toUpperCase()
         .slice(0, 2);
@@ -48,7 +48,7 @@ function ProfileAvatar({ src, name, size = 96 }) {
 }
 
 /* ─── Inline editable name ─── */
-function EditableName({ value, onSave }) {
+function EditableName({ value, onSave }: any) {
     const [editing, setEditing] = useState(false);
     const [draft, setDraft] = useState(value);
     const [saving, setSaving] = useState(false);
@@ -116,7 +116,7 @@ function EditableName({ value, onSave }) {
 }
 
 /* ─── Section Card Wrapper ─── */
-function SectionCard({ title, icon: Icon, children, className = '', variant = 'default' }) {
+function SectionCard({ title, icon: Icon, children, className = '', variant = 'default' }: any) {
     const borderColor = variant === 'danger' ? 'border-red-500/20' : 'border-white/5';
     const iconBg = variant === 'danger' ? 'bg-red-500/10' : 'bg-[#D4AF37]/10';
     const iconColor = variant === 'danger' ? 'text-red-400' : 'text-[#D4AF37]';
@@ -153,7 +153,7 @@ function PasswordChangeForm() {
     const [success, setSuccess] = useState('');
     const [saving, setSaving] = useState(false);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: any) => {
         e.preventDefault();
         setError('');
         setSuccess('');
@@ -258,14 +258,14 @@ function PasswordChangeForm() {
 }
 
 /* ─── Currency Select Dropdown ─── */
-function CurrencySelect({ label, value, onChange }) {
+function CurrencySelect({ label, value, onChange }: any) {
     const [open, setOpen] = useState(false);
-    const ref = useRef(null);
+    const ref = useRef<any>(null);
     const currencies = Object.values(SUPPORTED_CURRENCIES);
-    const selected = SUPPORTED_CURRENCIES[value];
+    const selected = (SUPPORTED_CURRENCIES as any)[value];
 
     useEffect(() => {
-        const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+        const handler = (e: any) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, []);
@@ -313,19 +313,16 @@ function CurrencySelect({ label, value, onChange }) {
 }
 
 /* ─── Background Select Dropdown ─── */
-function BackgroundSelect({ label, value, onChange }) {
+function BackgroundSelect({ label, value, onChange }: any) {
     const [open, setOpen] = useState(false);
-    const ref = useRef(null);
+    const ref = useRef<any>(null);
     
     const backgrounds = [
         { id: 'collection', name: 'Collection' },
         { id: 'concretely-funky', name: 'Concretely Funky' },
-        { id: 'copper-rise', name: 'Copper Rise' },
-        { id: 'creamy-linen', name: 'Creamy Linen' },
         { id: 'crystal-of-groove', name: 'Crystal of Groove' },
         { id: 'envelope-of-funk-light', name: 'Envelope of Funk Light' },
-        { id: 'envelope-of-funk', name: 'Envelope of Funk' },
-        { id: 'frosted-funk', name: 'Frosted Funk' },
+        { id: 'envelope-of-groove', name: 'Envelope of Groove' },
         { id: 'frosted-glass', name: 'Frosted Glass' },
         { id: 'funky-ledger', name: 'Funky Ledger' },
         { id: 'groove-vault', name: 'Groove Vault' },
@@ -333,6 +330,7 @@ function BackgroundSelect({ label, value, onChange }) {
         { id: 'linen-funk', name: 'Linen Funk' },
         { id: 'lux-swing', name: 'Lux Swing' },
         { id: 'mosaic-dance', name: 'Mosaic Dance' },
+        { id: 'neon-slap', name: 'Neon Slap' },
         { id: 'type-f', name: 'Type F' },
         { id: 'velvet-medal', name: 'Velvet Medal' },
         { id: 'vinyl-voyage', name: 'Vinyl Voyage' },
@@ -342,7 +340,7 @@ function BackgroundSelect({ label, value, onChange }) {
     const selected = backgrounds.find(b => b.id === value) || backgrounds.find(b => b.id === 'vinyl-voyage');
 
     useEffect(() => {
-        const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+        const handler = (e: any) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, []);
@@ -354,7 +352,7 @@ function BackgroundSelect({ label, value, onChange }) {
                 onClick={() => setOpen(!open)}
                 className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 hover:border-[#D4AF37]/30 transition-colors"
             >
-                <span className="text-sm text-parchment font-space">{selected.name}</span>
+                <span className="text-sm text-parchment font-space">{selected?.name}</span>
                 <ChevronDown size={14} className={`text-parchment/30 transition-transform ${open ? 'rotate-180' : ''}`} />
             </button>
 
@@ -372,7 +370,7 @@ function BackgroundSelect({ label, value, onChange }) {
                                     key={b.id}
                                     onClick={() => { onChange(b.id); setOpen(false); }}
                                     className={`w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/5 transition-colors
-                                        ${b.id === selected.id ? 'bg-[#D4AF37]/10 text-[#D4AF37]' : 'text-parchment'}`}
+                                        ${b.id === selected?.id ? 'bg-[#D4AF37]/10 text-[#D4AF37]' : 'text-parchment'}`}
                                 >
                                     <span className="text-sm font-space font-medium">{b.name}</span>
                                 </button>
@@ -386,7 +384,7 @@ function BackgroundSelect({ label, value, onChange }) {
 }
 
 /* ─── Delete Account Confirmation Modal ─── */
-function DeleteAccountModal({ isOpen, onClose, onConfirm }) {
+function DeleteAccountModal({ isOpen, onClose, onConfirm }: any) {
     const [input, setInput] = useState('');
     const [deleting, setDeleting] = useState(false);
 
@@ -472,7 +470,7 @@ export default function ProfilePage() {
     const { data: session, update: updateSession } = useSession();
     const { appSettings, handleUpdateAppSettings, resetFtue } = usePortfolio();
     const router = useRouter();
-    const [profile, setProfile] = useState(null);
+    const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [exporting, setExporting] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -496,7 +494,7 @@ export default function ProfilePage() {
         }
     };
 
-    const handleUpdateName = async (name) => {
+    const handleUpdateName = async (name: string) => {
         const res = await fetch('/api/user/profile', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -508,7 +506,7 @@ export default function ProfilePage() {
         await updateSession({ name: updated.name });
     };
 
-    const handleCurrencyChange = async (field, value) => {
+    const handleCurrencyChange = async (field: string, value: string) => {
         const body = field === 'primary'
             ? { primaryCurrency: value }
             : { secondaryCurrency: value };
@@ -528,7 +526,7 @@ export default function ProfilePage() {
         }
     };
 
-    const handleBackgroundChange = async (value) => {
+    const handleBackgroundChange = async (value: string) => {
         handleUpdateAppSettings({ ...appSettings, backgroundSelection: value });
     };
 
@@ -680,12 +678,12 @@ export default function ProfilePage() {
                             <CurrencySelect
                                 label="Primary Currency"
                                 value={currencyPrefs.primary}
-                                onChange={(v) => handleCurrencyChange('primary', v)}
+                                onChange={(v: string) => handleCurrencyChange('primary', v)}
                             />
                             <CurrencySelect
                                 label="Secondary Currency"
                                 value={currencyPrefs.secondary}
-                                onChange={(v) => handleCurrencyChange('secondary', v)}
+                                onChange={(v: string) => handleCurrencyChange('secondary', v)}
                             />
                             <BackgroundSelect
                                 label="App Background"

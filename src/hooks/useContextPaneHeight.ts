@@ -10,8 +10,8 @@ import { useState, useEffect } from 'react';
  * @param {string} heroId     - DOM id of the hero header card
  * @returns {number|undefined} height in pixels
  */
-export default function useContextPaneHeight(sectionId, heroId) {
-    const [paneHeight, setPaneHeight] = useState(undefined);
+export default function useContextPaneHeight(sectionId: string, heroId: string) {
+    const [paneHeight, setPaneHeight] = useState<number | undefined>(undefined);
 
     useEffect(() => {
         const measure = () => {

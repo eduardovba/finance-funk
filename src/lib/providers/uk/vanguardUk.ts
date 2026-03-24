@@ -34,26 +34,26 @@ export const vanguardUk = {
         'Download the file',
     ],
 
-    detect(headers) {
+    detect(headers: any[]) {
         const score = matchHeaderPatterns(headers, REQUIRED_HEADERS);
         // Boost confidence if "Vanguard" appears in any header or row
         return score;
     },
 
-    parse(headers, rows, options = {}) {
+    parse(headers: any[], rows: any[], options: any = {}) {
         const { defaultCurrency = 'GBP' } = options;
         const transactions = [];
         const summary = { total: rows.length, skipped: 0, assetClasses: new Set() };
 
         // Find the right header names (Vanguard may vary slightly)
-        const findCol = (row, patterns) => {
+        const findCol = (row: any, patterns: any[]) => {
             for (const key of Object.keys(row)) {
                 if (patterns.some(p => p.test(key))) return row[key];
             }
             return undefined;
         };
 
-        for (const row of rows) {
+        for (const row of rows as any[]) {
             const dateStr = findCol(row, [/^date$/i]) || '';
             const date = normalizeDate(dateStr);
             if (!date) { summary.skipped++; continue; }
@@ -91,7 +91,7 @@ export const vanguardUk = {
             });
         }
 
-        summary.assetClasses = [...summary.assetClasses];
+        summary.assetClasses = [...summary.assetClasses] as any;
         return { transactions, summary };
     },
 };

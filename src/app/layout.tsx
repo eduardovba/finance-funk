@@ -47,7 +47,7 @@ export const viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${bebasNeue.variable} ${spaceMono.variable}`}>
       <body className={`bg-midnight text-parchment antialiased font-sans min-h-screen`}>

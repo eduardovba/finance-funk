@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache';
 /**
  * Toggle admin status for a user (super-admin only).
  */
-export async function toggleAdminAction(userId, newIsAdmin) {
+export async function toggleAdminAction(userId: any, newIsAdmin: boolean) {
     await requireSuperAdmin();
     // Prevent self-demotion
     const caller = await requireAdmin();
@@ -22,7 +22,7 @@ export async function toggleAdminAction(userId, newIsAdmin) {
 /**
  * Soft-delete a user (any admin can do this, but not self).
  */
-export async function removeUserAction(userId) {
+export async function removeUserAction(userId: any) {
     const caller = await requireAdmin();
     if (String(userId) === String(caller.id)) {
         return { error: 'You cannot delete yourself.' };
