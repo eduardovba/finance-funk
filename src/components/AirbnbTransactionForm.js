@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import CurrencySelector from './CurrencySelector';
 import { SUPPORTED_CURRENCIES } from '@/lib/currency';
+import { Card } from '@/components/ui/card';
 
 export default function AirbnbTransactionForm({ onAdd, onCancel }) {
     const [formData, setFormData] = useState(() => {
@@ -38,40 +39,27 @@ export default function AirbnbTransactionForm({ onAdd, onCancel }) {
     };
 
     return (
-        <div className="glass-card" style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 1000,
-            width: '100%',
-            maxWidth: '450px',
-            padding: '32px',
-            border: '1px solid var(--glass-border)',
-            boxShadow: '0 24px 48px rgba(0,0,0,0.5)'
-        }}>
-            <h2 style={{ marginBottom: '24px' }}>Add Airbnb Transaction</h2>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <Card variant="flat" className="w-full p-8" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1000, maxWidth: '450px', border: '1px solid var(--glass-border)', boxShadow: '0 24px 48px rgba(0,0,0,0.5)' }}>
+            <h2 className="mb-6">Add Airbnb Transaction</h2>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Month (e.g. Feb-26)</label>
+                        <label className="block mb-2" style={{ fontSize: '0.8rem', color: 'white' }}>Month (e.g. Feb-26)</label>
                         <input
                             type="text"
                             value={formData.month}
                             onChange={(e) => setFormData({ ...formData, month: e.target.value })}
-                            className="glass-card"
                             placeholder="MMM-YY"
                             required
-                            style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
+                            className="w-full p-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         />
                     </div>
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Type</label>
+                        <label className="block mb-2" style={{ fontSize: '0.8rem', color: 'white' }}>Type</label>
                         <select
                             value={formData.type}
                             onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                            className="glass-card"
-                            style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
+                            className="w-full p-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         >
                             <option value="Revenue" style={{ background: '#111' }}>Revenue</option>
                             <option value="Cost" style={{ background: '#111' }}>Cost</option>
@@ -79,9 +67,9 @@ export default function AirbnbTransactionForm({ onAdd, onCancel }) {
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: '16px', alignItems: 'end' }}>
+                <div className="grid gap-4" style={{ gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', alignItems: 'end' }}>
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Amount ({currencySymbol})</label>
+                        <label className="block mb-2" style={{ fontSize: '0.8rem', color: 'white' }}>Amount ({currencySymbol})</label>
                         <input
                             type="number"
                             step="0.01"
@@ -89,8 +77,7 @@ export default function AirbnbTransactionForm({ onAdd, onCancel }) {
                             onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                             placeholder="0.00"
                             required
-                            className="glass-card"
-                            style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
+                            className="w-full p-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         />
                     </div>
                     <div>
@@ -103,12 +90,11 @@ export default function AirbnbTransactionForm({ onAdd, onCancel }) {
 
                 {formData.type === 'Cost' && (
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Cost Type</label>
+                        <label className="block mb-2" style={{ fontSize: '0.8rem', color: 'white' }}>Cost Type</label>
                         <select
                             value={formData.costType}
                             onChange={(e) => setFormData({ ...formData, costType: e.target.value })}
-                            className="glass-card"
-                            style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
+                            className="w-full p-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         >
                             <option value="Maintenance" style={{ background: '#111' }}>Maintenance</option>
                             <option value="Utilities" style={{ background: '#111' }}>Utilities</option>
@@ -121,30 +107,21 @@ export default function AirbnbTransactionForm({ onAdd, onCancel }) {
                 )}
 
                 <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Notes</label>
+                    <label className="block mb-2" style={{ fontSize: '0.8rem', color: 'white' }}>Notes</label>
                     <input
                         type="text"
                         value={formData.notes}
                         onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                        className="glass-card"
                         placeholder="Optional notes"
-                        style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
+                        className="w-full p-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                     />
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+                <div className="flex gap-3 mt-3">
                     <button type="submit" className="btn-primary" style={{ flex: 1 }}>Add Transaction</button>
-                    <button type="button" onClick={onCancel} style={{
-                        flex: 1,
-                        padding: '12px 24px',
-                        borderRadius: '12px',
-                        border: '1px solid var(--glass-border)',
-                        background: 'transparent',
-                        color: '#94a3b8',
-                        cursor: 'pointer'
-                    }}>Cancel</button>
+                    <button type="button" onClick={onCancel} className="rounded-xl cursor-pointer" style={{ flex: 1, padding: '12px 24px', border: '1px solid var(--glass-border)', background: 'transparent', color: '#94a3b8' }}>Cancel</button>
                 </div>
             </form>
-        </div>
+        </Card>
     );
 }

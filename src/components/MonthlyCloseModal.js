@@ -11,6 +11,7 @@ import {
     getDebtSummary
 } from '../lib/portfolioUtils';
 import { normalizeTransactions, calculateMonthlyIncome, calculateMonthlyInvestments } from '../lib/ledgerUtils';
+import { Card } from '@/components/ui/card';
 
 export default function MonthlyCloseModal({
     isOpen,
@@ -161,43 +162,24 @@ export default function MonthlyCloseModal({
     ];
 
     return (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }} onClick={onClose} />
+        <div className="flex items-center justify-center p-5" style={{ position: 'fixed', inset: 0, zIndex: 1000 }}>
+            <div className="absolute" style={{ inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }} onClick={onClose} />
 
-            <div className="glass-card" style={{
-                position: 'relative',
-                width: '100%',
-                maxWidth: '1080px',
-                padding: '0',
-                border: '1px solid var(--glass-border)',
-                maxHeight: '94vh',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column',
-                boxShadow: '0 0 50px rgba(0,0,0,0.5), 0 0 100px rgba(212,175,55,0.05)'
-            }}>
+            <Card variant="elevated" className="relative w-full overflow-hidden flex flex-col" style={{ maxWidth: '1080px', padding: '0', border: '1px solid var(--glass-border)', maxHeight: '94vh', boxShadow: '0 0 50px rgba(0,0,0,0.5), 0 0 100px rgba(212,175,55,0.05)' }}>
                 {/* Header */}
-                <header style={{ padding: '24px 32px', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
+                <header className="flex justify-between items-center" style={{ padding: '24px 32px', borderBottom: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.02)' }}>
                     <div>
                         <h2 className="text-gradient" style={{ fontSize: '1.8rem', margin: 0 }}>Monthly Close Review</h2>
                         <p style={{ color: 'var(--fg-secondary)', fontSize: '0.8rem', margin: '4px 0 0 0' }}>Review and verify your financial status for the month.</p>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <div style={{ textAlign: 'right' }}>
-                            <label style={{ display: 'block', color: 'var(--fg-secondary)', fontSize: '0.65rem', textTransform: 'uppercase', marginBottom: '4px' }}>Close Month</label>
+                    <div className="flex items-center gap-4">
+                        <div className="text-right">
+                            <label className="block text-[0.65rem] uppercase mb-1" style={{ color: 'var(--fg-secondary)' }}>Close Month</label>
                             <input
                                 type="month"
                                 value={selectedMonth}
                                 onChange={(e) => setSelectedMonth(e.target.value)}
-                                style={{
-                                    background: 'rgba(0,0,0,0.3)',
-                                    border: '1px solid var(--glass-border)',
-                                    borderRadius: '6px',
-                                    padding: '6px 12px',
-                                    color: 'var(--fg-primary)',
-                                    fontSize: '0.9rem',
-                                    outline: 'none'
-                                }}
+                                className="rounded-lg text-[0.9rem]" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--glass-border)', padding: '6px 12px', color: 'var(--fg-primary)', outline: 'none' }}
                             />
                         </div>
                         <Button variant="ghost" size="sm" onClick={onClose} className="rounded-full w-8 h-8 p-0">✕</Button>
@@ -205,21 +187,21 @@ export default function MonthlyCloseModal({
                 </header>
 
                 {/* Content Body */}
-                <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', flex: 1, overflow: 'hidden' }}>
+                <div className="grid overflow-hidden" style={{ gridTemplateColumns: '380px 1fr', flex: 1 }}>
 
                     {/* Left Sidebar: High Level Metrics */}
-                    <aside style={{ borderRight: '1px solid var(--glass-border)', padding: '32px', background: 'rgba(0,0,0,0.2)', overflowY: 'auto' }}>
+                    <aside className="p-8 overflow-y-auto" style={{ borderRight: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.2)' }}>
 
                         {/* Net Worth Hero */}
-                        <div style={{ marginBottom: '40px' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--fg-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Consolidated Net Worth</div>
+                        <div className="mb-10">
+                            <div className="uppercase tracking-[1px] mb-4" style={{ fontSize: '0.7rem', color: 'var(--fg-secondary)' }}>Consolidated Net Worth</div>
 
-                            <div style={{ marginBottom: '24px' }}>
-                                <div style={{ fontSize: '2.4rem', fontWeight: '800', color: 'var(--accent-color)', fontFamily: 'var(--font-bebas)', letterSpacing: '1px' }}>
+                            <div className="mb-6">
+                                <div className="tracking-[1px]" style={{ fontSize: '2.4rem', fontWeight: '800', color: 'var(--accent-color)', fontFamily: 'var(--font-bebas)' }}>
                                     {primaryMeta?.symbol} {(snapshotData.networthPrimary || 0).toLocaleString(primaryMeta?.locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
-                                    <span style={{ fontSize: '1.1rem', fontWeight: '700', color: snapshotData.diffPrimary >= 0 ? '#10b981' : '#ef4444' }}>
+                                <div className="flex items-center gap-3 mt-1">
+                                    <span className="text-lg" style={{ fontWeight: '700', color: snapshotData.diffPrimary >= 0 ? '#10b981' : '#ef4444' }}>
                                         {snapshotData.diffPrimary >= 0 ? '+' : ''}{snapshotData.percPrimary.toFixed(1)}%
                                     </span>
                                     <span style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>
@@ -228,9 +210,9 @@ export default function MonthlyCloseModal({
                                 </div>
                             </div>
 
-                            <div style={{ padding: '16px', borderRadius: '12px', background: 'rgba(139, 92, 246, 0.05)', border: '1px solid rgba(139, 92, 246, 0.1)' }}>
-                                <div style={{ fontSize: '0.65rem', color: 'rgba(139, 92, 246, 0.8)', textTransform: 'uppercase', marginBottom: '4px' }}>{secondaryCurrency} Reference</div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                            <div className="p-4 rounded-xl" style={{ background: 'rgba(139, 92, 246, 0.05)', border: '1px solid rgba(139, 92, 246, 0.1)' }}>
+                                <div className="text-[0.65rem] uppercase mb-1" style={{ color: 'rgba(139, 92, 246, 0.8)' }}>{secondaryCurrency} Reference</div>
+                                <div className="flex justify-between" style={{ alignItems: 'baseline' }}>
                                     <div style={{ fontSize: '1.4rem', fontWeight: '700', color: '#a78bfa', fontFamily: 'var(--font-bebas)' }}>
                                         {secondaryMeta?.symbol} {(snapshotData.networthSecondary || 0).toLocaleString(secondaryMeta?.locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                     </div>
@@ -242,38 +224,38 @@ export default function MonthlyCloseModal({
                         </div>
 
                         {/* Income & Investment Mini Cards */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '40px' }}>
-                            <div style={{ padding: '20px', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0) 100%)', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                    <span style={{ fontSize: '0.7rem', color: '#10b981', textTransform: 'uppercase' }}>Monthly Income</span>
+                        <div className="flex flex-col gap-4 mb-10">
+                            <div className="p-5 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0) 100%)', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="uppercase" style={{ fontSize: '0.7rem', color: '#10b981' }}>Monthly Income</span>
                                     <span style={{ fontSize: '1.2rem', fontWeight: '700', color: '#10b981' }}>{primaryMeta?.symbol}{(toPrimary(snapshotData.income?.total || 0, 'GBP')).toLocaleString(primaryMeta?.locale, { maximumFractionDigits: 0 })}</span>
                                 </div>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)' }}>From salary, real estate and dividends.</div>
+                                <div className="text-xs" style={{ color: 'var(--fg-secondary)' }}>From salary, real estate and dividends.</div>
                             </div>
 
-                            <div style={{ padding: '20px', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0) 100%)', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                    <span style={{ fontSize: '0.7rem', color: '#3b82f6', textTransform: 'uppercase' }}>New Investments</span>
+                            <div className="p-5 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0) 100%)', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="uppercase" style={{ fontSize: '0.7rem', color: '#3b82f6' }}>New Investments</span>
                                     <span style={{ fontSize: '1.2rem', fontWeight: '700', color: '#3b82f6' }}>{primaryMeta?.symbol}{(toPrimary(snapshotData.investment?.total || 0, 'GBP')).toLocaleString(primaryMeta?.locale, { maximumFractionDigits: 0 })}</span>
                                 </div>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)' }}>Capital deployed this month.</div>
+                                <div className="text-xs" style={{ color: 'var(--fg-secondary)' }}>Capital deployed this month.</div>
                             </div>
                         </div>
 
                         {/* Checklist Section */}
                         <div>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--fg-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Data Verification</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem' }}>
-                                    <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#10b981', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>✓</div>
+                            <div className="uppercase tracking-[1px] mb-4" style={{ fontSize: '0.7rem', color: 'var(--fg-secondary)' }}>Data Verification</div>
+                            <div className="flex flex-col gap-3">
+                                <div className="flex items-center gap-2.5" style={{ fontSize: '0.85rem' }}>
+                                    <div className="flex items-center justify-center text-[10px]" style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#10b981', color: '#000' }}>✓</div>
                                     <span>FX Rates Synced (Live)</span>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem' }}>
-                                    <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#10b981', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>✓</div>
+                                <div className="flex items-center gap-2.5" style={{ fontSize: '0.85rem' }}>
+                                    <div className="flex items-center justify-center text-[10px]" style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#10b981', color: '#000' }}>✓</div>
                                     <span>Market Prices Updated</span>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem' }}>
-                                    <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: (snapshotData.income?.total > 0) ? '#10b981' : '#f59e0b', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>
+                                <div className="flex items-center gap-2.5" style={{ fontSize: '0.85rem' }}>
+                                    <div className="flex items-center justify-center text-[10px]" style={{ width: '18px', height: '18px', borderRadius: '50%', background: (snapshotData.income?.total > 0) ? '#10b981' : '#f59e0b', color: '#000' }}>
                                         {(snapshotData.income?.total > 0) ? '✓' : '!'}
                                     </div>
                                     <span>Income Data Registered</span>
@@ -283,52 +265,48 @@ export default function MonthlyCloseModal({
                     </aside>
 
                     {/* Main Content Area: Category Details */}
-                    <main style={{ padding: '32px', overflowY: 'auto', background: 'rgba(255,255,255,0.01)' }}>
-                        <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--fg-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Asset Category Breakdown</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)' }}>Values in {primaryMeta?.symbol} (Master Currency)</div>
+                    <main className="p-8 overflow-y-auto" style={{ background: 'rgba(255,255,255,0.01)' }}>
+                        <div className="mb-6 flex justify-between items-end">
+                            <div className="uppercase tracking-[1px]" style={{ fontSize: '0.7rem', color: 'var(--fg-secondary)' }}>Asset Category Breakdown</div>
+                            <div className="text-xs" style={{ color: 'var(--fg-secondary)' }}>Values in {primaryMeta?.symbol} (Master Currency)</div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                        <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
                             {categoriesList.map(cat => (
-                                <div key={cat.id} className="glass-card" style={{ padding: '20px', border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.02)' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                                <div key={cat.id} className="p-5" style={{ border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.02)' }}>
+                                    <div className="flex justify-between items-start mb-4">
                                         <div>
                                             <span style={{ fontSize: '0.85rem', fontWeight: '600', color: cat.color }}>{cat.label}</span>
-                                            <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                <span style={{
-                                                    fontSize: '0.75rem',
-                                                    fontWeight: '700',
-                                                    color: (snapshotData.categoryDiffs?.[cat.id] || 0) >= 0 ? 'var(--vu-green)' : 'var(--error)'
-                                                }}>
+                                            <div className="mt-1 flex items-center gap-1.5">
+                                                <span className="text-xs" style={{ fontWeight: '700', color: (snapshotData.categoryDiffs?.[cat.id] || 0) >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                                     {(snapshotData.categoryDiffs?.[cat.id] || 0) >= 0 ? '+' : ''}
                                                     {snapshotData.categoryPercs?.[cat.id]?.toFixed(1)}%
                                                 </span>
-                                                <span style={{ fontSize: '0.65rem', color: 'var(--fg-secondary)', opacity: 0.7 }}>
+                                                <span className="text-[0.65rem] opacity-70" style={{ color: 'var(--fg-secondary)' }}>
                                                     ({(snapshotData.categoryDiffs?.[cat.id] || 0) >= 0 ? '+' : '-'}
                                                     {primaryMeta?.symbol}{Math.abs(toPrimary(snapshotData.categoryDiffs?.[cat.id] || 0, 'BRL')).toLocaleString(primaryMeta?.locale, { maximumFractionDigits: 0 })})
                                                 </span>
                                             </div>
                                         </div>
-                                        <span style={{ fontSize: '1.2rem', fontWeight: '800', fontFamily: 'var(--font-bebas)', letterSpacing: '0.5px' }}>
+                                        <span className="tracking-[0.5px]" style={{ fontSize: '1.2rem', fontWeight: '800', fontFamily: 'var(--font-bebas)' }}>
                                             {primaryMeta?.symbol}{(snapshotData.categories?.[cat.id] || 0).toLocaleString(primaryMeta?.locale, { maximumFractionDigits: 0 })}
                                         </span>
                                     </div>
 
                                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '12px' }}>
-                                        <div style={{ fontSize: '0.65rem', color: 'var(--fg-secondary)', textTransform: 'uppercase', marginBottom: '8px', opacity: 0.6 }}>Top Contributors</div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <div className="text-[0.65rem] uppercase mb-2" style={{ color: 'var(--fg-secondary)', opacity: 0.6 }}>Top Contributors</div>
+                                        <div className="flex flex-col gap-2">
                                             {(snapshotData.assetDetails?.[cat.id.toLowerCase().replace('fixedincome', 'fixed-income').replace('realestate', 'real-estate')] || [])
                                                 .sort((a, b) => b.gbp - a.gbp)
                                                 .slice(0, 3)
                                                 .map((asset, idx) => (
-                                                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                                                        <span style={{ color: 'var(--fg-primary)', opacity: 0.8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>{asset.name}</span>
-                                                        <span style={{ color: 'var(--fg-secondary)', fontFamily: 'var(--font-space tabular-nums)', fontSize: '0.75rem' }}>{primaryMeta?.symbol}{asset.brl?.toLocaleString(primaryMeta?.locale, { maximumFractionDigits: 0 })}</span>
+                                                    <div key={idx} className="flex justify-between" style={{ fontSize: '0.8rem' }}>
+                                                        <span className="whitespace-nowrap overflow-hidden" style={{ color: 'var(--fg-primary)', opacity: 0.8, textOverflow: 'ellipsis', maxWidth: '140px' }}>{asset.name}</span>
+                                                        <span className="text-xs" style={{ color: 'var(--fg-secondary)', fontFamily: 'var(--font-space tabular-nums)' }}>{primaryMeta?.symbol}{asset.brl?.toLocaleString(primaryMeta?.locale, { maximumFractionDigits: 0 })}</span>
                                                     </div>
                                                 ))}
                                             {(snapshotData.assetDetails?.[cat.id.toLowerCase().replace('fixedincome', 'fixed-income')]?.length === 0) && (
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)', opacity: 0.5, fontStyle: 'italic' }}>No assets found</div>
+                                                <div className="text-xs opacity-50" style={{ color: 'var(--fg-secondary)', fontStyle: 'italic' }}>No assets found</div>
                                             )}
                                         </div>
                                     </div>
@@ -337,25 +315,25 @@ export default function MonthlyCloseModal({
                         </div>
 
                         {/* Ledger Details at bottom */}
-                        <div style={{ marginTop: '40px', padding: '24px', borderRadius: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--glass-border)' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--fg-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px' }}>Historical Context</div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
+                        <div className="mt-10 p-6 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--glass-border)' }}>
+                            <div className="uppercase tracking-[1px] mb-5" style={{ fontSize: '0.7rem', color: 'var(--fg-secondary)' }}>Historical Context</div>
+                            <div className="grid gap-6" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
                                 <div>
-                                    <div style={{ fontSize: '0.65rem', color: 'var(--fg-secondary)', marginBottom: '4px' }}>Snapshot Count</div>
+                                    <div className="text-[0.65rem] mb-1" style={{ color: 'var(--fg-secondary)' }}>Snapshot Count</div>
                                     <div style={{ fontSize: '1.2rem', fontWeight: '600' }}>{historicalSnapshots.length}</div>
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: '0.65rem', color: 'var(--fg-secondary)', marginBottom: '4px' }}>Avg. Savings Rate</div>
+                                    <div className="text-[0.65rem] mb-1" style={{ color: 'var(--fg-secondary)' }}>Avg. Savings Rate</div>
                                     <div style={{ fontSize: '1.2rem', fontWeight: '600', color: '#10b981' }}>
                                         {((snapshotData.investment?.total / Math.max(1, snapshotData.income?.total)) * 100).toFixed(1)}%
                                     </div>
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: '0.65rem', color: 'var(--fg-secondary)', marginBottom: '4px' }}>FX (GBP/BRL)</div>
+                                    <div className="text-[0.65rem] mb-1" style={{ color: 'var(--fg-secondary)' }}>FX (GBP/BRL)</div>
                                     <div style={{ fontSize: '1.2rem', fontWeight: '600' }}>{activeRates?.BRL?.toFixed(2)}</div>
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: '0.65rem', color: 'var(--fg-secondary)', marginBottom: '4px' }}>Current Target</div>
+                                    <div className="text-[0.65rem] mb-1" style={{ color: 'var(--fg-secondary)' }}>Current Target</div>
                                     <div style={{ fontSize: '1.2rem', fontWeight: '600', color: 'var(--accent-color)' }}>
                                         {primaryMeta?.symbol}25M
                                     </div>
@@ -366,9 +344,9 @@ export default function MonthlyCloseModal({
                 </div>
 
                 {/* Footer Actions */}
-                <footer style={{ padding: '24px 32px', background: 'rgba(0,0,0,0.3)', borderTop: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
+                <footer className="flex justify-end gap-4" style={{ padding: '24px 32px', background: 'rgba(0,0,0,0.3)', borderTop: '1px solid var(--glass-border)' }}>
                     <Button variant="secondary" onClick={onClose}
-                        style={{ padding: '12px 24px', fontSize: '0.9rem', fontWeight: '600' }}>
+                        className="text-[0.9rem]" style={{ padding: '12px 24px', fontWeight: '600' }}>
                         Review Later
                     </Button>
                     <Button variant="primary" onClick={() => onRecord(snapshotData)}
@@ -376,7 +354,7 @@ export default function MonthlyCloseModal({
                         Confirm & Record Snapshot
                     </Button>
                 </footer>
-            </div>
+            </Card>
         </div>
     );
 }

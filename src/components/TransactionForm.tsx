@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui';
 import _CurrencySelector from './CurrencySelector';
+import { Card } from '@/components/ui/card';
 const CurrencySelector = _CurrencySelector as any;
 
 interface TransactionFormProps {
@@ -97,7 +98,7 @@ export default function TransactionForm({ onAdd, onCancel, initialData = null, i
         };
 
     return (
-        <div className={isDrawerMode ? "animate-in fade-in slide-in-from-right-4 duration-300 h-full flex flex-col" : "glass-card"} style={isDrawerMode ? {} : containerStyle}>
+        <div className={isDrawerMode ? "animate-in fade-in slide-in-from-right-4 duration-300 h-full flex flex-col" : ""} style={isDrawerMode ? {} : containerStyle}>
             {isDrawerMode ? (
                 <h4 className="font-bebas text-xl tracking-widest text-[#D4AF37] mb-6 flex-shrink-0">
                     {initialData ? 'EDIT TRANSACTION' : 'ADD TRANSACTION'}
@@ -114,7 +115,7 @@ export default function TransactionForm({ onAdd, onCancel, initialData = null, i
                             type="text"
                             value={formData.date}
                             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                            className="glass-card"
+                            className=""
                             style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         />
                     </div>
@@ -123,7 +124,7 @@ export default function TransactionForm({ onAdd, onCancel, initialData = null, i
                         <select
                             value={formData.broker}
                             onChange={(e) => setFormData({ ...formData, broker: e.target.value })}
-                            className="glass-card"
+                            className=""
                             style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         >
                             {brokers.map(b => (
@@ -142,7 +143,7 @@ export default function TransactionForm({ onAdd, onCancel, initialData = null, i
                             value={formData.investment}
                             onChange={(e) => setFormData({ ...formData, investment: e.target.value })}
                             placeholder="0.00"
-                            className="glass-card"
+                            className=""
                             style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         />
                     </div>
@@ -162,7 +163,7 @@ export default function TransactionForm({ onAdd, onCancel, initialData = null, i
                         value={formData.interest}
                         onChange={(e) => setFormData({ ...formData, interest: e.target.value })}
                         placeholder="0.00"
-                        className="glass-card"
+                        className=""
                         style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                     />
                 </div>

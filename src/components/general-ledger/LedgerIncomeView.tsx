@@ -72,31 +72,19 @@ export default function LedgerIncomeView({
             <div className="flex flex-col gap-8 w-full mt-2">
                 {/* Chart */}
                 <div id="ftue-income-chart" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                        <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'rgba(245,245,220,0.8)', fontWeight: 600, letterSpacing: '0.3px' }}>Monthly Income</h3>
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-lg font-semibold tracking-[0.3px]" style={{ margin: 0, color: 'rgba(245,245,220,0.8)' }}>Monthly Income</h3>
                         <div className="flex items-center gap-3">
-                            <span style={{ fontSize: '0.75rem', color: 'rgba(245,245,220,0.4)', letterSpacing: '0.3px' }}>Extraordinary</span>
+                            <span className="text-xs tracking-[0.3px]" style={{ color: 'rgba(245,245,220,0.4)' }}>Extraordinary</span>
                             <div
                                 onClick={() => setShowExtraordinary(!showExtraordinary)}
-                                style={{
-                                    width: '40px', height: '20px',
-                                    background: showExtraordinary ? '#D4AF37' : 'rgba(255,255,255,0.1)',
-                                    borderRadius: '10px', position: 'relative', cursor: 'pointer',
-                                    transition: 'all 0.3s ease',
-                                    boxShadow: showExtraordinary ? '0 0 12px rgba(212,175,55,0.3)' : 'none'
-                                }}
+                                className="rounded-xl relative cursor-pointer" style={{ width: '40px', height: '20px', background: showExtraordinary ? '#D4AF37' : 'rgba(255,255,255,0.1)', transition: 'all 0.3s ease', boxShadow: showExtraordinary ? '0 0 12px rgba(212,175,55,0.3)' : 'none' }}
                             >
-                                <div style={{
-                                    width: '16px', height: '16px',
-                                    background: showExtraordinary ? '#fff' : 'var(--fg-secondary)',
-                                    borderRadius: '50%', position: 'absolute', top: '2px',
-                                    left: showExtraordinary ? '22px' : '2px',
-                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                                }} />
+                                <div className="absolute" style={{ width: '16px', height: '16px', background: showExtraordinary ? '#fff' : 'var(--fg-secondary)', borderRadius: '50%', top: '2px', left: showExtraordinary ? '22px' : '2px', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }} />
                             </div>
                         </div>
                     </div>
-                    <div style={{ height: '400px', width: '100%' }}>
+                    <div className="w-full" style={{ height: '400px' }}>
                         <ResponsiveContainer>
                             <BarChart
                                 data={[...incomeData].reverse().map(d => {
@@ -138,35 +126,31 @@ export default function LedgerIncomeView({
                 </div>
 
                 {/* Revenue Ledger Accordion */}
-                <div id="ftue-income-table" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)]" style={{ overflow: 'hidden' }}>
+                <div id="ftue-income-table" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden">
                     <button
                         onClick={() => setShowLedgerTable(!showLedgerTable)}
-                        style={{
-                            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                            padding: '16px 20px', background: 'transparent', border: 'none', cursor: 'pointer',
-                            borderBottom: showLedgerTable ? '1px solid rgba(255,255,255,0.06)' : 'none', transition: 'all 0.2s ease',
-                        }}
+                        className="w-full flex items-center justify-between border-none cursor-pointer" style={{ padding: '16px 20px', background: 'transparent', borderBottom: showLedgerTable ? '1px solid rgba(255,255,255,0.06)' : 'none', transition: 'all 0.2s ease', }}
                     >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <span style={{ fontSize: '14px' }}>📋</span>
-                            <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(245,245,220,0.7)', letterSpacing: '0.3px' }}>Income Ledger</span>
-                            <span style={{ fontSize: '11px', color: 'rgba(245,245,220,0.3)', fontWeight: 400 }}>({incomeData.length} months)</span>
+                        <div className="flex items-center gap-2.5">
+                            <span className="text-sm">📋</span>
+                            <span className="text-[13px] font-semibold tracking-[0.3px]" style={{ color: 'rgba(245,245,220,0.7)' }}>Income Ledger</span>
+                            <span className="text-[11px] font-normal" style={{ color: 'rgba(245,245,220,0.3)' }}>({incomeData.length} months)</span>
                         </div>
-                        <span style={{ fontSize: '12px', color: 'rgba(245,245,220,0.35)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', transform: showLedgerTable ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block' }}>▼</span>
+                        <span className="text-xs inline-block" style={{ color: 'rgba(245,245,220,0.35)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', transform: showLedgerTable ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
                     </button>
 
                     <div style={{ maxHeight: showLedgerTable ? 'calc(100vh - 12rem)' : '0', overflow: showLedgerTable ? 'auto' : 'hidden', transition: 'max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <table className="w-full" style={{ borderCollapse: 'collapse' }}>
                             <thead className="sticky top-0 z-10" style={{ background: '#121418', backdropFilter: 'blur(10px)' }}>
                                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                                    <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(245,245,220,0.4)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Month</th>
-                                    <th style={{ padding: '16px', textAlign: 'right', color: '#3b82f6', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Salary</th>
-                                    <th style={{ padding: '16px', textAlign: 'right', color: '#D4AF37', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Extraordinary</th>
-                                    <th style={{ padding: '16px', textAlign: 'right', color: '#10b981', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Real Estate</th>
-                                    <th style={{ padding: '16px', textAlign: 'right', color: '#a855f7', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Equity</th>
-                                    <th style={{ padding: '16px', textAlign: 'right', color: '#f59e0b', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Interest</th>
-                                    <th style={{ padding: '16px', textAlign: 'right', color: '#fff', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>Total</th>
-                                    <th style={{ padding: '16px', textAlign: 'center', width: '60px' }}></th>
+                                    <th className="p-4 text-left text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: 'rgba(245,245,220,0.4)' }}>Month</th>
+                                    <th className="p-4 text-right text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: '#3b82f6' }}>Salary</th>
+                                    <th className="p-4 text-right text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: '#D4AF37' }}>Extraordinary</th>
+                                    <th className="p-4 text-right text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: '#10b981' }}>Real Estate</th>
+                                    <th className="p-4 text-right text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: '#a855f7' }}>Equity</th>
+                                    <th className="p-4 text-right text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: '#f59e0b' }}>Interest</th>
+                                    <th className="p-4 text-right text-[11px] uppercase tracking-[1px] font-bold" style={{ color: '#fff' }}>Total</th>
+                                    <th className="p-4 text-center" style={{ width: '60px' }}></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -176,15 +160,15 @@ export default function LedgerIncomeView({
                                     return (
                                         <tr key={`${d.month}-${d.isHistorical ? 'rec' : 'live'}`} style={isLiveRow ? highlightStyle : { borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                                             <td style={{ padding: '14px 16px', color: 'rgba(245,245,220,0.7)', fontWeight: isLiveRow ? 700 : 400 }}>
-                                                {formatMonthLabel(d.month)} {isLiveRow && <span style={{ fontSize: '0.65rem', background: '#D4AF37', color: '#000', padding: '2px 6px', borderRadius: '4px', marginLeft: '8px', fontWeight: 700 }}>LIVE</span>}
+                                                {formatMonthLabel(d.month)} {isLiveRow && <span className="text-[0.65rem] rounded ml-2 font-bold" style={{ background: '#D4AF37', color: '#000', padding: '2px 6px' }}>LIVE</span>}
                                             </td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right', color: 'rgba(245,245,220,0.5)', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(d.salary, 'GBP')}</td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right', color: 'rgba(245,245,220,0.5)', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(d.extraordinary, 'GBP')}</td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right', color: 'rgba(245,245,220,0.5)', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(d.realEstate, 'GBP')}</td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right', color: 'rgba(245,245,220,0.5)', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(d.equity, 'GBP')}</td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right', color: 'rgba(245,245,220,0.5)', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(d.fixedIncome, 'GBP')}</td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right', color: total >= 0 ? 'var(--vu-green)' : '#ef4444', fontWeight: 600, fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(total, 'GBP')}</td>
-                                            <td style={{ padding: '14px 8px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                                            <td className="text-right font-space text-[13px]" style={{ padding: '14px 16px', color: 'rgba(245,245,220,0.5)' }}>{formatCurrency(d.salary, 'GBP')}</td>
+                                            <td className="text-right font-space text-[13px]" style={{ padding: '14px 16px', color: 'rgba(245,245,220,0.5)' }}>{formatCurrency(d.extraordinary, 'GBP')}</td>
+                                            <td className="text-right font-space text-[13px]" style={{ padding: '14px 16px', color: 'rgba(245,245,220,0.5)' }}>{formatCurrency(d.realEstate, 'GBP')}</td>
+                                            <td className="text-right font-space text-[13px]" style={{ padding: '14px 16px', color: 'rgba(245,245,220,0.5)' }}>{formatCurrency(d.equity, 'GBP')}</td>
+                                            <td className="text-right font-space text-[13px]" style={{ padding: '14px 16px', color: 'rgba(245,245,220,0.5)' }}>{formatCurrency(d.fixedIncome, 'GBP')}</td>
+                                            <td className="text-right font-semibold font-space text-[13px]" style={{ padding: '14px 16px', color: total >= 0 ? 'var(--vu-green)' : '#ef4444' }}>{formatCurrency(total, 'GBP')}</td>
+                                            <td className="text-center whitespace-nowrap" style={{ padding: '14px 8px' }}>
                                                 {!isLiveRow && d.isHistorical && (
                                                     <>
                                                         <button onClick={() => handleEditClick('income', d.month, { salarySavings: d.salary, extraordinary: d.extraordinary, realEstate: d.realEstate, equity: d.equity, fixedIncome: d.fixedIncome })} style={{ ...actionBtnStyle, color: '#D4AF37' }} title="Edit">✏️</button>
@@ -197,17 +181,17 @@ export default function LedgerIncomeView({
                                 })}
                             </tbody>
                             <tfoot>
-                                <tr style={{ background: 'rgba(255,255,255,0.03)', fontWeight: 700 }}>
-                                    <td style={{ padding: '16px', color: 'rgba(245,245,220,0.6)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px' }}>TOTAL</td>
-                                    <td style={{ padding: '16px', textAlign: 'right', color: '#3b82f6', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(incomeData.reduce((acc, d) => acc + d.salary, 0), 'GBP')}</td>
-                                    <td style={{ padding: '16px', textAlign: 'right', color: '#D4AF37', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(incomeData.reduce((acc, d) => acc + (d.extraordinary || 0), 0), 'GBP')}</td>
-                                    <td style={{ padding: '16px', textAlign: 'right', color: '#10b981', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(incomeData.reduce((acc, d) => acc + d.realEstate, 0), 'GBP')}</td>
-                                    <td style={{ padding: '16px', textAlign: 'right', color: '#a855f7', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(incomeData.reduce((acc, d) => acc + d.equity, 0), 'GBP')}</td>
-                                    <td style={{ padding: '16px', textAlign: 'right', color: '#f59e0b', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(incomeData.reduce((acc, d) => acc + d.fixedIncome, 0), 'GBP')}</td>
-                                    <td style={{ padding: '16px', textAlign: 'right', color: incomeData.reduce((acc, d) => acc + d.salary + (d.extraordinary || 0) + d.realEstate + d.equity + d.fixedIncome, 0) >= 0 ? 'var(--vu-green)' : '#ef4444', fontFamily: 'monospace', fontSize: '13px' }}>
+                                <tr className="font-bold" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                                    <td className="p-4 text-[11px] uppercase tracking-[1px]" style={{ color: 'rgba(245,245,220,0.6)' }}>TOTAL</td>
+                                    <td className="p-4 text-right font-space text-[13px]" style={{ color: '#3b82f6' }}>{formatCurrency(incomeData.reduce((acc, d) => acc + d.salary, 0), 'GBP')}</td>
+                                    <td className="p-4 text-right font-space text-[13px]" style={{ color: '#D4AF37' }}>{formatCurrency(incomeData.reduce((acc, d) => acc + (d.extraordinary || 0), 0), 'GBP')}</td>
+                                    <td className="p-4 text-right font-space text-[13px]" style={{ color: '#10b981' }}>{formatCurrency(incomeData.reduce((acc, d) => acc + d.realEstate, 0), 'GBP')}</td>
+                                    <td className="p-4 text-right font-space text-[13px]" style={{ color: '#a855f7' }}>{formatCurrency(incomeData.reduce((acc, d) => acc + d.equity, 0), 'GBP')}</td>
+                                    <td className="p-4 text-right font-space text-[13px]" style={{ color: '#f59e0b' }}>{formatCurrency(incomeData.reduce((acc, d) => acc + d.fixedIncome, 0), 'GBP')}</td>
+                                    <td className="p-4 text-right font-space text-[13px]" style={{ color: incomeData.reduce((acc, d) => acc + d.salary + (d.extraordinary || 0) + d.realEstate + d.equity + d.fixedIncome, 0) >= 0 ? 'var(--vu-green)' : '#ef4444' }}>
                                         {formatCurrency(incomeData.reduce((acc, d) => acc + d.salary + (d.extraordinary || 0) + d.realEstate + d.equity + d.fixedIncome, 0), 'GBP')}
                                     </td>
-                                    <td style={{ padding: '16px' }}></td>
+                                    <td className="p-4"></td>
                                 </tr>
                             </tfoot>
                         </table>

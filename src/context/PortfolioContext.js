@@ -1,11 +1,23 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
+import { createContext, useContext, useEffect, useMemo, useCallback } from "react";
+import { useQueryClient } from '@tanstack/react-query';
 import { formatCurrency, convertCurrency, SUPPORTED_CURRENCIES, getFallbackRates } from '@/lib/currency';
 import useCurrencyStore from '@/stores/useCurrencyStore';
 import useUIStore from '@/stores/useUIStore';
 import useFTUEStore from '@/stores/useFTUEStore';
 import useSettingsStore from '@/stores/useSettingsStore';
+import usePortfolioStore from '@/stores/usePortfolioStore';
+import useMarketStore from '@/stores/useMarketStore';
+import {
+    useTransactionsQuery, useEquityTransactionsQuery, useCryptoTransactionsQuery,
+    useFixedIncomeQuery, usePensionsQuery, useDebtTransactionsQuery, useRealEstateQuery,
+    useHistoricalSnapshotsQuery, useLedgerDataQuery, useFxRatesQuery, usePensionPricesQuery,
+    useAllocationTargetsQuery, useAssetClassesQuery, useAppSettingsQuery,
+    useForecastSettingsQuery, useDashboardConfigQuery,
+    useSaveTransactionMutation, useDeleteTransactionMutation, useSaveSnapshotMutation,
+    queryKeys,
+} from '@/hooks/useQueries';
 import { normalizeTransactions, calculateMonthlyIncome, calculateMonthlyInvestments } from '@/lib/ledgerUtils';
 import { calculateFV, getMonthDiff, parseDate as parseForecastDate, calculatePMT } from '@/lib/forecastUtils';
 import actualsData from '@/data/forecast_actuals.json';
@@ -24,27 +36,45 @@ import demoData from '@/lib/demoData';
 const PortfolioContext = createContext(null);
 
 export function PortfolioProvider({ children }) {
-    // ═══════════ RAW DATA STATE ═══════════
-    const [transactions, setTransactions] = useState([]);
-    const [equityTransactions, setEquityTransactions] = useState([]);
-    const [cryptoTransactions, setCryptoTransactions] = useState([]);
-    const [pensionTransactions, setPensionTransactions] = useState([]);
-    const [debtTransactions, setDebtTransactions] = useState([]);
-    const [realEstate, setRealEstate] = useState(null);
-    const [fixedIncomeTransactions, setFixedIncomeTransactions] = useState([]);
-    const [historicalSnapshots, setHistoricalSnapshots] = useState([]);
-    const [marketData, setMarketData] = useState({});
-    const [pensionPrices, setPensionPrices] = useState({});
-    // rates are managed by useCurrencyStore — read reactively
+    // ═══════════ RAW DATA (from usePortfolioStore) ═══════════
+    const transactions = usePortfolioStore(s => s.transactions);
+    const setTransactions = usePortfolioStore(s => s.setTransactions);
+    const equityTransactions = usePortfolioStore(s => s.equityTransactions);
+    const setEquityTransactions = usePortfolioStore(s => s.setEquityTransactions);
+    const cryptoTransactions = usePortfolioStore(s => s.cryptoTransactions);
+    const setCryptoTransactions = usePortfolioStore(s => s.setCryptoTransactions);
+    const pensionTransactions = usePortfolioStore(s => s.pensionTransactions);
+    const setPensionTransactions = usePortfolioStore(s => s.setPensionTransactions);
+    const debtTransactions = usePortfolioStore(s => s.debtTransactions);
+    const setDebtTransactions = usePortfolioStore(s => s.setDebtTransactions);
+    const realEstate = usePortfolioStore(s => s.realEstate);
+    const setRealEstate = usePortfolioStore(s => s.setRealEstate);
+    const fixedIncomeTransactions = usePortfolioStore(s => s.fixedIncomeTransactions);
+    const setFixedIncomeTransactions = usePortfolioStore(s => s.setFixedIncomeTransactions);
+    const historicalSnapshots = usePortfolioStore(s => s.historicalSnapshots);
+    const setHistoricalSnapshots = usePortfolioStore(s => s.setHistoricalSnapshots);
+    const lastUpdated = usePortfolioStore(s => s.lastUpdated);
+    const setLastUpdated = usePortfolioStore(s => s.setLastUpdated);
+    const isInitialLoading = usePortfolioStore(s => s.isInitialLoading);
+    const setIsInitialLoading = usePortfolioStore(s => s.setIsInitialLoading);
+    const ledgerData = usePortfolioStore(s => s.ledgerData);
+    const setLedgerData = usePortfolioStore(s => s.setLedgerData);
+
+    // ═══════════ MARKET DATA (from useMarketStore) ═══════════
+    const marketData = useMarketStore(s => s.marketData);
+    const setMarketData = useMarketStore(s => s.setMarketData);
+    const pensionPrices = useMarketStore(s => s.pensionPrices);
+    const setPensionPrices = useMarketStore(s => s.setPensionPrices);
+    const isRefreshingMarketData = useMarketStore(s => s.isRefreshingMarketData);
+    const setIsRefreshingMarketData = useMarketStore(s => s.setIsRefreshingMarketData);
+    const marketDataCacheInfo = useMarketStore(s => s.marketDataCacheInfo);
+    const setMarketDataCacheInfo = useMarketStore(s => s.setMarketDataCacheInfo);
+
+    // ═══════════ CURRENCY (from useCurrencyStore) ═══════════
     const rates = useCurrencyStore(s => s.rates);
     const setRates = useCurrencyStore(s => s.setRates);
     const loadingRates = useCurrencyStore(s => s.loadingRates);
     const setLoadingRates = useCurrencyStore(s => s.setLoadingRates);
-    const [lastUpdated, setLastUpdated] = useState(null);
-    const [isInitialLoading, setIsInitialLoading] = useState(true);
-    const [isRefreshingMarketData, setIsRefreshingMarketData] = useState(false);
-    const [marketDataCacheInfo, setMarketDataCacheInfo] = useState(null);
-    const [ledgerData, setLedgerData] = useState('');
     const fxHistory = useCurrencyStore(s => s.fxHistory);
     const setFxHistory = useCurrencyStore(s => s.setFxHistory);
 
@@ -107,6 +137,58 @@ export function PortfolioProvider({ children }) {
         useCurrencyStore.getState().persistCurrencyPrefs();
     }, [primaryCurrency, secondaryCurrency, rateFlipped, displayCurrencyOverrides]);
 
+    // ═══════════ TANSTACK QUERY HOOKS ═══════════
+    const queryClient = useQueryClient();
+
+    const { data: txData } = useTransactionsQuery();
+    const { data: eqTxData } = useEquityTransactionsQuery();
+    const { data: cryptoTxData } = useCryptoTransactionsQuery();
+    const { data: fiData } = useFixedIncomeQuery();
+    const { data: pensionTxData } = usePensionsQuery();
+    const { data: debtTxData } = useDebtTransactionsQuery();
+    const { data: reData } = useRealEstateQuery();
+    const { data: snapshotData } = useHistoricalSnapshotsQuery();
+    const { data: ledgerResult } = useLedgerDataQuery();
+    const { data: fxData } = useFxRatesQuery();
+    const { data: pensionPriceData } = usePensionPricesQuery();
+    const { data: allocData } = useAllocationTargetsQuery();
+    const { data: assetClassData } = useAssetClassesQuery();
+    const { data: settingsData } = useAppSettingsQuery();
+    const { data: forecastData } = useForecastSettingsQuery();
+    const { data: dashConfigData } = useDashboardConfigQuery();
+
+    // Mutation hooks
+    const saveTransactionMutation = useSaveTransactionMutation();
+    const deleteTransactionMutation = useDeleteTransactionMutation();
+    const saveSnapshotMutation = useSaveSnapshotMutation();
+
+    // ═══════════ BRIDGE EFFECTS (query results → Zustand stores) ═══════════
+    useEffect(() => { if (txData) setTransactions(Array.isArray(txData) ? txData : []); }, [txData]);
+    useEffect(() => { if (eqTxData) setEquityTransactions(Array.isArray(eqTxData) ? eqTxData : []); }, [eqTxData]);
+    useEffect(() => { if (cryptoTxData) setCryptoTransactions(Array.isArray(cryptoTxData) ? cryptoTxData : []); }, [cryptoTxData]);
+    useEffect(() => { if (fiData) setFixedIncomeTransactions(Array.isArray(fiData) ? fiData : []); }, [fiData]);
+    useEffect(() => { if (pensionTxData) setPensionTransactions(Array.isArray(pensionTxData) ? pensionTxData : []); }, [pensionTxData]);
+    useEffect(() => { if (debtTxData) setDebtTransactions(Array.isArray(debtTxData) ? debtTxData : []); }, [debtTxData]);
+    useEffect(() => { if (reData) setRealEstate(reData); }, [reData]);
+    useEffect(() => { if (snapshotData) setHistoricalSnapshots(Array.isArray(snapshotData) ? snapshotData : []); }, [snapshotData]);
+    useEffect(() => { if (ledgerResult) setLedgerData(ledgerResult); }, [ledgerResult]);
+    useEffect(() => { if (fxData) setFxHistory(fxData); }, [fxData]);
+    useEffect(() => { if (pensionPriceData) setPensionPrices(pensionPriceData); }, [pensionPriceData]);
+    useEffect(() => { if (allocData) setAllocationTargets(allocData); }, [allocData]);
+    useEffect(() => { if (assetClassData) setAssetClasses(assetClassData); }, [assetClassData]);
+    useEffect(() => { if (settingsData) setAppSettings(prev => ({ ...prev, ...settingsData })); }, [settingsData]);
+    useEffect(() => { if (forecastData) setForecastSettings(forecastData); }, [forecastData]);
+    useEffect(() => { if (dashConfigData) setDashboardConfig(dashConfigData); }, [dashConfigData]);
+
+    // Flip isInitialLoading once first round of queries settles
+    const allQueriesSettled = txData !== undefined && eqTxData !== undefined;
+    useEffect(() => {
+        if (allQueriesSettled && isInitialLoading) {
+            setIsInitialLoading(false);
+            setLastUpdated(new Date());
+        }
+    }, [allQueriesSettled, isInitialLoading]);
+
     // ═══════════ HELPERS ═══════════
     const parseDate = (dateStr) => {
         if (!dateStr) return new Date();
@@ -123,16 +205,8 @@ export function PortfolioProvider({ children }) {
 
     // ═══════════ FETCHERS ═══════════
     const fetchRealEstate = useCallback(async () => {
-        try {
-            const res = await fetch('/api/real-estate');
-            const data = await res.json();
-            setRealEstate(data);
-            return data;
-        } catch (err) {
-            console.error('Failed to load real estate:', err);
-            return null;
-        }
-    }, []);
+        queryClient.invalidateQueries({ queryKey: queryKeys.realEstate });
+    }, [queryClient]);
 
     const fetchMarketData = useCallback(async (forceRefresh = false, prefetched = {}) => {
         try {
@@ -342,45 +416,12 @@ export function PortfolioProvider({ children }) {
             return;
         }
 
-        // Fire all independent fetches in parallel
-        const [eqRes, cryptoRes, reData] = await Promise.all([
-            fetch('/api/equity-transactions').then(res => res.json()).then(data => { const arr = Array.isArray(data) ? data : []; setEquityTransactions(arr); return arr; }),
-            fetch('/api/crypto-transactions').then(res => res.json()).then(data => { const arr = Array.isArray(data) ? data : []; setCryptoTransactions(arr); return arr; }),
-            fetchRealEstate(),
-        ]);
+        // 3. Non-demo: invalidate all TanStack Query caches — they auto-refetch
+        queryClient.invalidateQueries();
 
-        // Fire remaining independent fetches (no need to await these)
-        fetch('/api/transactions').then(res => res.json()).then(data => setTransactions(Array.isArray(data) ? data : []));
-        fetch('/api/fixed-income').then(res => res.json()).then(data => setFixedIncomeTransactions(Array.isArray(data) ? data : []));
-        fetch('/api/pensions').then(res => res.json()).then(data => setPensionTransactions(Array.isArray(data) ? data : []));
-        fetch('/api/debt-transactions').then(res => res.json()).then(data => setDebtTransactions(Array.isArray(data) ? data : []));
-        fetch('/api/history').then(res => res.json()).then(data => setHistoricalSnapshots(Array.isArray(data) ? data : []));
-        fetch('/api/ledger-data').then(res => res.json()).then(data => setLedgerData(data.content));
-        fetch('/api/fx-rates').then(res => res.json()).then(setFxHistory);
-        fetch('/api/allocation-targets').then(res => res.json()).then(setAllocationTargets);
-        fetch('/api/asset-classes').then(res => res.json()).then(setAssetClasses);
-        fetch('/api/app-settings').then(res => res.json()).then(data => {
-            setAppSettings(prev => ({ ...prev, ...data }));
-        });
-        fetch('/api/forecast-settings').then(res => res.json()).then(setForecastSettings).catch(err => console.error("Failed to load settings", err));
-        fetch('/api/dashboard-config').then(res => res.json()).then(setDashboardConfig).catch(e => console.error("Failed to load dashboard config", e));
-
-        // Pass pre-fetched data to fetchMarketData to avoid 3 duplicate requests
-        fetchMarketData(false, { equity: eqRes, realEstate: reData, crypto: cryptoRes });
-
-        // Pension prices: fetch cached immediately, refresh in background (non-blocking)
-        fetch('/api/pension-prices')
-            .then(res => res.json())
-            .then(data => {
-                setPensionPrices(data);
-                // Background refresh — don't chain/block
-                fetch('/api/pension-prices?refresh=true')
-                    .then(res => res.json())
-                    .then(newData => setPensionPrices(prev => ({ ...prev, ...newData })))
-                    .catch(e => console.error('Background pension refresh failed:', e));
-            })
-            .catch(err => console.error('Failed to load pension prices:', err));
-    }, [fetchRealEstate, fetchMarketData]);
+        // fetchMarketData stays manual (complex ticker-building logic)
+        fetchMarketData();
+    }, [fetchMarketData, queryClient]);
 
     // ═══════════ INITIAL LOAD ═══════════
     useEffect(() => {
@@ -619,33 +660,15 @@ export function PortfolioProvider({ children }) {
     // ═══════════ TRANSACTION HANDLERS ═══════════
     const handleSaveTransaction = useCallback(async (formData) => {
         try {
-            if (formData.id) {
-                await fetch('/api/transactions', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-            } else {
-                await fetch('/api/transactions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-            }
-
-            fetchRealEstate();
-            fetch('/api/fixed-income').then(res => res.json()).then(setFixedIncomeTransactions);
-            fetch('/api/transactions').then(res => res.json()).then(setTransactions);
-            fetch('/api/pensions').then(res => res.json()).then(setPensionTransactions);
-            fetch('/api/debt-transactions').then(res => res.json()).then(setDebtTransactions);
+            await saveTransactionMutation.mutateAsync(formData);
+            // Mutation onSuccess auto-invalidates related queries
             fetchMarketData();
-
             setIsFormOpen(false);
             setEditingTransaction(null);
         } catch (error) {
             console.error('Failed to save transaction:', error);
         }
-    }, [fetchRealEstate, fetchMarketData]);
+    }, [saveTransactionMutation, fetchMarketData]);
 
     const handleEditTransaction = useCallback((transaction) => {
         setEditingTransaction(transaction);
@@ -660,22 +683,15 @@ export function PortfolioProvider({ children }) {
     const handleConfirmDelete = useCallback(async () => {
         if (!transactionToDelete) return;
         try {
-            await fetch(`/api/transactions?id=${transactionToDelete}`, { method: 'DELETE' });
-            setTransactions(prev => prev.filter(tr => tr.id !== transactionToDelete));
-
-            fetchRealEstate();
-            fetch('/api/transactions').then(res => res.json()).then(setTransactions);
-            fetch('/api/fixed-income').then(res => res.json()).then(setFixedIncomeTransactions);
-            fetch('/api/pensions').then(res => res.json()).then(setPensionTransactions);
-            fetch('/api/debt-transactions').then(res => res.json()).then(setDebtTransactions);
+            await deleteTransactionMutation.mutateAsync(transactionToDelete);
+            // Mutation onSuccess auto-invalidates related queries
             fetchMarketData();
-
             setIsDeleteModalOpen(false);
             setTransactionToDelete(null);
         } catch (error) {
             console.error('Failed to delete transaction:', error);
         }
-    }, [transactionToDelete, fetchRealEstate, fetchMarketData]);
+    }, [transactionToDelete, deleteTransactionMutation, fetchMarketData]);
 
     const handleRecordSnapshot = useCallback(async (explicitSnapshot = null, options = { silent: false }) => {
         try {

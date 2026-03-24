@@ -1,4 +1,5 @@
 import React from 'react';
+import { Card } from '@/components/ui/card';
 
 /**
  * Mobile-First Ledger timeline replacing standard wide tables
@@ -31,7 +32,7 @@ export default function TransactionTimeline({
                     <div className="absolute left-[-5px] top-1/2 -mt-1.5 w-3 h-3 rounded-full border-2 border-[var(--bg-primary)] bg-white/20 shadow-sm" />
 
                     {/* Item Card */}
-                    <div className="glass-card flex-1 p-3.5 hover:bg-white/5 transition-colors duration-200">
+                    <Card className="flex-1 p-3.5 hover:bg-white/5 transition-colors duration-200">
                         <div className="flex justify-between items-start gap-2 mb-2">
                             <div className="flex flex-col">
                                 {renderItem ? renderItem(tr) : (
@@ -66,7 +67,7 @@ export default function TransactionTimeline({
                                 )}
                             </div>
                         </div>
-                    </div>
+                    </Card>
                 </div>
             ))}
         </div>

@@ -14,6 +14,9 @@ import useDashboard from './useDashboard';
 import { StaggerList } from '@/components/ui/stagger-list';
 import BudgetKpiPod from '@/components/budget/BudgetKpiPod';
 import FirstGrooveFlow from '@/components/ftue/FirstGrooveFlow';
+import _PersonalizedEmptyState from '@/components/ftue/PersonalizedEmptyState';
+const PersonalizedEmptyState = _PersonalizedEmptyState as any;
+import useBudgetStore from '@/stores/useBudgetStore';
 import type { DashboardTabProps } from './types';
 import { getPersonalization } from '@/lib/personalization';
 
@@ -28,6 +31,32 @@ export default function DashboardTab(props: DashboardTabProps) {
 
     const h = useDashboard(props);
     const personalization = getPersonalization(h.ftueState || { onboardingGoal: null, onboardingExperience: 'beginner' });
+    const budgetTransactions = useBudgetStore((s: any) => s.transactions);
+
+    const hasPortfolioData = data?.netWorth?.amount > 0 ||
+        data?.categories?.some((cat: any) => cat.assets?.length > 1);
+    const hasBudgetData = budgetTransactions?.length > 0;
+    const hasAnyData = hasPortfolioData || hasBudgetData;
+
+    // Show unified empty state for new users with no data (not demo mode)
+    if (!hasAnyData && !isLoading && !h.ftueState?.usingDemoData) {
+        return (
+            <div className="pb-10">
+                <FirstGrooveFlow />
+                <PersonalizedEmptyState
+                    copyKey="emptyPortfolioDashboard"
+                    actionLabel="🎸 Import Your Data"
+                    onAction={() => { window.location.href = '/import'; }}
+                    secondaryLabel="Add Manually"
+                    onSecondaryAction={() => {
+                        const goal = h.ftueState?.onboardingGoal || 'both';
+                        if (goal === 'budget') window.location.href = '/budget';
+                        else window.location.href = '/assets/equity';
+                    }}
+                />
+            </div>
+        );
+    }
 
     return (
         <div className="pb-10">

@@ -70,7 +70,7 @@ export default function ImportWizard() {
                 transition={{ delay: 0.05 }}
                 className="font-bebas text-3xl md:text-4xl tracking-widest text-gradient m-0 mb-6"
             >
-                Bring Your Data Home
+                Update Your Positions
             </motion.h1>
 
             {/* Progress Bar */}

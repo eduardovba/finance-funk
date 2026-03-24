@@ -1,4 +1,5 @@
 import { formatCurrency } from "@/lib/currency";
+import { Card } from '@/components/ui/card';
 
 export default function AssetTable({ title, assets, rates }) {
     return (
@@ -6,7 +7,7 @@ export default function AssetTable({ title, assets, rates }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <h2>{title}</h2>
             </div>
-            <div className="glass-card" style={{ padding: '0' }}>
+            <Card style={{ padding: '0' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                     <thead>
                         <tr style={{ borderBottom: '1px solid var(--glass-border)' }}>
@@ -41,7 +42,7 @@ export default function AssetTable({ title, assets, rates }) {
                         ))}
                     </tbody>
                 </table>
-            </div>
+            </Card>
         </section>
     );
 }

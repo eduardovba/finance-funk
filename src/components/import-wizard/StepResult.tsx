@@ -46,7 +46,7 @@ export default function StepResult({ result, assetClass, onReset }: StepResultPr
             className="space-y-6"
         >
             {/* Hero Result */}
-            <div className="text-center py-12 px-8">
+            <Card variant="flat" className="text-center py-12 px-8">
                 <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
@@ -79,11 +79,11 @@ export default function StepResult({ result, assetClass, onReset }: StepResultPr
                         <div className="text-xs text-parchment/40 font-space uppercase tracking-widest">New Assets</div>
                     </div>
                 </div>
-            </div>
+            </Card>
 
             {/* Errors */}
             {result.errors?.length > 0 && (
-                <div className="">
+                <Card variant="flat">
                     <h3 className="font-bebas text-lg tracking-widest text-amber-400 mb-3">
                         {result.errors.length} Issue{result.errors.length > 1 ? 's' : ''} Found
                     </h3>
@@ -98,7 +98,7 @@ export default function StepResult({ result, assetClass, onReset }: StepResultPr
                             <p className="text-xs text-parchment/30 font-space">...and {result.errors.length - 20} more</p>
                         )}
                     </div>
-                </div>
+                </Card>
             )}
 
             {/* Actions */}

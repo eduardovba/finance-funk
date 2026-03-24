@@ -32,6 +32,7 @@ import REFundAccordion from './REFundAccordion';
 import REPropertyDetails from './REPropertyDetails';
 import REFundDetails from './REFundDetails';
 import type { RealEstateTabProps } from './types';
+import { Card } from '@/components/ui/card';
 
 const REALESTATE_TUTORIAL_STEPS = [
     { type: 'spotlight', targetId: 'ftue-re-header', title: 'Property Empire 🏠', message: "Total real estate value, invested capital, and appreciation. Link rental income and mortgages per property.", position: 'bottom' },
@@ -357,10 +358,10 @@ function AddTransactionForm({ h }: { h: any }) {
                     <NumberInput value={h.fundBuyData?.buyPricePerShare || ''} onChange={(val: any) => h.updateFundBuyCalc('buyPricePerShare', val)}
                         className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="0" />
                 </div>
-                <div className="glass-card p-4 text-center">
+                <Card className="p-4 text-center">
                     <div className="text-xs text-white/50 uppercase tracking-wider mb-1">Total Investment</div>
                     <div className="text-xl font-bold text-[#D4AF37]">{formatCurrency(h.fundBuyData?.totalInvestment || 0, 'BRL')}</div>
-                </div>
+                </Card>
                 <div className="mt-auto pt-6 flex gap-3">
                     <Button variant="secondary" className="flex-1" onClick={() => h.setRightPaneMode('default')}>Cancel</Button>
                     <Button variant="primary" className="flex-1" onClick={() => { h.handleFundBuyConfirm(); h.setRightPaneMode('default'); }}>Confirm Purchase</Button>
@@ -396,10 +397,10 @@ function EditTransactionForm({ h }: { h: any }) {
                             <div><label className="block text-xs text-parchment/70 tracking-wide uppercase mb-2">Quantity</label><NumberInput value={h.editingTransaction.quantity || ''} onChange={(val: any) => h.setEditingTransaction((p: any) => ({ ...p, quantity: val }))} className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="0" /></div>
                             <div><label className="block text-xs text-parchment/70 tracking-wide uppercase mb-2">Price/Share</label><NumberInput value={h.editingTransaction.costPerShare || h.editingTransaction.price || ''} onChange={(val: any) => h.setEditingTransaction((p: any) => ({ ...p, costPerShare: val }))} className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#D4AF37]/50 transition-all font-space" placeholder="0" /></div>
                         </div>
-                        <div className="glass-card p-4 text-center">
+                        <Card className="p-4 text-center">
                             <div className="text-xs text-white/50 uppercase tracking-wider mb-1">Total</div>
                             <div className="text-xl font-bold text-[#D4AF37]">{formatCurrency(Math.abs((parseFloat(h.editingTransaction.quantity) || 0) * (parseFloat(h.editingTransaction.costPerShare || h.editingTransaction.price) || 0)), 'BRL')}</div>
-                        </div>
+                        </Card>
                     </>
                 )}
                 {!isFund && (

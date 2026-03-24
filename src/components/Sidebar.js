@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { LayoutDashboard, BookOpen, TrendingUp, Landmark, Home, LineChart, Bitcoin, Wallet, CreditCard, ChevronRight } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 const iconMap = {
     'dashboard': LayoutDashboard,
@@ -77,7 +78,7 @@ export default function Sidebar({ activeItem, onNavigate }) {
     const initials = userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 
     return (
-        <aside className="glass-card h-[calc(100vh-64px)] w-[260px] sticky top-8 p-6 flex-shrink-0 overflow-y-auto flex flex-col border-r border-[#D4AF37]/20">
+        <aside className="h-[calc(100vh-64px)] w-[260px] sticky top-8 p-6 flex-shrink-0 overflow-y-auto flex flex-col border-r border-[#D4AF37]/20">
             {/* Logo */}
             <div className="mb-10 px-2 flex items-center gap-3">
                 <Image src="/logos/ff-logo.png" alt="Finance Funk" height={60} width={120} className="h-[60px] w-auto" />

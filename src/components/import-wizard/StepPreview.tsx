@@ -44,16 +44,16 @@ export default function StepPreview({ transformedTxs, assetClass, importing, onI
                     { label: 'Buys / Sells', value: `${buys} / ${sells}`, icon: ArrowRight },
                     { label: 'Total Volume', value: fmtNum(totalAmount), icon: Sparkles },
                 ].map(card => (
-                    <div key={card.label} className="!p-4 text-center">
+                    <Card key={card.label} variant="inset" className="!p-4 text-center">
                         <card.icon size={16} className="text-[#D4AF37]/50 mx-auto mb-2" />
                         <div className="text-xl font-bebas tracking-wider text-[#D4AF37]">{card.value}</div>
                         <div className="text-xs text-parchment/40 font-space uppercase tracking-widest">{card.label}</div>
-                    </div>
+                    </Card>
                 ))}
             </div>
 
             {/* Transaction Table */}
-            <div className="!p-0 overflow-hidden">
+            <Card variant="flat" className="!p-0 overflow-hidden">
                 <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
                     <h4 className="text-[#D4AF37] font-bebas tracking-widest text-lg m-0">Transaction Preview</h4>
                     {transformedTxs.length > 10 && (
@@ -106,7 +106,7 @@ export default function StepPreview({ transformedTxs, assetClass, importing, onI
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </Card>
 
             {/* Nav */}
             <div className="flex justify-between gap-4">

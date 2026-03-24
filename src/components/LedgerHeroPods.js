@@ -31,20 +31,13 @@ const formatYAxis = (value) => {
 const PodTooltip = ({ active, payload, label, isCurrency = true }) => {
     if (!active || !payload || !payload.length) return null;
     return (
-        <div style={{
-            background: 'rgba(18, 20, 24, 0.90)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            borderRadius: '10px',
-            padding: '10px 14px',
-            backdropFilter: 'blur(12px)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-        }}>
-            <div style={{ fontSize: '11px', color: '#D4AF37', fontWeight: 600, marginBottom: '6px', fontFamily: 'monospace' }}>{label}</div>
+        <div className="rounded-xl" style={{ background: 'rgba(18, 20, 24, 0.90)', border: '1px solid rgba(255,255,255,0.06)', padding: '10px 14px', backdropFilter: 'blur(12px)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)', }}>
+            <div className="text-[11px] font-semibold mb-1.5 font-space" style={{ color: '#D4AF37' }}>{label}</div>
             {payload.filter(e => e.value != null && e.value !== 0).map((entry, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: entry.color || entry.fill || '#fff' }} />
-                    <span style={{ fontSize: '10px', color: 'rgba(245,245,220,0.5)', fontFamily: 'monospace' }}>{entry.name}:</span>
-                    <span style={{ fontSize: '10px', color: 'rgba(245,245,220,0.9)', fontWeight: 600, fontFamily: 'monospace' }}>
+                <div key={i} className="flex items-center gap-1.5" style={{ marginBottom: '3px' }}>
+                    <div className="rounded" style={{ width: '8px', height: '8px', background: entry.color || entry.fill || '#fff' }} />
+                    <span className="text-[10px] font-space" style={{ color: 'rgba(245,245,220,0.5)' }}>{entry.name}:</span>
+                    <span className="text-[10px] font-semibold font-space" style={{ color: 'rgba(245,245,220,0.9)' }}>
                         {isCurrency ? formatCurrency(entry.value, 'BRL') : `${entry.value.toFixed(1)}%`}
                     </span>
                 </div>
@@ -55,10 +48,10 @@ const PodTooltip = ({ active, payload, label, isCurrency = true }) => {
 
 // --- Pod Card Wrapper ---
 const PodCard = ({ title, icon, children }) => (
-    <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)]" style={{ overflow: 'hidden' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-            <span style={{ fontSize: '14px' }}>{icon}</span>
-            <span style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(245,245,220,0.7)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{title}</span>
+    <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden">
+        <div className="flex items-center gap-2 mb-4">
+            <span className="text-sm">{icon}</span>
+            <span className="text-xs font-semibold tracking-[0.5px] uppercase" style={{ color: 'rgba(245,245,220,0.7)' }}>{title}</span>
         </div>
         {children}
     </div>
@@ -158,7 +151,7 @@ export default function LedgerHeroPods({ snapshots, forecastActuals, targetROI, 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
             {/* Pod 1: Portfolio Composition */}
             <PodCard title="Portfolio Composition" icon="📊">
-                <div style={{ height: '220px', width: '100%' }}>
+                <div className="w-full" style={{ height: '220px' }}>
                     <ResponsiveContainer>
                         <AreaChart data={compositionData}>
                             <defs>
@@ -204,11 +197,11 @@ export default function LedgerHeroPods({ snapshots, forecastActuals, targetROI, 
                     </ResponsiveContainer>
                 </div>
                 {/* Mini legend */}
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '8px', flexWrap: 'wrap' }}>
+                <div className="flex justify-center gap-3 mt-2 flex-wrap">
                     {Object.entries(CATEGORY_COLORS).filter(([k]) => k !== 'Debt').map(([key, color]) => (
-                        <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <div key={key} className="flex items-center gap-1">
                             <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: color, boxShadow: `0 0 6px ${color}50` }} />
-                            <span style={{ fontSize: '9px', color: 'rgba(245,245,220,0.4)', fontWeight: 500 }}>
+                            <span className="font-medium" style={{ fontSize: '9px', color: 'rgba(245,245,220,0.4)' }}>
                                 {key === 'FixedIncome' ? 'Fixed Inc' : key === 'RealEstate' ? 'Real Est' : key}
                             </span>
                         </div>
@@ -218,7 +211,7 @@ export default function LedgerHeroPods({ snapshots, forecastActuals, targetROI, 
 
             {/* Pod 2: Yearly ROI vs Target */}
             <PodCard title="Yearly ROI vs Target" icon="📈">
-                <div style={{ height: '220px', width: '100%' }}>
+                <div className="w-full" style={{ height: '220px' }}>
                     <ResponsiveContainer>
                         <BarChart data={yearlyROIData} barCategoryGap="20%">
                             <defs>
@@ -263,21 +256,21 @@ export default function LedgerHeroPods({ snapshots, forecastActuals, targetROI, 
                     </ResponsiveContainer>
                 </div>
                 {/* Legend */}
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: '#6b7280', opacity: 0.5 }} />
-                        <span style={{ fontSize: '10px', color: 'rgba(245,245,220,0.4)', fontWeight: 500 }}>Target ({targetROI || 10}%)</span>
+                <div className="flex justify-center gap-5 mt-2">
+                    <div className="flex items-center" style={{ gap: '5px' }}>
+                        <div className="rounded opacity-50" style={{ width: '10px', height: '10px', background: '#6b7280' }} />
+                        <span className="text-[10px] font-medium" style={{ color: 'rgba(245,245,220,0.4)' }}>Target ({targetROI || 10}%)</span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: '#34D399' }} />
-                        <span style={{ fontSize: '10px', color: 'rgba(245,245,220,0.4)', fontWeight: 500 }}>Actual</span>
+                    <div className="flex items-center" style={{ gap: '5px' }}>
+                        <div className="rounded" style={{ width: '10px', height: '10px', background: '#34D399' }} />
+                        <span className="text-[10px] font-medium" style={{ color: 'rgba(245,245,220,0.4)' }}>Actual</span>
                     </div>
                 </div>
             </PodCard>
 
             {/* Pod 3: Yearly Contributions vs Target */}
             <PodCard title="Yearly Contributions vs Target" icon="💸">
-                <div style={{ height: '220px', width: '100%' }}>
+                <div className="w-full" style={{ height: '220px' }}>
                     <ResponsiveContainer>
                         <BarChart data={yearlyContribData} barCategoryGap="20%">
                             <defs>
@@ -321,16 +314,16 @@ export default function LedgerHeroPods({ snapshots, forecastActuals, targetROI, 
                     </ResponsiveContainer>
                 </div>
                 {/* Legend */}
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: '#6b7280', opacity: 0.5 }} />
-                        <span style={{ fontSize: '10px', color: 'rgba(245,245,220,0.4)', fontWeight: 500 }}>
+                <div className="flex justify-center gap-5 mt-2">
+                    <div className="flex items-center" style={{ gap: '5px' }}>
+                        <div className="rounded opacity-50" style={{ width: '10px', height: '10px', background: '#6b7280' }} />
+                        <span className="text-[10px] font-medium" style={{ color: 'rgba(245,245,220,0.4)' }}>
                             Target ({formatCurrency((targetContribution || 12000) * 12, 'BRL')}/yr)
                         </span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: '#3b82f6' }} />
-                        <span style={{ fontSize: '10px', color: 'rgba(245,245,220,0.4)', fontWeight: 500 }}>Actual</span>
+                    <div className="flex items-center" style={{ gap: '5px' }}>
+                        <div className="rounded" style={{ width: '10px', height: '10px', background: '#3b82f6' }} />
+                        <span className="text-[10px] font-medium" style={{ color: 'rgba(245,245,220,0.4)' }}>Actual</span>
                     </div>
                 </div>
             </PodCard>

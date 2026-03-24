@@ -83,7 +83,7 @@ export default function StepConfigure({ sheetsConfig, setSheetsConfig, onNext, o
                     </div>
 
                     {/* Defaults */}
-                    <div className={isMultiSheet ? '' : 'glass-card'}>
+                    <div className={isMultiSheet ? '' : ''}>
                         <h4 className={`font-bebas tracking-widest text-[#D4AF37] mb-3 ${isMultiSheet ? 'text-base' : 'text-lg'}`}>Defaults</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
@@ -122,7 +122,7 @@ export default function StepConfigure({ sheetsConfig, setSheetsConfig, onNext, o
             className="space-y-6"
         >
             {/* File Summary */}
-            <div className="flex items-center gap-4">
+            <Card variant="flat" className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
                     <FileSpreadsheet size={24} className="text-emerald-400" />
                 </div>
@@ -134,10 +134,12 @@ export default function StepConfigure({ sheetsConfig, setSheetsConfig, onNext, o
                     </p>
                 </div>
                 <Check size={20} className="text-emerald-400 flex-shrink-0" />
-            </div>
+            </Card>
 
             {/* Sheet Configs */}
-            {sheetsConfig.map((sc: SheetConfig, idx: number) => renderSheetConfig(sc, idx))}
+            <Card variant="flat">
+                {sheetsConfig.map((sc: SheetConfig, idx: number) => renderSheetConfig(sc, idx))}
+            </Card>
 
             {/* Nav */}
             <div className="flex justify-between gap-4">

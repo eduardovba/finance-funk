@@ -81,7 +81,7 @@ function AssetsSheet({ isOpen, onClose }) {
                         </div>
 
                         {/* 2×3 Grid */}
-                        <div className="grid grid-cols-2 gap-3 px-5 pb-6">
+                        <div className="grid grid-cols-2 gap-3 px-5 pb-4">
                             {ASSET_TABS.map(tab => {
                                 const Icon = tab.icon;
                                 const value = getCategoryValue(tab.id);
@@ -109,6 +109,20 @@ function AssetsSheet({ isOpen, onClose }) {
                                     </Link>
                                 );
                             })}
+                        </div>
+
+                        {/* Import Link */}
+                        <div className="px-5 pb-6">
+                            <div className="border-t border-white/5 pt-3">
+                                <Link
+                                    href="/import"
+                                    onClick={onClose}
+                                    className="flex items-center gap-4 px-3 py-3 rounded-xl text-parchment/80 hover:bg-white/5 active:bg-white/5 active:scale-[0.98] transition-all no-underline"
+                                >
+                                    <Upload size={18} className="text-[#CC5500]/60" />
+                                    <span className="text-sm font-space font-medium">Import</span>
+                                </Link>
+                            </div>
                         </div>
                     </motion.div>
                 </>

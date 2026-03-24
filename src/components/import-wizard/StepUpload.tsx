@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Upload, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
+
 interface StepUploadProps {
     onFile: (f: File | undefined) => void;
     onDrop: (e: React.DragEvent) => void;
@@ -24,13 +25,19 @@ export default function StepUpload({ onFile, onDrop, onDragOver, fileInputRef, p
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
         >
-            <div
+            <Card
+                variant="flat"
                 onDrop={(e) => { onDrop(e); setDragActive(false); }}
                 onDragOver={(e) => { onDragOver(e); setDragActive(true); }}
                 onDragLeave={() => setDragActive(false)}
                 onClick={() => fileInputRef.current?.click()}
-                className={`cursor-pointer text-center py-20 px-8 transition-all duration-300 group
-                    ${dragActive ? 'border-[#D4AF37]/60 bg-[#D4AF37]/5 scale-[1.01]' : 'hover:border-[#D4AF37]/30'}`}
+                className={`
+                    !border-2 !border-dashed
+                    !p-12 flex flex-col items-center justify-center gap-4 cursor-pointer group
+                    ${dragActive
+                        ? '!border-[#34D399]/50 !bg-[#34D399]/5 scale-[1.01]'
+                        : '!border-white/[0.08] hover:!border-[#D4AF37]/30'
+                    }`}
             >
                 {parsing ? (
                     <div className="flex flex-col items-center gap-4">
@@ -39,25 +46,24 @@ export default function StepUpload({ onFile, onDrop, onDragOver, fileInputRef, p
                     </div>
                 ) : (
                     <>
-                        <div className="relative w-20 h-20 mx-auto mb-6">
-                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#D4AF37]/20 to-[#CC5500]/10 group-hover:from-[#D4AF37]/30 group-hover:to-[#CC5500]/20 transition-all" />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <Upload size={32} className="text-[#D4AF37] group-hover:scale-110 transition-transform" />
-                            </div>
+                        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-colors ${
+                            dragActive ? 'bg-[#34D399]/10' : 'bg-[#D4AF37]/10'
+                        }`}>
+                            <Upload size={28} className={dragActive ? 'text-[#34D399]' : 'text-[#D4AF37]'} />
                         </div>
-                        <h3 className="font-bebas text-2xl tracking-widest text-[#D4AF37] mb-2">
-                            {providerName ? `Upload ${providerName} Statement` : 'Drop Your Spreadsheet'}
-                        </h3>
-                        <p className="text-parchment/50 font-space text-sm mb-4 max-w-md mx-auto">
-                            {providerName
-                                ? `Drop your ${providerName} export file here. We'll auto-detect columns and import instantly.`
-                                : <>Drag & drop a file here, or click to browse.
-                                    We support <span className="text-[#D4AF37]/80">.csv</span>,{' '}
-                                    <span className="text-[#D4AF37]/80">.xlsx</span>,{' '}
-                                    <span className="text-[#D4AF37]/80">.xls</span>,{' '}
-                                    <span className="text-[#D4AF37]/80">.tsv</span>, and{' '}
-                                    <span className="text-[#D4AF37]/80">.ods</span> formats.</>}
-                        </p>
+                        <div className="text-center">
+                            <p className="text-parchment/60 text-sm font-space">
+                                {providerName
+                                    ? `Drop your ${providerName} export file here or `
+                                    : 'Drop your file here or '}
+                                <span className="text-[#D4AF37] underline">browse</span>
+                            </p>
+                            <p className="text-parchment/25 text-xs font-space mt-1">
+                                {providerName
+                                    ? `We'll auto-detect columns and import instantly.`
+                                    : <>Supports <span className="text-[#D4AF37]/80">.csv</span>, <span className="text-[#D4AF37]/80">.xlsx</span>, <span className="text-[#D4AF37]/80">.xls</span>, <span className="text-[#D4AF37]/80">.tsv</span>, and <span className="text-[#D4AF37]/80">.ods</span> formats.</>}
+                            </p>
+                        </div>
                         {!providerName && (
                             <div className="flex items-center justify-center gap-4 text-parchment/30 text-xs font-space">
                                 <span>Google Sheets → File → Download</span>
@@ -67,7 +73,7 @@ export default function StepUpload({ onFile, onDrop, onDragOver, fileInputRef, p
                         )}
                     </>
                 )}
-            </div>
+            </Card>
 
             <input
                 ref={fileInputRef}

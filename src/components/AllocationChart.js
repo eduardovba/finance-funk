@@ -1,5 +1,6 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Card } from '@/components/ui/card';
 
 export default function AllocationChart({ actual, targets }) {
     // Transform data for Recharts
@@ -39,7 +40,7 @@ export default function AllocationChart({ actual, targets }) {
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             return (
-                <div className="glass-card" style={{ padding: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <Card style={{ padding: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
                     <p style={{ color: 'var(--fg-primary)', marginBottom: '8px', fontWeight: 600 }}>{label}</p>
                     {payload.map((entry, index) => (
                         <div key={index} style={{ marginBottom: '4px', fontSize: '0.9rem', color: entry.dataKey === 'Actual' ? entry.payload.fill : 'var(--fg-secondary)' }}>
@@ -51,7 +52,7 @@ export default function AllocationChart({ actual, targets }) {
                             )}
                         </div>
                     ))}
-                </div>
+                </Card>
             );
         }
         return null;

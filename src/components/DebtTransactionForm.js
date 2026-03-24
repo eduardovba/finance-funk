@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import CurrencySelector from './CurrencySelector';
 import { usePortfolio } from '../context/PortfolioContext';
 import { convertCurrency } from '@/lib/currency';
+import { Card } from '@/components/ui/card';
 
 export default function DebtTransactionForm({ onSave, onCancel, initialData = null, rates: propRates }) {
     const { primaryCurrency, rates: contextRates } = usePortfolio();
@@ -56,56 +57,42 @@ export default function DebtTransactionForm({ onSave, onCancel, initialData = nu
     };
 
     return (
-        <div className="glass-card" style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 1000,
-            width: '100%',
-            maxWidth: '450px',
-            padding: '32px',
-            border: '1px solid var(--glass-border)',
-            boxShadow: '0 24px 48px rgba(0,0,0,0.5)'
-        }}>
-            <h2 style={{ marginBottom: '24px' }}>{initialData ? 'Edit Debt' : 'Add Debt'}</h2>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <Card variant="flat" className="w-full p-8" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1000, maxWidth: '450px', border: '1px solid var(--glass-border)', boxShadow: '0 24px 48px rgba(0,0,0,0.5)' }}>
+            <h2 className="mb-6">{initialData ? 'Edit Debt' : 'Add Debt'}</h2>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Date</label>
+                        <label className="block mb-2" style={{ fontSize: '0.8rem', color: 'white' }}>Date</label>
                         <input
                             type="text"
                             value={formData.date}
                             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                             placeholder="YYYY-MM-DD"
-                            className="glass-card"
-                            style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
+                            className="w-full p-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         />
                     </div>
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Lender</label>
+                        <label className="block mb-2" style={{ fontSize: '0.8rem', color: 'white' }}>Lender</label>
                         <input
                             type="text"
                             value={formData.lender}
                             onChange={(e) => setFormData({ ...formData, lender: e.target.value })}
                             placeholder="e.g. Dad"
-                            className="glass-card"
-                            style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
+                            className="w-full p-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         />
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'end' }}>
+                <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 1fr', alignItems: 'end' }}>
                     <div style={{ gridColumn: 'span 1' }}>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Value</label>
+                        <label className="block mb-2" style={{ fontSize: '0.8rem', color: 'white' }}>Value</label>
                         <input
                             type="number"
                             step="0.01"
                             value={formData.amount}
                             onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                             placeholder="0.00"
-                            className="glass-card"
-                            style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
+                            className="w-full p-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         />
                     </div>
                     <div style={{ gridColumn: 'span 1' }}>
@@ -117,18 +104,17 @@ export default function DebtTransactionForm({ onSave, onCancel, initialData = nu
                 </div>
 
                 <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Observations</label>
+                    <label className="block mb-2" style={{ fontSize: '0.8rem', color: 'white' }}>Observations</label>
                     <input
                         type="text"
                         value={formData.obs}
                         onChange={(e) => setFormData({ ...formData, obs: e.target.value })}
                         placeholder="Notes..."
-                        className="glass-card"
-                        style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
+                        className="w-full p-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                     />
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div className="flex items-center gap-2">
                     <input
                         type="checkbox"
                         checked={formData.isSalaryContribution || false}
@@ -136,24 +122,16 @@ export default function DebtTransactionForm({ onSave, onCancel, initialData = nu
                         id="debt-salary-contribution"
                         style={{ width: '16px', height: '16px', accentColor: 'var(--accent-color)' }}
                     />
-                    <label htmlFor="debt-salary-contribution" style={{ color: '#fff', fontSize: '0.9rem', cursor: 'pointer' }}>
+                    <label htmlFor="debt-salary-contribution" className="text-[0.9rem] cursor-pointer" style={{ color: '#fff' }}>
                         Funded by Salary Contribution
                     </label>
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+                <div className="flex gap-3 mt-3">
                     <button type="submit" className="btn-primary" style={{ flex: 1 }}>Confirm</button>
-                    <button type="button" onClick={onCancel} style={{
-                        flex: 1,
-                        padding: '12px 24px',
-                        borderRadius: '12px',
-                        border: '1px solid var(--glass-border)',
-                        background: 'transparent',
-                        color: '#94a3b8',
-                        cursor: 'pointer'
-                    }}>Cancel</button>
+                    <button type="button" onClick={onCancel} className="rounded-xl cursor-pointer" style={{ flex: 1, padding: '12px 24px', border: '1px solid var(--glass-border)', background: 'transparent', color: '#94a3b8' }}>Cancel</button>
                 </div>
             </form>
-        </div>
+        </Card>
     );
 }

@@ -76,10 +76,10 @@ export default function LedgerInvestmentsView({
             <div className="flex flex-col gap-8 w-full mt-2">
                 {/* Chart */}
                 <div id="ftue-investment-chart" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-6">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                        <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'rgba(245,245,220,0.8)', fontWeight: 600 }}>Monthly Investments (Capital Injection)</h3>
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-lg font-semibold" style={{ margin: 0, color: 'rgba(245,245,220,0.8)' }}>Monthly Investments (Capital Injection)</h3>
                     </div>
-                    <div style={{ height: '400px', width: '100%' }}>
+                    <div className="w-full" style={{ height: '400px' }}>
                         <ResponsiveContainer>
                             <ComposedChart
                                 data={[...investmentData].reverse().map(d => {
@@ -106,13 +106,13 @@ export default function LedgerInvestmentsView({
                                 <Legend content={({ payload }: any) => {
                                     if (!payload) return null;
                                     return (
-                                        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '16px', flexWrap: 'wrap' }}>
+                                        <div className="flex justify-center gap-5 mt-4 flex-wrap">
                                             {payload.filter((e: any) => e.dataKey !== 'total').map((entry: any, index: number) => {
                                                 const resolvedColor = INVESTMENT_COLORS[entry.dataKey]?.color || entry.color;
                                                 return (
-                                                    <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    <div key={index} className="flex items-center gap-1.5">
                                                         <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: resolvedColor, boxShadow: `0 0 8px ${resolvedColor}60` }} />
-                                                        <span style={{ fontSize: '11px', color: 'rgba(245,245,220,0.5)', fontWeight: 500, letterSpacing: '0.3px' }}>{entry.value}</span>
+                                                        <span className="text-[11px] font-medium tracking-[0.3px]" style={{ color: 'rgba(245,245,220,0.5)' }}>{entry.value}</span>
                                                     </div>
                                                 );
                                             })}
@@ -150,36 +150,32 @@ export default function LedgerInvestmentsView({
                 </div>
 
                 {/* Investment Ledger Accordion */}
-                <div id="ftue-investment-table" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)]" style={{ overflow: 'hidden' }}>
+                <div id="ftue-investment-table" className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden">
                     <button
                         onClick={() => setShowInvestmentLedgerTable(!showInvestmentLedgerTable)}
-                        style={{
-                            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                            padding: '16px 20px', background: 'transparent', border: 'none', cursor: 'pointer',
-                            borderBottom: showInvestmentLedgerTable ? '1px solid rgba(255,255,255,0.06)' : 'none', transition: 'all 0.2s ease',
-                        }}
+                        className="w-full flex items-center justify-between border-none cursor-pointer" style={{ padding: '16px 20px', background: 'transparent', borderBottom: showInvestmentLedgerTable ? '1px solid rgba(255,255,255,0.06)' : 'none', transition: 'all 0.2s ease', }}
                     >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <span style={{ fontSize: '14px' }}>💰</span>
-                            <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(245,245,220,0.7)', letterSpacing: '0.3px' }}>Investment Ledger</span>
-                            <span style={{ fontSize: '11px', color: 'rgba(245,245,220,0.3)', fontWeight: 400 }}>({investmentData.length} months)</span>
+                        <div className="flex items-center gap-2.5">
+                            <span className="text-sm">💰</span>
+                            <span className="text-[13px] font-semibold tracking-[0.3px]" style={{ color: 'rgba(245,245,220,0.7)' }}>Investment Ledger</span>
+                            <span className="text-[11px] font-normal" style={{ color: 'rgba(245,245,220,0.3)' }}>({investmentData.length} months)</span>
                         </div>
-                        <span style={{ fontSize: '12px', color: 'rgba(245,245,220,0.35)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', transform: showInvestmentLedgerTable ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block' }}>▼</span>
+                        <span className="text-xs inline-block" style={{ color: 'rgba(245,245,220,0.35)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', transform: showInvestmentLedgerTable ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
                     </button>
 
                     <div style={{ maxHeight: showInvestmentLedgerTable ? 'calc(100vh - 12rem)' : '0', overflow: showInvestmentLedgerTable ? 'auto' : 'hidden', transition: 'max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <table className="w-full" style={{ borderCollapse: 'collapse' }}>
                             <thead className="sticky top-0 z-10" style={{ background: '#121418', backdropFilter: 'blur(10px)' }}>
                                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                                    <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(245,245,220,0.4)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Month</th>
-                                    <th style={{ padding: '16px', textAlign: 'right', color: '#3b82f6', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Equity</th>
-                                    <th style={{ padding: '16px', textAlign: 'right', color: '#10b981', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Fixed Inc.</th>
-                                    <th style={{ padding: '16px', textAlign: 'right', color: '#ef4444', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Real Estate</th>
-                                    <th style={{ padding: '16px', textAlign: 'right', color: '#8b5cf6', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Pensions</th>
-                                    <th style={{ padding: '16px', textAlign: 'right', color: '#f59e0b', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Crypto</th>
-                                    <th style={{ padding: '16px', textAlign: 'right', color: '#ec4899', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Debt</th>
-                                    <th style={{ padding: '16px', textAlign: 'right', color: '#fff', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>Total</th>
-                                    <th style={{ padding: '16px', textAlign: 'center', width: '60px' }}></th>
+                                    <th className="p-4 text-left text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: 'rgba(245,245,220,0.4)' }}>Month</th>
+                                    <th className="p-4 text-right text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: '#3b82f6' }}>Equity</th>
+                                    <th className="p-4 text-right text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: '#10b981' }}>Fixed Inc.</th>
+                                    <th className="p-4 text-right text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: '#ef4444' }}>Real Estate</th>
+                                    <th className="p-4 text-right text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: '#8b5cf6' }}>Pensions</th>
+                                    <th className="p-4 text-right text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: '#f59e0b' }}>Crypto</th>
+                                    <th className="p-4 text-right text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: '#ec4899' }}>Debt</th>
+                                    <th className="p-4 text-right text-[11px] uppercase tracking-[1px] font-bold" style={{ color: '#fff' }}>Total</th>
+                                    <th className="p-4 text-center" style={{ width: '60px' }}></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -189,16 +185,16 @@ export default function LedgerInvestmentsView({
                                     return (
                                         <tr key={`${d.month}-${d.isHistorical ? 'rec' : 'live'}`} style={isLiveRow ? highlightStyle : { borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                                             <td style={{ padding: '14px 16px', color: 'rgba(245,245,220,0.7)', fontWeight: isLiveRow ? 700 : 400 }}>
-                                                {formatMonthLabel(d.month)} {isLiveRow && <span style={{ fontSize: '0.65rem', background: '#D4AF37', color: '#000', padding: '2px 6px', borderRadius: '4px', marginLeft: '8px', fontWeight: 700 }}>LIVE</span>}
+                                                {formatMonthLabel(d.month)} {isLiveRow && <span className="text-[0.65rem] rounded ml-2 font-bold" style={{ background: '#D4AF37', color: '#000', padding: '2px 6px' }}>LIVE</span>}
                                             </td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right', color: 'rgba(245,245,220,0.5)', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(d.equity, 'GBP')}</td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right', color: 'rgba(245,245,220,0.5)', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(d.fixedIncome, 'GBP')}</td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right', color: 'rgba(245,245,220,0.5)', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(d.realEstate, 'GBP')}</td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right', color: 'rgba(245,245,220,0.5)', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(d.pensions, 'GBP')}</td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right', color: 'rgba(245,245,220,0.5)', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(d.crypto, 'GBP')}</td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right', color: 'rgba(245,245,220,0.5)', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(d.debt, 'GBP')}</td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right', color: total >= 0 ? 'var(--vu-green)' : '#ef4444', fontWeight: 600, fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(total, 'GBP')}</td>
-                                            <td style={{ padding: '14px 8px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                                            <td className="text-right font-space text-[13px]" style={{ padding: '14px 16px', color: 'rgba(245,245,220,0.5)' }}>{formatCurrency(d.equity, 'GBP')}</td>
+                                            <td className="text-right font-space text-[13px]" style={{ padding: '14px 16px', color: 'rgba(245,245,220,0.5)' }}>{formatCurrency(d.fixedIncome, 'GBP')}</td>
+                                            <td className="text-right font-space text-[13px]" style={{ padding: '14px 16px', color: 'rgba(245,245,220,0.5)' }}>{formatCurrency(d.realEstate, 'GBP')}</td>
+                                            <td className="text-right font-space text-[13px]" style={{ padding: '14px 16px', color: 'rgba(245,245,220,0.5)' }}>{formatCurrency(d.pensions, 'GBP')}</td>
+                                            <td className="text-right font-space text-[13px]" style={{ padding: '14px 16px', color: 'rgba(245,245,220,0.5)' }}>{formatCurrency(d.crypto, 'GBP')}</td>
+                                            <td className="text-right font-space text-[13px]" style={{ padding: '14px 16px', color: 'rgba(245,245,220,0.5)' }}>{formatCurrency(d.debt, 'GBP')}</td>
+                                            <td className="text-right font-semibold font-space text-[13px]" style={{ padding: '14px 16px', color: total >= 0 ? 'var(--vu-green)' : '#ef4444' }}>{formatCurrency(total, 'GBP')}</td>
+                                            <td className="text-center whitespace-nowrap" style={{ padding: '14px 8px' }}>
                                                 {!isLiveRow && d.isHistorical && (
                                                     <>
                                                         <button onClick={() => handleEditClick('investments', d.month, { equity: d.equity, pensions: d.pensions, realEstate: d.realEstate, crypto: d.crypto, fixedIncome: d.fixedIncome, debt: d.debt })} style={{ ...actionBtnStyle, color: '#D4AF37' }} title="Edit">✏️</button>
@@ -211,18 +207,18 @@ export default function LedgerInvestmentsView({
                                 })}
                             </tbody>
                             <tfoot>
-                                <tr style={{ background: 'rgba(255,255,255,0.03)', fontWeight: 700 }}>
-                                    <td style={{ padding: '16px', color: 'rgba(245,245,220,0.6)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px' }}>TOTAL</td>
-                                    <td style={{ padding: '16px', textAlign: 'right', color: '#3b82f6', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(investmentData.reduce((acc, d) => acc + d.equity, 0), 'GBP')}</td>
-                                    <td style={{ padding: '16px', textAlign: 'right', color: '#10b981', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(investmentData.reduce((acc, d) => acc + d.fixedIncome, 0), 'GBP')}</td>
-                                    <td style={{ padding: '16px', textAlign: 'right', color: '#ef4444', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(investmentData.reduce((acc, d) => acc + d.realEstate, 0), 'GBP')}</td>
-                                    <td style={{ padding: '16px', textAlign: 'right', color: '#8b5cf6', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(investmentData.reduce((acc, d) => acc + d.pensions, 0), 'GBP')}</td>
-                                    <td style={{ padding: '16px', textAlign: 'right', color: '#f59e0b', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(investmentData.reduce((acc, d) => acc + d.crypto, 0), 'GBP')}</td>
-                                    <td style={{ padding: '16px', textAlign: 'right', color: '#ec4899', fontFamily: 'monospace', fontSize: '13px' }}>{formatCurrency(investmentData.reduce((acc, d) => acc + d.debt, 0), 'GBP')}</td>
-                                    <td style={{ padding: '16px', textAlign: 'right', color: investmentData.reduce((acc, d) => acc + d.equity + d.pensions + d.realEstate + d.crypto + d.fixedIncome + d.debt, 0) >= 0 ? 'var(--vu-green)' : '#ef4444', fontFamily: 'monospace', fontSize: '13px' }}>
+                                <tr className="font-bold" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                                    <td className="p-4 text-[11px] uppercase tracking-[1px]" style={{ color: 'rgba(245,245,220,0.6)' }}>TOTAL</td>
+                                    <td className="p-4 text-right font-space text-[13px]" style={{ color: '#3b82f6' }}>{formatCurrency(investmentData.reduce((acc, d) => acc + d.equity, 0), 'GBP')}</td>
+                                    <td className="p-4 text-right font-space text-[13px]" style={{ color: '#10b981' }}>{formatCurrency(investmentData.reduce((acc, d) => acc + d.fixedIncome, 0), 'GBP')}</td>
+                                    <td className="p-4 text-right font-space text-[13px]" style={{ color: '#ef4444' }}>{formatCurrency(investmentData.reduce((acc, d) => acc + d.realEstate, 0), 'GBP')}</td>
+                                    <td className="p-4 text-right font-space text-[13px]" style={{ color: '#8b5cf6' }}>{formatCurrency(investmentData.reduce((acc, d) => acc + d.pensions, 0), 'GBP')}</td>
+                                    <td className="p-4 text-right font-space text-[13px]" style={{ color: '#f59e0b' }}>{formatCurrency(investmentData.reduce((acc, d) => acc + d.crypto, 0), 'GBP')}</td>
+                                    <td className="p-4 text-right font-space text-[13px]" style={{ color: '#ec4899' }}>{formatCurrency(investmentData.reduce((acc, d) => acc + d.debt, 0), 'GBP')}</td>
+                                    <td className="p-4 text-right font-space text-[13px]" style={{ color: investmentData.reduce((acc, d) => acc + d.equity + d.pensions + d.realEstate + d.crypto + d.fixedIncome + d.debt, 0) >= 0 ? 'var(--vu-green)' : '#ef4444' }}>
                                         {formatCurrency(investmentData.reduce((acc, d) => acc + d.equity + d.pensions + d.realEstate + d.crypto + d.fixedIncome + d.debt, 0), 'GBP')}
                                     </td>
-                                    <td style={{ padding: '16px' }}></td>
+                                    <td className="p-4"></td>
                                 </tr>
                             </tfoot>
                         </table>

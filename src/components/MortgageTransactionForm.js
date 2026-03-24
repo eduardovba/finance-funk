@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import CurrencySelector from './CurrencySelector';
 import { SUPPORTED_CURRENCIES } from '@/lib/currency';
+import { Card } from '@/components/ui/card';
 
 export default function MortgageTransactionForm({ onAdd, onCancel }) {
     const [formData, setFormData] = useState(() => {
@@ -37,40 +38,27 @@ export default function MortgageTransactionForm({ onAdd, onCancel }) {
     };
 
     return (
-        <div className="glass-card" style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 1000,
-            width: '100%',
-            maxWidth: '450px',
-            padding: '32px',
-            border: '1px solid var(--glass-border)',
-            boxShadow: '0 24px 48px rgba(0,0,0,0.5)'
-        }}>
-            <h2 style={{ marginBottom: '24px' }}>Add Mortgage Payment</h2>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <Card variant="flat" className="w-full p-8" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1000, maxWidth: '450px', border: '1px solid var(--glass-border)', boxShadow: '0 24px 48px rgba(0,0,0,0.5)' }}>
+            <h2 className="mb-6">Add Mortgage Payment</h2>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Month (e.g. Feb-26)</label>
+                        <label className="block mb-2" style={{ fontSize: '0.8rem', color: 'white' }}>Month (e.g. Feb-26)</label>
                         <input
                             type="text"
                             value={formData.month}
                             onChange={(e) => setFormData({ ...formData, month: e.target.value })}
-                            className="glass-card"
                             placeholder="MMM-YY"
                             required
-                            style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
+                            className="w-full p-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         />
                     </div>
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Type</label>
+                        <label className="block mb-2" style={{ fontSize: '0.8rem', color: 'white' }}>Type</label>
                         <select
                             value={formData.type}
                             onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                            className="glass-card"
-                            style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
+                            className="w-full p-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         >
                             <option value="Mortgage" style={{ background: '#111' }}>Mortgage</option>
                             <option value="Fees" style={{ background: '#111' }}>Fees</option>
@@ -79,9 +67,9 @@ export default function MortgageTransactionForm({ onAdd, onCancel }) {
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1.5fr)', gap: '16px', alignItems: 'end' }}>
+                <div className="grid gap-4" style={{ gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1.5fr)', alignItems: 'end' }}>
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Total Paid ({currencySymbol})</label>
+                        <label className="block mb-2" style={{ fontSize: '0.8rem', color: 'white' }}>Total Paid ({currencySymbol})</label>
                         <input
                             type="number"
                             step="0.01"
@@ -89,8 +77,7 @@ export default function MortgageTransactionForm({ onAdd, onCancel }) {
                             onChange={(e) => setFormData({ ...formData, total: e.target.value })}
                             placeholder="0.00"
                             required
-                            className="glass-card"
-                            style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
+                            className="w-full p-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         />
                     </div>
                     <div>
@@ -100,39 +87,37 @@ export default function MortgageTransactionForm({ onAdd, onCancel }) {
                         />
                     </div>
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Interest ({currencySymbol})</label>
+                        <label className="block mb-2" style={{ fontSize: '0.8rem', color: 'white' }}>Interest ({currencySymbol})</label>
                         <input
                             type="number"
                             step="0.01"
                             value={formData.interest}
                             onChange={(e) => setFormData({ ...formData, interest: e.target.value })}
                             placeholder="0.00"
-                            className="glass-card"
-                            style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
+                            className="w-full p-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                         />
                     </div>
                 </div>
 
-                <div style={{ padding: '16px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', border: '1px solid var(--accent-color)' }}>
-                    <div style={{ color: 'var(--fg-secondary)', fontSize: '0.8rem', marginBottom: '4px' }}>Calculated Principal</div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: '600', color: 'var(--accent-color)' }}>
+                <div className="p-4 rounded-xl" style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid var(--accent-color)' }}>
+                    <div className="mb-1" style={{ color: 'var(--fg-secondary)', fontSize: '0.8rem' }}>Calculated Principal</div>
+                    <div className="text-2xl" style={{ fontWeight: '600', color: 'var(--accent-color)' }}>
                         {currencySymbol} {principal.toLocaleString(SUPPORTED_CURRENCIES[formData.currency]?.locale || 'en-GB', { minimumFractionDigits: 2 })}
                     </div>
                 </div>
 
                 <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', color: 'white', marginBottom: '8px' }}>Notes</label>
+                    <label className="block mb-2" style={{ fontSize: '0.8rem', color: 'white' }}>Notes</label>
                     <input
                         type="text"
                         value={formData.notes}
                         onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                        className="glass-card"
                         placeholder="Optional notes"
-                        style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
+                        className="w-full p-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white' }}
                     />
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div className="flex items-center gap-2">
                     <input
                         type="checkbox"
                         checked={formData.isSalaryContribution || false}
@@ -140,24 +125,16 @@ export default function MortgageTransactionForm({ onAdd, onCancel }) {
                         id="mortgage-salary-contribution"
                         style={{ width: '16px', height: '16px', accentColor: 'var(--accent-color)' }}
                     />
-                    <label htmlFor="mortgage-salary-contribution" style={{ color: '#fff', fontSize: '0.9rem', cursor: 'pointer' }}>
+                    <label htmlFor="mortgage-salary-contribution" className="text-[0.9rem] cursor-pointer" style={{ color: '#fff' }}>
                         Funded by Salary Contribution
                     </label>
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+                <div className="flex gap-3 mt-3">
                     <button type="submit" className="btn-primary" style={{ flex: 1 }}>Confirm payment</button>
-                    <button type="button" onClick={onCancel} style={{
-                        flex: 1,
-                        padding: '12px 24px',
-                        borderRadius: '12px',
-                        border: '1px solid var(--glass-border)',
-                        background: 'transparent',
-                        color: '#94a3b8',
-                        cursor: 'pointer'
-                    }}>Cancel</button>
+                    <button type="button" onClick={onCancel} className="rounded-xl cursor-pointer" style={{ flex: 1, padding: '12px 24px', border: '1px solid var(--glass-border)', background: 'transparent', color: '#94a3b8' }}>Cancel</button>
                 </div>
             </form>
-        </div>
+        </Card>
     );
 }

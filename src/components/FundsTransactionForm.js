@@ -42,23 +42,14 @@ export default function FundsTransactionForm({ onSubmit, onCancel }) {
     };
 
     return (
-        <div style={{
-            position: 'relative',
-            background: 'var(--card-bg)',
-            borderRadius: '16px',
-            padding: '32px',
-            maxWidth: '600px',
-            width: '90vw',
-            border: '1px solid var(--glass-border)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
-        }}>
-            <h2 style={{ margin: '0 0 24px 0', fontSize: '1.5rem' }}>Add Fund Transaction</h2>
+        <div className="relative rounded-2xl p-8" style={{ background: 'var(--card-bg)', maxWidth: '600px', width: '90vw', border: '1px solid var(--glass-border)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+            <h2 className="text-2xl" style={{ margin: '0 0 24px 0' }}>Add Fund Transaction</h2>
 
             <form onSubmit={handleSubmit}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div className="flex flex-col gap-4">
                     {/* Date */}
                     <div>
-                        <label style={{ display: 'block', color: 'var(--fg-secondary)', fontSize: '0.85rem', marginBottom: '6px' }}>
+                        <label className="block mb-1.5" style={{ color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>
                             Date *
                         </label>
                         <input
@@ -66,21 +57,13 @@ export default function FundsTransactionForm({ onSubmit, onCancel }) {
                             value={formData.date}
                             onChange={(e) => handleChange('date', e.target.value)}
                             required
-                            style={{
-                                width: '100%',
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid var(--glass-border)',
-                                borderRadius: '8px',
-                                padding: '10px 12px',
-                                color: 'var(--fg-primary)',
-                                fontSize: '0.9rem'
-                            }}
+                            className="w-full rounded-lg text-[0.9rem]" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '10px 12px', color: 'var(--fg-primary)' }}
                         />
                     </div>
 
                     {/* Fund */}
                     <div>
-                        <label style={{ display: 'block', color: 'var(--fg-secondary)', fontSize: '0.85rem', marginBottom: '6px' }}>
+                        <label className="block mb-1.5" style={{ color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>
                             Fund *
                         </label>
                         <input
@@ -89,24 +72,16 @@ export default function FundsTransactionForm({ onSubmit, onCancel }) {
                             onChange={(e) => handleChange('fund', e.target.value)}
                             placeholder="e.g., XP - PVBI11"
                             required
-                            style={{
-                                width: '100%',
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid var(--glass-border)',
-                                borderRadius: '8px',
-                                padding: '10px 12px',
-                                color: 'var(--fg-primary)',
-                                fontSize: '0.9rem'
-                            }}
+                            className="w-full rounded-lg text-[0.9rem]" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '10px 12px', color: 'var(--fg-primary)' }}
                         />
                     </div>
 
                     {/* Investment & Currency Row */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
                         <div>
-                            <label style={{ display: 'block', color: 'var(--fg-secondary)', fontSize: '0.85rem', marginBottom: '6px' }}>
+                            <label className="block mb-1.5" style={{ color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>
                                 Investment ({currencySymbol}) *
-                                <span style={{ fontSize: '0.75rem', marginLeft: '8px', color: 'var(--fg-tertiary)' }}>
+                                <span className="text-xs ml-2" style={{ color: 'var(--fg-tertiary)' }}>
                                     Use negative for sales
                                 </span>
                             </label>
@@ -117,15 +92,7 @@ export default function FundsTransactionForm({ onSubmit, onCancel }) {
                                 onChange={(e) => handleChange('investment', e.target.value)}
                                 placeholder="0.00"
                                 required
-                                style={{
-                                    width: '100%',
-                                    background: 'rgba(255,255,255,0.05)',
-                                    border: '1px solid var(--glass-border)',
-                                    borderRadius: '8px',
-                                    padding: '10px 12px',
-                                    color: 'var(--fg-primary)',
-                                    fontSize: '0.9rem'
-                                }}
+                                className="w-full rounded-lg text-[0.9rem]" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '10px 12px', color: 'var(--fg-primary)' }}
                             />
                         </div>
                         <div>
@@ -139,9 +106,9 @@ export default function FundsTransactionForm({ onSubmit, onCancel }) {
 
                     {/* Quantity */}
                     <div>
-                        <label style={{ display: 'block', color: 'var(--fg-secondary)', fontSize: '0.85rem', marginBottom: '6px' }}>
+                        <label className="block mb-1.5" style={{ color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>
                             Quantity of Shares *
-                            <span style={{ fontSize: '0.75rem', marginLeft: '8px', color: 'var(--fg-tertiary)' }}>
+                            <span className="text-xs ml-2" style={{ color: 'var(--fg-tertiary)' }}>
                                 Use negative for sales
                             </span>
                         </label>
@@ -152,23 +119,15 @@ export default function FundsTransactionForm({ onSubmit, onCancel }) {
                             onChange={(e) => handleChange('quantity', e.target.value)}
                             placeholder="0"
                             required
-                            style={{
-                                width: '100%',
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid var(--glass-border)',
-                                borderRadius: '8px',
-                                padding: '10px 12px',
-                                color: 'var(--fg-primary)',
-                                fontSize: '0.9rem'
-                            }}
+                            className="w-full rounded-lg text-[0.9rem]" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '10px 12px', color: 'var(--fg-primary)' }}
                         />
                     </div>
 
                     {/* Cost Per Share */}
                     <div>
-                        <label style={{ display: 'block', color: 'var(--fg-secondary)', fontSize: '0.85rem', marginBottom: '6px' }}>
+                        <label className="block mb-1.5" style={{ color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>
                             Cost / Share ({currencySymbol}) *
-                            <span style={{ fontSize: '0.75rem', marginLeft: '8px', color: 'var(--fg-tertiary)' }}>
+                            <span className="text-xs ml-2" style={{ color: 'var(--fg-tertiary)' }}>
                                 Auto-calculated
                             </span>
                         </label>
@@ -179,19 +138,11 @@ export default function FundsTransactionForm({ onSubmit, onCancel }) {
                             onChange={(e) => handleChange('costPerShare', e.target.value)}
                             placeholder="0.00"
                             required
-                            style={{
-                                width: '100%',
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid var(--glass-border)',
-                                borderRadius: '8px',
-                                padding: '10px 12px',
-                                color: 'var(--fg-primary)',
-                                fontSize: '0.9rem'
-                            }}
+                            className="w-full rounded-lg text-[0.9rem]" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '10px 12px', color: 'var(--fg-primary)' }}
                         />
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 4px' }}>
+                    <div className="flex items-center gap-2" style={{ padding: '0 4px' }}>
                         <input
                             type="checkbox"
                             checked={formData.isSalaryContribution || false}
@@ -199,26 +150,17 @@ export default function FundsTransactionForm({ onSubmit, onCancel }) {
                             id="fund-salary-contribution"
                             style={{ width: '16px', height: '16px', accentColor: 'var(--accent-color)' }}
                         />
-                        <label htmlFor="fund-salary-contribution" style={{ color: '#fff', fontSize: '0.9rem', cursor: 'pointer' }}>
+                        <label htmlFor="fund-salary-contribution" className="text-[0.9rem] cursor-pointer" style={{ color: '#fff' }}>
                             Funded by Salary Contribution
                         </label>
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px' }}>
+                <div className="flex justify-end gap-3 mt-8">
                     <button
                         type="button"
                         onClick={onCancel}
-                        style={{
-                            background: 'transparent',
-                            border: '1px solid var(--glass-border)',
-                            borderRadius: '8px',
-                            padding: '10px 24px',
-                            color: 'var(--fg-primary)',
-                            fontSize: '0.9rem',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
-                        }}
+                        className="rounded-lg text-[0.9rem] cursor-pointer" style={{ background: 'transparent', border: '1px solid var(--glass-border)', padding: '10px 24px', color: 'var(--fg-primary)', transition: 'all 0.2s' }}
                         onMouseEnter={(e) => {
                             e.target.style.background = 'rgba(255,255,255,0.05)';
                         }}
@@ -230,11 +172,7 @@ export default function FundsTransactionForm({ onSubmit, onCancel }) {
                     </button>
                     <button
                         type="submit"
-                        className="btn-primary"
-                        style={{
-                            padding: '10px 24px',
-                            fontSize: '0.9rem'
-                        }}
+                        className="btn-primary text-[0.9rem]" style={{ padding: '10px 24px' }}
                     >
                         Add Transaction
                     </button>

@@ -77,7 +77,7 @@ export default function StepMap({ sheetsConfig, setSheetsConfig, onNext, onBack 
             )}
 
             {/* AI Detection Banner */}
-            <div className="flex items-center gap-3 !py-3">
+            <Card variant="flat" className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center flex-shrink-0">
                     <Sparkles size={16} className="text-[#D4AF37]" />
                 </div>
@@ -90,10 +90,10 @@ export default function StepMap({ sheetsConfig, setSheetsConfig, onNext, onBack 
                     </p>
                 </div>
                 {hasDate && hasAmount && <Check size={18} className="text-emerald-400" />}
-            </div>
+            </Card>
 
             {/* Mapping Table */}
-            <div className="!p-0 overflow-hidden">
+            <Card variant="flat" className="!p-0 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
@@ -148,7 +148,7 @@ export default function StepMap({ sheetsConfig, setSheetsConfig, onNext, onBack 
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </Card>
 
             {/* Validation warnings */}
             {!hasDate && (

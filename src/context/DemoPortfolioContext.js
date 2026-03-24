@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { formatCurrency, convertCurrency } from '@/lib/currency';
 import demoData from '@/lib/demoData';
 import {
@@ -15,8 +15,57 @@ import {
 import { normalizeTransactions, calculateMonthlyInvestments } from '@/lib/ledgerUtils';
 import pensionMap from '@/data/pension_fund_map.json';
 import { PortfolioContext } from '@/context/PortfolioContext';
+import usePortfolioStore from '@/stores/usePortfolioStore';
+import useMarketStore from '@/stores/useMarketStore';
+import { setQueriesEnabled } from '@/hooks/useQueries';
 
 export function DemoPortfolioProvider({ children, onSignUpPrompt }) {
+    // ═══════════ DISABLE TANSTACK QUERY IN DEMO MODE ═══════════
+    useEffect(() => {
+        setQueriesEnabled(false);
+        return () => setQueriesEnabled(true);
+    }, []);
+
+    // ═══════════ SEED ZUSTAND STORES WITH DEMO DATA ═══════════
+    useEffect(() => {
+        usePortfolioStore.getState().setAllData({
+            transactions: demoData.transactions || [],
+            equityTransactions: demoData.equityTransactions || [],
+            cryptoTransactions: demoData.cryptoTransactions || [],
+            pensionTransactions: demoData.pensionTransactions || [],
+            debtTransactions: demoData.debtTransactions || [],
+            realEstate: demoData.realEstate || null,
+            fixedIncomeTransactions: demoData.fixedIncomeTransactions || [],
+            historicalSnapshots: demoData.historicalSnapshots || [],
+            ledgerData: demoData.ledgerData || '',
+            isInitialLoading: false,
+            lastUpdated: new Date(),
+        });
+
+        useMarketStore.getState().setMarketData(demoData.marketData || {});
+        if (demoData.pensionPrices) {
+            useMarketStore.getState().setPensionPrices(demoData.pensionPrices);
+        }
+
+        return () => {
+            // Clean up on unmount
+            usePortfolioStore.getState().setAllData({
+                transactions: [],
+                equityTransactions: [],
+                cryptoTransactions: [],
+                pensionTransactions: [],
+                debtTransactions: [],
+                realEstate: null,
+                fixedIncomeTransactions: [],
+                historicalSnapshots: [],
+                ledgerData: '',
+                isInitialLoading: true,
+                lastUpdated: null,
+            });
+            useMarketStore.getState().setMarketData({});
+            useMarketStore.getState().setPensionPrices({});
+        };
+    }, []);
     // ═══════════ STATIC DEMO DATA ═══════════
     const [transactions] = useState(demoData.transactions);
     const [equityTransactions] = useState(demoData.equityTransactions);

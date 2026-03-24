@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Card } from '@/components/ui/card';
 
 export default function AssetSearch({ onSelect }) {
     const [query, setQuery] = useState('');
@@ -94,7 +95,7 @@ export default function AssetSearch({ onSelect }) {
             </div>
 
             {isOpen && results.length > 0 && (
-                <div className="glass-card" style={{
+                <Card style={{
                     position: 'absolute',
                     top: '110%',
                     left: 0,
@@ -130,7 +131,7 @@ export default function AssetSearch({ onSelect }) {
                             </span>
                         </div>
                     ))}
-                </div>
+                </Card>
             )}
         </div>
     );

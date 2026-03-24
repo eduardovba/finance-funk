@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Globe, ChevronRight, Info, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
+import { Card } from '@/components/ui/card';
 
 /**
  * ProviderPicker — displays a grid of supported financial providers
@@ -25,7 +26,7 @@ export default function ProviderPicker({ providers, onSelect, onBack }) {
                 className="space-y-6"
             >
                 {/* Selected Provider Header */}
-                <div className="glass-card flex items-center gap-4">
+                <Card variant="flat" className="flex items-center gap-4">
                     <div
                         className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden"
                         style={selectedProvider.logo
@@ -56,10 +57,10 @@ export default function ProviderPicker({ providers, onSelect, onBack }) {
                             </span>
                         ))}
                     </div>
-                </div>
+                </Card>
 
                 {/* Export Instructions */}
-                <div className="glass-card">
+                <Card variant="flat">
                     <div className="flex items-center gap-2 mb-4">
                         <Info size={16} className="text-[#D4AF37]/60" />
                         <h4 className="text-[#D4AF37] font-bebas text-lg tracking-widest m-0">
@@ -86,7 +87,7 @@ export default function ProviderPicker({ providers, onSelect, onBack }) {
                             Supported formats: {selectedProvider.supportedFormats.map(f => f.toUpperCase()).join(', ')}
                         </p>
                     </div>
-                </div>
+                </Card>
 
                 {/* Actions */}
                 <div className="flex justify-between gap-4">
@@ -155,7 +156,7 @@ function ProviderGroup({ title, providers, onSelect }) {
                         whileHover={{ scale: 1.02, y: -2 }}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => onSelect(provider)}
-                        className="group p-4 rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#D4AF37]/30 hover:bg-white/[0.06] text-left transition-all cursor-pointer"
+                        className="group p-4 rounded-2xl bg-[rgba(18,20,24,0.55)] backdrop-blur-[24px] backdrop-saturate-150 border border-[rgba(255,255,255,0.06)] border-t-[rgba(255,255,255,0.1)] shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-[#D4AF37]/30 text-left transition-all cursor-pointer"
                     >
                         <div className="flex items-center gap-3 mb-2">
                             <span

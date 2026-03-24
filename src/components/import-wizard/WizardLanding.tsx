@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FileSpreadsheet, Building2, FileText } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+
 
 interface WizardLandingProps {
     onChooseProvider: () => void;
@@ -23,18 +23,18 @@ export default function WizardLanding({ onChooseProvider, onChooseGeneric }: Wiz
                 initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
                 className="font-bebas text-3xl md:text-4xl tracking-widest text-gradient m-0 mb-8"
             >
-                Bring Your Data Home
+                Update Your Positions
             </motion.h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <motion.button
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    whileHover={{ scale: 1.02, y: -4 }}
+                    transition={{ delay: 0.1, type: 'spring', stiffness: 400, damping: 25 }}
+                    whileHover={{ scale: 1.015, y: -3 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={onChooseProvider}
-                    className="group text-left cursor-pointer border-white/10 hover:border-[#D4AF37]/40 transition-all"
+                    className="group text-left cursor-pointer bg-[rgba(18,20,24,0.55)] backdrop-blur-[24px] backdrop-saturate-150 border border-[rgba(255,255,255,0.06)] border-t-[rgba(255,255,255,0.1)] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.3)] p-6 hover:border-[#D4AF37]/40 transition-all"
                 >
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#D4AF37]/20 to-[#CC5500]/10 flex items-center justify-center mb-4 group-hover:from-[#D4AF37]/30 group-hover:to-[#CC5500]/20 transition-all">
                         <Building2 size={28} className="text-[#D4AF37]" />
@@ -57,11 +57,11 @@ export default function WizardLanding({ onChooseProvider, onChooseGeneric }: Wiz
                 <motion.button
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    whileHover={{ scale: 1.02, y: -4 }}
+                    transition={{ delay: 0.2, type: 'spring', stiffness: 400, damping: 25 }}
+                    whileHover={{ scale: 1.015, y: -3 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={onChooseGeneric}
-                    className="group text-left cursor-pointer border-white/10 hover:border-[#D4AF37]/40 transition-all"
+                    className="group text-left cursor-pointer bg-[rgba(18,20,24,0.55)] backdrop-blur-[24px] backdrop-saturate-150 border border-[rgba(255,255,255,0.06)] border-t-[rgba(255,255,255,0.1)] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.3)] p-6 hover:border-[#D4AF37]/40 transition-all"
                 >
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#D4AF37]/20 to-[#CC5500]/10 flex items-center justify-center mb-4 group-hover:from-[#D4AF37]/30 group-hover:to-[#CC5500]/20 transition-all">
                         <FileText size={28} className="text-[#D4AF37]" />

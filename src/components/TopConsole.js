@@ -57,6 +57,7 @@ export default function TopConsole() {
         { id: 'crypto', href: '/assets/crypto', label: 'Crypto', icon: Bitcoin },
         { id: 'pensions', href: '/assets/pensions', label: 'Pensions', icon: Wallet },
         { id: 'debt', href: '/assets/debt', label: 'Debt', icon: CreditCard },
+        { id: 'import', href: '/import', label: 'Import', icon: Upload },
     ];
 
     const activeAssetTab = assetTabs.find(t => pathname.startsWith(t.href));

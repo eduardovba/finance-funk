@@ -29,10 +29,10 @@ const CURRENCY_SYMBOLS = { BRL: "R$", GBP: "£", USD: "$", EUR: "€", AUD: "A$"
 
 /* ─── Transition config ─── */
 const stepTransition = {
-    initial: { opacity: 0, x: 40 },
-    animate: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -40 },
-    transition: { duration: 0.3, ease: "easeInOut" },
+    initial: { opacity: 0, x: 30, scale: 0.98 },
+    animate: { opacity: 1, x: 0, scale: 1 },
+    exit: { opacity: 0, x: -30, scale: 0.98 },
+    transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
 };
 
 /* ─── SVG Icons ─── */
@@ -140,9 +140,21 @@ function StepGoal({ selectedGoal, setSelectedGoal, onContinue, onSkip }) {
         <motion.div key="step-1" {...stepTransition}>
             <ProfessorF
                 pose="welcome"
-                message={GOAL_MESSAGES[selectedGoal] || "Welcome to Finance Funk! What are you looking to do?"}
                 animate
             />
+            <AnimatePresence mode="wait">
+                <motion.p
+                    key={selectedGoal || 'default'}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.2 }}
+                    className="onboarding-subtitle"
+                    style={{ minHeight: '2em', marginBottom: 0 }}
+                >
+                    {GOAL_MESSAGES[selectedGoal] || "Welcome to Finance Funk! What are you looking to do?"}
+                </motion.p>
+            </AnimatePresence>
 
             <h1 className="onboarding-heading" style={{ fontSize: "1.6rem", marginTop: 24 }}>
                 What&apos;s Your Vibe?
@@ -152,7 +164,7 @@ function StepGoal({ selectedGoal, setSelectedGoal, onContinue, onSkip }) {
             </p>
 
             <div className="goal-cards" role="radiogroup" aria-label="Select your financial goal">
-                <div
+                <motion.div
                     ref={firstCardRef}
                     className={`goal-card ${selectedGoal === "budget" ? "selected" : ""}`}
                     onClick={() => setSelectedGoal("budget")}
@@ -160,45 +172,55 @@ function StepGoal({ selectedGoal, setSelectedGoal, onContinue, onSkip }) {
                     role="radio"
                     aria-checked={selectedGoal === "budget"}
                     tabIndex={0}
+                    whileTap={{ scale: 0.97 }}
+                    animate={selectedGoal === "budget" ? { scale: [1, 1.02, 1], transition: { duration: 0.3 } } : {}}
                 >
                     <div className="goal-check"><CheckIcon /></div>
                     <div className="goal-icon"><WalletIcon color="#D4AF37" /></div>
                     <h3 className="goal-title">Budget Tracking</h3>
                     <p className="goal-desc">Track spending, manage categories, and hit your savings goals</p>
-                </div>
+                </motion.div>
 
-                <div
+                <motion.div
                     className={`goal-card ${selectedGoal === "investments" ? "selected-orange" : ""}`}
                     onClick={() => setSelectedGoal("investments")}
                     onKeyDown={(e) => handleKeyDown(e, "investments")}
                     role="radio"
                     aria-checked={selectedGoal === "investments"}
                     tabIndex={0}
+                    whileTap={{ scale: 0.97 }}
+                    animate={selectedGoal === "investments" ? { scale: [1, 1.02, 1], transition: { duration: 0.3 } } : {}}
                 >
                     <div className="goal-check"><CheckIcon /></div>
                     <div className="goal-icon"><ChartIcon color="#CC5500" /></div>
                     <h3 className="goal-title">Investment Tracking</h3>
                     <p className="goal-desc">Monitor your portfolio, track returns, and manage multi-currency assets</p>
-                </div>
+                </motion.div>
 
-                <div
+                <motion.div
                     className={`goal-card full-width ${selectedGoal === "both" ? "selected-gradient" : ""}`}
                     onClick={() => setSelectedGoal("both")}
                     onKeyDown={(e) => handleKeyDown(e, "both")}
                     role="radio"
                     aria-checked={selectedGoal === "both"}
                     tabIndex={0}
+                    whileTap={{ scale: 0.97 }}
+                    animate={selectedGoal === "both" ? { scale: [1, 1.02, 1], transition: { duration: 0.3 } } : {}}
                 >
                     <div className="goal-check"><CheckIcon /></div>
                     <div className="goal-icon"><GuitarIcon color="#D4AF37" /></div>
                     <h3 className="goal-title">The Full Groove</h3>
                     <p className="goal-desc">Budget tracking AND investment management — the complete experience</p>
-                </div>
+                </motion.div>
             </div>
 
-            <button type="button" className="btn-primary" disabled={!selectedGoal} onClick={onContinue}>
+            <motion.button
+                type="button" className="btn-primary" disabled={!selectedGoal} onClick={onContinue}
+                animate={selectedGoal ? { scale: [1, 1.03, 1] } : {}}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+            >
                 Continue
-            </button>
+            </motion.button>
             <button type="button" className="link-skip" onClick={onSkip}>
                 Skip for now
             </button>

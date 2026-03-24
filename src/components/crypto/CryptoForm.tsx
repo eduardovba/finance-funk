@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import _AssetSearch from '../AssetSearch';
 import _BrokerForm from '../BrokerForm';
 import _CurrencySelector from '../CurrencySelector';
+import { Card } from '@/components/ui/card';
 const AssetSearch = _AssetSearch as any;
 const BrokerForm = _BrokerForm as any;
 const CurrencySelector = _CurrencySelector as any;
@@ -259,70 +260,70 @@ export default function CryptoForm({
     const renderSellModal = () => {
         if (!isSellModalOpen || !sellData) return null;
         return (
-            <div style={{ position: 'fixed', inset: 0, zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} onClick={() => setIsSellModalOpen(false)} />
-                <div className="glass-card" style={{ position: 'relative', zIndex: 1000, padding: '32px', width: '520px', maxWidth: '90vw' }}>
-                    <h3 style={{ marginBottom: '8px', fontSize: '1.3rem', color: 'var(--error)' }}>Sell {sellData.asset}</h3>
-                    <p style={{ margin: '0 0 24px', color: 'var(--fg-secondary)', fontSize: '0.9rem' }}>
+            <div className="flex items-center justify-center" style={{ position: 'fixed', inset: 0, zIndex: 999 }}>
+                <div className="absolute" style={{ inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} onClick={() => setIsSellModalOpen(false)} />
+                <Card variant="flat" className="relative p-8" style={{ zIndex: 1000, width: '520px', maxWidth: '90vw' }}>
+                    <h3 className="mb-2" style={{ fontSize: '1.3rem', color: 'var(--error)' }}>Sell {sellData.asset}</h3>
+                    <p className="text-[0.9rem]" style={{ margin: '0 0 24px', color: 'var(--fg-secondary)' }}>
                         {sellData.broker} · {sellData.sharesHeld.toLocaleString(undefined, { maximumFractionDigits: 4 })} shares held · Avg cost: {formatCurrency(sellData.avgCost, sellData.currency)}
                     </p>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                    <div className="grid gap-4 mb-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Date</label>
+                            <label className="block mb-1" style={{ color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Date</label>
                             <input type="text" value={sellData.date} onChange={e => setSellData((prev: any) => ({ ...prev, date: e.target.value }))}
-                                style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
+                                className="w-full rounded-lg" style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
                         </div>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Currency</label>
+                            <label className="block mb-1" style={{ color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Currency</label>
                             <input type="text" value={sellData.currency} readOnly
-                                style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--fg-secondary)', fontSize: '0.95rem', outline: 'none' }} />
+                                className="w-full rounded-lg" style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--fg-secondary)', fontSize: '0.95rem', outline: 'none' }} />
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+                    <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: '1fr 1fr' }}>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Quantity to Sell</label>
+                            <label className="block mb-1" style={{ color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Quantity to Sell</label>
                             <input type="number" value={sellData.qtyToSell} onChange={e => updateSellCalc('qtyToSell', e.target.value)}
                                 max={sellData.sharesHeld} step="any"
-                                style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
+                                className="w-full rounded-lg" style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
                         </div>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '4px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Sell Price / Share</label>
+                            <label className="block mb-1" style={{ color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Sell Price / Share</label>
                             <input type="number" value={sellData.sellPricePerShare} onChange={e => updateSellCalc('sellPricePerShare', e.target.value)}
                                 step="any"
-                                style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
+                                className="w-full rounded-lg" style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
                         </div>
                     </div>
 
-                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '20px', marginBottom: '24px', border: '1px solid var(--glass-border)' }}>
-                        <div style={{ marginBottom: '16px' }}>
-                            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Total Sale Value (Proceeds)</label>
-                            <div style={{ position: 'relative' }}>
-                                <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--fg-secondary)' }}>
+                    <div className="rounded-xl p-5 mb-6" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)' }}>
+                        <div className="mb-4">
+                            <label className="block mb-2" style={{ color: 'var(--fg-secondary)', fontSize: '0.85rem' }}>Total Sale Value (Proceeds)</label>
+                            <div className="relative">
+                                <span className="absolute" style={{ left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--fg-secondary)' }}>
                                     {sellData.currency === 'BRL' ? 'R$' : (sellData.currency === 'USD' ? '$' : '£')}
                                 </span>
                                 <input type="number" value={sellData.totalProceeds} onChange={e => updateSellCalc('totalProceeds', e.target.value)} step="any"
-                                    style={{ width: '100%', padding: '10px 12px 10px 32px', background: 'rgba(255,255,255,0.08)', border: '1px solid var(--accent-color)', borderRadius: '8px', color: '#fff', fontSize: '1.1rem', fontWeight: 600, outline: 'none' }} />
+                                    className="w-full rounded-lg text-lg font-semibold" style={{ padding: '10px 12px 10px 32px', background: 'rgba(255,255,255,0.08)', border: '1px solid var(--accent-color)', color: '#fff', outline: 'none' }} />
                             </div>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                        <div className="flex justify-between mb-3">
                             <span style={{ color: 'var(--fg-secondary)' }}>Cost Basis</span>
                             <span style={{ color: 'var(--fg-secondary)' }}>{formatCurrency(sellData.avgCost * (parseFloat(sellData.qtyToSell) || 0), sellData.currency)}</span>
                         </div>
-                        <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between' }}>
-                            <span style={{ fontWeight: 600 }}>P&L</span>
-                            <span style={{ fontWeight: 700, fontSize: '1.1rem', color: sellData.pnl >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
+                        <div className="flex justify-between" style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '12px' }}>
+                            <span className="font-semibold">P&L</span>
+                            <span className="font-bold text-lg" style={{ color: sellData.pnl >= 0 ? 'var(--vu-green)' : 'var(--error)' }}>
                                 {sellData.pnl >= 0 ? '+' : ''}{formatCurrency(sellData.pnl, sellData.currency)} ({sellData.roi >= 0 ? '+' : ''}{sellData.roi.toFixed(1)}%)
                             </span>
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                    <div className="flex gap-3 justify-end">
                         <Button variant="secondary" onClick={() => setIsSellModalOpen(false)}>Cancel</Button>
                         <Button variant="danger" onClick={handleSellConfirm}>Confirm Sale</Button>
                     </div>
-                </div>
+                </Card>
             </div>
         );
     };
