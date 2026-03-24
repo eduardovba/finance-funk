@@ -47,7 +47,7 @@ export default function FirstGrooveFlow() {
     if (!ftueState.wizardCompleted) return null;
     if (ftueState.showFirstVisitGreeting) return null; // Wait for greeting to dismiss
     if (ftueState.usingDemoData) return null;
-    if (ftueState.checklistItems?.addFirstHolding || ftueState.checklistItems?.importHistory) return null;
+    if (ftueState.checklistItems?.addFirstHolding || ftueState.checklistItems?.importHistory || ftueState.checklistItems?.firstGrooveDismissed) return null;
     if (dismissed) return null;
 
     // ─── Budget Submit ───
@@ -179,7 +179,15 @@ export default function FirstGrooveFlow() {
         }
     };
 
-    const handleDismiss = () => setDismissed(true);
+    const handleDismiss = () => {
+        setDismissed(true);
+        updateFtueProgress({
+            checklistItems: {
+                ...ftueState.checklistItems,
+                firstGrooveDismissed: true,
+            },
+        });
+    };
     const handleCelebrationDone = () => {
         setShowCelebration(false);
         setDismissed(true);
