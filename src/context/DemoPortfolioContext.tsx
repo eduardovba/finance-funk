@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { formatCurrency, convertCurrency } from '@/lib/currency';
 import demoData from '@/lib/demoData';
 import {
@@ -19,7 +19,12 @@ import usePortfolioStore from '@/stores/usePortfolioStore';
 import useMarketStore from '@/stores/useMarketStore';
 import { setQueriesEnabled } from '@/hooks/useQueries';
 
-export function DemoPortfolioProvider({ children, onSignUpPrompt }) {
+interface DemoPortfolioProviderProps {
+    children: React.ReactNode;
+    onSignUpPrompt?: (action: string) => void;
+}
+
+export function DemoPortfolioProvider({ children, onSignUpPrompt }: DemoPortfolioProviderProps) {
     // ═══════════ DISABLE TANSTACK QUERY IN DEMO MODE ═══════════
     useEffect(() => {
         setQueriesEnabled(false);
@@ -79,10 +84,10 @@ export function DemoPortfolioProvider({ children, onSignUpPrompt }) {
     const [pensionPrices] = useState(demoData.pensionPrices);
     const [rates] = useState(demoData.rates);
     const [ledgerData] = useState(demoData.ledgerData);
-    const [fxHistory] = useState(demoData.fxHistory);
+    const [fxHistory] = useState<Record<string, Record<string, number>>>(demoData.fxHistory as any);
     const [forecastSettings, setForecastSettings] = useState(demoData.forecastSettings);
     const [allocationTargets] = useState(demoData.allocationTargets);
-    const [assetClasses, setAssetClasses] = useState(demoData.assetClasses);
+    const [assetClasses, setAssetClasses] = useState<Record<string, any>>(demoData.assetClasses as any);
     const [appSettings] = useState(demoData.appSettings || {});
     const [dashboardConfig, setDashboardConfig] = useState(demoData.dashboardConfig);
 
@@ -109,17 +114,17 @@ export function DemoPortfolioProvider({ children, onSignUpPrompt }) {
     const [rateFlipped, setRateFlipped] = useState(false);
     const [displayCurrencyOverrides, setDisplayCurrencyOverrideState] = useState({});
 
-    const setDisplayCurrencyOverride = useCallback((category, value) => {
+    const setDisplayCurrencyOverride = useCallback((category: string, value: string | null) => {
         setDisplayCurrencyOverrideState(prev => ({ ...prev, [category]: value }));
     }, []);
 
-    const formatPrimary = useCallback((amount, options = {}) =>
+    const formatPrimary = useCallback((amount: number, options: any = {}) =>
         formatCurrency(amount, primaryCurrency, options), [primaryCurrency]);
-    const formatSecondary = useCallback((amount, options = {}) =>
+    const formatSecondary = useCallback((amount: number, options: any = {}) =>
         formatCurrency(amount, secondaryCurrency, options), [secondaryCurrency]);
-    const toPrimary = useCallback((amount, fromCurrency = 'GBP') =>
+    const toPrimary = useCallback((amount: number, fromCurrency = 'GBP') =>
         convertCurrency(amount, fromCurrency, primaryCurrency, rates), [primaryCurrency, rates]);
-    const toSecondary = useCallback((amount, fromCurrency = 'GBP') =>
+    const toSecondary = useCallback((amount: number, fromCurrency = 'GBP') =>
         convertCurrency(amount, fromCurrency, secondaryCurrency, rates), [secondaryCurrency, rates]);
 
     // ═══════════ FTUE STATE (demo mode) ═══════════
@@ -138,7 +143,7 @@ export function DemoPortfolioProvider({ children, onSignUpPrompt }) {
     });
 
     // ═══════════ INTERCEPTED WRITE OPERATIONS ═══════════
-    const promptSignUp = useCallback((action) => {
+    const promptSignUp = useCallback((action: string) => {
         if (onSignUpPrompt) onSignUpPrompt(action);
     }, [onSignUpPrompt]);
 
@@ -152,7 +157,7 @@ export function DemoPortfolioProvider({ children, onSignUpPrompt }) {
     const fetchMarketData = useCallback(async () => {}, []);
     const forceRefreshMarketData = useCallback(async () => {}, []);
     const handleUpdateAppSettings = useCallback(() => promptSignUp('settings'), [promptSignUp]);
-    const updateFtueProgress = useCallback(async () => ftueState, [ftueState]);
+    const updateFtueProgress = useCallback(async (_updates: any) => ftueState, [ftueState]);
 
     // ═══════════ MEMOIZED SUMMARIES ═══════════
     const fixedIncomeData = useMemo(() =>
@@ -184,7 +189,7 @@ export function DemoPortfolioProvider({ children, onSignUpPrompt }) {
         + totalPensionBRL + totalRealEstateBRL - totalDebtBRL;
 
     const sortedTransactions = useMemo(() =>
-        [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date)),
+        [...transactions].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()),
         [transactions]);
 
     const monthlyInvestments = useMemo(() => {
@@ -192,8 +197,8 @@ export function DemoPortfolioProvider({ children, onSignUpPrompt }) {
         const allLive = normalizeTransactions({
             equity: equityTransactions, crypto: cryptoTransactions,
             pensions: pensionTransactions, debt: debtTransactions,
-            fixedIncome: transactions, realEstate
-        }, rates, fxHistory);
+            fixedIncome: transactions, realEstate: realEstate
+        } as any, rates, fxHistory);
         return calculateMonthlyInvestments(allLive, ledgerData.investments);
     }, [equityTransactions, cryptoTransactions, pensionTransactions,
         debtTransactions, transactions, realEstate, ledgerData, rates, fxHistory]);
@@ -273,23 +278,23 @@ export function DemoPortfolioProvider({ children, onSignUpPrompt }) {
         const assetPctGBP = previous.networthGBP !== 0 ? (assetEffectGBPAmt / previous.networthGBP) * 100 : 0;
 
         // Target diff: compare current allocation vs targets
-        const cats = current.categories || {};
+        const cats: Record<string, number> = (current.categories || {}) as Record<string, number>;
         const grossAssets = (cats.Equity || 0) + (cats.FixedIncome || 0) + (cats.RealEstate || 0)
             + (cats.Crypto || 0) + (cats.Pensions || 0);
-        const targetTotal = Object.values(allocationTargets || {}).reduce((s, v) => s + v, 0);
+        const targetTotal = Object.values(allocationTargets || {} as Record<string, number>).reduce((s: number, v: number) => s + v, 0);
 
         let targetDiffBRL = 0;
-        const assetDiffsObj = {};
-        const assetDiffsGBPObj = {};
-        const categoryAssetDiffsObj = {};
+        const assetDiffsObj: Record<string, any> = {};
+        const assetDiffsGBPObj: Record<string, any> = {};
+        const categoryAssetDiffsObj: Record<string, any> = {};
 
-        const catMap = { Equity: 'equity', FixedIncome: 'fixed-income', RealEstate: 'real-estate', Crypto: 'crypto', Pensions: 'pensions' };
-        const targetMap = { Equity: 'Equity', FixedIncome: 'Fixed Income', RealEstate: 'Real Estate', Crypto: 'Crypto', Pensions: 'Pensions' };
+        const catMap: Record<string, string> = { Equity: 'equity', FixedIncome: 'fixed-income', RealEstate: 'real-estate', Crypto: 'crypto', Pensions: 'pensions' };
+        const targetMap: Record<string, string> = { Equity: 'Equity', FixedIncome: 'Fixed Income', RealEstate: 'Real Estate', Crypto: 'Crypto', Pensions: 'Pensions' };
 
         for (const [catKey, tabId] of Object.entries(catMap)) {
             const actual = cats[catKey] || 0;
             const actualPct = grossAssets > 0 ? (actual / grossAssets) * 100 : 0;
-            const targetPct = allocationTargets?.[targetMap[catKey]] || 0;
+            const targetPct = (allocationTargets as Record<string, number>)?.[targetMap[catKey]] || 0;
             const idealBRL = grossAssets * (targetPct / 100);
             const diff = actual - idealBRL;
             const diffPct = targetPct > 0 ? ((actualPct - targetPct) / targetPct) * 100 : 0;
@@ -300,7 +305,7 @@ export function DemoPortfolioProvider({ children, onSignUpPrompt }) {
             assetDiffsGBPObj[tabId] = { amount: diffGBP, percentage: Math.round(diffPct * 10) / 10 };
 
             // Per-category MoM
-            const prevCatVal = previous.categories?.[catKey] || 0;
+            const prevCatVal = (previous.categories as Record<string, number>)?.[catKey] || 0;
             const curCatVal = actual;
             const catMoM = curCatVal - prevCatVal;
             const catMoMPct = prevCatVal !== 0 ? (catMoM / prevCatVal) * 100 : 0;
@@ -372,7 +377,7 @@ export function DemoPortfolioProvider({ children, onSignUpPrompt }) {
     ]);
 
     return (
-        <PortfolioContext.Provider value={value}>
+        <PortfolioContext.Provider value={value as any}>
             {children}
         </PortfolioContext.Provider>
     );

@@ -517,7 +517,7 @@ export default function TopConsole() {
                             id="ftue-settings"
                             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                             className="w-8 h-8 rounded-full overflow-hidden border-2 border-white/10 hover:border-[#D4AF37]/50 transition-all duration-200 bg-[#D4AF37]/10 flex items-center justify-center p-0 cursor-pointer"
-                            title={session.user.name || session.user.email}
+                            title={session.user.name || session.user.email || undefined}
                         >
                             {session.user.image ? (
                                 <Image src={session.user.image} alt={session.user.name || 'User'} width={32} height={32} className="w-full h-full object-cover" unoptimized />
@@ -564,7 +564,7 @@ export default function TopConsole() {
                                                 <FileSpreadsheet size={14} className="text-[#D4AF37]/60" />
                                                 Import Spreadsheet
                                             </Link>
-                                            {session.user.is_admin && (
+                                            {(session.user as any).is_admin && (
                                                 <Link
                                                     href="/admin"
                                                     onClick={() => setIsUserMenuOpen(false)}

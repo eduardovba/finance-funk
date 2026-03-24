@@ -13,6 +13,7 @@ import { usePortfolio } from '@/context/PortfolioContext';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { LucideIcon } from 'lucide-react';
 
 const BACKGROUNDS = [
     { id: 'collection', name: 'Collection' },
@@ -64,7 +65,7 @@ const ASSET_ICONS = {
 };
 
 /* ─── Section header ─── */
-function SectionHeader({ title, icon: Icon }) {
+function SectionHeader({ title, icon: Icon }: { title: string; icon?: LucideIcon }) {
     return (
         <div className="flex items-center gap-2 mb-3">
             {Icon && <Icon size={13} className="text-[#D4AF37]/50" />}
@@ -74,13 +75,13 @@ function SectionHeader({ title, icon: Icon }) {
 }
 
 /* ─── Background mini-selector ─── */
-function BackgroundMiniSelect({ value, onChange }) {
+function BackgroundMiniSelect({ value, onChange }: { value: string; onChange: (id: string) => void }) {
     const [open, setOpen] = useState(false);
-    const ref = useRef(null);
-    const selected = BACKGROUNDS.find(b => b.id === value) || BACKGROUNDS.find(b => b.id === 'vinyl-voyage');
+    const ref = useRef<HTMLDivElement>(null);
+    const selected = BACKGROUNDS.find(b => b.id === value) || BACKGROUNDS.find(b => b.id === 'vinyl-voyage')!;
 
     useEffect(() => {
-        const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+        const handler = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, []);
@@ -151,7 +152,7 @@ export default function Inspector() {
     const NEGATIVE_ACTIONS = ['Sell', 'Withdrawal', 'Divestment', 'Liability'];
 
     const recentActivity = useMemo(() => {
-        const items = [];
+        const items: Array<{ type: string; name: string; date: string; amount: number; currency: string; action: string; broker: string }> = [];
 
         // Equity transactions — API returns { ticker, asset, broker, investment, currency, type, date }
         if (Array.isArray(equityTransactions)) {
@@ -234,7 +235,7 @@ export default function Inspector() {
             .sort((a, b) => {
                 const dateA = new Date(a.date);
                 const dateB = new Date(b.date);
-                return dateB - dateA;
+                return dateB.getTime() - dateA.getTime();
             })
             .slice(0, 5);
     }, [equityTransactions, cryptoTransactions, fixedIncomeTransactions, pensionTransactions, debtTransactions]);
@@ -269,12 +270,12 @@ export default function Inspector() {
         if (!marketData || typeof marketData !== 'object') return [];
         const ttlMs = (marketDataCacheInfo?.ttlMinutes || 15) * 60 * 1000;
         const now = Date.now();
-        const stale = [];
+        const stale: string[] = [];
 
         Object.entries(marketData).forEach(([ticker, data]) => {
             if (ticker.startsWith('_') || !data) return;
             // Check if data has a timestamp indicating staleness
-            if (data.timestamp && (now - data.timestamp) > ttlMs * 2) {
+            if ((data as any).timestamp && (now - (data as any).timestamp) > ttlMs * 2) {
                 stale.push(ticker);
             }
         });
@@ -283,11 +284,11 @@ export default function Inspector() {
     }, [marketData, marketDataCacheInfo]);
 
     // ═══════════ HELPERS ═══════════
-    const formatDate = (dateStr) => {
+    const formatDate = (dateStr: string): string => {
         if (!dateStr) return '';
         try {
             const d = new Date(dateStr);
-            if (isNaN(d)) {
+            if (isNaN(d.getTime())) {
                 // Try DD/MM/YYYY format
                 const parts = dateStr.split('/');
                 if (parts.length === 3) {
@@ -303,8 +304,8 @@ export default function Inspector() {
 
     const CURRENCY_SYMBOLS = { BRL: 'R$', GBP: '£', USD: '$', EUR: '€', JPY: '¥', CHF: 'Fr', AUD: 'A$' };
 
-    const formatAmount = (amount, currencyCode = 'GBP', isNegative = false) => {
-        const sym = CURRENCY_SYMBOLS[currencyCode] || currencyCode;
+    const formatAmount = (amount: number, currencyCode = 'GBP', isNegative = false): string => {
+        const sym = (CURRENCY_SYMBOLS as Record<string, string>)[currencyCode] || currencyCode;
         const num = Math.abs(Number(amount) || 0);
         const sign = isNegative ? '-' : '';
         if (num >= 1000000) return `${sign}${sym}${(num / 1000000).toFixed(1)}M`;
@@ -312,11 +313,11 @@ export default function Inspector() {
         return `${sign}${sym}${num.toFixed(0)}`;
     };
 
-    const timeAgo = (date) => {
+    const timeAgo = (date: string | Date): string => {
         if (!date) return '';
         const now = new Date();
         const d = new Date(date);
-        const diffMs = now - d;
+        const diffMs = now.getTime() - d.getTime();
         const mins = Math.floor(diffMs / 60000);
         if (mins < 1) return 'just now';
         if (mins < 60) return `${mins}m ago`;
@@ -374,7 +375,7 @@ export default function Inspector() {
                                 ) : (
                                     <div className="space-y-1">
                                         {recentActivity.map((item, idx) => {
-                                            const assetType = ASSET_ICONS[item.type] || ASSET_ICONS.default;
+                                            const assetType = (ASSET_ICONS as Record<string, any>)[item.type] || ASSET_ICONS.default;
                                             const Icon = assetType.icon;
                                             const isNeg = NEGATIVE_ACTIONS.includes(item.action);
                                             const deepLink = item.broker

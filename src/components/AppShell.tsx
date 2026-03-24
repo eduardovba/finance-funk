@@ -20,7 +20,7 @@ import CurrencyQuickPicker from '@/components/ftue/CurrencyQuickPicker';
 import FirstVisitGreeting from '@/components/ftue/FirstVisitGreeting';
 import GrooveCheck from '@/components/ftue/GrooveCheck';
 
-function AppShellInner({ children }) {
+function AppShellInner({ children }: { children: React.ReactNode }) {
     const {
         isFormOpen, setIsFormOpen,
         editingTransaction, setEditingTransaction,
@@ -63,7 +63,7 @@ function AppShellInner({ children }) {
 
     // Tracking mouse position for background interactivity
     useEffect(() => {
-        const handleMouseMove = (e) => {
+        const handleMouseMove = (e: MouseEvent) => {
             const x = (e.clientX / window.innerWidth).toFixed(3);
             const y = (e.clientY / window.innerHeight).toFixed(3);
             document.documentElement.style.setProperty('--mouse-x', x);
@@ -162,7 +162,7 @@ function AppShellInner({ children }) {
                                 onClick={() => setIsFormOpen(false)}
                             />
                             <TransactionForm
-                                onAdd={(tx) => {
+                                onAdd={(tx: any) => {
                                     handleSaveTransaction(tx);
                                     setIsFormOpen(false);
                                 }}
@@ -184,14 +184,14 @@ function AppShellInner({ children }) {
                         isOpen={statusModal.isOpen}
                         title={statusModal.title}
                         message={statusModal.message}
-                        type={statusModal.type}
-                        onClose={() => setStatusModal(prev => ({ ...prev, isOpen: false }))}
+                        type={statusModal.type as any}
+                        onClose={() => setStatusModal((prev: any) => ({ ...prev, isOpen: false }))}
                     />
 
                     <MonthlyCloseModal
                         isOpen={isMonthlyCloseModalOpen}
                         onClose={() => setIsMonthlyCloseModalOpen(false)}
-                        onRecord={(snapshot) => {
+                        onRecord={(snapshot: any) => {
                             handleRecordSnapshot(snapshot);
                             setIsMonthlyCloseModalOpen(false);
                         }}
@@ -207,7 +207,7 @@ function AppShellInner({ children }) {
                         pensionPrices={pensionPrices}
                         ledgerData={ledgerData}
                         fxHistory={fxHistory}
-                        historicalSnapshots={historicalSnapshots}
+                        historicalSnapshots={historicalSnapshots as any}
                         assetClasses={assetClasses}
                     />
                 </main>
@@ -246,7 +246,7 @@ function AppShellInner({ children }) {
 }
 
 /* ─── Pull-to-Refresh Wrapper ─── */
-function PullToRefreshWrapper({ children }) {
+function PullToRefreshWrapper({ children }: { children: React.ReactNode }) {
     const { refreshAllData } = usePortfolio();
     const [pulling, setPulling] = React.useState(false);
     const [pullDistance, setPullDistance] = React.useState(0);
@@ -254,7 +254,7 @@ function PullToRefreshWrapper({ children }) {
     const startY = React.useRef(0);
     const threshold = 80;
 
-    const handleTouchStart = (e) => {
+    const handleTouchStart = (e: React.TouchEvent) => {
         const mainEl = document.getElementById('main-scroll');
         if (mainEl && mainEl.scrollTop <= 0) {
             startY.current = e.touches[0].clientY;
@@ -262,7 +262,7 @@ function PullToRefreshWrapper({ children }) {
         }
     };
 
-    const handleTouchMove = (e) => {
+    const handleTouchMove = (e: React.TouchEvent) => {
         if (!pulling || refreshing) return;
         const diff = e.touches[0].clientY - startY.current;
         if (diff > 0) {
@@ -309,7 +309,7 @@ function PullToRefreshWrapper({ children }) {
     );
 }
 
-export default function AppShell({ children }) {
+export default function AppShell({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
 
     // Demo routes use their own DemoAppShell with DemoPortfolioProvider

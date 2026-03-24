@@ -6,8 +6,20 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { LayoutDashboard, BookOpen, TrendingUp, Landmark, Home, LineChart, Bitcoin, Wallet, CreditCard, ChevronRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { LucideIcon } from 'lucide-react';
 
-const iconMap = {
+interface NavItem {
+    id: string;
+    label: string;
+    href?: string;
+}
+
+interface SidebarProps {
+    activeItem: string;
+    onNavigate: (id: string) => void;
+}
+
+const iconMap: Record<string, LucideIcon> = {
     'dashboard': LayoutDashboard,
     'general-ledger': BookOpen,
     'forecast': TrendingUp,
@@ -19,19 +31,19 @@ const iconMap = {
     'debt': CreditCard,
 };
 
-export default function Sidebar({ activeItem, onNavigate }) {
+export default function Sidebar({ activeItem, onNavigate }: SidebarProps) {
     const { data: session } = useSession();
     const pathname = usePathname();
     const isProfileActive = pathname === '/profile';
 
-    const trackingItems = [
+    const trackingItems: NavItem[] = [
         { id: 'dashboard', label: 'Dashboard' },
         { id: 'general-ledger', label: 'General Ledger', href: '/ledger/income' },
         { id: 'forecast', label: 'Targets' },
         { id: 'long-term-forecast', label: 'Long-Term Forecast' },
     ];
 
-    const assetItems = [
+    const assetItems: NavItem[] = [
         { id: 'fixed-income', label: 'Fixed Income' },
         { id: 'real-estate', label: 'Real Estate' },
         { id: 'equity', label: 'Equity' },
@@ -40,7 +52,7 @@ export default function Sidebar({ activeItem, onNavigate }) {
         { id: 'debt', label: 'Debt' },
     ];
 
-    const renderGroup = (title, items) => (
+    const renderGroup = (title: string, items: NavItem[]) => (
         <div className="mb-6">
             <h3 className="text-xs uppercase text-parchment/50 mb-3 pl-4 tracking-widest font-medium">
                 {title}

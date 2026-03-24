@@ -14,6 +14,21 @@ import { usePortfolio } from '@/context/PortfolioContext';
 import { useSession, signOut } from 'next-auth/react';
 import { formatCurrency } from '@/lib/currency';
 import { getPersonalization } from '@/lib/personalization';
+import { LucideIcon } from 'lucide-react';
+
+interface SheetProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+interface TabItem {
+    id: string;
+    href: string | null;
+    label: string;
+    icon: LucideIcon;
+    color: string;
+    action?: () => void;
+}
 
 const ASSET_TABS = [
     { id: 'fixed-income', href: '/assets/fixed-income', label: 'Fixed Income', icon: Landmark, color: '#CC5500' },
@@ -44,12 +59,12 @@ const BUDGET_ITEMS = [
 ];
 
 /* ─── Assets Bottom Sheet ─── */
-function AssetsSheet({ isOpen, onClose }) {
+function AssetsSheet({ isOpen, onClose }: SheetProps) {
     const { dashboardData, primaryCurrency } = usePortfolio();
 
-    const getCategoryValue = (id) => {
+    const getCategoryValue = (id: string): number => {
         if (!dashboardData?.summaries) return 0;
-        const s = dashboardData.summaries.find(s => s.id === id);
+        const s = dashboardData.summaries.find((s: any) => s.id === id);
         return s?.amount || 0;
     };
 
@@ -132,7 +147,7 @@ function AssetsSheet({ isOpen, onClose }) {
 }
 
 /* ─── Planning Bottom Sheet ─── */
-function PlanningSheet({ isOpen, onClose }) {
+function PlanningSheet({ isOpen, onClose }: SheetProps) {
     const { data: session } = useSession();
 
     return (
@@ -186,7 +201,7 @@ function PlanningSheet({ isOpen, onClose }) {
 }
 
 /* ─── Ledger Bottom Sheet ─── */
-function LedgerSheet({ isOpen, onClose }) {
+function LedgerSheet({ isOpen, onClose }: SheetProps) {
     return (
         <AnimatePresence>
             {isOpen && (
@@ -237,7 +252,7 @@ function LedgerSheet({ isOpen, onClose }) {
 }
 
 /* ─── Budget Bottom Sheet ─── */
-function BudgetSheet({ isOpen, onClose }) {
+function BudgetSheet({ isOpen, onClose }: SheetProps) {
     return (
         <AnimatePresence>
             {isOpen && (
@@ -328,11 +343,11 @@ export default function BottomNav() {
 
     let orderedTabs = [...tabs];
     if (personalization.goal === 'budget') {
-        const budget = orderedTabs.find(t => t.id === 'budget');
+        const budget = orderedTabs.find(t => t.id === 'budget')!;
         const rest = orderedTabs.filter(t => t.id !== 'budget');
         orderedTabs = [budget, ...rest];
     } else if (personalization.goal === 'investments') {
-        const budget = orderedTabs.find(t => t.id === 'budget');
+        const budget = orderedTabs.find(t => t.id === 'budget')!;
         const rest = orderedTabs.filter(t => t.id !== 'budget');
         orderedTabs = [...rest, budget];
     }
@@ -345,7 +360,7 @@ export default function BottomNav() {
         }
     }
 
-    const isActive = (tab) => {
+    const isActive = (tab: TabItem): boolean => {
         if (tab.id === 'home') return pathname === '/dashboard' || pathname === '/';
         if (tab.id === 'budget') return isBudgetRoute || budgetOpen;
         if (tab.id === 'assets') return isAssetRoute || assetsOpen;

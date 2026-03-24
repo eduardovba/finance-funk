@@ -1,6 +1,135 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useCallback } from "react";
+
+/* ─── Diff helper type ─── */
+interface DiffPair {
+    amount: number;
+    percentage: number;
+}
+
+/* ─── Status modal shape ─── */
+interface StatusModalState {
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: string;
+}
+
+/* ─── PortfolioContextValue ─── */
+export interface PortfolioContextValue {
+    // Raw data
+    transactions: any[];
+    equityTransactions: any[];
+    cryptoTransactions: any[];
+    pensionTransactions: any[];
+    debtTransactions: any[];
+    fixedIncomeTransactions: any[];
+    realEstate: any | null;
+    historicalSnapshots: any[];
+    marketData: Record<string, any>;
+    pensionPrices: Record<string, any>;
+    rates: Record<string, number>;
+    loadingRates: boolean;
+    lastUpdated: Date | null;
+    isInitialLoading: boolean;
+    isRefreshingMarketData: boolean;
+    marketDataCacheInfo: any | null;
+    ledgerData: any;
+    fxHistory: Record<string, Record<string, number>>;
+    forecastSettings: any;
+    allocationTargets: any;
+    sortedTransactions: any[];
+    assetClasses: Record<string, any>;
+    setAssetClasses: (v: any) => void;
+
+    // Summaries
+    fixedIncomeData: any;
+    equityData: any;
+    cryptoData: any;
+    pensionData: any;
+    realEstateData: any;
+    debtData: any;
+    totalFixedIncomeBRL: number;
+    totalEquityBRL: number;
+    totalCryptoBRL: number;
+    totalPensionBRL: number;
+    totalRealEstateBRL: number;
+    totalDebtBRL: number;
+    totalNetWorthBRL: number;
+    dashboardData: any;
+    masterMixData: any;
+    monthlyInvestments: any[];
+    dashboardConfig: any;
+    setDashboardConfig: (v: any) => void;
+
+    // Diffs
+    diffPrevMonth: DiffPair;
+    diffPrevMonthGBP: DiffPair;
+    fxEffectBRL: DiffPair;
+    assetEffectBRL: DiffPair;
+    fxEffectGBP: DiffPair;
+    assetEffectGBP: DiffPair;
+    diffTarget: DiffPair;
+    diffTargetGBP: DiffPair;
+    assetDiffs: Record<string, DiffPair>;
+    assetDiffsGBP: Record<string, DiffPair>;
+    categoryAssetDiffs: Record<string, DiffPair>;
+
+    // Actions
+    refreshAllData: () => Promise<void>;
+    fetchRealEstate: () => Promise<any>;
+    fetchMarketData: (forceRefresh?: boolean, prefetched?: any) => Promise<void>;
+    forceRefreshMarketData: () => Promise<void>;
+    handleSaveTransaction: (formData: any) => Promise<void>;
+    handleEditTransaction: (transaction: any) => void;
+    handleDeleteClick: (id: string | number) => void;
+    handleConfirmDelete: () => Promise<void>;
+    handleRecordSnapshot: (snapshot?: any, options?: { silent?: boolean }) => Promise<void>;
+    setForecastSettings: (v: any) => void;
+    appSettings: any;
+    handleUpdateAppSettings: (v: any) => void;
+
+    // FTUE
+    ftueState: any;
+    setFtueState: (v: any) => void;
+    updateFtueProgress: (updates: any) => Promise<any>;
+    resetFtue: () => void;
+
+    // UI State
+    isFormOpen: boolean;
+    setIsFormOpen: (v: boolean) => void;
+    editingTransaction: any | null;
+    setEditingTransaction: (v: any | null) => void;
+    isDeleteModalOpen: boolean;
+    setIsDeleteModalOpen: (v: boolean) => void;
+    transactionToDelete: any | null;
+    isInspectorOpen: boolean;
+    setIsInspectorOpen: (v: boolean) => void;
+    inspectorMode: string;
+    setInspectorMode: (v: string) => void;
+    statusModal: StatusModalState;
+    setStatusModal: (v: any) => void;
+    isMonthlyCloseModalOpen: boolean;
+    setIsMonthlyCloseModalOpen: (v: boolean) => void;
+
+    // Currency
+    primaryCurrency: string;
+    setPrimaryCurrency: (v: string) => void;
+    secondaryCurrency: string;
+    setSecondaryCurrency: (v: string) => void;
+    rateFlipped: boolean;
+    setRateFlipped: (v: boolean) => void;
+    displayCurrencyOverrides: Record<string, string | null>;
+    setDisplayCurrencyOverride: (category: string, value: string | null) => void;
+    formatPrimary: (amount: number, options?: Intl.NumberFormatOptions) => string;
+    formatSecondary: (amount: number, options?: Intl.NumberFormatOptions) => string;
+    toPrimary: (amount: number, fromCurrency?: string) => number;
+    toSecondary: (amount: number, fromCurrency?: string) => number;
+
+    // Demo mode flag (only present in DemoPortfolioContext)
+    isDemoMode?: boolean;
+}
 import { useQueryClient } from '@tanstack/react-query';
 import { formatCurrency, convertCurrency, SUPPORTED_CURRENCIES, getFallbackRates } from '@/lib/currency';
 import useCurrencyStore from '@/stores/useCurrencyStore';
@@ -33,9 +162,9 @@ import {
 } from "@/lib/portfolioUtils";
 import demoData from '@/lib/demoData';
 
-const PortfolioContext = createContext(null);
+const PortfolioContext = createContext<PortfolioContextValue | null>(null);
 
-export function PortfolioProvider({ children }) {
+export function PortfolioProvider({ children }: { children: React.ReactNode }) {
     // ═══════════ RAW DATA (from usePortfolioStore) ═══════════
     const transactions = usePortfolioStore(s => s.transactions);
     const setTransactions = usePortfolioStore(s => s.setTransactions);
@@ -190,7 +319,7 @@ export function PortfolioProvider({ children }) {
     }, [allQueriesSettled, isInitialLoading]);
 
     // ═══════════ HELPERS ═══════════
-    const parseDate = (dateStr) => {
+    const parseDate = (dateStr: any): Date => {
         if (!dateStr) return new Date();
         if (dateStr.includes('-')) {
             const parts = dateStr.split('-');
@@ -208,7 +337,7 @@ export function PortfolioProvider({ children }) {
         queryClient.invalidateQueries({ queryKey: queryKeys.realEstate });
     }, [queryClient]);
 
-    const fetchMarketData = useCallback(async (forceRefresh = false, prefetched = {}) => {
+    const fetchMarketData = useCallback(async (forceRefresh = false, prefetched: any = {}) => {
         try {
             if (forceRefresh) setIsRefreshingMarketData(true);
 
@@ -234,14 +363,14 @@ export function PortfolioProvider({ children }) {
                 ]);
             }
 
-            const tickerSet = new Set(assets && assets.length > 0 ? assets.map(a => a.ticker).filter(t => t !== 'CASH') : []);
+            const tickerSet = new Set(assets && assets.length > 0 ? assets.map((a: any) => a.ticker).filter((t: any) => t !== 'CASH') : []);
 
             if (Array.isArray(eqData)) {
                 eqData.forEach(tr => { if (tr.ticker && tr.ticker !== 'CASH') tickerSet.add(tr.ticker); });
             }
 
             if (reData?.funds?.holdings) {
-                reData.funds.holdings.forEach(h => { if (h.ticker) tickerSet.add(h.ticker + '.SA'); });
+                reData.funds.holdings.forEach((h: any) => { if (h.ticker) tickerSet.add(h.ticker + '.SA'); });
             }
 
             if (Array.isArray(cryptoData)) {
@@ -253,7 +382,7 @@ export function PortfolioProvider({ children }) {
                 });
             }
 
-            pensionMap.forEach(p => {
+            (pensionMap as any[]).forEach((p: any) => {
                 if (p.ticker && p.type === 'market-data') {
                     tickerSet.add(p.ticker);
                 }
@@ -391,9 +520,9 @@ export function PortfolioProvider({ children }) {
             setDebtTransactions(demoData.debtTransactions);
             setHistoricalSnapshots(demoData.historicalSnapshots);
             setLedgerData(demoData.ledgerData);
-            setFxHistory(demoData.fxHistory);
+            setFxHistory(demoData.fxHistory as any);
             setAllocationTargets(demoData.allocationTargets);
-            setAssetClasses(demoData.assetClasses);
+            setAssetClasses(demoData.assetClasses as any);
             // Still load user's app settings (background, preferences) even in demo mode
             try {
                 const settingsRes = await fetch('/api/app-settings');
@@ -445,7 +574,7 @@ export function PortfolioProvider({ children }) {
     const totalNetWorthBRL = totalFixedIncomeBRL + totalEquityBRL + totalCryptoBRL + totalPensionBRL + totalRealEstateBRL - totalDebtBRL;
 
     const sortedTransactions = useMemo(() =>
-        [...transactions].sort((a, b) => parseDate(b.date) - parseDate(a.date)),
+        [...transactions].sort((a: any, b: any) => parseDate(b.date).getTime() - parseDate(a.date).getTime()),
         [transactions]
     );
 
@@ -456,7 +585,7 @@ export function PortfolioProvider({ children }) {
         const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
         // Filter out current month so it always recalculates live (matches GeneralLedgerTab behavior)
-        const filteredHistorical = ledgerData.investments.filter(h => h.month !== currentMonth);
+        const filteredHistorical = ledgerData.investments.filter((h: any) => h.month !== currentMonth);
 
         const allLive = normalizeTransactions({
             equity: equityTransactions,
@@ -465,7 +594,7 @@ export function PortfolioProvider({ children }) {
             debt: debtTransactions,
             fixedIncome: transactions,
             realEstate: realEstate
-        }, rates, fxHistory);
+        } as any, rates as any, fxHistory as any);
 
         return calculateMonthlyInvestments(allLive, filteredHistorical);
     }, [equityTransactions, cryptoTransactions, pensionTransactions, debtTransactions, transactions, realEstate, ledgerData, rates, fxHistory]);
@@ -518,9 +647,9 @@ export function PortfolioProvider({ children }) {
         let assetEffectGBP = { amount: 0, percentage: 0 };
         let diffTarget = { amount: 0, percentage: 0 };
         let diffTargetGBP = { amount: 0, percentage: 0 };
-        let assetDiffs = {};
-        let assetDiffsGBP = {};
-        let categoryAssetDiffs = {};
+        let assetDiffs: Record<string, DiffPair> = {};
+        let assetDiffsGBP: Record<string, DiffPair> = {};
+        let categoryAssetDiffs: Record<string, any> = {};
 
         const now = new Date();
         const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -568,7 +697,7 @@ export function PortfolioProvider({ children }) {
 
                 const snapshotCats = prevSnapshot.categories || {};
                 const categories = ['FixedIncome', 'Equity', 'RealEstate', 'Crypto', 'Pensions', 'Debt'];
-                const catIdMap = {
+                const catIdMap: Record<string, string> = {
                     'FixedIncome': 'fixed-income', 'Equity': 'equity', 'RealEstate': 'real-estate',
                     'Crypto': 'crypto', 'Pensions': 'pensions', 'Debt': 'debt'
                 };
@@ -608,9 +737,9 @@ export function PortfolioProvider({ children }) {
                     else if (cat === 'Pensions') currentAssets.push(...(pensionData.individualHoldings || pensionData.assets));
                     else if (cat === 'Debt') currentAssets.push(...(debtData.individualHoldings || debtData.assets));
 
-                    categoryAssetDiffs[catId] = {};
-                    currentAssets.filter(a => !a.isTotal).forEach(curr => {
-                        const prev = prevAssets.find(p => p.name === curr.name);
+                    categoryAssetDiffs[catId] = {} as Record<string, DiffPair>;
+                    currentAssets.filter((a: any) => !a.isTotal).forEach((curr: any) => {
+                        const prev = prevAssets.find((p: any) => p.name === curr.name);
                         const prevBRL = prev ? prev.brl : 0;
                         categoryAssetDiffs[catId][curr.name] = {
                             amount: curr.brl - prevBRL,
@@ -626,13 +755,13 @@ export function PortfolioProvider({ children }) {
         // 1. Starting from the first historical actuals entry.
         // 2. Using the same Monthly Growth projection as planned (rate + PMT).
         // 3. Comparing current live net worth against that projected value for today.
-        const firstActual = actualsData[0];
-        const goal2031 = forecastSettings?.yearlyGoals?.[2031] || forecastSettings?.yearlyGoals?.['2031'];
+        const firstActual = (actualsData as any[])[0];
+        const goal2031 = (forecastSettings as any)?.yearlyGoals?.[2031] || (forecastSettings as any)?.yearlyGoals?.['2031'];
 
         if (firstActual && goal2031 > 0) {
             const startValue = firstActual.actualBRL || 0;
             const anchorDate = parseForecastDate(firstActual.date);
-            const monthlyRate = (forecastSettings.annualInterestRate || 10) / 100 / 12;
+            const monthlyRate = ((forecastSettings as any).annualInterestRate || 10) / 100 / 12;
 
             // Calculate where we SHOULD be today on the FV curve anchored to the goal
             // Method: solve for the PMT that would reach goal2031 from anchor, then project to now.
@@ -658,7 +787,7 @@ export function PortfolioProvider({ children }) {
     }, [historicalSnapshots, totalNetWorthBRL, totalFixedIncomeBRL, totalEquityBRL, totalRealEstateBRL, totalCryptoBRL, totalPensionBRL, totalDebtBRL, rates, forecastSettings]);
 
     // ═══════════ TRANSACTION HANDLERS ═══════════
-    const handleSaveTransaction = useCallback(async (formData) => {
+    const handleSaveTransaction = useCallback(async (formData: any) => {
         try {
             await saveTransactionMutation.mutateAsync(formData);
             // Mutation onSuccess auto-invalidates related queries
@@ -670,12 +799,12 @@ export function PortfolioProvider({ children }) {
         }
     }, [saveTransactionMutation, fetchMarketData]);
 
-    const handleEditTransaction = useCallback((transaction) => {
+    const handleEditTransaction = useCallback((transaction: any) => {
         setEditingTransaction(transaction);
         setIsFormOpen(true);
     }, []);
 
-    const handleDeleteClick = useCallback((id) => {
+    const handleDeleteClick = useCallback((id: string | number) => {
         setTransactionToDelete(id);
         setIsDeleteModalOpen(true);
     }, []);
@@ -683,7 +812,7 @@ export function PortfolioProvider({ children }) {
     const handleConfirmDelete = useCallback(async () => {
         if (!transactionToDelete) return;
         try {
-            await deleteTransactionMutation.mutateAsync(transactionToDelete);
+            await deleteTransactionMutation.mutateAsync(transactionToDelete as any);
             // Mutation onSuccess auto-invalidates related queries
             fetchMarketData();
             setIsDeleteModalOpen(false);
@@ -693,7 +822,7 @@ export function PortfolioProvider({ children }) {
         }
     }, [transactionToDelete, deleteTransactionMutation, fetchMarketData]);
 
-    const handleRecordSnapshot = useCallback(async (explicitSnapshot = null, options = { silent: false }) => {
+    const handleRecordSnapshot = useCallback(async (explicitSnapshot: any = null, options: { silent?: boolean } = { silent: false }) => {
         try {
             const currentMonth = new Date().toISOString().slice(0, 7);
 
@@ -893,7 +1022,7 @@ export function PortfolioProvider({ children }) {
     ]);
 
     return (
-        <PortfolioContext.Provider value={value}>
+        <PortfolioContext.Provider value={value as PortfolioContextValue}>
             {children}
         </PortfolioContext.Provider>
     );
@@ -901,7 +1030,7 @@ export function PortfolioProvider({ children }) {
 
 export { PortfolioContext };
 
-export function usePortfolio() {
+export function usePortfolio(): PortfolioContextValue {
     const context = useContext(PortfolioContext);
     if (!context) {
         throw new Error('usePortfolio must be used within a PortfolioProvider');
