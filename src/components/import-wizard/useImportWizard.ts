@@ -47,6 +47,7 @@ export default function useImportWizard() {
     const [defaultBroker, setDefaultBroker] = useState('');
     const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
     const [transformedTxs, setTransformedTxs] = useState<any[]>([]);
+    const [duplicateIndices, setDuplicateIndices] = useState<Set<number>>(new Set());
     const [importing, setImporting] = useState(false);
     const [importResult, setImportResult] = useState<any>(null);
     const [error, setError] = useState('');
@@ -55,6 +56,40 @@ export default function useImportWizard() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const STEPS = importMode === 'provider' ? PROVIDER_STEPS : GENERIC_STEPS;
+
+    // ── Duplicate detection helper ──────────────────────────────────
+    const checkDuplicates = useCallback(async (txs: any[]) => {
+        if (txs.length === 0) { setDuplicateIndices(new Set()); return; }
+        try {
+            const res = await fetch('/api/import/duplicate-check', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    transactions: txs.map(t => ({
+                        date: t.date,
+                        asset: t.asset,
+                        ticker: t.ticker,
+                        broker: t.broker,
+                        amount: t.amount,
+                        type: t.type,
+                        currency: t.currency,
+                        assetClass: t.assetClass,
+                    })),
+                }),
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setDuplicateIndices(new Set<number>(data.duplicateIndices ?? []));
+            }
+        } catch (err) {
+            console.error('Duplicate check failed:', err);
+        }
+    }, []);
+
+    const removeDuplicates = useCallback(() => {
+        setTransformedTxs(prev => prev.filter((_, i) => !duplicateIndices.has(i)));
+        setDuplicateIndices(new Set());
+    }, [duplicateIndices]);
 
     // Choose Import Mode
     const handleChooseProvider = () => {
@@ -109,6 +144,8 @@ export default function useImportWizard() {
                     if (result.summary?.assetClasses?.length > 0) {
                         setAssetClass(result.summary.assetClasses[0]);
                     }
+                    // Check for duplicates before advancing to preview
+                    checkDuplicates(result.transactions);
                     setStep(2);
                 } catch (parseErr: any) {
                     setError(`Auto-parse failed: ${parseErr.message}. Try the Generic Spreadsheet import instead.`);
@@ -173,8 +210,10 @@ export default function useImportWizard() {
         setTransformedTxs(allTxs);
         const uniqueClasses = new Set(allTxs.map((t: any) => t.assetClass).filter(Boolean));
         setAssetClass(uniqueClasses.size === 1 ? [...uniqueClasses][0] : '');
+        // Check for duplicates before advancing to preview
+        checkDuplicates(allTxs);
         setStep(3);
-    }, [sheetsConfig]);
+    }, [sheetsConfig, checkDuplicates]);
 
     // Import
     const handleImport = useCallback(async () => {
@@ -214,6 +253,7 @@ export default function useImportWizard() {
         setFile(null);
         setParsedData(null);
         setSheetsConfig([]);
+        setDuplicateIndices(new Set());
         setAssetClass('');
         setDefaultBroker('');
         setColumnMapping({});
@@ -245,6 +285,7 @@ export default function useImportWizard() {
         defaultBroker, setDefaultBroker,
         columnMapping, setColumnMapping,
         transformedTxs, setTransformedTxs,
+        duplicateIndices, removeDuplicates,
         importing,
         importResult,
         error, setError,

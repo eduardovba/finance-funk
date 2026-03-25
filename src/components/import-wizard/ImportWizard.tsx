@@ -25,6 +25,7 @@ export default function ImportWizard() {
         sheetsConfig,
         assetClass,
         transformedTxs, setTransformedTxs,
+        duplicateIndices, removeDuplicates,
         importing,
         importResult,
         error, setError,
@@ -164,6 +165,8 @@ export default function ImportWizard() {
                             onImport={handleImport}
                             onBack={() => { setStep(1); setFile(null); setParsedData(null); setTransformedTxs([]); }}
                             showAssetClassColumn={true}
+                            duplicateIndices={duplicateIndices}
+                            onRemoveDuplicates={removeDuplicates}
                         />
                     </div>
                 )}
@@ -211,6 +214,8 @@ export default function ImportWizard() {
                         onImport={handleImport}
                         onBack={() => setStep(2)}
                         showAssetClassColumn={sheetsConfig.filter((s: any) => s.enabled).length > 1 || sheetsConfig.some((s: any) => s.assetClass === 'Mixed')}
+                        duplicateIndices={duplicateIndices}
+                        onRemoveDuplicates={removeDuplicates}
                     />
                 )}
                 {!isProviderMode && step === 4 && (
