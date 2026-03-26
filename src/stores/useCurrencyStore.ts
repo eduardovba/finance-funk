@@ -8,6 +8,7 @@ import { formatCurrency, convertCurrency, SUPPORTED_CURRENCIES } from '@/lib/cur
 export interface CurrencyState {
     primaryCurrency: string;
     secondaryCurrency: string;
+    singleCurrencyMode: boolean;
     rateFlipped: boolean;
     displayCurrencyOverrides: Record<string, string | null>;
     rates: Record<string, number>;
@@ -19,6 +20,7 @@ export interface CurrencyState {
 export interface CurrencyActions {
     setPrimaryCurrency: (v: string) => void;
     setSecondaryCurrency: (v: string) => void;
+    setSingleCurrencyMode: (v: boolean) => void;
     setRateFlipped: (v: boolean) => void;
     setDisplayCurrencyOverride: (category: string, value: string | null) => void;
     setRates: (r: Record<string, number> | ((prev: Record<string, number>) => Record<string, number>)) => void;
@@ -38,6 +40,7 @@ const useCurrencyStore = create<CurrencyState & CurrencyActions>((set, get) => (
     // ═══════════ STATE ═══════════
     primaryCurrency: 'BRL',
     secondaryCurrency: 'GBP',
+    singleCurrencyMode: false,
     rateFlipped: false,
     displayCurrencyOverrides: {},   // per-category map, e.g. { equity: 'USD' }
     rates: { GBP: 1, BRL: 7.10, USD: 1.28 },
@@ -48,6 +51,7 @@ const useCurrencyStore = create<CurrencyState & CurrencyActions>((set, get) => (
     // ═══════════ SETTERS ═══════════
     setPrimaryCurrency: (v) => set({ primaryCurrency: v }),
     setSecondaryCurrency: (v) => set({ secondaryCurrency: v }),
+    setSingleCurrencyMode: (v) => set({ singleCurrencyMode: v }),
     setRateFlipped: (v) => set({ rateFlipped: v }),
     setDisplayCurrencyOverride: (category, value) =>
         set((s) => ({ displayCurrencyOverrides: { ...s.displayCurrencyOverrides, [category]: value } })),
@@ -63,9 +67,9 @@ const useCurrencyStore = create<CurrencyState & CurrencyActions>((set, get) => (
 
     // ═══════════ CURRENCY HELPERS ═══════════
     formatPrimary: (amount, options = {}) => formatCurrency(amount, get().primaryCurrency, options),
-    formatSecondary: (amount, options = {}) => formatCurrency(amount, get().secondaryCurrency, options),
+    formatSecondary: (amount, options = {}) => get().singleCurrencyMode ? '' : formatCurrency(amount, get().secondaryCurrency, options),
     toPrimary: (amount, fromCurrency = 'GBP') => convertCurrency(amount, fromCurrency, get().primaryCurrency, get().rates),
-    toSecondary: (amount, fromCurrency = 'GBP') => convertCurrency(amount, fromCurrency, get().secondaryCurrency, get().rates),
+    toSecondary: (amount, fromCurrency = 'GBP') => get().singleCurrencyMode ? 0 : convertCurrency(amount, fromCurrency, get().secondaryCurrency, get().rates),
 
     // ═══════════ LOAD FROM DB / LOCALSTORAGE ═══════════
     loadCurrencyPrefs: async () => {
@@ -77,6 +81,8 @@ const useCurrencyStore = create<CurrencyState & CurrencyActions>((set, get) => (
                     set({
                         primaryCurrency: data.currencyPreferences.primary || 'BRL',
                         secondaryCurrency: data.currencyPreferences.secondary || 'GBP',
+                        singleCurrencyMode: data.currencyPreferences.singleCurrencyMode !== undefined
+                            ? data.currencyPreferences.singleCurrencyMode : false,
                         rateFlipped: data.currencyPreferences.rateFlipped !== undefined
                             ? data.currencyPreferences.rateFlipped : false,
                         displayCurrencyOverrides:
@@ -94,11 +100,13 @@ const useCurrencyStore = create<CurrencyState & CurrencyActions>((set, get) => (
         if (typeof window !== 'undefined') {
             const savedPrimary = localStorage.getItem('ff_primaryCurrency');
             const savedSecondary = localStorage.getItem('ff_secondaryCurrency');
+            const savedSingleMode = localStorage.getItem('ff_singleCurrencyMode');
             const savedFlipped = localStorage.getItem('ff_rateFlipped');
             const savedOverrides = localStorage.getItem('ff_displayCurrencyOverrides');
             const patch: Partial<CurrencyState> = {};
             if (savedPrimary && SUPPORTED_CURRENCIES[savedPrimary]) patch.primaryCurrency = savedPrimary;
             if (savedSecondary && SUPPORTED_CURRENCIES[savedSecondary]) patch.secondaryCurrency = savedSecondary;
+            if (savedSingleMode !== null) patch.singleCurrencyMode = savedSingleMode === 'true';
             if (savedFlipped !== null) patch.rateFlipped = savedFlipped === 'true';
             if (savedOverrides) {
                 try { patch.displayCurrencyOverrides = JSON.parse(savedOverrides); } catch { /* ignore */ }
@@ -110,11 +118,12 @@ const useCurrencyStore = create<CurrencyState & CurrencyActions>((set, get) => (
 
     // ═══════════ PERSIST TO LOCALSTORAGE + DB ═══════════
     persistCurrencyPrefs: () => {
-        const { primaryCurrency, secondaryCurrency, rateFlipped, displayCurrencyOverrides, currencyLoaded } = get();
+        const { primaryCurrency, secondaryCurrency, singleCurrencyMode, rateFlipped, displayCurrencyOverrides, currencyLoaded } = get();
         if (!currencyLoaded) return;      // don't persist initial defaults
         if (typeof window !== 'undefined') {
             localStorage.setItem('ff_primaryCurrency', primaryCurrency);
             localStorage.setItem('ff_secondaryCurrency', secondaryCurrency);
+            localStorage.setItem('ff_singleCurrencyMode', String(singleCurrencyMode));
             localStorage.setItem('ff_rateFlipped', String(rateFlipped));
             localStorage.setItem('ff_displayCurrencyOverrides', JSON.stringify(displayCurrencyOverrides));
         }
@@ -122,7 +131,7 @@ const useCurrencyStore = create<CurrencyState & CurrencyActions>((set, get) => (
         fetch('/api/user/profile', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ primaryCurrency, secondaryCurrency, rateFlipped, displayCurrencyOverrides }),
+            body: JSON.stringify({ primaryCurrency, secondaryCurrency, singleCurrencyMode, rateFlipped, displayCurrencyOverrides }),
         }).catch(() => { /* ignore – localStorage is the instant fallback */ });
     },
 }));

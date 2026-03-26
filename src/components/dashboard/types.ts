@@ -29,6 +29,7 @@ export interface DashboardChartsProps {
     allocationTargets: any;
     forecastSettings: any;
     dashboardConfig: any;
+    singleCurrencyMode?: boolean;
     onCustomizeClick: () => void;
     onNavigate: (tabId: string, assetName?: string) => void;
 }

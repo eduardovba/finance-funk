@@ -1,7 +1,7 @@
 import { formatCurrency } from "@/lib/currency";
 import { usePortfolio } from '@/context/PortfolioContext';
 
-export default function ConsolidatedAssetTable({ title, categoryId, assets, rates, hideInvestment = false, onNavigate }: { title: string; categoryId?: string; assets: any[]; rates?: any; hideInvestment?: boolean; onNavigate?: (cat: string, name: string) => void }) {
+export default function ConsolidatedAssetTable({ title, categoryId, assets, rates, hideInvestment = false, singleCurrencyMode = false, onNavigate }: { title: string; categoryId?: string; assets: any[]; rates?: any; hideInvestment?: boolean; singleCurrencyMode?: boolean; onNavigate?: (cat: string, name: string) => void }) {
     const { primaryCurrency, secondaryCurrency, toPrimary, toSecondary, formatPrimary, formatSecondary } = usePortfolio();
 
     const formatPrimaryNoDecimals = (val: number) => formatPrimary(val, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -60,9 +60,11 @@ export default function ConsolidatedAssetTable({ title, categoryId, assets, rate
                                 <div className="flex justify-end items-baseline gap-2">
                                     <span className="text-xs font-medium text-[#F5F5DC]/90 truncate">{formatPrimaryNoDecimals(toPrimary(asset.gbp))}</span>
                                 </div>
-                                <div className="flex justify-end items-baseline gap-2">
-                                    <span className="text-xs font-medium text-[#F5F5DC]/70 truncate">{formatSecondaryNoDecimals(toSecondary(asset.gbp))}</span>
-                                </div>
+                                {!singleCurrencyMode && (
+                                    <div className="flex justify-end items-baseline gap-2">
+                                        <span className="text-xs font-medium text-[#F5F5DC]/70 truncate">{formatSecondaryNoDecimals(toSecondary(asset.gbp))}</span>
+                                    </div>
+                                )}
 
                             </div>
                         </div>
@@ -85,7 +87,7 @@ export default function ConsolidatedAssetTable({ title, categoryId, assets, rate
                 <div className="mt-4 bg-[#121418]/50 backdrop-blur-lg border border-white/[0.06] rounded-xl overflow-hidden font-space">
                     {/* Current Holdings Subtotal */}
                     {realisedPnL && categoryId !== 'real-estate' && (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 border-b border-white/5 bg-white/5 items-center">
+                        <div className={`grid ${singleCurrencyMode ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-2 md:grid-cols-4'} gap-3 p-3 border-b border-white/5 bg-white/5 items-center`}>
                             <div className="col-span-2 md:col-span-1 text-[#F5F5DC]/50 italic text-xs">
                                 Current Holdings
                             </div>
@@ -93,10 +95,12 @@ export default function ConsolidatedAssetTable({ title, categoryId, assets, rate
                                 <span className="text-2xs uppercase text-[#F5F5DC]/40 md:hidden mb-0.5">{primaryCurrency}</span>
                                 <span className="text-xs text-[#F5F5DC]/80">{formatPrimaryNoDecimals(toPrimary(subGbp))}</span>
                             </div>
-                            <div className="flex flex-col md:items-end">
-                                <span className="text-2xs uppercase text-[#F5F5DC]/40 md:hidden mb-0.5">{secondaryCurrency}</span>
-                                <span className="text-xs text-[#F5F5DC]/60">{formatSecondaryNoDecimals(toSecondary(subGbp))}</span>
-                            </div>
+                            {!singleCurrencyMode && (
+                                <div className="flex flex-col md:items-end">
+                                    <span className="text-2xs uppercase text-[#F5F5DC]/40 md:hidden mb-0.5">{secondaryCurrency}</span>
+                                    <span className="text-xs text-[#F5F5DC]/60">{formatSecondaryNoDecimals(toSecondary(subGbp))}</span>
+                                </div>
+                            )}
                             <div className="flex flex-col md:items-end col-span-2 md:col-span-1 border-t border-white/5 md:border-t-0 pt-1.5 md:pt-0 mt-1.5 md:mt-0">
                                 <span className={`text-base font-bebas tracking-wide ${subRoi >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                                     {subRoi >= 0 ? '+' : ''}{subRoi.toFixed(1)}%
@@ -107,7 +111,7 @@ export default function ConsolidatedAssetTable({ title, categoryId, assets, rate
 
                     {/* Grand Total Row */}
                     {totalAsset && (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 xl:p-4 bg-gradient-to-r from-[#D4AF37]/10 to-transparent items-center border-t border-[#D4AF37]/20">
+                        <div className={`grid ${singleCurrencyMode ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-2 md:grid-cols-4'} gap-3 p-3 xl:p-4 bg-gradient-to-r from-[#D4AF37]/10 to-transparent items-center border-t border-[#D4AF37]/20`}>
                             <div className="col-span-2 md:col-span-1 text-[#D4AF37] font-bebas tracking-wide text-lg uppercase">
                                 {totalAsset.name}
                             </div>
@@ -115,10 +119,12 @@ export default function ConsolidatedAssetTable({ title, categoryId, assets, rate
                                 <span className="text-2xs uppercase text-[#D4AF37]/60 md:hidden mb-0.5">{primaryCurrency}</span>
                                 <span className="text-sm text-[#F5F5DC]/90 font-medium">{formatPrimaryNoDecimals(toPrimary(totalAsset.gbp))}</span>
                             </div>
-                            <div className="flex flex-col md:items-end">
-                                <span className="text-2xs uppercase text-[#D4AF37]/60 md:hidden mb-0.5">{secondaryCurrency}</span>
-                                <span className="text-sm text-[#D4AF37] font-medium">{formatSecondaryNoDecimals(toSecondary(totalAsset.gbp))}</span>
-                            </div>
+                            {!singleCurrencyMode && (
+                                <div className="flex flex-col md:items-end">
+                                    <span className="text-2xs uppercase text-[#D4AF37]/60 md:hidden mb-0.5">{secondaryCurrency}</span>
+                                    <span className="text-sm text-[#D4AF37] font-medium">{formatSecondaryNoDecimals(toSecondary(totalAsset.gbp))}</span>
+                                </div>
+                            )}
                             <div className="flex flex-col md:items-end col-span-2 md:col-span-1 border-t border-[#D4AF37]/20 md:border-t-0 pt-2 md:pt-0 mt-1.5 md:mt-0">
                                 <span className={`text-xl font-bebas tracking-widest ${totalAsset.roi >= 0 ? 'text-vu-green drop-shadow-[0_0_6px_rgba(74,222,128,0.4)]' : 'text-red-400 drop-shadow-[0_0_6px_rgba(248,113,113,0.4)]'}`}>
                                     {totalAsset.roi !== null && totalAsset.roi !== undefined ? (

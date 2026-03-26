@@ -12,6 +12,7 @@ const PatchProfileSchema = z.object({
     // Currency preference fields
     primaryCurrency: z.string().optional(),
     secondaryCurrency: z.string().optional(),
+    singleCurrencyMode: z.boolean().optional(),
     rateFlipped: z.boolean().optional(),
     displayCurrencyOverrides: z.record(z.string(), z.string()).optional(),
     // Name update
@@ -60,11 +61,12 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
         }
 
         // ── Currency preferences ──
-        if (data!.primaryCurrency || data!.secondaryCurrency || data!.rateFlipped !== undefined || data!.displayCurrencyOverrides !== undefined) {
-            const current = await kvGet<Record<string, any>>('currency_preferences', { primary: 'BRL', secondary: 'GBP', rateFlipped: false, displayCurrencyOverrides: {} }, sessionUser.id) || { primary: 'BRL', secondary: 'GBP', rateFlipped: false, displayCurrencyOverrides: {} };
+        if (data!.primaryCurrency || data!.secondaryCurrency || data!.singleCurrencyMode !== undefined || data!.rateFlipped !== undefined || data!.displayCurrencyOverrides !== undefined) {
+            const current = await kvGet<Record<string, any>>('currency_preferences', { primary: 'BRL', secondary: 'GBP', singleCurrencyMode: false, rateFlipped: false, displayCurrencyOverrides: {} }, sessionUser.id) || { primary: 'BRL', secondary: 'GBP', singleCurrencyMode: false, rateFlipped: false, displayCurrencyOverrides: {} };
             const updated = {
                 primary: data!.primaryCurrency || current.primary,
                 secondary: data!.secondaryCurrency || current.secondary,
+                singleCurrencyMode: data!.singleCurrencyMode !== undefined ? data!.singleCurrencyMode : (current.singleCurrencyMode || false),
                 rateFlipped: data!.rateFlipped !== undefined ? data!.rateFlipped : (current.rateFlipped || false),
                 displayCurrencyOverrides: data!.displayCurrencyOverrides !== undefined ? data!.displayCurrencyOverrides : (current.displayCurrencyOverrides || {}),
             };

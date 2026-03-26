@@ -7,15 +7,22 @@ import { usePortfolio } from '@/context/PortfolioContext';
 import { CURRENCY_LIST } from '@/lib/currency';
 
 export default function CurrencyQuickPicker({ onDone }: any) {
-    const { primaryCurrency, setPrimaryCurrency, secondaryCurrency, setSecondaryCurrency } = usePortfolio();
+    const { primaryCurrency, setPrimaryCurrency, secondaryCurrency, setSecondaryCurrency, setSingleCurrencyMode } = usePortfolio();
     const [primary, setPrimary] = useState(primaryCurrency || 'BRL');
     const [secondary, setSecondary] = useState(secondaryCurrency || 'GBP');
+    const [isSingleMode, setIsSingleMode] = useState(false);
 
     const handleConfirm = useCallback(() => {
         setPrimaryCurrency(primary);
-        setSecondaryCurrency(secondary);
+        if (isSingleMode) {
+            setSingleCurrencyMode(true);
+            setSecondaryCurrency(primary); // fallback
+        } else {
+            setSingleCurrencyMode(false);
+            setSecondaryCurrency(secondary);
+        }
         onDone?.();
-    }, [primary, secondary, setPrimaryCurrency, setSecondaryCurrency, onDone]);
+    }, [primary, secondary, isSingleMode, setPrimaryCurrency, setSecondaryCurrency, setSingleCurrencyMode, onDone]);
 
     return (
         <motion.div
@@ -82,18 +89,35 @@ export default function CurrencyQuickPicker({ onDone }: any) {
                     <div className="flex flex-col gap-1.5">
                         <label className="text-2xs uppercase tracking-[3px] text-[#CC5500]/50 font-space text-center">Secondary</label>
                         <div className="flex flex-col gap-1">
+                            <button
+                                onClick={() => setIsSingleMode(true)}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all duration-300 text-left ${
+                                    isSingleMode
+                                        ? 'border-[#D4AF37]/50 bg-[#D4AF37]/10 text-[#D4AF37] shadow-md shadow-[#D4AF37]/10'
+                                        : 'border-white/[0.06] bg-white/[0.02] text-[#F5F5DC]/50 hover:bg-white/[0.05]'
+                                }`}
+                            >
+                                <span className="text-lg">➖</span>
+                                <div className="flex flex-col">
+                                    <span className="text-xs font-bold font-space">None</span>
+                                    <span className="text-2xs opacity-50">Single Currency</span>
+                                </div>
+                            </button>
                             {CURRENCY_LIST.map(c => (
                                 <button
                                     key={`s-${c.code}`}
-                                    onClick={() => setSecondary(c.code)}
+                                    onClick={() => {
+                                        setIsSingleMode(false);
+                                        setSecondary(c.code);
+                                    }}
                                     disabled={c.code === primary}
                                     className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all duration-300 text-left ${
-                                        secondary === c.code
+                                        !isSingleMode && secondary === c.code
                                             ? 'border-[#CC5500]/50 bg-[#CC5500]/10 text-[#CC5500] shadow-md shadow-[#CC5500]/10'
                                             : c.code === primary
                                             ? 'opacity-20 cursor-not-allowed border-white/[0.03]'
                                             : 'border-white/[0.06] bg-white/[0.02] text-[#F5F5DC]/50 hover:bg-white/[0.05]'
-                                    }`}
+                                    } ${isSingleMode ? 'opacity-40 grayscale hover:opacity-100 hover:grayscale-0' : ''}`}
                                 >
                                     <span className="text-lg">{c.flag}</span>
                                     <div className="flex flex-col">
@@ -111,7 +135,7 @@ export default function CurrencyQuickPicker({ onDone }: any) {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={handleConfirm}
-                    disabled={primary === secondary}
+                    disabled={!isSingleMode && primary === secondary}
                     className="w-full px-6 py-3 rounded-xl font-space text-sm tracking-wide font-bold transition-all duration-300
                         bg-gradient-to-r from-[#D4AF37] to-[#B8962E] text-[#0B0611]
                         hover:shadow-lg hover:shadow-[#D4AF37]/20

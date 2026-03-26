@@ -28,10 +28,14 @@ const formatMonthYear = (val: any) => {
     return cleanVal;
 };
 
-const CustomTooltip = ({ active, payload, label, primaryCurrency, secondaryCurrency, primaryMeta, secondaryMeta, formatPrimary, formatSecondary }: any) => {
+const CustomTooltip = ({ active, payload, label, primaryCurrency, secondaryCurrency, primaryMeta, secondaryMeta, formatPrimary, formatSecondary, singleCurrencyMode }: any) => {
     if (!active || !payload || !payload.length) return null;
 
-    const uniquePayload = payload.filter((v: any, i: number, a: any[]) => a.findIndex(t => (t.name === v.name)) === i);
+    const uniquePayload = payload.filter((v: any, i: number, a: any[]) => a.findIndex(t => (t.name === v.name)) === i)
+        .filter((v: any) => {
+            if (singleCurrencyMode && (v.name?.includes(secondaryCurrency) || v.name?.includes('FX Rate'))) return false;
+            return true;
+        });
 
     const valueFormatter = (value: number, name: string, entry: any) => {
         const isDebt = entry.dataKey === 'categories.Debt';
@@ -62,7 +66,7 @@ const CustomTooltip = ({ active, payload, label, primaryCurrency, secondaryCurre
 };
 
 export default function DashboardCharts({ historicalData, currentMonthData, rates, monthlyInvestments, masterMixData, allocationTargets, forecastSettings, dashboardConfig, onCustomizeClick, onNavigate }: DashboardChartsProps) {
-    const { primaryCurrency, secondaryCurrency, toPrimary, toSecondary, formatPrimary, formatSecondary } = usePortfolio() as any;
+    const { primaryCurrency, secondaryCurrency, toPrimary, toSecondary, formatPrimary, formatSecondary, singleCurrencyMode } = usePortfolio() as any;
     const primaryMeta = (SUPPORTED_CURRENCIES as any)[primaryCurrency];
     const secondaryMeta = (SUPPORTED_CURRENCIES as any)[secondaryCurrency];
 
@@ -344,11 +348,15 @@ export default function DashboardCharts({ historicalData, currentMonthData, rate
 
     const meta = {
         primaryCurrency, secondaryCurrency, primaryMeta, secondaryMeta, formatPrimary, formatSecondary,
+        singleCurrencyMode,
         domainPrimary, domainSecondary, totalCurrencyTokensPrimary,
         totalDrift: allocationData.reduce((acc, current) => acc + Math.abs(current.actual - current.target), 0)
     };
 
-    const chartsToRender = dashboardConfig?.charts ? [...dashboardConfig.charts].sort((a: any, b: any) => a.order - b.order) : [];
+    const chartsToRender = dashboardConfig?.charts ? [...dashboardConfig.charts].filter((cfg: any) => {
+        if (singleCurrencyMode && (cfg.id === 'currency-exposure' || cfg.dataSources[0] === 'currency-exposure')) return false;
+        return true;
+    }).sort((a: any, b: any) => a.order - b.order) : [];
     const [showAllCharts, setShowAllCharts] = React.useState(false);
 
     if (chartsToRender.length === 0) return null;
@@ -376,13 +384,13 @@ export default function DashboardCharts({ historicalData, currentMonthData, rate
 
 function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate }: any) {
     const { chartType, dataSources, series, title, options } = config;
-    const { primaryCurrency, secondaryCurrency, primaryMeta, secondaryMeta, formatPrimary, formatSecondary, domainPrimary, domainSecondary, totalCurrencyTokensPrimary, totalDrift } = meta;
+    const { primaryCurrency, secondaryCurrency, primaryMeta, secondaryMeta, formatPrimary, formatSecondary, domainPrimary, domainSecondary, totalCurrencyTokensPrimary, totalDrift, singleCurrencyMode } = meta;
 
     const mainSource = dataSources?.[0];
     const data = dataRegistry[mainSource] || [];
     const isCategory = mainSource === 'allocation-current' || mainSource === 'currency-exposure';
     const xAxisKey = isCategory ? 'name' : 'month';
-    const customTooltipProps = { primaryCurrency, secondaryCurrency, primaryMeta, secondaryMeta, formatPrimary, formatSecondary };
+    const customTooltipProps = { primaryCurrency, secondaryCurrency, primaryMeta, secondaryMeta, formatPrimary, formatSecondary, singleCurrencyMode };
 
     const commonXAxis = {
         dataKey: xAxisKey,
@@ -420,7 +428,7 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
                 <div className="mt-3 flex justify-center gap-4 text-2xs font-space shrink-0 flex-wrap">
                     <span className="text-[#D4AF37]">● {primaryCurrency}</span>
                     <span className="text-[#A0A0A0]">● Target ({primaryCurrency})</span>
-                    <span className="text-[#CC5500]">● {secondaryCurrency}</span>
+                    {!singleCurrencyMode && <span className="text-[#CC5500]">● {secondaryCurrency}</span>}
                 </div>
             );
         }
@@ -436,7 +444,7 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
             return (
                 <div className="mt-3 flex justify-center gap-4 text-2xs font-space shrink-0 flex-wrap">
                     <span className="text-[#D4AF37]">● ROI (%)</span>
-                    <span className="text-[#CC5500]">● FX Rate</span>
+                    {!singleCurrencyMode && <span className="text-[#CC5500]">● FX Rate</span>}
                 </div>
             );
         }
@@ -468,10 +476,10 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
                         if (Math.abs(val) >= 1000000) return `${primaryMeta?.symbol || ''}${(val / 1000000).toFixed(1)}M`;
                         return `${primaryMeta?.symbol || ''}${(val / 1000).toFixed(0)}k`;
                     }} />
-                    {options?.dualAxis && <YAxis yAxisId="right" orientation="right" stroke="#CC5500" tick={{ fill: '#CC5500', fontSize: 11, opacity: 0.7, fontFamily: 'var(--font-space)' }} domain={domainSecondary} tickFormatter={(val: number) => `${secondaryMeta?.symbol || ''}${(val / 1000).toFixed(0)}k`} axisLine={{ stroke: 'rgba(204,85,0,0.2)' }} />}
+                    {options?.dualAxis && !singleCurrencyMode && <YAxis yAxisId="right" orientation="right" stroke="#CC5500" tick={{ fill: '#CC5500', fontSize: 11, opacity: 0.7, fontFamily: 'var(--font-space)' }} domain={domainSecondary} tickFormatter={(val: number) => `${secondaryMeta?.symbol || ''}${(val / 1000).toFixed(0)}k`} axisLine={{ stroke: 'rgba(204,85,0,0.2)' }} />}
                     <Tooltip content={<CustomTooltip {...customTooltipProps} />} />
                     {series.includes('networthPrimary') && <Area yAxisId="left" type="monotone" dataKey="networthPrimary" stroke="#D4AF37" strokeWidth={3} fillOpacity={1} fill={`url(#colorGold-${config.id})`} name={`Net Worth ${primaryCurrency}`} />}
-                    {series.includes('networthSecondary') && <Area yAxisId={options?.dualAxis ? "right" : "left"} type="monotone" dataKey="networthSecondary" stroke="#CC5500" strokeWidth={2} dot={{ r: 0 } as any} activeDot={{ r: 4, fill: '#CC5500' }} name={`Net Worth ${secondaryCurrency}`} fillOpacity={0} />}
+                    {series.includes('networthSecondary') && !singleCurrencyMode && <Area yAxisId={options?.dualAxis && !singleCurrencyMode ? "right" : "left"} type="monotone" dataKey="networthSecondary" stroke="#CC5500" strokeWidth={2} dot={{ r: 0 } as any} activeDot={{ r: 4, fill: '#CC5500' }} name={`Net Worth ${secondaryCurrency}`} fillOpacity={0} />}
                     {series.includes('targetPrimary') && <Line yAxisId="left" type="monotone" dataKey="targetPrimary" name={`Target ${primaryCurrency}`} stroke="#A0A0A0" strokeWidth={2} strokeDasharray="3 3" dot={false} connectNulls />}
                     {series.includes('actualGreen') && <Line yAxisId="left" type="monotone" dataKey="actualGreen" stroke="var(--vu-green)" strokeWidth={3} name={`Actual ${primaryCurrency}`} dot={false} connectNulls={false} />}
                     {series.includes('actualRed') && <Line yAxisId="left" type="monotone" dataKey="actualRed" stroke="#ef4444" strokeWidth={3} name={`Actual ${primaryCurrency}`} dot={false} connectNulls={false} />}
@@ -560,13 +568,13 @@ function GenericChart({ config, dataRegistry, meta, onCustomizeClick, onNavigate
                     <CartesianGrid strokeOpacity={0.1} vertical={false} stroke="#F5F5DC" />
                     <XAxis {...commonXAxis} />
                     <YAxis yAxisId="left" stroke="#F5F5DC" tick={{ fill: '#F5F5DC', fontSize: 11, opacity: 0.5, fontFamily: 'var(--font-space)' }} tickFormatter={(val: number) => series.includes('roi') ? `${val}%` : `${secondaryMeta?.symbol || ''}${(val / 1000).toFixed(0)}k`} axisLine={{ stroke: 'rgba(212,175,55,0.1)' }} />
-                    {options?.dualAxis && <YAxis yAxisId="right" orientation="right" stroke="#CC5500" tick={{ fill: '#CC5500', fontSize: 11, opacity: 0.7, fontFamily: 'var(--font-space)' }} tickFormatter={(val: number) => `${primaryMeta?.symbol || ''}${val.toFixed(2)}`} axisLine={{ stroke: 'rgba(204,85,0,0.2)' }} domain={['auto', 'auto']} />}
+                    {options?.dualAxis && !singleCurrencyMode && <YAxis yAxisId="right" orientation="right" stroke="#CC5500" tick={{ fill: '#CC5500', fontSize: 11, opacity: 0.7, fontFamily: 'var(--font-space)' }} tickFormatter={(val: number) => `${primaryMeta?.symbol || ''}${val.toFixed(2)}`} axisLine={{ stroke: 'rgba(204,85,0,0.2)' }} domain={['auto', 'auto']} />}
                     <Tooltip content={<CustomTooltip {...customTooltipProps} />} />
 
 
                     <ReferenceLine yAxisId="left" y={0} stroke="#F5F5DC" strokeOpacity={0.2} />
                     {series.includes('roi') && <Line yAxisId="left" type="monotone" dataKey="roi" stroke="#D4AF37" strokeWidth={2} dot={{ r: 0 } as any} activeDot={{ r: 4, fill: '#D4AF37' }} name="ROI" />}
-                    {series.includes('impliedRate') && <Line yAxisId={options?.dualAxis ? "right" : "left"} type="monotone" dataKey="impliedRate" stroke="#CC5500" strokeWidth={2} dot={{ r: 0 } as any} activeDot={{ r: 4, fill: '#CC5500' }} name={`FX Rate ${secondaryCurrency}/${primaryCurrency}`} connectNulls />}
+                    {series.includes('impliedRate') && !singleCurrencyMode && <Line yAxisId={options?.dualAxis && !singleCurrencyMode ? "right" : "left"} type="monotone" dataKey="impliedRate" stroke="#CC5500" strokeWidth={2} dot={{ r: 0 } as any} activeDot={{ r: 4, fill: '#CC5500' }} name={`FX Rate ${secondaryCurrency}/${primaryCurrency}`} connectNulls />}
                     {series.includes('Net') && <Line yAxisId="left" type="monotone" dataKey="Net" name={`Net Flow ${secondaryCurrency}`} stroke="#D4AF37" strokeWidth={2} dot={{ r: 0 } as any} activeDot={{ r: 4, fill: '#D4AF37' }} />}
                 </LineChart>
             );

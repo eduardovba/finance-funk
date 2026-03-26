@@ -118,6 +118,8 @@ export interface PortfolioContextValue {
     setPrimaryCurrency: (v: string) => void;
     secondaryCurrency: string;
     setSecondaryCurrency: (v: string) => void;
+    singleCurrencyMode: boolean;
+    setSingleCurrencyMode: (v: boolean) => void;
     rateFlipped: boolean;
     setRateFlipped: (v: boolean) => void;
     displayCurrencyOverrides: Record<string, string | null>;
@@ -130,6 +132,8 @@ export interface PortfolioContextValue {
     // Demo mode flag (only present in DemoPortfolioContext)
     isDemoMode?: boolean;
 }
+
+// @ts-ignore
 import { useQueryClient } from '@tanstack/react-query';
 import { formatCurrency, convertCurrency, SUPPORTED_CURRENCIES, getFallbackRates } from '@/lib/currency';
 import useCurrencyStore from '@/stores/useCurrencyStore';
@@ -246,6 +250,7 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
     // ═══════════ CURRENCY (from Zustand store) ═══════════
     const primaryCurrency = useCurrencyStore(s => s.primaryCurrency);
     const secondaryCurrency = useCurrencyStore(s => s.secondaryCurrency);
+    const singleCurrencyMode = useCurrencyStore(s => s.singleCurrencyMode);
     const displayCurrencyOverrides = useCurrencyStore(s => s.displayCurrencyOverrides);
     const rateFlipped = useCurrencyStore(s => s.rateFlipped);
     const currencyLoaded = useCurrencyStore(s => s.currencyLoaded);
@@ -255,6 +260,7 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
     const toSecondary = useCurrencyStore(s => s.toSecondary);
     const setPrimaryCurrency = useCurrencyStore(s => s.setPrimaryCurrency);
     const setSecondaryCurrency = useCurrencyStore(s => s.setSecondaryCurrency);
+    const setSingleCurrencyMode = useCurrencyStore(s => s.setSingleCurrencyMode);
     const setRateFlipped = useCurrencyStore(s => s.setRateFlipped);
     const setDisplayCurrencyOverride = useCurrencyStore(s => s.setDisplayCurrencyOverride);
 
@@ -492,6 +498,9 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
                             useCurrencyStore.getState().setPrimaryCurrency(onboardingData.primaryCurrency);
                             if (onboardingData.secondaryCurrency) {
                                 useCurrencyStore.getState().setSecondaryCurrency(onboardingData.secondaryCurrency);
+                            }
+                            if (onboardingData.singleCurrencyMode !== undefined) {
+                                useCurrencyStore.getState().setSingleCurrencyMode(onboardingData.singleCurrencyMode);
                             }
                             setTimeout(() => {
                                 useCurrencyStore.getState().persistCurrencyPrefs();
@@ -996,6 +1005,7 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
         // Currency selection
         primaryCurrency, setPrimaryCurrency,
         secondaryCurrency, setSecondaryCurrency,
+        singleCurrencyMode, setSingleCurrencyMode,
         rateFlipped, setRateFlipped,
         displayCurrencyOverrides, setDisplayCurrencyOverride,
         formatPrimary, formatSecondary, toPrimary, toSecondary,
@@ -1015,8 +1025,8 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
         isFormOpen, editingTransaction, isDeleteModalOpen, transactionToDelete,
         isInspectorOpen, inspectorMode, statusModal, isMonthlyCloseModalOpen,
         setIsFormOpen, setEditingTransaction, setIsDeleteModalOpen, setIsInspectorOpen, setInspectorMode, setStatusModal, setIsMonthlyCloseModalOpen,
-        primaryCurrency, secondaryCurrency, rateFlipped, displayCurrencyOverrides, formatPrimary, formatSecondary, toPrimary, toSecondary,
-        setPrimaryCurrency, setSecondaryCurrency, setRateFlipped, setDisplayCurrencyOverride,
+        primaryCurrency, secondaryCurrency, singleCurrencyMode, rateFlipped, displayCurrencyOverrides, formatPrimary, formatSecondary, toPrimary, toSecondary,
+        setPrimaryCurrency, setSecondaryCurrency, setSingleCurrencyMode, setRateFlipped, setDisplayCurrencyOverride,
         ftueState, updateFtueProgress,
         appSettings, handleUpdateAppSettings
     ]);
@@ -1074,6 +1084,7 @@ const FALLBACK_CONTEXT: PortfolioContextValue = {
     isMonthlyCloseModalOpen: false, setIsMonthlyCloseModalOpen: noop,
     primaryCurrency: 'BRL', setPrimaryCurrency: noop,
     secondaryCurrency: 'GBP', setSecondaryCurrency: noop,
+    singleCurrencyMode: false, setSingleCurrencyMode: noop,
     rateFlipped: false, setRateFlipped: noop,
     displayCurrencyOverrides: {}, setDisplayCurrencyOverride: noop,
     formatPrimary: (v: number) => `R$ ${v.toFixed(2)}`,

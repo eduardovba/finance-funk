@@ -137,12 +137,32 @@ export default function CurrencyPill() {
         primaryCurrency, setPrimaryCurrency,
         secondaryCurrency, setSecondaryCurrency,
         rateFlipped, setRateFlipped,
-    } = usePortfolio();
+        singleCurrencyMode, setSingleCurrencyMode,
+    } = usePortfolio() as any;
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [leftOpen, setLeftOpen] = useState(false);
     const [rightOpen, setRightOpen] = useState(false);
+    const [search, setSearch] = useState('');
     const menuRef = useRef<HTMLDivElement>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
+    // Focus search input when menu opens in single currency mode
+    useEffect(() => {
+        if (isMenuOpen && singleCurrencyMode && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+        if (!isMenuOpen) setSearch('');
+    }, [isMenuOpen, singleCurrencyMode]);
+
+    const filteredSingle = useMemo(() => {
+        const q = search.toLowerCase();
+        if (!q) return CURRENCY_LIST;
+        return CURRENCY_LIST.filter(c =>
+            c.code.toLowerCase().includes(q) ||
+            c.name.toLowerCase().includes(q)
+        );
+    }, [search]);
 
     // Close menu on click outside
     useEffect(() => {
@@ -179,65 +199,117 @@ export default function CurrencyPill() {
                     <span className="text-xs md:text-xs font-space font-bold text-parchment/80 group-hover:text-[#D4AF37] transition-colors">{primaryCurrency}</span>
                 </div>
 
-                <div className="hidden md:block w-px h-3 bg-white/10" />
+                {!singleCurrencyMode ? (
+                    <>
+                        <div className="hidden md:block w-px h-3 bg-white/10" />
 
-                <div className="md:hidden text-2xs text-parchment/50 group-hover:text-[#D4AF37] pl-0.5 transition-colors">▼</div>
+                        <div className="md:hidden text-2xs text-parchment/50 group-hover:text-[#D4AF37] pl-0.5 transition-colors">▼</div>
 
-                {/* Center: Flip Rate Button */}
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setRateFlipped(!rateFlipped);
-                    }}
-                    className="hidden md:flex bg-transparent border-none p-0 flex items-center gap-1 cursor-pointer"
-                >
-                    <span className="text-data-xs font-space  font-bold text-[#D4AF37] drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">
-                        {loadingRates ? '...' : liveRate.toFixed(2)}
-                    </span>
-                    <span className="text-2xs text-parchment/30 group-hover:text-parchment/50">⇅</span>
-                </button>
+                        {/* Center: Flip Rate Button */}
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setRateFlipped(!rateFlipped);
+                            }}
+                            className="hidden md:flex bg-transparent border-none p-0 flex items-center gap-1 cursor-pointer"
+                        >
+                            <span className="text-data-xs font-space  font-bold text-[#D4AF37] drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">
+                                {loadingRates ? '...' : liveRate.toFixed(2)}
+                            </span>
+                            <span className="text-2xs text-parchment/30 group-hover:text-parchment/50">⇅</span>
+                        </button>
 
-                <div className="hidden md:block w-px h-3 bg-white/10" />
+                        <div className="hidden md:block w-px h-3 bg-white/10" />
 
-                {/* Right Side: Secondary Code + Flag */}
-                <div className="hidden md:flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
-                    <span className="text-xs font-space font-bold text-parchment/60 group-hover:text-[#D4AF37] transition-colors">{secondaryCurrency}</span>
-                    <span className="text-sm">{secondaryMeta?.flag}</span>
-                </div>
+                        {/* Right Side: Secondary Code + Flag */}
+                        <div className="hidden md:flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                            <span className="text-xs font-space font-bold text-parchment/60 group-hover:text-[#D4AF37] transition-colors">{secondaryCurrency}</span>
+                            <span className="text-sm">{secondaryMeta?.flag}</span>
+                        </div>
+                    </>
+                ) : (
+                    <div className="text-2xs text-parchment/50 group-hover:text-[#D4AF37] pl-0.5 transition-colors">▼</div>
+                )}
             </div>
 
             {/* Expanded Mini Menu */}
             {isMenuOpen && (
-                <div
-                    className="absolute top-full right-0 mt-3 w-64 bg-[#0B0611] backdrop-blur-2xl border border-[#D4AF37]/20 rounded-2xl shadow-2xl p-4 z-[900]"
-                    style={{ animation: 'pillExpand 0.25s cubic-bezier(0.16, 1, 0.3, 1)' }}
-                >
-                    <div className="flex flex-col gap-4">
-                        {/* Currency Selectors */}
-                        <div className="flex items-center justify-between pb-3 border-b border-white/5">
-                            <div className="flex flex-col gap-1">
-                                <span className="text-2xs font-space text-parchment/40 uppercase tracking-widest pl-2">Primary</span>
-                                <CurrencyDropdown
-                                    selected={primaryCurrency}
-                                    onSelect={setPrimaryCurrency}
-                                    otherSelected={secondaryCurrency}
-                                    side="left"
-                                    isOpen={leftOpen}
-                                    onToggle={(v) => { setLeftOpen(v); if (v) setRightOpen(false); }}
-                                />
-                            </div>
-                            <div className="flex flex-col items-end gap-1">
-                                <span className="text-2xs font-space text-parchment/40 uppercase tracking-widest pr-2">Secondary</span>
-                                <CurrencyDropdown
-                                    selected={secondaryCurrency}
-                                    onSelect={setSecondaryCurrency}
-                                    otherSelected={primaryCurrency}
-                                    side="right"
-                                    isOpen={rightOpen}
-                                    onToggle={(v) => { setRightOpen(v); if (v) setLeftOpen(false); }}
-                                />
-                            </div>
+                singleCurrencyMode ? (
+                    <div
+                        className="absolute top-full right-0 mt-3 w-56 bg-[#0B0611] backdrop-blur-2xl border border-[#D4AF37]/20 rounded-2xl shadow-2xl z-[900] overflow-hidden"
+                        style={{ animation: 'pillExpand 0.25s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                    >
+                        {/* Search Input */}
+                        <div className="p-2 border-b border-white/5">
+                            <input
+                                ref={searchInputRef}
+                                type="text"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Search currency..."
+                                className="w-full px-3 py-2 text-xs font-space bg-white/5 border border-white/10 rounded-lg text-parchment placeholder:text-parchment/30 outline-none focus:border-[#D4AF37]/40 transition-colors"
+                            />
                         </div>
+
+                        {/* Currency List */}
+                        <div className="max-h-56 overflow-y-auto">
+                            {filteredSingle.map(c => (
+                                <button
+                                    key={c.code}
+                                    onClick={() => {
+                                        setPrimaryCurrency(c.code);
+                                        // Reset secondary to avoid weird dual mode bugs if they disable single mode later
+                                        setSecondaryCurrency(c.code); 
+                                        setIsMenuOpen(false);
+                                    }}
+                                    className={`w-full flex items-center gap-3 px-3 py-3.5 md:py-2.5 text-left transition-all duration-150 border-none cursor-pointer active:scale-[0.98] ${c.code === primaryCurrency
+                                        ? 'bg-[#D4AF37]/15 text-[#D4AF37]'
+                                        : 'bg-transparent text-parchment/80 hover:bg-white/5 hover:text-white'
+                                        }`}
+                                >
+                                    <span className="text-base">{c.flag}</span>
+                                    <span className="text-xs font-space font-bold tracking-wider">{c.code}</span>
+                                    <span className="text-xs text-parchment/40 ml-auto">{c.name}</span>
+                                </button>
+                            ))}
+                            {filteredSingle.length === 0 && (
+                                <div className="px-3 py-4 text-center text-xs text-parchment/30 font-space">
+                                    No currencies found
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ) : (
+                    <div
+                        className="absolute top-full right-0 mt-3 w-64 bg-[#0B0611] backdrop-blur-2xl border border-[#D4AF37]/20 rounded-2xl shadow-2xl p-4 z-[900]"
+                        style={{ animation: 'pillExpand 0.25s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                    >
+                        <div className="flex flex-col gap-4">
+                            {/* Currency Selectors */}
+                            <div className="flex items-center justify-between pb-3 border-b border-white/5">
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-2xs font-space text-parchment/40 uppercase tracking-widest pl-2">Primary</span>
+                                    <CurrencyDropdown
+                                        selected={primaryCurrency}
+                                        onSelect={setPrimaryCurrency}
+                                        otherSelected={secondaryCurrency}
+                                        side="left"
+                                        isOpen={leftOpen}
+                                        onToggle={(v) => { setLeftOpen(v); if (v) setRightOpen(false); }}
+                                    />
+                                </div>
+                                <div className="flex flex-col items-end gap-1">
+                                    <span className="text-2xs font-space text-parchment/40 uppercase tracking-widest pr-2">Secondary</span>
+                                    <CurrencyDropdown
+                                        selected={secondaryCurrency}
+                                        onSelect={setSecondaryCurrency}
+                                        otherSelected={primaryCurrency}
+                                        side="right"
+                                        isOpen={rightOpen}
+                                        onToggle={(v) => { setRightOpen(v); if (v) setLeftOpen(false); }}
+                                    />
+                                </div>
+                            </div>
 
                         {/* Detailed Rate Info */}
                         <div className="space-y-3 px-1">
@@ -276,6 +348,7 @@ export default function CurrencyPill() {
                         </div>
                     </div>
                 </div>
+                )
             )}
 
             <style jsx>{`

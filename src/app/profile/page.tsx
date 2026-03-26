@@ -476,7 +476,7 @@ function DeleteAccountModal({ isOpen, onClose, onConfirm }: any) {
 /* ─── Main Profile Page ─── */
 export default function ProfilePage() {
     const { data: session, update: updateSession } = useSession();
-    const { appSettings, handleUpdateAppSettings, resetFtue } = usePortfolio();
+    const { appSettings, handleUpdateAppSettings, resetFtue, setPrimaryCurrency, setSecondaryCurrency, setSingleCurrencyMode } = usePortfolio() as any;
     const router = useRouter();
     const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -514,10 +514,10 @@ export default function ProfilePage() {
         await updateSession({ name: updated.name });
     };
 
-    const handleCurrencyChange = async (field: string, value: string) => {
-        const body = field === 'primary'
-            ? { primaryCurrency: value }
-            : { secondaryCurrency: value };
+    const handleCurrencyChange = async (field: string, value: string | boolean) => {
+        const body = field === 'primary' ? { primaryCurrency: value }
+            : field === 'secondary' ? { secondaryCurrency: value }
+            : { singleCurrencyMode: value };
 
         try {
             const res = await fetch('/api/user/profile', {
@@ -528,6 +528,9 @@ export default function ProfilePage() {
             if (res.ok) {
                 const updated = await res.json();
                 setProfile(updated);
+                if (field === 'primary') setPrimaryCurrency(value);
+                if (field === 'secondary') setSecondaryCurrency(value);
+                if (field === 'singleMode') setSingleCurrencyMode(value);
             }
         } catch (err) {
             console.error('Failed to update currency:', err);
@@ -593,7 +596,7 @@ export default function ProfilePage() {
     const memberSince = profile?.created_at
         ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
         : null;
-    const currencyPrefs = profile?.currencyPreferences || { primary: 'BRL', secondary: 'GBP' };
+    const currencyPrefs = profile?.currencyPreferences || { primary: 'BRL', secondary: 'GBP', singleCurrencyMode: false };
 
     return (
         <div className="max-w-5xl mx-auto space-y-6">
@@ -662,7 +665,7 @@ export default function ProfilePage() {
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.3 }}
                         onClick={() => signOut({ callbackUrl: '/login' })}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-space hover:bg-red-500/20 active:scale-[0.98] transition-all"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-4 rounded-2xl bg-[rgba(18,20,24,0.55)] backdrop-blur-[24px] backdrop-saturate-150 border border-[rgba(239,68,68,0.15)] border-t-[rgba(239,68,68,0.25)] shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-[rgba(239,68,68,0.3)] hover:-translate-y-0.5 hover:shadow-[0_12px_40px_rgba(239,68,68,0.15)] hover:bg-[rgba(239,68,68,0.08)] text-red-400 text-sm font-space transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.98]"
                     >
                         <LogOut size={16} />
                         Sign Out
@@ -671,15 +674,6 @@ export default function ProfilePage() {
 
                 {/* ─── Right Column: Banks, Preferences, Data ─── */}
                 <div className="lg:col-span-3 space-y-6">
-                    <SectionCard title="Connected Banks" icon={Landmark}>
-                        <div className="space-y-4">
-                            <ConnectedInstitutionsList />
-                            <div className="pt-2 border-t border-white/5">
-                                <BankConnectButton />
-                            </div>
-                        </div>
-                    </SectionCard>
-
                     {/* Preferences — Currency Selector */}
                     <SectionCard title="Preferences" icon={Settings}>
                         <div className="space-y-4">
@@ -688,16 +682,26 @@ export default function ProfilePage() {
                                 value={currencyPrefs.primary}
                                 onChange={(v: string) => handleCurrencyChange('primary', v)}
                             />
-                            <CurrencySelect
-                                label="Secondary Currency"
-                                value={currencyPrefs.secondary}
-                                onChange={(v: string) => handleCurrencyChange('secondary', v)}
-                            />
-                            <BackgroundSelect
-                                label="App Background"
-                                value={appSettings?.backgroundSelection || 'vinyl-voyage'}
-                                onChange={handleBackgroundChange}
-                            />
+                            {!currencyPrefs.singleCurrencyMode && (
+                                <CurrencySelect
+                                    label="Secondary Currency"
+                                    value={currencyPrefs.secondary}
+                                    onChange={(v: string) => handleCurrencyChange('secondary', v)}
+                                />
+                            )}
+                            
+                            <div className="flex items-center justify-between px-3 py-3 rounded-xl bg-white/[0.03] border border-white/10 mt-4">
+                                <div>
+                                    <div className="text-sm text-parchment font-space font-medium">Single Currency Mode</div>
+                                    <div className="text-[0.75rem] text-parchment/30 font-space mt-0.5">Hide secondary currency across the dashboard</div>
+                                </div>
+                                <button
+                                    onClick={() => handleCurrencyChange('singleMode', !currencyPrefs.singleCurrencyMode)}
+                                    className={`w-11 h-6 rounded-full transition-colors relative ${currencyPrefs.singleCurrencyMode ? 'bg-[#D4AF37]/80' : 'bg-white/20'}`}
+                                >
+                                    <span className={`absolute top-1 bottom-1 w-4 bg-white rounded-full transition-all ${currencyPrefs.singleCurrencyMode ? 'left-6' : 'left-1'}`} />
+                                </button>
+                            </div>
 
                             <div className="flex items-center justify-between px-3 py-3 rounded-xl bg-white/[0.03] border border-white/10 mt-4">
                                 <div>
@@ -711,6 +715,12 @@ export default function ProfilePage() {
                                     <span className={`absolute top-1 bottom-1 w-4 bg-white rounded-full transition-all ${appSettings?.showEmptyCashBalances !== false ? 'left-6' : 'left-1'}`} />
                                 </button>
                             </div>
+
+                            <BackgroundSelect
+                                label="App Background"
+                                value={appSettings?.backgroundSelection || 'vinyl-voyage'}
+                                onChange={handleBackgroundChange}
+                            />
 
                             {/* Replay Tutorial */}
                             <div className="mt-5 pt-4 border-t border-white/5">
@@ -765,6 +775,15 @@ export default function ProfilePage() {
                                 <Download size={16} />
                                 {exporting ? 'Exporting...' : 'Export All Data'}
                             </button>
+                        </div>
+                    </SectionCard>
+
+                    <SectionCard title="Connected Banks" icon={Landmark}>
+                        <div className="space-y-4">
+                            <ConnectedInstitutionsList />
+                            <div className="pt-2 border-t border-white/5">
+                                <BankConnectButton />
+                            </div>
                         </div>
                     </SectionCard>
 

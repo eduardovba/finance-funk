@@ -15,6 +15,7 @@ export const RegisterSchema = z.object({
     onboarding_goal: z.string().nullable().optional(),
     onboarding_currency_primary: z.string().nullable().optional(),
     onboarding_currency_secondary: z.string().nullable().optional(),
+    onboarding_single_currency_mode: z.boolean().optional(),
     onboarding_experience: z.string().nullable().optional(),
 }).refine(data => data!.password === data!.confirmPassword, {
     message: 'Passwords do not match',
@@ -87,6 +88,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 await kvSet('currency_preferences', {
                     primary: data!.onboarding_currency_primary,
                     secondary: data!.onboarding_currency_secondary || null,
+                    singleCurrencyMode: data!.onboarding_single_currency_mode || false,
                 }, user.id);
             }
         } catch (e) {

@@ -64,7 +64,7 @@ export default async function AdminPage() {
 
             <AdminUserTable
                 users={JSON.parse(JSON.stringify(users))}
-                engagementStats={engagementStats}
+                engagementStats={JSON.parse(JSON.stringify(engagementStats))}
                 currentUserId={String(session.user.id)}
                 isSuperAdmin={isSuperAdmin}
             />

@@ -35,7 +35,7 @@ interface DashboardHeroProps {
 }
 
 export default function DashboardHero(props: DashboardHeroProps) {
-    const { ftueState } = usePortfolio() as any;
+    const { ftueState, singleCurrencyMode } = usePortfolio() as any;
     const experience = (ftueState?.onboardingExperience || 'beginner') as ExperienceLevel;
     const {
         data, isLoading, primaryMeta, secondaryMeta, primaryCurrency, secondaryCurrency,
@@ -98,9 +98,12 @@ export default function DashboardHero(props: DashboardHeroProps) {
                 </motion.div>
             </div>
 
-            <span className="text-sm text-[#CC5500]/70 font-space mb-6 tracking-wide text-center block">
-                ≈ {secondaryMeta?.symbol}<AnimatedNumber value={toSecondary(data.netWorth.amount, 'BRL') / 1000} formatter={(v) => v.toLocaleString(secondaryMeta?.locale || 'en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} />k
-            </span>
+            {!singleCurrencyMode && (
+                <span className="text-sm text-[#CC5500]/70 font-space mb-6 tracking-wide text-center block">
+                    ≈ {secondaryMeta?.symbol}<AnimatedNumber value={toSecondary(data.netWorth.amount, 'BRL') / 1000} formatter={(v) => v.toLocaleString(secondaryMeta?.locale || 'en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} />k
+                </span>
+            )}
+            {singleCurrencyMode && <div className="h-4" />}
 
             <div className={`flex flex-wrap justify-center gap-3 transition-opacity duration-300 ${isLoading ? 'opacity-30' : 'opacity-100'}`}>
                 {/* MoM Pill */}
@@ -157,16 +160,18 @@ export default function DashboardHero(props: DashboardHeroProps) {
                                 {isLoading ? '---' : <><AnimatedNumber value={toPrimary(data.netWorth.amount, 'BRL') / 1000000} formatter={(v) => v.toLocaleString(primaryMeta?.locale || 'en-GB', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} />M</>}
                             </span>
                         </div>
-                        <span className={`text-base xl:text-lg text-[#CC5500]/70 font-space mt-1 tracking-wide transition-opacity duration-300 ${isLoading ? 'opacity-20' : 'opacity-100'}`}>
-                            ≈ {secondaryMeta?.symbol}<AnimatedNumber value={toSecondary(data.netWorth.amount, 'BRL') / 1000} formatter={(v) => v.toLocaleString(secondaryMeta?.locale || 'en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} />k
-                        </span>
+                        {!singleCurrencyMode && (
+                            <span className={`text-base xl:text-lg text-[#CC5500]/70 font-space mt-1 tracking-wide transition-opacity duration-300 ${isLoading ? 'opacity-20' : 'opacity-100'}`}>
+                                ≈ {secondaryMeta?.symbol}<AnimatedNumber value={toSecondary(data.netWorth.amount, 'BRL') / 1000} formatter={(v) => v.toLocaleString(secondaryMeta?.locale || 'en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} />k
+                            </span>
+                        )}
                     </div>
 
                     <div className="w-full h-px bg-gradient-to-r from-transparent via-[#D4AF37]/25 to-transparent my-1" />
 
                     {/* Stat Strip */}
                     {!isLoading && (
-                        <div className="grid grid-cols-4 relative z-10">
+                        <div className={`grid ${singleCurrencyMode ? 'grid-cols-3' : 'grid-cols-4'} relative z-10`}>
                             <div className="flex flex-col items-center py-4 xl:py-5 border-r border-white/[0.04]">
                                 <span className="text-xs xl:text-sm text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">{getJargon('roi', experience)}</span>
                                 <span className={`text-xl xl:text-2xl font-bold font-space ${currentROI.percentage >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
@@ -185,7 +190,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                                     {(diffPrevMonth?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(diffPrevMonth?.amount || 0, 'BRL'))}
                                 </span>
                             </div>
-                            <div className="flex flex-col items-center py-4 xl:py-5 border-r border-white/[0.04]">
+                            <div className={`flex flex-col items-center py-4 xl:py-5 ${singleCurrencyMode ? '' : 'border-r border-white/[0.04]'}`}>
                                 <span className="text-xs xl:text-sm text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">vs Target</span>
                                 <span className={`text-xl xl:text-2xl font-bold font-space ${(diffTarget?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                                     {(diffTarget?.amount || 0) >= 0 ? '+' : ''}{Math.abs(diffTarget?.percentage || 0).toFixed(1)}%
@@ -194,15 +199,17 @@ export default function DashboardHero(props: DashboardHeroProps) {
                                     {(diffTarget?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(diffTarget?.amount || 0, 'BRL'))}
                                 </span>
                             </div>
-                            <div className="flex flex-col items-center py-4 xl:py-5">
-                                <span className="text-xs xl:text-sm text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">{getJargon('fxImpact', experience)}</span>
-                                <span className={`text-xl xl:text-2xl font-bold font-space ${(fxEffectBRL?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
-                                    {(fxEffectBRL?.amount || 0) >= 0 ? '+' : ''}{Math.abs(fxEffectBRL?.percentage || 0).toFixed(1)}%
-                                </span>
-                                <span className={`text-data-xs xl:text-sm font-space  mt-0.5 opacity-60 ${(fxEffectBRL?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
-                                    {(fxEffectBRL?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(fxEffectBRL?.amount || 0, 'BRL'))}
-                                </span>
-                            </div>
+                            {!singleCurrencyMode && (
+                                <div className="flex flex-col items-center py-4 xl:py-5">
+                                    <span className="text-xs xl:text-sm text-[#F5F5DC]/30 uppercase tracking-[2px] font-space mb-1.5">{getJargon('fxImpact', experience)}</span>
+                                    <span className={`text-xl xl:text-2xl font-bold font-space ${(fxEffectBRL?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
+                                        {(fxEffectBRL?.amount || 0) >= 0 ? '+' : ''}{Math.abs(fxEffectBRL?.percentage || 0).toFixed(1)}%
+                                    </span>
+                                    <span className={`text-data-xs xl:text-sm font-space  mt-0.5 opacity-60 ${(fxEffectBRL?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
+                                        {(fxEffectBRL?.amount || 0) >= 0 ? '+' : ''}{formatPrimaryNoDecimals(toPrimary(fxEffectBRL?.amount || 0, 'BRL'))}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -218,7 +225,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                         {heroExpanded && !isLoading && (
                             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease: 'easeInOut' }} className="overflow-hidden relative z-10">
                                 <div className="px-6 xl:px-8 pb-8 pt-4 border-t border-white/[0.04]">
-                                    <div className="grid grid-cols-2 gap-8">
+                                    <div className={`grid ${singleCurrencyMode ? 'grid-cols-1 max-w-2xl mx-auto' : 'grid-cols-2 gap-8'}`}>
                                         {/* Primary Currency Details */}
                                         <div className="flex flex-col gap-4">
                                             <span className="text-xs text-[#D4AF37]/50 uppercase tracking-[2px] font-space">{primaryCurrency} Details</span>
@@ -272,7 +279,8 @@ export default function DashboardHero(props: DashboardHeroProps) {
                                         </div>
 
                                         {/* Secondary Currency Details */}
-                                        <div className="flex flex-col gap-4">
+                                        {!singleCurrencyMode && (
+                                            <div className="flex flex-col gap-4">
                                             <span className="text-xs text-[#CC5500]/70 uppercase tracking-[2px] font-space">{secondaryCurrency} Details</span>
                                             <div className="flex items-center justify-between bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3">
                                                 <span className="text-xs uppercase font-space tracking-[1.5px] text-[#F5F5DC]/40">{getJargon('monthlyChange', experience)}</span>
@@ -322,6 +330,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                                                 </div>
                                             )}
                                         </div>
+                                        )}
                                     </div>
                                 </div>
                             </motion.div>

@@ -234,6 +234,7 @@ function StepGoal({ selectedGoal, setSelectedGoal, onContinue, onSkip }: any) {
 function StepSetup({
     primaryCurrency, setPrimaryCurrency,
     secondaryCurrency, setSecondaryCurrency,
+    isSingleMode, setIsSingleMode,
     experienceLevel, setExperienceLevel,
     onContinue, onBack,
 }: any) {
@@ -300,8 +301,11 @@ function StepSetup({
                 <div className="currency-row">
                     <button
                         type="button"
-                        className={`currency-btn currency-btn--no-secondary ${secondaryCurrency === null ? "active" : ""}`}
-                        onClick={() => setSecondaryCurrency(null)}
+                        className={`currency-btn currency-btn--no-secondary ${isSingleMode ? "active" : ""}`}
+                        onClick={() => {
+                            setIsSingleMode(true);
+                            setSecondaryCurrency(null);
+                        }}
                     >
                         No, just one
                     </button>
@@ -309,8 +313,11 @@ function StepSetup({
                         <button
                             key={c.code}
                             type="button"
-                            className={`currency-btn ${secondaryCurrency === c.code ? "active" : ""} ${primaryCurrency === c.code ? "currency-btn--disabled" : ""}`}
-                            onClick={() => primaryCurrency !== c.code && setSecondaryCurrency(c.code)}
+                            className={`currency-btn ${!isSingleMode && secondaryCurrency === c.code ? "active" : ""} ${primaryCurrency === c.code ? "currency-btn--disabled" : ""}`}
+                            onClick={() => {
+                                setIsSingleMode(false);
+                                if (primaryCurrency !== c.code) setSecondaryCurrency(c.code);
+                            }}
                             disabled={primaryCurrency === c.code}
                         >
                             {c.flag} {c.code}
@@ -465,7 +472,7 @@ function StepPreview({ selectedGoal, primaryCurrency, onContinue, onBack }: any)
    STEP 4: Account Creation
    ═══════════════════════════════════════════ */
 function StepAccount({
-    selectedGoal, primaryCurrency, secondaryCurrency, experienceLevel,
+    selectedGoal, primaryCurrency, secondaryCurrency, isSingleMode, experienceLevel,
     name, setName, email, setEmail, password, setPassword,
     showPassword, setShowPassword, isLoading, setIsLoading,
     errorMsg, setErrorMsg, router,
@@ -481,6 +488,7 @@ function StepAccount({
             goal: selectedGoal,
             primaryCurrency,
             secondaryCurrency,
+            isSingleMode,
             experienceLevel,
         }));
         signIn("google", { callbackUrl: "/dashboard" });
@@ -508,7 +516,8 @@ function StepAccount({
                     confirmPassword: password,
                     onboarding_goal: selectedGoal,
                     onboarding_currency_primary: primaryCurrency,
-                    onboarding_currency_secondary: secondaryCurrency,
+                    onboarding_currency_secondary: isSingleMode ? primaryCurrency : secondaryCurrency,
+                    onboarding_single_currency_mode: isSingleMode,
                     onboarding_experience: experienceLevel,
                 }),
             });
@@ -676,6 +685,7 @@ function OnboardingFlow() {
     const [selectedGoal, setSelectedGoal] = useState<any>(null);
     const [primaryCurrency, setPrimaryCurrency] = useState("USD");
     const [secondaryCurrency, setSecondaryCurrency] = useState<any>(null);
+    const [isSingleMode, setIsSingleMode] = useState(false);
     const [experienceLevel, setExperienceLevel] = useState<any>(null);
 
     const [name, setName] = useState("");
@@ -698,6 +708,7 @@ function OnboardingFlow() {
                 if (saved.goal) setSelectedGoal(saved.goal);
                 if (saved.primaryCurrency) setPrimaryCurrency(saved.primaryCurrency);
                 if (saved.secondaryCurrency) setSecondaryCurrency(saved.secondaryCurrency);
+                if (saved.isSingleMode !== undefined) setIsSingleMode(saved.isSingleMode);
                 if (saved.experienceLevel) setExperienceLevel(saved.experienceLevel);
             } catch {}
         }
@@ -709,6 +720,7 @@ function OnboardingFlow() {
             goal: selectedGoal,
             primaryCurrency,
             secondaryCurrency,
+            isSingleMode,
             experienceLevel,
         }));
         // Go to live demo
@@ -743,6 +755,8 @@ function OnboardingFlow() {
                             setPrimaryCurrency={setPrimaryCurrency}
                             secondaryCurrency={secondaryCurrency}
                             setSecondaryCurrency={setSecondaryCurrency}
+                            isSingleMode={isSingleMode}
+                            setIsSingleMode={setIsSingleMode}
                             experienceLevel={experienceLevel}
                             setExperienceLevel={setExperienceLevel}
                             onContinue={handleStep2Continue}
@@ -755,6 +769,7 @@ function OnboardingFlow() {
                             selectedGoal={selectedGoal}
                             primaryCurrency={primaryCurrency}
                             secondaryCurrency={secondaryCurrency}
+                            isSingleMode={isSingleMode}
                             experienceLevel={experienceLevel}
                             name={name} setName={setName}
                             email={email} setEmail={setEmail}

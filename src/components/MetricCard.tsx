@@ -4,7 +4,7 @@ import { formatCurrency, convertCurrency } from "@/lib/currency";
 import { AnimatedNumber } from '@/components/ui/animated-number';
 import { ChevronDown } from 'lucide-react';
 
-export default function MetricCard({ id, title, badge, amount, percentage, diffAmount, contributors = [], currency = 'BRL', primaryCurrency = 'BRL', secondaryCurrency = 'GBP', rates, invertColor = false, isLoading = false, onNavigate, compact = false, className = "" }: any) {
+export default function MetricCard({ id, title, badge, amount, percentage, diffAmount, contributors = [], currency = 'BRL', primaryCurrency = 'BRL', secondaryCurrency = 'GBP', singleCurrencyMode = false, rates, invertColor = false, isLoading = false, onNavigate, compact = false, className = "" }: any) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isTouchDevice, setIsTouchDevice] = useState(false);
     const isActuallyPositive = (percentage || 0) >= 0;
@@ -57,9 +57,11 @@ export default function MetricCard({ id, title, badge, amount, percentage, diffA
                         </p>
                     </div>
                     <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                        <p className={`text-data-xs xl:text-sm font-space  text-[#CC5500] opacity-80 ${isLoading ? 'opacity-20' : ''} leading-none`}>
-                            {isLoading ? '---' : formatCurrency(secondaryValue, secondaryCurrency, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                        </p>
+                        {!singleCurrencyMode && (
+                            <p className={`text-data-xs xl:text-sm font-space  text-[#CC5500] opacity-80 ${isLoading ? 'opacity-20' : ''} leading-none`}>
+                                {isLoading ? '---' : formatCurrency(secondaryValue, secondaryCurrency, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                            </p>
+                        )}
                         <span className={`text-data-xs font-space  leading-none ${isPositiveForColor ? 'text-vu-green' : 'text-red-400'}`}>
                             {(diffAmount || 0) > 0 ? '+' : ''}{formatCurrency(diffAmount || 0, primaryCurrency, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                             {' '}{Math.abs(percentage || 0).toFixed(1)}%
@@ -146,14 +148,16 @@ export default function MetricCard({ id, title, badge, amount, percentage, diffA
                     animate={{ scale: isExpanded ? 1.02 : 1 }}
                     style={{ originX: 0 }}
                 >
-                    <p className={`text-3xl xl:text-4xl font-normal text-[#D4AF37] mb-1 drop-shadow-[0_0_10px_rgba(212,175,55,0.4)] font-bebas truncate ${isLoading ? 'opacity-30' : 'opacity-100'}`}>
+                    <p className={`font-normal text-[#D4AF37] mb-1 drop-shadow-[0_0_10px_rgba(212,175,55,0.4)] font-bebas truncate ${isLoading ? 'opacity-30' : 'opacity-100'} ${singleCurrencyMode ? 'text-4xl xl:text-5xl mt-2 mb-3' : 'text-3xl xl:text-4xl'}`}>
                         {isLoading ? '---' : <AnimatedNumber value={amount} formatter={(v: number) => formatCurrency(v, currency, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} />}
                     </p>
                 </motion.div>
-                <div className="flex justify-between items-center gap-2 flex-wrap">
-                    <p className={`text-data-xs xl:text-sm font-space  text-[#CC5500] opacity-80 truncate ${isLoading ? 'opacity-20' : ''}`}>
-                        {isLoading ? '---' : formatCurrency(secondaryValue, secondaryCurrency, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                    </p>
+                <div className={`flex items-center flex-wrap gap-2 ${singleCurrencyMode ? 'justify-start' : 'justify-between'}`}>
+                    {!singleCurrencyMode && (
+                        <p className={`text-data-xs xl:text-sm font-space  text-[#CC5500] opacity-80 truncate ${isLoading ? 'opacity-20' : ''}`}>
+                            {isLoading ? '---' : formatCurrency(secondaryValue, secondaryCurrency, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                        </p>
+                    )}
                     <div className={`
                         px-2 py-0.5 rounded-xl font-medium text-xs flex items-center gap-1.5 leading-none shadow-sm
                         ${isPositiveForColor

@@ -21,6 +21,7 @@ const PersonalizedEmptyState = _PersonalizedEmptyState as any;
 import useBudgetStore from '@/stores/useBudgetStore';
 import type { DashboardTabProps } from './types';
 import { getPersonalization } from '@/lib/personalization';
+import { usePortfolio } from '@/context/PortfolioContext';
 
 export default function DashboardTab(props: DashboardTabProps) {
     const {
@@ -32,6 +33,7 @@ export default function DashboardTab(props: DashboardTabProps) {
     } = props;
 
     const h = useDashboard(props);
+    const { singleCurrencyMode } = usePortfolio() as any;
     const personalization = getPersonalization(h.ftueState || { onboardingGoal: null, onboardingExperience: 'beginner' });
     const budgetTransactions = useBudgetStore((s: any) => s.transactions);
     const [isSmartCloseOpen, setIsSmartCloseOpen] = useState(false);
@@ -115,6 +117,7 @@ export default function DashboardTab(props: DashboardTabProps) {
                             currency={h.primaryCurrency}
                             primaryCurrency={h.primaryCurrency}
                             secondaryCurrency={h.secondaryCurrency}
+                            singleCurrencyMode={singleCurrencyMode}
                             rates={rates}
                             percentage={assetDiffs?.[metric.id]?.percentage || 0}
                             diffAmount={h.toPrimary(assetDiffs?.[metric.id]?.amount || 0, 'BRL')}
@@ -154,6 +157,7 @@ export default function DashboardTab(props: DashboardTabProps) {
                         onCustomizeClick={() => h.setIsCustomizing(true)}
                         forecastSettings={h.forecastSettings}
                         dashboardConfig={h.dashboardConfig}
+                        singleCurrencyMode={singleCurrencyMode}
                         onNavigate={onNavigate}
                     />
                 </div>
@@ -184,6 +188,7 @@ export default function DashboardTab(props: DashboardTabProps) {
                             currency={h.primaryCurrency}
                             primaryCurrency={h.primaryCurrency}
                             secondaryCurrency={h.secondaryCurrency}
+                            singleCurrencyMode={singleCurrencyMode}
                             rates={rates}
                             percentage={assetDiffs?.[metric.id]?.percentage || 0}
                             diffAmount={h.toPrimary(assetDiffs?.[metric.id]?.amount || 0, 'BRL')}
@@ -207,6 +212,7 @@ export default function DashboardTab(props: DashboardTabProps) {
                             assets={cat.assets}
                             rates={rates}
                             hideInvestment={cat.id === 'debt'}
+                            singleCurrencyMode={singleCurrencyMode}
                             onNavigate={onNavigate}
                         />
                     ))}
@@ -225,6 +231,7 @@ export default function DashboardTab(props: DashboardTabProps) {
                                 assets={cat.assets}
                                 rates={rates}
                                 hideInvestment={cat.id === 'debt'}
+                                singleCurrencyMode={singleCurrencyMode}
                                 onNavigate={onNavigate}
                             />
                         ))}
