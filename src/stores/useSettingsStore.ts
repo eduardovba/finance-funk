@@ -8,6 +8,7 @@ import type { AssetClassesMap } from '@/types/portfolio.types';
 export interface AppSettings {
     autoMonthlyCloseEnabled: boolean;
     backgroundSelection: string;
+    showEmptyCashBalances: boolean;
 }
 
 export interface SettingsState {
@@ -31,7 +32,7 @@ export interface SettingsActions {
 
 const useSettingsStore = create<SettingsState & SettingsActions>((set) => ({
     // ═══════════ STATE ═══════════
-    appSettings: { autoMonthlyCloseEnabled: true, backgroundSelection: 'vinyl-voyage' },
+    appSettings: { autoMonthlyCloseEnabled: true, backgroundSelection: 'vinyl-voyage', showEmptyCashBalances: true },
     forecastSettings: {},
     dashboardConfig: null,
     allocationTargets: {},

@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useMemo, useState, useRef, useEffect } from 'react';
+import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    X, RefreshCw, Clock, Camera, CheckCircle2, AlertTriangle,
+    X, RefreshCw, Clock, Camera, CheckCircle2, AlertTriangle, ClipboardList,
     LayoutDashboard, Landmark, Home as HomeIcon, LineChart, Bitcoin, Wallet, CreditCard,
     Target, TrendingUp, Scale, DollarSign, ArrowUpDown, BookOpen,
     Upload, User, ChevronDown, Palette
@@ -14,6 +14,7 @@ import { useSession } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LucideIcon } from 'lucide-react';
+import SmartMonthlyCloseModal from '@/components/SmartMonthlyCloseModal';
 
 const BACKGROUNDS = [
     { id: 'collection', name: 'Collection' },
@@ -145,6 +146,24 @@ export default function Inspector() {
     const { data: session } = useSession();
     const pathname = usePathname();
     const router = useRouter();
+
+    // ═══════════ SMART CLOSE STATE ═══════════
+    const [isSmartCloseOpen, setIsSmartCloseOpen] = useState(false);
+    const [taskProgress, setTaskProgress] = useState<{ completed: number; total: number; month: string } | null>(null);
+
+    const fetchTaskProgress = useCallback(async () => {
+        try {
+            const res = await fetch('/api/monthly-close');
+            if (res.ok) {
+                const json = await res.json();
+                setTaskProgress({ completed: json.completed, total: json.total, month: json.month });
+            }
+        } catch { /* ignore */ }
+    }, []);
+
+    useEffect(() => {
+        if (isInspectorOpen) fetchTaskProgress();
+    }, [isInspectorOpen, fetchTaskProgress]);
 
     // ═══════════ RECENT ACTIVITY ═══════════
     const NEGATIVE_ACTIONS = ['Sell', 'Withdrawal', 'Divestment', 'Liability'];
@@ -331,6 +350,7 @@ export default function Inspector() {
     const initials = userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 
     return (
+        <>
         <AnimatePresence>
             {isInspectorOpen && (
                 <>
@@ -419,8 +439,48 @@ export default function Inspector() {
                             {/* ═══════════ SECTION 2: MONTHLY CLOSE ═══════════ */}
                             <div>
                                 <SectionHeader title="Monthly Close" icon={Camera} />
+
+                                {/* Task progress card */}
+                                {taskProgress && taskProgress.total > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => { setIsSmartCloseOpen(true); setIsInspectorOpen(false); }}
+                                        className="w-full text-left mb-2.5 p-3 rounded-xl transition-all hover:border-[#D4AF37]/30 cursor-pointer"
+                                        style={{
+                                            background: 'rgba(255, 255, 255, 0.03)',
+                                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                                            backdropFilter: 'blur(12px)',
+                                            WebkitBackdropFilter: 'blur(12px)',
+                                        }}
+                                    >
+                                        <div className="flex items-center gap-2.5">
+                                            <ClipboardList size={14} className="text-[#D4AF37] shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs text-parchment/80 font-space font-medium m-0">
+                                                    Close checklist — {taskProgress.completed}/{taskProgress.total} tasks
+                                                </p>
+                                                <div
+                                                    className="w-full h-1 rounded-full overflow-hidden mt-1.5"
+                                                    style={{ background: 'rgba(212, 175, 55, 0.1)' }}
+                                                >
+                                                    <div
+                                                        className="h-full rounded-full transition-all duration-500"
+                                                        style={{
+                                                            width: `${(taskProgress.completed / taskProgress.total) * 100}%`,
+                                                            background: taskProgress.completed >= taskProgress.total
+                                                                ? 'linear-gradient(135deg, #34D399, #10b981)'
+                                                                : 'linear-gradient(135deg, #CC5500, #D4AF37)',
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <span className="text-2xs text-[#D4AF37]/60 font-space shrink-0">→</span>
+                                        </div>
+                                    </button>
+                                )}
+
+                                {/* Snapshot status */}
                                 {!monthlyCloseStatus.hasCurrentSnapshot && monthlyCloseStatus.isCloseWindow ? (
-                                    /* Amber alert — snapshot needed */
                                     <motion.div
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
@@ -433,7 +493,7 @@ export default function Inspector() {
                                                     {monthlyCloseStatus.currentMonth} snapshot not recorded
                                                 </p>
                                                 <p className="text-xs text-amber-200/50 font-space m-0 mt-0.5">
-                                                    Record a snapshot to lock in this month's values
+                                                    Record a snapshot to lock in this month&apos;s values
                                                 </p>
                                             </div>
                                         </div>
@@ -446,7 +506,6 @@ export default function Inspector() {
                                         </Button>
                                     </motion.div>
                                 ) : (
-                                    /* Green status — all good */
                                     <div className="flex items-center gap-2.5 p-3 rounded-xl bg-emerald-500/[0.05] border border-emerald-500/15">
                                         <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
                                         <div>
@@ -607,5 +666,8 @@ export default function Inspector() {
                 </>
             )}
         </AnimatePresence>
+        {/* Smart Monthly Close Modal — rendered outside AnimatePresence */}
+        <SmartMonthlyCloseModal isOpen={isSmartCloseOpen} onClose={() => { setIsSmartCloseOpen(false); fetchTaskProgress(); }} />
+        </>
     );
 }

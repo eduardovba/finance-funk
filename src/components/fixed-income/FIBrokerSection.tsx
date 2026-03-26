@@ -1,4 +1,5 @@
 import React from 'react';
+import useSettingsStore from '@/stores/useSettingsStore';
 import { formatCurrency } from '@/lib/currency';
 import _AssetCard from '../AssetCard';
 const AssetCard = _AssetCard as any;
@@ -25,11 +26,24 @@ export default function FIBrokerSection({
     selectedAsset, explicitDbBrokers,
     onToggle, onAddClick, onDeleteBroker, onUpdateClick, onSelectAsset
 }: FIBrokerSectionProps) {
-    if (!showEmptyBrokers && !isNewlyAdded && items.length === 0) return null;
+    const showEmptyCashBalances = useSettingsStore(s => s.appSettings?.showEmptyCashBalances) !== false;
+    let baseRows = [...items];
+    
+    if (showEmptyCashBalances && !baseRows.find(r => r.name === 'Cash')) {
+        baseRows.push({ name: 'Cash', broker: brokerName, currentValue: 0, investment: 0, interest: 0, roi: 0 } as any);
+    }
 
-    const totalValue = items.reduce((sum, i) => sum + i.currentValue, 0);
-    const totalInv = items.reduce((sum, i) => sum + i.investment, 0);
-    const totalInt = items.reduce((sum, i) => sum + i.interest, 0);
+    const rows = baseRows.sort((a, b) => {
+        if (a.name === 'Cash') return -1;
+        if (b.name === 'Cash') return 1;
+        return (b.currentValue || 0) - (a.currentValue || 0);
+    });
+    
+    if (!showEmptyBrokers && !isNewlyAdded && rows.length === 0) return null;
+
+    const totalValue = rows.reduce((sum, i) => sum + i.currentValue, 0);
+    const totalInv = rows.reduce((sum, i) => sum + i.investment, 0);
+    const totalInt = rows.reduce((sum, i) => sum + i.interest, 0);
     const totalROI = Math.abs(totalInv) > 0.1 ? (totalInt / Math.abs(totalInv) * 100) : 0;
 
     const glowClass = isNewlyAdded ? 'shadow-[0_0_25px_rgba(212,175,55,0.4)] border-[#D4AF37] ring-1 ring-[#D4AF37]/50' : '';
@@ -56,7 +70,7 @@ export default function FIBrokerSection({
                     </div>
 
                     <div className="flex items-center gap-2">
-                        {(explicitDbBrokers.includes(brokerName) || items.length === 0) && (
+                        {(explicitDbBrokers.includes(brokerName) || rows.length === 0) && (
                             <button
                                 onClick={(e) => { e.stopPropagation(); onDeleteBroker(brokerName); }}
                                 className="w-8 h-8 rounded-full bg-rose-500/10 hover:bg-rose-500/20 flex items-center justify-center transition-colors shrink-0 text-sm"
@@ -76,11 +90,11 @@ export default function FIBrokerSection({
                 </div>
             </div>
 
-            {isOpen && items.length > 0 && (
+            {isOpen && rows.length > 0 && (
                 <>
                     {/* Mobile & Tablet Card Grid View */}
                     <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {items.map(item => (
+                        {rows.map(item => (
                             <AssetCard
                                 key={item.name}
                                 title={item.name}
@@ -88,7 +102,8 @@ export default function FIBrokerSection({
                                 value={formatCurrency(item.currentValue, cur)}
                                 performance={`${item.interest >= 0 ? '+' : ''}${formatCurrency(item.interest, cur)} (${item.roi >= 0 ? '+' : ''}${item.roi.toFixed(1)}%)`}
                                 isPositive={item.interest >= 0}
-                                icon={item.name.substring(0, 1)}
+                                icon={item.name === 'Cash' ? '💵' : item.name.substring(0, 1)}
+                                customBgClass={item.name === 'Cash' ? 'bg-emerald-500/[0.05] backdrop-blur-md border border-emerald-500/20' : undefined}
                                 expandedContent={
                                     <div className="flex flex-col gap-3 py-2">
                                         <div className="grid grid-cols-2 gap-4">
@@ -124,8 +139,9 @@ export default function FIBrokerSection({
                     {/* Desktop List View — Trading 212 Style */}
                     <div className="hidden lg:block">
                         <div className="overflow-hidden rounded-xl border border-white/[0.06] bg-[#121418]/50 backdrop-blur-lg shadow-[0_4px_16px_rgba(0,0,0,0.3)] divide-y divide-white/[0.04]">
-                            {items.map(item => {
+                            {rows.map(item => {
                                 const isSelected = selectedAsset && selectedAsset.name === item.name;
+                                const isCash = item.name === 'Cash';
                                 const displayName = item.name.length > 25 ? item.name.substring(0, 24) + '…' : item.name;
 
                                 return (
@@ -134,7 +150,9 @@ export default function FIBrokerSection({
                                         onClick={() => onSelectAsset(item)}
                                         className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200 group ${isSelected
                                             ? 'bg-white/[0.08] border-l-2 border-l-[#D4AF37]'
-                                            : 'hover:bg-white/[0.04] border-l-2 border-l-transparent'
+                                            : isCash
+                                                ? 'bg-emerald-500/[0.05] backdrop-blur-md border-y border-emerald-500/10 hover:bg-emerald-500/10 border-l-2 border-l-emerald-500/50'
+                                                : 'hover:bg-white/[0.04] border-l-2 border-l-transparent'
                                             }`}
                                     >
                                         {/* Icon */}
@@ -165,7 +183,7 @@ export default function FIBrokerSection({
                 </>
             )}
 
-            {isOpen && items.length === 0 && (
+            {isOpen && rows.length === 0 && (
                 <div className="px-4 pb-4">
                     <div className="bg-white/[0.02] rounded-xl border border-white/5 p-6 text-center">
                         <p className="text-white/40 text-sm">No holdings in this broker yet.</p>

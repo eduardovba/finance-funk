@@ -87,6 +87,8 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                                     secondaryLabel="Add Fund Broker" onSecondaryAction={() => h.setRightPaneMode('add-broker')} />
                             </div>
                         )}
+
+                        <ActivityHistory h={h} data={data} />
                     </div>
 
                     {/* Right Pane */}
@@ -148,8 +150,6 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
 
 
 
-                {/* Activity History */}
-                <ActivityHistory h={h} data={data} />
 
                 {/* FAB */}
                 <FloatingActionButton
@@ -474,16 +474,24 @@ function SellFundTransactionForm({ h }: { h: any }) {
 
 // --- Activity History ---
 function ActivityHistory({ h, data }: { h: any; data: any }) {
+    const totalTransactions = (data?.funds?.transactions?.length || 0) + h.properties.reduce((a: number, p: any) => a + (p.ledger?.length || 0), 0);
+
     return (
-        <section className="max-w-3xl mx-auto mb-10 mt-12">
-            <div className="flex justify-between items-center mb-6 px-1">
-                <h3 className="text-lg font-medium text-white/90 flex items-center gap-2">Activity History</h3>
-                <Button variant="ghost" size="sm" onClick={() => h.setLedgerOpen(!h.ledgerOpen)}>
-                    {h.ledgerOpen ? 'Hide' : 'Show'} ({(data?.funds?.transactions?.length || 0) + h.properties.reduce((a: number, p: any) => a + (p.ledger?.length || 0), 0)})
-                </Button>
-            </div>
-            {h.ledgerOpen && (
-                <div className="bg-white/5 backdrop-blur-md border border-white/5 rounded-2xl p-4 sm:p-6 mb-24">
+        <div id="ftue-re-ledger" className="mt-12 mb-10 rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden">
+            <button
+                onClick={() => h.setLedgerOpen(!h.ledgerOpen)}
+                className="w-full flex items-center justify-between border-none cursor-pointer" style={{ padding: '16px 20px', background: 'transparent', borderBottom: h.ledgerOpen ? '1px solid rgba(255,255,255,0.06)' : 'none', transition: 'all 0.2s ease', }}
+            >
+                <div className="flex items-center gap-2.5">
+                    <span className="text-sm">📋</span>
+                    <span className="text-[13px] font-semibold tracking-[0.3px]" style={{ color: 'rgba(245,245,220,0.7)' }}>Activity History</span>
+                    <span className="text-[11px] font-normal" style={{ color: 'rgba(245,245,220,0.3)' }}>({totalTransactions} transactions)</span>
+                </div>
+                <span className="text-xs inline-block" style={{ color: 'rgba(245,245,220,0.35)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', transform: h.ledgerOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
+            </button>
+
+            <div style={{ maxHeight: h.ledgerOpen ? 'calc(100vh - 12rem)' : '0', overflow: h.ledgerOpen ? 'auto' : 'hidden', transition: 'max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                <div className="p-4 sm:p-6 bg-transparent">
                     <TransactionTimeline
                         transactions={[
                             ...h.properties.flatMap((p: any) => (p.ledger || []).map((l: any) => ({ ...l, asset: p.name, broker: 'Manual', category: 'property', investment: l.amount, date: l.date, currency: p.currency }))),
@@ -512,7 +520,7 @@ function ActivityHistory({ h, data }: { h: any; data: any }) {
                         }}
                     />
                 </div>
-            )}
-        </section>
+            </div>
+        </div>
     );
 }

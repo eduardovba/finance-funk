@@ -1,4 +1,5 @@
 import React from 'react';
+import useSettingsStore from '@/stores/useSettingsStore';
 import { formatCurrency } from '@/lib/currency';
 import _AssetCard from '../AssetCard';
 import _AssetLogo from '../AssetLogo';
@@ -31,8 +32,14 @@ export default function EquityBrokerSection({
     expandedBrokers, toggleBroker, newlyAddedBrokers, explicitDbBrokers, showEmptyBrokers,
     selectedAsset, setSelectedAsset, handleBuyClick, handleSellClick, handleNewBuyClick, handleDeleteBrokerClick
 }: EquityBrokerSectionProps) {
-    const items = rawItems || [];
+    const showEmptyCashBalances = useSettingsStore(s => s.appSettings?.showEmptyCashBalances) !== false;
+    let items = rawItems ? [...rawItems] : [];
     const isNewlyAdded = newlyAddedBrokers.includes(brokerName);
+
+    if (showEmptyCashBalances && !items.find((i: any) => i.asset === 'Cash')) {
+        items.push({ asset: 'Cash', qty: 0, totalCost: 0, broker: brokerName });
+    }
+
     if (!showEmptyBrokers && !isNewlyAdded && (items.length === 0 && (!lockedPnL[brokerName] || lockedPnL[brokerName] === 0))) return null;
 
     const cur = brokerDict[brokerName] || 'GBP';
@@ -135,6 +142,7 @@ export default function EquityBrokerSection({
                                     performance={isCash ? null : `${r.pnl >= 0 ? '+' : ''}${formatCurrency(r.pnl, cur)} (${(r.roi || 0).toFixed(1)}%)`}
                                     isPositive={r.pnl >= 0}
                                     icon={isCash ? '💵' : <AssetLogo ticker={r.ticker} name={r.asset} size={40} />}
+                                    customBgClass={isCash ? 'bg-emerald-500/[0.05] backdrop-blur-md border border-emerald-500/20' : undefined}
                                     expandedContent={
                                         <div className="flex flex-col gap-3 py-2">
                                             <div className="grid grid-cols-2 gap-4">
@@ -164,8 +172,8 @@ export default function EquityBrokerSection({
                                 />
                             );
                         })}
-                        {lockedPnL[brokerName] && lockedPnL[brokerName] !== 0 && (
-                            <div className="bg-white/5 rounded-2xl p-4 border border-white/10 flex flex-col justify-center">
+                        {typeof lockedPnL[brokerName] === 'number' && lockedPnL[brokerName] !== 0 && (
+                            <div className="bg-[#121418]/60 backdrop-blur-md shadow-[0_4px_16px_rgba(0,0,0,0.3)] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-center">
                                 <span className="text-xs text-white/40 mb-1 font-medium tracking-wide uppercase">Realised P&L</span>
                                 <span className={`text-lg font-bold ${lockedPnL[brokerName] >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                     {lockedPnL[brokerName] >= 0 ? '+' : ''}{formatCurrency(lockedPnL[brokerName], cur)}
@@ -188,7 +196,9 @@ export default function EquityBrokerSection({
                                         onClick={() => setSelectedAsset({ ...r, brokerCurrency: cur })}
                                         className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200 group ${isSelected
                                             ? 'bg-white/[0.08] border-l-2 border-l-[#D4AF37]'
-                                            : 'hover:bg-white/[0.04] border-l-2 border-l-transparent'
+                                            : isCash
+                                                ? 'bg-emerald-500/[0.05] backdrop-blur-md border-y border-emerald-500/10 hover:bg-emerald-500/10 border-l-2 border-l-emerald-500/50'
+                                                : 'hover:bg-white/[0.04] border-l-2 border-l-transparent'
                                             }`}
                                     >
                                         {isCash ? (
@@ -214,8 +224,8 @@ export default function EquityBrokerSection({
                                 );
                             })}
                         </div>
-                        {lockedPnL[brokerName] && lockedPnL[brokerName] !== 0 && (
-                            <div className="mt-4 bg-white/5 rounded-2xl p-4 border border-white/10 flex justify-between items-center w-72">
+                        {typeof lockedPnL[brokerName] === 'number' && lockedPnL[brokerName] !== 0 && (
+                            <div className="mt-4 bg-[#121418]/60 backdrop-blur-md shadow-[0_4px_16px_rgba(0,0,0,0.3)] border border-white/[0.06] rounded-2xl p-4 flex justify-between items-center w-72">
                                 <span className="text-xs text-white/40 font-medium tracking-wide uppercase">Realised P&L</span>
                                 <span className={`text-lg font-bold ${lockedPnL[brokerName] >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                     {lockedPnL[brokerName] >= 0 ? '+' : ''}{formatCurrency(lockedPnL[brokerName], cur)}

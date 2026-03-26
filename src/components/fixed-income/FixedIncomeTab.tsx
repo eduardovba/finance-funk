@@ -104,9 +104,56 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }: 
                         />
                         </div>
                     )}
+
+                    {/* Transaction Ledger Accordion */}
+                    <div id="ftue-fi-ledger" className="mt-12 mb-10 rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden">
+                        <button
+                            onClick={() => h.setLedgerOpen(!h.ledgerOpen)}
+                            className="w-full flex items-center justify-between border-none cursor-pointer" style={{ padding: '16px 20px', background: 'transparent', borderBottom: h.ledgerOpen ? '1px solid rgba(255,255,255,0.06)' : 'none', transition: 'all 0.2s ease', }}
+                        >
+                            <div className="flex items-center gap-2.5">
+                                <span className="text-sm">📋</span>
+                                <span className="text-[13px] font-semibold tracking-[0.3px]" style={{ color: 'rgba(245,245,220,0.7)' }}>Activity History</span>
+                                <span className="text-[11px] font-normal" style={{ color: 'rgba(245,245,220,0.3)' }}>({transactions.length} transactions)</span>
+                            </div>
+                            <span className="text-xs inline-block" style={{ color: 'rgba(245,245,220,0.35)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', transform: h.ledgerOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
+                        </button>
+
+                        <div style={{ maxHeight: h.ledgerOpen ? 'calc(100vh - 12rem)' : '0', overflow: h.ledgerOpen ? 'auto' : 'hidden', transition: 'max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                            <div className="p-4 sm:p-6 bg-transparent">
+                                <TransactionTimeline
+                                    transactions={[...transactions].sort((a, b) => b.date.localeCompare(a.date))}
+                                    onEdit={h.handleEditClick}
+                                    onDelete={h.handleDeleteClick}
+                                    renderItem={(tr: any) => {
+                                        const isInterest = tr.type === 'Interest';
+                                        const isWithdrawal = tr.type === 'Withdrawal';
+                                        const cur = tr.currency || 'BRL';
+                                        const amount = tr.investment + (tr.interest || 0);
+                                        return (
+                                            <>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <div className={`w-2 h-2 rounded-full ${isInterest ? 'bg-emerald-500' : isWithdrawal ? 'bg-rose-500' : 'bg-blue-400'}`} />
+                                                    <span className="font-semibold text-sm text-white/90">
+                                                        {tr.type} <span className="text-white/60">{tr.asset}</span>
+                                                    </span>
+                                                    <span className="text-xs text-white/40 ml-auto">{tr.broker}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-sm font-bold text-white tracking-tight">{formatCurrency(amount, cur)}</span>
+                                                    <span className="text-xs text-white/40">• {tr.date}</span>
+                                                </div>
+                                            </>
+                                        )
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    
                     </div>
 
-                        <div className={`${(h.selectedAsset || h.rightPaneMode !== 'default') ? 'block fixed inset-0 z-50 bg-[#0A0612] lg:bg-transparent lg:static lg:block' : 'hidden lg:block'} lg:sticky top-8 h-[100dvh] lg:h-fit overflow-hidden`}>
+                    <div className={`${(h.selectedAsset || h.rightPaneMode !== 'default') ? 'block fixed inset-0 z-50 bg-[#0A0612] lg:bg-transparent lg:static lg:block' : 'hidden lg:block'} lg:sticky top-8 h-[100dvh] lg:h-fit overflow-hidden`}>
                             <ContextPane
                                 selectedAsset={h.selectedAsset}
                                 rightPaneMode={h.rightPaneMode}
@@ -229,51 +276,6 @@ export default function FixedIncomeTab({ transactions = [], rates, onRefresh }: 
                             />
                         </div>
                     </div>
-
-                {/* Transaction Ledger */}
-                <section id="ftue-fi-ledger" className="max-w-3xl mx-auto mb-10 mt-12">
-                    <div className="flex justify-between items-center mb-6 px-1">
-                        <h3 className="text-lg font-medium text-white/90 flex items-center gap-2">
-                            Activity History
-                        </h3>
-                        <Button variant="ghost" size="sm"
-                            onClick={() => h.setLedgerOpen(!h.ledgerOpen)}
-                        >
-                            {h.ledgerOpen ? 'Hide' : 'Show'} ({transactions.length})
-                        </Button>
-                    </div>
-
-                    {h.ledgerOpen && (
-                        <div className="bg-white/5 backdrop-blur-md border border-white/5 rounded-2xl p-4 sm:p-6 mb-24">
-                            <TransactionTimeline
-                                transactions={[...transactions].sort((a, b) => b.date.localeCompare(a.date))}
-                                onEdit={h.handleEditClick}
-                                onDelete={h.handleDeleteClick}
-                                renderItem={(tr: any) => {
-                                    const isInterest = tr.type === 'Interest';
-                                    const isWithdrawal = tr.type === 'Withdrawal';
-                                    const cur = tr.currency || 'BRL';
-                                    const amount = tr.investment + (tr.interest || 0);
-                                    return (
-                                        <>
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <div className={`w-2 h-2 rounded-full ${isInterest ? 'bg-emerald-500' : isWithdrawal ? 'bg-rose-500' : 'bg-blue-400'}`} />
-                                                <span className="font-semibold text-sm text-white/90">
-                                                    {tr.type} <span className="text-white/60">{tr.asset}</span>
-                                                </span>
-                                                <span className="text-xs text-white/40 ml-auto">{tr.broker}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm font-bold text-white tracking-tight">{formatCurrency(amount, cur)}</span>
-                                                <span className="text-xs text-white/40">• {tr.date}</span>
-                                            </div>
-                                        </>
-                                    )
-                                }}
-                            />
-                        </div>
-                    )}
-                </section>
 
                 <FloatingActionButton
                     onAddBroker={() => { h.setRightPaneMode('add-broker'); h.setSelectedAsset(null); }}

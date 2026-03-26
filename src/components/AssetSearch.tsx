@@ -75,13 +75,13 @@ export default function AssetSearch({ onSelect }: { onSelect: (asset: any) => vo
                     placeholder="Search for stocks, crypto (e.g., AAPL, PETR4, BTC)..."
                     style={{
                         width: '100%',
-                        padding: '16px 24px',
-                        paddingLeft: '48px',
+                        padding: '10px 12px',
+                        paddingLeft: '36px',
                         backgroundColor: 'rgba(255,255,255,0.05)',
                         border: '1px solid rgba(255,255,255,0.1)',
                         borderRadius: '12px',
                         color: 'white',
-                        fontSize: '1rem',
+                        fontSize: '0.875rem',
                         outline: 'none',
                         transition: 'all 0.2s'
                     }}

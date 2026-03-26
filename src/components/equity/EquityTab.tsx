@@ -159,8 +159,63 @@ export default function EquityTab({ transactions = [], marketData: globalMarketD
                         />
                         </div>
                     )}
+
+                    {/* Transaction Ledger Accordion */}
+                    <div id="ftue-equity-ledger" className="mt-12 mb-10 rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden">
+                        <button
+                            onClick={() => setLedgerOpen(!ledgerOpen)}
+                            className="w-full flex items-center justify-between border-none cursor-pointer" style={{ padding: '16px 20px', background: 'transparent', borderBottom: ledgerOpen ? '1px solid rgba(255,255,255,0.06)' : 'none', transition: 'all 0.2s ease', }}
+                        >
+                            <div className="flex items-center gap-2.5">
+                                <span className="text-sm">📋</span>
+                                <span className="text-[13px] font-semibold tracking-[0.3px]" style={{ color: 'rgba(245,245,220,0.7)' }}>Activity History</span>
+                                <span className="text-[11px] font-normal" style={{ color: 'rgba(245,245,220,0.3)' }}>({transactions.length} transactions)</span>
+                            </div>
+                            <span className="text-xs inline-block" style={{ color: 'rgba(245,245,220,0.35)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', transform: ledgerOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
+                        </button>
+
+                        <div style={{ maxHeight: ledgerOpen ? 'calc(100vh - 12rem)' : '0', overflow: ledgerOpen ? 'auto' : 'hidden', transition: 'max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                            <div className="p-4 sm:p-6 bg-transparent">
+                                <TransactionTimeline
+                                    transactions={sortedTr}
+                                    onEdit={handleEditClick}
+                                    onDelete={handleDeleteClick}
+                                    renderItem={(tr: any) => {
+                                        const isSell = tr.investment < 0;
+                                        const cur = tr.currency || 'GBP';
+                                        return (
+                                            <>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <div className={`w-2 h-2 rounded-full ${!isSell ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                                                    <span className="font-semibold text-sm text-white/90">
+                                                        {!isSell ? 'Bought' : 'Sold'} <span className="text-white/60">{tr.asset}</span>
+                                                    </span>
+                                                    <span className="text-xs text-white/40 ml-auto">{tr.broker}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-sm font-bold text-white tracking-tight">
+                                                        {formatCurrency(Math.abs(tr.investment), cur)}
+                                                    </span>
+                                                    <span className="text-xs text-white/40">• {tr.quantity?.toLocaleString(undefined, { maximumFractionDigits: 2 })} units • {tr.date}</span>
+                                                </div>
+                                                {isSell && tr.pnl !== null && tr.pnl !== undefined && (
+                                                    <div className="mt-1.5">
+                                                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-lg ${tr.pnl >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                                                            P&L: {tr.pnl >= 0 ? '+' : ''}{formatCurrency(tr.pnl, cur)}
+                                                            {tr.roiPercent !== null && tr.roiPercent !== undefined ? ` (${tr.roiPercent >= 0 ? '+' : ''}${parseFloat(tr.roiPercent).toFixed(1)}%)` : ''}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )
+                                    }}
+                                />
+                            </div>
+                        </div>
                     </div>
-                        <div className={`${(selectedAsset || rightPaneMode !== 'default') ? 'block fixed inset-0 z-50 bg-[#0A0612] lg:bg-transparent lg:static lg:block' : 'hidden lg:block'} lg:sticky top-8 h-[100dvh] lg:h-fit overflow-hidden`}>
+
+                    </div>
+                    <div className={`${(selectedAsset || rightPaneMode !== 'default') ? 'block fixed inset-0 z-50 bg-[#0A0612] lg:bg-transparent lg:static lg:block' : 'hidden lg:block'} lg:sticky top-8 h-[100dvh] lg:h-fit overflow-hidden`}>
                             <ContextPane
                                 selectedAsset={selectedAsset}
                                 rightPaneMode={rightPaneMode}
@@ -193,11 +248,13 @@ export default function EquityTab({ transactions = [], marketData: globalMarketD
                                                     <span className="text-data-sm font-medium text-white/90 font-space ">{asset.livePrice ? formatCurrency(asset.livePrice, asset.brokerCurrency) : 'N/A'}</span>
                                                 </div>
                                             )}
-                                            <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                                                <span className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">{isCash ? 'Deposits' : 'Cost Basis'}</span>
-                                                <span className="text-data-sm font-medium text-white/90 font-space ">{formatCurrency(asset.totalCost, asset.brokerCurrency)}</span>
-                                            </div>
-                                            <div className="bg-[#D4AF37]/5 border border-[#D4AF37]/20 rounded-xl p-3">
+                                            {!isCash && (
+                                                <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
+                                                    <span className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Cost Basis</span>
+                                                    <span className="text-data-sm font-medium text-white/90 font-space ">{formatCurrency(asset.totalCost, asset.brokerCurrency)}</span>
+                                                </div>
+                                            )}
+                                            <div className={`${isCash ? 'col-span-2' : ''} bg-[#D4AF37]/5 border border-[#D4AF37]/20 rounded-xl p-3`}>
                                                 <span className="block text-xs text-[#D4AF37]/60 uppercase tracking-widest mb-1.5">Current Value</span>
                                                 <span className="text-data-sm font-bold text-[#D4AF37] font-space  drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">{formatCurrency(asset.currentValue, asset.brokerCurrency)}</span>
                                             </div>
@@ -262,54 +319,7 @@ export default function EquityTab({ transactions = [], marketData: globalMarketD
                         </div>
                     </div>
 
-                {/* Transaction Ledger */}
-                <section id="ftue-equity-ledger" className="max-w-3xl mx-auto mb-10 mt-12">
-                    <div className="flex justify-between items-center mb-6 px-1">
-                        <h3 className="text-lg font-medium text-white/90 flex items-center gap-2">Activity History</h3>
-                        <Button variant="ghost" size="sm" onClick={() => setLedgerOpen(!ledgerOpen)}>
-                            {ledgerOpen ? 'Hide' : 'Show'} ({transactions.length})
-                        </Button>
-                    </div>
 
-                    {ledgerOpen && (
-                        <div className="bg-white/5 backdrop-blur-md border border-white/5 rounded-2xl p-4 sm:p-6 mb-24">
-                            <TransactionTimeline
-                                transactions={sortedTr}
-                                onEdit={handleEditClick}
-                                onDelete={handleDeleteClick}
-                                renderItem={(tr: any) => {
-                                    const isSell = tr.investment < 0;
-                                    const cur = tr.currency || 'GBP';
-                                    return (
-                                        <>
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <div className={`w-2 h-2 rounded-full ${!isSell ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                                                <span className="font-semibold text-sm text-white/90">
-                                                    {!isSell ? 'Bought' : 'Sold'} <span className="text-white/60">{tr.asset}</span>
-                                                </span>
-                                                <span className="text-xs text-white/40 ml-auto">{tr.broker}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm font-bold text-white tracking-tight">
-                                                    {formatCurrency(Math.abs(tr.investment), cur)}
-                                                </span>
-                                                <span className="text-xs text-white/40">• {tr.quantity?.toLocaleString(undefined, { maximumFractionDigits: 2 })} units • {tr.date}</span>
-                                            </div>
-                                            {isSell && tr.pnl !== null && tr.pnl !== undefined && (
-                                                <div className="mt-1.5">
-                                                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-lg ${tr.pnl >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-                                                        P&L: {tr.pnl >= 0 ? '+' : ''}{formatCurrency(tr.pnl, cur)}
-                                                        {tr.roiPercent !== null && tr.roiPercent !== undefined ? ` (${tr.roiPercent >= 0 ? '+' : ''}${parseFloat(tr.roiPercent).toFixed(1)}%)` : ''}
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </>
-                                    )
-                                }}
-                            />
-                        </div>
-                    )}
-                </section>
 
                 <FloatingActionButton
                     onAddBroker={() => setRightPaneMode('add-broker')}

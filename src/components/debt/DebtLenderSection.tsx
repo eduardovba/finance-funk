@@ -76,7 +76,7 @@ export default function DebtLenderSection({
 
             {isOpen && data.transactions.length > 0 && (
                 <div className="px-4 pb-4">
-                    <div className="bg-white/[0.02] rounded-xl border border-white/5 overflow-hidden">
+                    <div className="overflow-hidden rounded-xl border border-white/[0.06] bg-[#121418]/50 backdrop-blur-lg shadow-[0_4px_16px_rgba(0,0,0,0.3)] divide-y divide-white/[0.04]">
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-white/5">
@@ -113,7 +113,7 @@ export default function DebtLenderSection({
 
             {isOpen && data.transactions.length === 0 && (
                 <div className="px-4 pb-4">
-                    <div className="bg-white/[0.02] rounded-xl border border-white/5 p-6 text-center">
+                    <div className="rounded-xl border border-white/[0.06] bg-[#121418]/50 backdrop-blur-lg shadow-[0_4px_16px_rgba(0,0,0,0.3)] p-6 text-center">
                         <p className="text-white/40 text-sm">No transactions for this lender yet.</p>
                         <button onClick={() => onAddClick(lenderName)}
                             className="mt-3 px-4 py-2 bg-white/10 hover:bg-white/15 rounded-lg text-sm font-medium transition-colors text-white/70">

@@ -271,8 +271,19 @@ export default function useCrypto({ transactions = [], marketData = {}, rates, o
             let proceeds = parseFloat(updated.totalProceeds) || 0;
             const avgCost = prev.avgCost;
 
+            if (updated.asset === 'Cash') {
+                price = 1;
+                updated.sellPricePerShare = 1;
+            }
+
             if (field === 'totalProceeds') {
-                if (qty > 0) { price = proceeds / qty; updated.sellPricePerShare = price; }
+                if (updated.asset === 'Cash') {
+                    qty = proceeds;
+                    updated.qtyToSell = proceeds;
+                } else if (qty > 0) {
+                    price = proceeds / qty;
+                    updated.sellPricePerShare = price;
+                }
             } else if (field === 'qtyToSell' || field === 'sellPricePerShare') {
                 proceeds = price * qty;
                 updated.totalProceeds = proceeds;
@@ -287,11 +298,23 @@ export default function useCrypto({ transactions = [], marketData = {}, rates, o
 
     const handleSellConfirm = async () => {
         if (!sellData) return;
-        const qty = parseFloat(String(sellData.qtyToSell)) || 0;
-        const price = parseFloat(String(sellData.sellPricePerShare)) || 0;
+        let qty = parseFloat(String(sellData.qtyToSell)) || 0;
+        let price = parseFloat(String(sellData.sellPricePerShare)) || 0;
+        let proceeds = parseFloat(String(sellData.totalProceeds)) || 0;
+
+        if (sellData.asset === 'Cash') {
+            if (proceeds > 0) {
+                qty = proceeds;
+                price = 1;
+            } else if (qty > 0) {
+                price = 1;
+                proceeds = qty;
+            } else return;
+        }
+
         const tr = {
             date: sellData.date, asset: sellData.asset, broker: sellData.broker,
-            currency: sellData.currency, ticker: sellData.ticker,
+            currency: sellData.currency, ticker: sellData.asset === 'Cash' ? 'CASH' : sellData.ticker,
             investment: -price * Math.abs(qty), quantity: -Math.abs(qty),
             pnl: parseFloat(String(sellData.pnl)) || 0, type: 'Sell', platform: sellData.broker
         };
@@ -340,8 +363,19 @@ export default function useCrypto({ transactions = [], marketData = {}, rates, o
             let price = parseFloat(updated.buyPricePerShare) || 0;
             let investment = parseFloat(updated.totalInvestment) || 0;
 
+            if (updated.asset === 'Cash') {
+                price = 1;
+                updated.buyPricePerShare = 1;
+            }
+
             if (field === 'totalInvestment') {
-                if (qty > 0) { price = investment / qty; updated.buyPricePerShare = price; }
+                if (updated.asset === 'Cash') {
+                    qty = investment;
+                    updated.qtyToBuy = investment;
+                } else if (qty > 0) {
+                    price = investment / qty;
+                    updated.buyPricePerShare = price;
+                }
             } else if (field === 'qtyToBuy' || field === 'buyPricePerShare') {
                 investment = qty * price;
                 updated.totalInvestment = investment;
@@ -352,12 +386,25 @@ export default function useCrypto({ transactions = [], marketData = {}, rates, o
 
     const handleBuyConfirm = async () => {
         if (!buyData || !buyData.asset) return;
-        const qty = parseFloat(String(buyData.qtyToBuy)) || 0;
-        const price = parseFloat(String(buyData.buyPricePerShare)) || 0;
-        if (qty <= 0 || price <= 0) return;
+        let qty = parseFloat(String(buyData.qtyToBuy)) || 0;
+        let price = parseFloat(String(buyData.buyPricePerShare)) || 0;
+        let investment = parseFloat(String(buyData.totalInvestment)) || 0;
+
+        if (buyData.asset === 'Cash') {
+            if (investment > 0) {
+                qty = investment;
+                price = 1;
+            } else if (qty > 0) {
+                price = 1;
+                investment = qty;
+            } else return;
+        } else {
+            if (qty <= 0 || price <= 0) return;
+        }
+
         const tr = {
             date: buyData.date, asset: buyData.asset, broker: buyData.broker,
-            currency: buyData.currency, ticker: buyData.ticker,
+            currency: buyData.currency, ticker: buyData.asset === 'Cash' ? 'CASH' : buyData.ticker,
             investment: price * qty, quantity: qty,
             isSalaryContribution: buyData.isSalaryContribution || false,
             type: 'Buy', platform: buyData.broker

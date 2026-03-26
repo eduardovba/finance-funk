@@ -266,8 +266,19 @@ export default function useEquity({ transactions = [], marketData = {}, rates, o
             let proceeds = parseFloat(updated.totalProceeds) || 0;
             const avgCost = prev.avgCost;
 
+            if (updated.asset === 'Cash') {
+                price = 1;
+                updated.sellPricePerShare = 1;
+            }
+
             if (field === 'totalProceeds') {
-                if (qty > 0) { price = proceeds / qty; updated.sellPricePerShare = price; }
+                if (updated.asset === 'Cash') {
+                    qty = proceeds;
+                    updated.qtyToSell = proceeds;
+                } else if (qty > 0) {
+                    price = proceeds / qty;
+                    updated.sellPricePerShare = price;
+                }
             } else if (field === 'qtyToSell' || field === 'sellPricePerShare') {
                 proceeds = price * qty;
                 updated.totalProceeds = proceeds;
@@ -282,11 +293,28 @@ export default function useEquity({ transactions = [], marketData = {}, rates, o
 
     const handleSellConfirm = async () => {
         if (!sellData) return;
-        const qty = parseFloat(String(sellData.qtyToSell)) || 0;
-        const price = parseFloat(String(sellData.sellPricePerShare)) || 0;
+        let qty = parseFloat(String(sellData.qtyToSell)) || 0;
+        let price = parseFloat(String(sellData.sellPricePerShare)) || 0;
+        let proceeds = parseFloat(String(sellData.totalProceeds)) || 0;
+
+        if (sellData.asset === 'Cash') {
+            if (proceeds > 0) {
+                qty = proceeds;
+                price = 1;
+            } else if (qty > 0) {
+                price = 1;
+                proceeds = qty;
+            } else return;
+        }
+
+        // Cash withdrawals must use the broker's base currency
+        const effectiveSellCurrency = sellData.asset === 'Cash'
+            ? (BROKER_CURRENCY[sellData.broker] || brokerDict[sellData.broker] || 'GBP')
+            : sellData.currency;
+
         const tr = {
             date: sellData.date, asset: sellData.asset, broker: sellData.broker,
-            currency: sellData.currency, ticker: sellData.ticker,
+            currency: effectiveSellCurrency, ticker: sellData.asset === 'Cash' ? 'CASH' : sellData.ticker,
             investment: -(price * qty), quantity: -qty,
             costPerShare: price, pnl: sellData.pnl, roiPercent: sellData.roi,
         };
@@ -331,8 +359,19 @@ export default function useEquity({ transactions = [], marketData = {}, rates, o
             let price = parseFloat(updated.buyPricePerShare) || 0;
             let investment = parseFloat(updated.totalInvestment) || 0;
 
+            if (updated.asset === 'Cash') {
+                price = 1;
+                updated.buyPricePerShare = 1;
+            }
+
             if (field === 'totalInvestment') {
-                if (qty > 0) { price = investment / qty; updated.buyPricePerShare = price; }
+                if (updated.asset === 'Cash') {
+                    qty = investment;
+                    updated.qtyToBuy = investment;
+                } else if (qty > 0) {
+                    price = investment / qty;
+                    updated.buyPricePerShare = price;
+                }
             } else if (field === 'qtyToBuy' || field === 'buyPricePerShare') {
                 investment = qty * price;
                 updated.totalInvestment = investment;
@@ -343,12 +382,30 @@ export default function useEquity({ transactions = [], marketData = {}, rates, o
 
     const handleBuyConfirm = async () => {
         if (!buyData || !buyData.asset) return;
-        const qty = parseFloat(String(buyData.qtyToBuy)) || 0;
-        const price = parseFloat(String(buyData.buyPricePerShare)) || 0;
-        if (qty <= 0 || price <= 0) return;
+        let qty = parseFloat(String(buyData.qtyToBuy)) || 0;
+        let price = parseFloat(String(buyData.buyPricePerShare)) || 0;
+        let investment = parseFloat(String(buyData.totalInvestment)) || 0;
+
+        if (buyData.asset === 'Cash') {
+            if (investment > 0) {
+                qty = investment;
+                price = 1;
+            } else if (qty > 0) {
+                price = 1;
+                investment = qty;
+            } else return;
+        } else {
+            if (qty <= 0 || price <= 0) return;
+        }
+
+        // Cash deposits must use the broker's base currency, not whatever the form has
+        const effectiveCurrency = buyData.asset === 'Cash'
+            ? (BROKER_CURRENCY[buyData.broker] || brokerDict[buyData.broker] || 'GBP')
+            : buyData.currency;
+
         const tr = {
             date: buyData.date, asset: buyData.asset, broker: buyData.broker,
-            currency: buyData.currency, ticker: buyData.ticker,
+            currency: effectiveCurrency, ticker: buyData.asset === 'Cash' ? 'CASH' : buyData.ticker,
             investment: price * qty, quantity: qty, costPerShare: price,
             pnl: null, roiPercent: null,
             isSalaryContribution: buyData.isSalaryContribution || false,

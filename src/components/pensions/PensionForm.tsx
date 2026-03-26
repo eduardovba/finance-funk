@@ -45,17 +45,19 @@ export default function PensionForm({
                     <Button variant="ghost" size="sm" onClick={() => { setRightPaneMode('default'); setBuyData(null); }} className="rounded-full"><span className="text-sm font-bold">✕</span></Button>
                 </div>
 
-                <div className="flex bg-white/5 rounded-2xl p-1 mb-6">
-                    {(['search', 'manual'] as const).map(p => (
-                        <button
-                            key={p}
-                            onClick={() => setBuyData((prev: any) => ({ ...prev, buyPath: p }))}
-                            className={`flex-1 py-1.5 text-xs font-semibold rounded-xl transition-all ${buyData.buyPath === p ? 'bg-[#D4AF37] text-[#1A0F2E] shadow-sm' : 'text-white/50 hover:text-white/80'}`}
-                        >
-                            {p === 'search' ? 'Search Asset' : 'URL Scraper'}
-                        </button>
-                    ))}
-                </div>
+                {buyData.asset !== 'Cash' && (
+                    <div className="flex bg-white/5 rounded-2xl p-1 mb-6">
+                        {(['search', 'manual'] as const).map(p => (
+                            <button
+                                key={p}
+                                onClick={() => setBuyData((prev: any) => ({ ...prev, buyPath: p }))}
+                                className={`flex-1 py-1.5 text-xs font-semibold rounded-xl transition-all ${buyData.buyPath === p ? 'bg-[#D4AF37] text-[#1A0F2E] shadow-sm' : 'text-white/50 hover:text-white/80'}`}
+                            >
+                                {p === 'search' ? 'Search Asset' : 'URL Scraper'}
+                            </button>
+                        ))}
+                    </div>
+                )}
 
                 <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
                     <div className="grid grid-cols-2 gap-4">
@@ -69,46 +71,48 @@ export default function PensionForm({
                         </div>
                     </div>
 
-                    {buyData.buyPath === 'search' ? (
-                        <div>
-                            <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Search Asset (Ticker)</label>
-                            {buyData.ticker ? (
-                                <div className="w-full px-3 py-2.5 bg-white/5 border border-[#D4AF37]/50 rounded-xl flex justify-between items-center">
-                                    <div>
-                                        <span className="font-bold text-white mr-2">{buyData.ticker}</span>
-                                        <span className="text-white/50 text-sm">{buyData.asset}</span>
+                    {buyData.asset !== 'Cash' && (
+                        buyData.buyPath === 'search' ? (
+                            <div>
+                                <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Search Asset (Ticker)</label>
+                                {buyData.ticker ? (
+                                    <div className="w-full px-3 py-2.5 bg-white/5 border border-[#D4AF37]/50 rounded-xl flex justify-between items-center">
+                                        <div>
+                                            <span className="font-bold text-white mr-2">{buyData.ticker}</span>
+                                            <span className="text-white/50 text-sm">{buyData.asset}</span>
+                                        </div>
+                                        <button onClick={() => setBuyData((prev: any) => ({ ...prev, ticker: '', asset: '' }))} className="text-rose-400 hover:text-rose-300">✕</button>
                                     </div>
-                                    <button onClick={() => setBuyData((prev: any) => ({ ...prev, ticker: '', asset: '' }))} className="text-rose-400 hover:text-rose-300">✕</button>
-                                </div>
-                            ) : (
-                                <AssetSearch onSelect={handleAssetSelect} />
-                            )}
-                        </div>
-                    ) : (
-                        <>
-                            <div>
-                                <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Asset Name</label>
-                                <input type="text" value={buyData.asset} onChange={e => setBuyData((prev: any) => ({ ...prev, asset: e.target.value }))}
-                                    placeholder="e.g. Fidelity World Index"
-                                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all" />
+                                ) : (
+                                    <AssetSearch onSelect={handleAssetSelect} />
+                                )}
                             </div>
-                            <div>
-                                <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Scraper URL</label>
-                                <div className="flex gap-2">
-                                    <input type="text" value={buyData.scraperUrl} onChange={e => setBuyData((prev: any) => ({ ...prev, scraperUrl: e.target.value, isVerified: false }))}
-                                        placeholder="https://www.fidelity.co.uk/..."
-                                        className="flex-1 px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all" />
-                                    <button
-                                        onClick={handleVerifyScrape}
-                                        disabled={!buyData.scraperUrl || isFetchingPrice}
-                                        className={`px-4 rounded-xl text-xs font-semibold transition-all ${buyData.isVerified ? 'bg-[#D4AF37] text-[#1A0F2E]' : 'bg-white/10 text-white hover:bg-white/20'}`}
-                                        style={{ opacity: isFetchingPrice ? 0.7 : 1, cursor: buyData.scraperUrl ? 'pointer' : 'not-allowed' }}
-                                    >
-                                        {isFetchingPrice ? '...' : (buyData.isVerified ? 'Verified ✓' : 'Verify')}
-                                    </button>
+                        ) : (
+                            <>
+                                <div>
+                                    <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Asset Name</label>
+                                    <input type="text" value={buyData.asset} onChange={e => setBuyData((prev: any) => ({ ...prev, asset: e.target.value }))}
+                                        placeholder="e.g. Fidelity World Index"
+                                        className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all" />
                                 </div>
-                            </div>
-                        </>
+                                <div>
+                                    <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Scraper URL</label>
+                                    <div className="flex gap-2">
+                                        <input type="text" value={buyData.scraperUrl} onChange={e => setBuyData((prev: any) => ({ ...prev, scraperUrl: e.target.value, isVerified: false }))}
+                                            placeholder="https://www.fidelity.co.uk/..."
+                                            className="flex-1 px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all" />
+                                        <button
+                                            onClick={handleVerifyScrape}
+                                            disabled={!buyData.scraperUrl || isFetchingPrice}
+                                            className={`px-4 rounded-xl text-xs font-semibold transition-all ${buyData.isVerified ? 'bg-[#D4AF37] text-[#1A0F2E]' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                                            style={{ opacity: isFetchingPrice ? 0.7 : 1, cursor: buyData.scraperUrl ? 'pointer' : 'not-allowed' }}
+                                        >
+                                            {isFetchingPrice ? '...' : (buyData.isVerified ? 'Verified ✓' : 'Verify')}
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
+                        )
                     )}
 
                     <div className="grid grid-cols-2 gap-4">
@@ -125,29 +129,34 @@ export default function PensionForm({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Quantity</label>
-                            <input type="number" value={buyData.qtyToBuy} onChange={e => updateBuyCalc('qtyToBuy', e.target.value)}
-                                step="any" placeholder="0.00"
-                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-data-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-space " />
+                    {buyData.asset !== 'Cash' && (
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Quantity</label>
+                                <input type="number" value={buyData.qtyToBuy} onChange={e => updateBuyCalc('qtyToBuy', e.target.value)}
+                                    step="any" placeholder="0.00"
+                                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-data-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-space " />
+                            </div>
+                            <div className="relative">
+                                <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Price / Share</label>
+                                <input type="number" value={buyData.buyPricePerShare} onChange={e => updateBuyCalc('buyPricePerShare', e.target.value)}
+                                    step="any" placeholder="0.00"
+                                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-data-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-space " />
+                                {isFetchingPrice && <span className="absolute right-3 top-[34px] text-xs text-[#D4AF37] uppercase tracking-wider font-semibold animate-pulse">Fetching...</span>}
+                            </div>
                         </div>
-                        <div className="relative">
-                            <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Price / Share</label>
-                            <input type="number" value={buyData.buyPricePerShare} onChange={e => updateBuyCalc('buyPricePerShare', e.target.value)}
-                                step="any" placeholder="0.00"
-                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-data-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-space " />
-                            {isFetchingPrice && <span className="absolute right-3 top-[34px] text-xs text-[#D4AF37] uppercase tracking-wider font-semibold animate-pulse">Fetching...</span>}
-                        </div>
-                    </div>
+                    )}
 
                     <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 mt-2">
-                        <label className="block mb-1 text-emerald-400/70 text-xs font-medium uppercase tracking-wider">Total Investment</label>
+                        <label className="block mb-1 text-emerald-400/70 text-xs font-medium uppercase tracking-wider">
+                            {buyData.asset === 'Cash' ? 'Deposit Amount' : 'Total Investment'}
+                        </label>
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50 font-space tabular-nums">
                                 {buyData.currency === 'BRL' ? 'R$' : (buyData.currency === 'USD' ? '$' : '£')}
                             </span>
-                            <input type="number" value={buyData.totalInvestment} onChange={e => updateBuyCalc('totalInvestment', e.target.value)} step="any"
+                            <input type="number" value={buyData.totalInvestment} onChange={e => updateBuyCalc('totalInvestment', e.target.value)}
+                                onFocus={e => e.target.select()} step="any"
                                 className="w-full py-2.5 pl-8 pr-3 bg-white/5 border border-emerald-500/30 rounded-xl text-white text-lg font-bold focus:outline-none focus:border-emerald-500 transition-all font-space tabular-nums" />
                         </div>
                     </div>
@@ -194,22 +203,26 @@ export default function PensionForm({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Quantity to Sell</label>
-                            <input type="number" value={sellData.qtyToSell} onChange={e => updateSellCalc('qtyToSell', e.target.value)} step="any"
-                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-data-sm focus:outline-none focus:ring-1 focus:ring-rose-500/50 transition-all font-space " />
+                    {sellData.asset !== 'Cash' && (
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Quantity to Sell</label>
+                                <input type="number" value={sellData.qtyToSell} onChange={e => updateSellCalc('qtyToSell', e.target.value)} step="any"
+                                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-data-sm focus:outline-none focus:ring-1 focus:ring-rose-500/50 transition-all font-space " />
+                            </div>
+                            <div>
+                                <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Sell Price / Share</label>
+                                <input type="number" value={sellData.sellPricePerShare} onChange={e => updateSellCalc('sellPricePerShare', e.target.value)} step="any"
+                                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-data-sm focus:outline-none focus:ring-1 focus:ring-rose-500/50 transition-all font-space " />
+                            </div>
                         </div>
-                        <div>
-                            <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Sell Price / Share</label>
-                            <input type="number" value={sellData.sellPricePerShare} onChange={e => updateSellCalc('sellPricePerShare', e.target.value)} step="any"
-                                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-data-sm focus:outline-none focus:ring-1 focus:ring-rose-500/50 transition-all font-space " />
-                        </div>
-                    </div>
+                    )}
 
                     <div className="bg-white/5 border border-white/10 rounded-xl p-5 mt-4 flex flex-col gap-4">
                         <div>
-                            <label className="block mb-1 text-white/70 text-xs font-medium uppercase tracking-wider">Total Sale Value (Proceeds)</label>
+                            <label className="block mb-1 text-white/70 text-xs font-medium uppercase tracking-wider">
+                                {sellData.asset === 'Cash' ? 'Withdrawal Amount' : 'Total Sale Value (Proceeds)'}
+                            </label>
                             <div className="relative">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50 font-space tabular-nums">
                                     {sellData.currency === 'BRL' ? 'R$' : (sellData.currency === 'USD' ? '$' : '£')}

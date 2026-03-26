@@ -84,7 +84,7 @@ export async function GET(): Promise<NextResponse> {
             asset: r.asset,
             ticker: r.ticker,
             broker: r.broker,
-            currency: r.currency,
+            currency: r.txCurrency || r.currency,
             quantity: r.quantity,
             costPerShare: r.costPerShare,
             investment: r.investment,

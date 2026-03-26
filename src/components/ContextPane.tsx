@@ -60,7 +60,7 @@ export default function ContextPane({
 
     if (!showDetails) {
         return (
-            <div className={`${rightPaneMode !== 'default' ? 'flex' : 'hidden'} lg:flex w-full lg:w-[400px] xl:w-[450px] flex-col shrink-0 rounded-2xl border border-white/[0.06] bg-[#121418]/60 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative transition-[height] duration-300 ease-in-out overflow-hidden`} style={{ height: maxHeight || 500 }}>
+            <div className={`${rightPaneMode !== 'default' ? 'flex' : 'hidden'} lg:flex w-full lg:w-[400px] xl:w-[450px] flex-col shrink-0 rounded-2xl border border-white/[0.06] bg-[#121418]/60 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative transition-[height] duration-300 ease-in-out overflow-hidden`} style={{ minHeight: maxHeight || 500, maxHeight: 'calc(100vh - 4rem)' }}>
                 {/* Subtle glow effect behind content */}
                 <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-[#D4AF37]/[0.02] to-transparent z-0 rounded-2xl"></div>
 

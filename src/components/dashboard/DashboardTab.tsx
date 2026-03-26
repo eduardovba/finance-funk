@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import _MetricCard from '../MetricCard';
 import _ConsolidatedAssetTable from '../ConsolidatedAssetTable';
 import _DashboardCustomizer from '../DashboardCustomizer';
@@ -14,6 +14,8 @@ import useDashboard from './useDashboard';
 import { StaggerList } from '@/components/ui/stagger-list';
 import BudgetKpiPod from '@/components/budget/BudgetKpiPod';
 import FirstGrooveFlow from '@/components/ftue/FirstGrooveFlow';
+import MonthlyCloseWidget from '@/components/MonthlyCloseWidget';
+import SmartMonthlyCloseModal from '@/components/SmartMonthlyCloseModal';
 import _PersonalizedEmptyState from '@/components/ftue/PersonalizedEmptyState';
 const PersonalizedEmptyState = _PersonalizedEmptyState as any;
 import useBudgetStore from '@/stores/useBudgetStore';
@@ -32,6 +34,7 @@ export default function DashboardTab(props: DashboardTabProps) {
     const h = useDashboard(props);
     const personalization = getPersonalization(h.ftueState || { onboardingGoal: null, onboardingExperience: 'beginner' });
     const budgetTransactions = useBudgetStore((s: any) => s.transactions);
+    const [isSmartCloseOpen, setIsSmartCloseOpen] = useState(false);
 
     const hasPortfolioData = data?.netWorth?.amount > 0 ||
         data?.categories?.some((cat: any) => cat.assets?.length > 1);
@@ -62,6 +65,10 @@ export default function DashboardTab(props: DashboardTabProps) {
         <div className="pb-10">
             {/* First Groove — guided first action for new users */}
             <FirstGrooveFlow />
+
+            {/* Smart Monthly Close — task checklist widget */}
+            <MonthlyCloseWidget onOpenChecklist={() => setIsSmartCloseOpen(true)} />
+            <SmartMonthlyCloseModal isOpen={isSmartCloseOpen} onClose={() => setIsSmartCloseOpen(false)} />
 
             {/* Mobile Hero */}
             <DashboardHero

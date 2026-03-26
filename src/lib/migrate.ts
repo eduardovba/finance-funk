@@ -375,5 +375,54 @@ function getMigrations(): Migration[] {
                 "ALTER TABLE users ADD COLUMN last_accessed_at DATETIME",
             ],
         },
+        {
+            version: 16,
+            name: 'monthly_close_tasks',
+            sql: [
+                `CREATE TABLE IF NOT EXISTS monthly_close_tasks (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    month TEXT NOT NULL,
+                    task_type TEXT NOT NULL,
+                    related_entity_id INTEGER,
+                    related_entity_name TEXT,
+                    is_completed INTEGER DEFAULT 0,
+                    completed_at DATETIME,
+                    UNIQUE(user_id, month, task_type, related_entity_id)
+                )`,
+            ],
+        },
+        {
+            version: 17,
+            name: 'monthly_close_custom_tasks',
+            sql: [
+                "ALTER TABLE monthly_close_tasks ADD COLUMN is_recurring INTEGER DEFAULT 0",
+                "ALTER TABLE monthly_close_tasks ADD COLUMN custom_label TEXT",
+                `CREATE TABLE IF NOT EXISTS monthly_close_templates (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    task_type TEXT NOT NULL DEFAULT 'CUSTOM',
+                    related_entity_id INTEGER,
+                    label TEXT NOT NULL,
+                    is_active INTEGER DEFAULT 1,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(user_id, label)
+                )`,
+            ],
+        },
+        {
+            version: 18,
+            name: 'monthly_close_checklist_dnd',
+            sql: [
+                "ALTER TABLE monthly_close_tasks ADD COLUMN sort_order INTEGER DEFAULT 0",
+                `CREATE TABLE IF NOT EXISTS monthly_close_dismissed_suggestions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    label TEXT NOT NULL,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(user_id, label)
+                )`
+            ]
+        }
     ];
 }

@@ -61,10 +61,10 @@ export default function CurrencySelector({ value, onChange, label = "" }: { valu
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all text-white font-space tabular-nums"
+                className="w-full flex items-center justify-between px-3 bg-white/5 border border-white/20 rounded-xl hover:bg-white/10 transition-all text-white text-sm font-space tabular-nums" style={{ height: '40px' }}
             >
-                <div className="flex items-center gap-3">
-                    <span className="text-xl">{selectedCurrency.flag}</span>
+                <div className="flex items-center gap-2">
+                    <span className="text-base leading-none">{selectedCurrency.flag}</span>
                     <span className="font-bold">{selectedCurrency.code}</span>
                 </div>
                 <svg className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">

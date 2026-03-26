@@ -68,10 +68,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         if (error) return NextResponse.json({ error }, { status: 400 });
 
         let assetId: number;
-        const rows = await query<{ id: number }>('SELECT id FROM assets WHERE name = ? AND asset_class = ? AND user_id = ?', [data!.lender, 'Debt', user.id]);
+        let assetCurrency = 'BRL';
+        const rows = await query<{ id: number; currency: string }>('SELECT id, currency FROM assets WHERE name = ? AND asset_class = ? AND user_id = ?', [data!.lender, 'Debt', user.id]);
 
         if (rows.length > 0) {
             assetId = rows[0].id;
+            assetCurrency = rows[0].currency || 'BRL';
         } else {
             const res = await run(
                 `INSERT INTO assets (name, asset_class, currency, broker, user_id) VALUES (?, ?, ?, ?, ?)`,
@@ -82,7 +84,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         const res = await run(
             `INSERT INTO ledger (date, type, asset_id, amount, currency, notes, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [data!.date ?? '', 'Liability', assetId, data!.value_brl, 'BRL', data!.obs || '', user.id]
+            [data!.date ?? '', 'Liability', assetId, data!.value_brl, assetCurrency, data!.obs || '', user.id]
         );
 
         return NextResponse.json({ success: true, id: res.lastID });

@@ -317,13 +317,25 @@ export default function usePensions({ transactions = [], rates, onRefresh, marke
 
     const handleSellConfirm = async () => {
         if (!sellData) return;
-        const qty = parseFloat(String(sellData.qtyToSell)) || 0;
-        const price = parseFloat(String(sellData.sellPricePerShare)) || 0;
+        let qty = parseFloat(String(sellData.qtyToSell)) || 0;
+        let price = parseFloat(String(sellData.sellPricePerShare)) || 0;
+        let proceeds = parseFloat(String(sellData.totalProceeds)) || 0;
+
+        if (sellData.asset === 'Cash') {
+            if (proceeds > 0) {
+                qty = proceeds;
+                price = 1;
+            } else if (qty > 0) {
+                price = 1;
+                proceeds = qty;
+            } else return;
+        }
+
         const value = price * qty;
 
         const tr = {
             date: sellData.date, description: sellData.asset,
-            account: sellData.broker, ticker: sellData.ticker,
+            account: sellData.broker, ticker: sellData.asset === 'Cash' ? 'CASH' : sellData.ticker,
             type: 'Sell', category: 'Pension',
             quantity: qty, amount: value, price: price,
             pnl: sellData.pnl, roiPercent: sellData.roi
@@ -446,9 +458,21 @@ export default function usePensions({ transactions = [], rates, onRefresh, marke
 
     const handleBuyConfirm = async () => {
         if (!buyData || !buyData.asset) return;
-        const qty = parseFloat(String(buyData.qtyToBuy)) || 0;
-        const price = parseFloat(String(buyData.buyPricePerShare)) || 0;
-        if (qty <= 0 || price <= 0) return;
+        let qty = parseFloat(String(buyData.qtyToBuy)) || 0;
+        let price = parseFloat(String(buyData.buyPricePerShare)) || 0;
+        let investment = parseFloat(String(buyData.totalInvestment)) || 0;
+
+        if (buyData.asset === 'Cash') {
+            if (investment > 0) {
+                qty = investment;
+                price = 1;
+            } else if (qty > 0) {
+                price = 1;
+                investment = qty;
+            } else return;
+        } else {
+            if (qty <= 0 || price <= 0) return;
+        }
 
         if (buyData.buyPath === 'manual' || (buyData.buyPath === 'search' && buyData.ticker)) {
             try {
@@ -473,7 +497,7 @@ export default function usePensions({ transactions = [], rates, onRefresh, marke
         const tr = {
             date: buyData.date, description: buyData.asset,
             account: buyData.broker,
-            ticker: buyData.ticker || buyData.asset,
+            ticker: buyData.asset === 'Cash' ? 'CASH' : (buyData.ticker || buyData.asset),
             type: 'Buy', category: 'Pension',
             quantity: qty, amount: price * qty, price: price,
             isSalaryContribution: buyData.isSalaryContribution || false,
@@ -495,7 +519,7 @@ export default function usePensions({ transactions = [], rates, onRefresh, marke
         setSellData(prev => {
             if (!prev) return null;
             const updated: any = { ...prev, [field]: value };
-            const qty = parseFloat(updated.qtyToSell) || 0;
+            let qty = parseFloat(updated.qtyToSell) || 0;
             let price = parseFloat(updated.sellPricePerShare) || 0;
             let proceeds = parseFloat(updated.totalProceeds) || 0;
             const avgCost = prev.avgCost;
@@ -506,7 +530,10 @@ export default function usePensions({ transactions = [], rates, onRefresh, marke
             }
 
             if (field === 'totalProceeds') {
-                if (qty > 0) {
+                if (updated.asset === 'Cash') {
+                    qty = proceeds; // Added sync for Cash
+                    updated.qtyToSell = proceeds;
+                } else if (qty > 0) {
                     price = proceeds / qty;
                     updated.sellPricePerShare = price;
                 }
@@ -526,7 +553,7 @@ export default function usePensions({ transactions = [], rates, onRefresh, marke
         setBuyData(prev => {
             if (!prev) return null;
             const updated: any = { ...prev, [field]: value };
-            const qty = parseFloat(updated.qtyToBuy) || 0;
+            let qty = parseFloat(updated.qtyToBuy) || 0;
             let price = parseFloat(updated.buyPricePerShare) || 0;
             let investment = parseFloat(updated.totalInvestment) || 0;
 
@@ -536,7 +563,10 @@ export default function usePensions({ transactions = [], rates, onRefresh, marke
             }
 
             if (field === 'totalInvestment') {
-                if (qty > 0) {
+                if (updated.asset === 'Cash') {
+                    qty = investment; // Added sync for Cash
+                    updated.qtyToBuy = investment;
+                } else if (qty > 0) {
                     price = investment / qty;
                     updated.buyPricePerShare = price;
                 }

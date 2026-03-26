@@ -699,6 +699,19 @@ export default function ProfilePage() {
                                 onChange={handleBackgroundChange}
                             />
 
+                            <div className="flex items-center justify-between px-3 py-3 rounded-xl bg-white/[0.03] border border-white/10 mt-4">
+                                <div>
+                                    <div className="text-sm text-parchment font-space font-medium">Show Empty Cash Balances</div>
+                                    <div className="text-[0.75rem] text-parchment/30 font-space mt-0.5">Display a 0-value cash row for each broker</div>
+                                </div>
+                                <button
+                                    onClick={() => handleUpdateAppSettings({ ...appSettings, showEmptyCashBalances: appSettings?.showEmptyCashBalances === false ? true : false })}
+                                    className={`w-11 h-6 rounded-full transition-colors relative ${appSettings?.showEmptyCashBalances !== false ? 'bg-[#D4AF37]/80' : 'bg-white/20'}`}
+                                >
+                                    <span className={`absolute top-1 bottom-1 w-4 bg-white rounded-full transition-all ${appSettings?.showEmptyCashBalances !== false ? 'left-6' : 'left-1'}`} />
+                                </button>
+                            </div>
+
                             {/* Replay Tutorial */}
                             <div className="mt-5 pt-4 border-t border-white/5">
                                 <div className="text-[0.75rem] uppercase tracking-widest text-parchment/30 mb-1.5 font-space">Tutorial</div>
