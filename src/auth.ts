@@ -5,6 +5,7 @@ import { findUserByEmail, verifyPassword, findOrCreateOAuthUser, updateUserAvata
 import type { User } from "@/types";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+    trustHost: true,
     providers: [
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID,
@@ -63,7 +64,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         await updateUserAvatar(dbUser.id, user.image);
                     }
                 } catch (error) {
-                    console.error("Error creating OAuth user:", error);
+                    console.error("[AUTH] Error creating OAuth user:", error);
+                    console.error("[AUTH] Stack:", error instanceof Error ? error.stack : 'no stack');
                     return false;
                 }
             }

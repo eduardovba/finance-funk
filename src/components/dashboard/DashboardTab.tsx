@@ -75,6 +75,7 @@ export default function DashboardTab(props: DashboardTabProps) {
             {/* Mobile Hero */}
             <DashboardHero
                 data={data}
+                historicalSnapshots={historicalSnapshots}
                 isLoading={isLoading}
                 primaryMeta={h.primaryMeta}
                 secondaryMeta={h.secondaryMeta}

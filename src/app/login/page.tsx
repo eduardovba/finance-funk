@@ -165,7 +165,7 @@ function LoginView({ onBack, callbackUrl }: any) {
     const searchParams = useSearchParams();
     const error = searchParams.get("error");
     const [errorMsg, setErrorMsg] = useState(
-        error === "CredentialsSignin" ? "Invalid email or password." : ""
+        error === "CredentialsSignin" ? "Invalid email or password." : error ? `Authentication Error: ${error}` : ""
     );
 
     const handleCredentialsLogin = async (e: any) => {
