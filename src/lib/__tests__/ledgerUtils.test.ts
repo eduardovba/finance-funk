@@ -72,7 +72,7 @@ describe('normalizeTransactions', () => {
         const result = normalizeTransactions({
             equity: [{ id: 'eq-1', date: '2024-01-15', ticker: 'AAPL', broker: 'T212', type: 'Buy', quantity: 10, investment: 1500, currency: 'GBP' }],
             crypto: [{ id: 'cr-1', date: '2024-01-20', ticker: 'ETH', type: 'Buy', quantity: 2, investment: 5000, currency: 'USD' }],
-            pensions: [{ id: 'pn-1', date: '2024-01-25', asset: 'L&G Global', broker: 'L&G', type: 'Buy', value: 500, quantity: 100 }],
+            pensions: [{ id: 'pn-1', date: '2024-01-25', asset: 'L&G Global', broker: 'L&G', type: 'Buy', value: 500, quantity: 100 }] as any,
             debt: [{ id: 'db-1', date: '2024-02-01', lender: 'Bank', value_brl: 1000 }],
         }, defaultRates);
 
@@ -143,9 +143,9 @@ describe('calculateMonthlyInvestments', () => {
 
     it('includes historical data', () => {
         const historical = [
-            { month: '2024-01', equity: 1000, fixedIncome: 500, realEstate: 0, pensions: 0, crypto: 0, debt: 0 },
+            { month: '2024-01', equity: 1000, fixedIncome: 500, realEstate: 0, pensions: 0, crypto: 0, debt: 0, total: 1500 },
         ];
-        const result = calculateMonthlyInvestments([], historical);
+        const result = calculateMonthlyInvestments([], historical as any);
         const jan = result.find(d => d.month === '2024-01');
         expect(jan).toBeDefined();
         expect(jan!.equity).toBe(1000);
@@ -157,7 +157,7 @@ describe('calculateMonthlyInvestments', () => {
             { date: '2025-01-15', flow: -500, category: 'Equity' },
             { date: '2025-01-20', flow: -300, category: 'Crypto' },
         ];
-        const result = calculateMonthlyInvestments(transactions, []);
+        const result = calculateMonthlyInvestments(transactions as any, []);
         const month = result.find(d => d.month === '2025-01');
         expect(month).toBeDefined();
         // flow is negated (-(-500) = 500)
@@ -167,9 +167,9 @@ describe('calculateMonthlyInvestments', () => {
 
     it('computes totals', () => {
         const historical = [
-            { month: '2024-01', equity: 1000, fixedIncome: 500, realEstate: 200, pensions: 100, crypto: 50, debt: 25 },
+            { month: '2024-01', equity: 1000, fixedIncome: 500, realEstate: 200, pensions: 100, crypto: 50, debt: 25, total: 1875 },
         ];
-        const result = calculateMonthlyInvestments([], historical);
+        const result = calculateMonthlyInvestments([], historical as any);
         const jan = result.find(d => d.month === '2024-01');
         expect(jan!.total).toBe(1875);
     });

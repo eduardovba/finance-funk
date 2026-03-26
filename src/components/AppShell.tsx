@@ -1,17 +1,15 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus } from 'lucide-react';
 import { PortfolioProvider, usePortfolio } from '@/context/PortfolioContext';
-import TopConsole from '@/components/TopConsole';
 import TransactionForm from '@/components/TransactionForm';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import StatusModal from '@/components/StatusModal';
 import AnimatedBackground from '@/components/AnimatedBackground';
-import Inspector from '@/components/Inspector';
-import MonthlyCloseModal from '@/components/MonthlyCloseModal';
 import BottomNav from '@/components/BottomNav';
 import InstallPrompt from '@/components/InstallPrompt';
 import FTUEWizard from '@/components/ftue/FTUEWizard';
@@ -19,6 +17,11 @@ import FTUEChecklist from '@/components/ftue/FTUEChecklist';
 import CurrencyQuickPicker from '@/components/ftue/CurrencyQuickPicker';
 import FirstVisitGreeting from '@/components/ftue/FirstVisitGreeting';
 import GrooveCheck from '@/components/ftue/GrooveCheck';
+
+// Lazy-loaded heavy components (deferred from initial bundle)
+const TopConsole = dynamic(() => import('@/components/TopConsole'), { ssr: false });
+const Inspector = dynamic(() => import('@/components/Inspector'), { ssr: false });
+const MonthlyCloseModal = dynamic(() => import('@/components/MonthlyCloseModal'), { ssr: false });
 
 function AppShellInner({ children }: { children: React.ReactNode }) {
     const {
@@ -51,6 +54,17 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
         const main = document.getElementById('main-scroll');
         if (main) main.focus({ preventScroll: true });
     }, [pathname]);
+
+    // Track user activity ping (debounced to once per browser session)
+    useEffect(() => {
+        if (isAuthPage) return;
+        
+        const hasPinged = sessionStorage.getItem('finance_funk_pinged');
+        if (!hasPinged) {
+            fetch('/api/user/ping').catch(console.error);
+            sessionStorage.setItem('finance_funk_pinged', 'true');
+        }
+    }, [isAuthPage]);
 
     // Goal-based landing redirect — budget users land on /budget instead of /dashboard
     useEffect(() => {
@@ -142,14 +156,13 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
 
                 {/* ═══════════ MAIN STAGE ═══════════ */}
                 <div className="flex flex-1 overflow-hidden">
-                    <main id="main-scroll" role="main" tabIndex={-1} className="flex-1 overflow-y-auto p-3 md:p-6 lg:p-8 pb-24 md:pb-8 w-full">
-                    <AnimatePresence mode="wait">
+                    <main id="main-scroll" role="main" tabIndex={-1} className="flex-1 overflow-y-auto p-3 md:p-6 lg:p-8 pb-24 md:pb-8 w-full outline-none">
+                    <AnimatePresence initial={false}>
                         <motion.div
                             key={pathname}
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -4 }}
-                            transition={{ duration: 0.2, ease: 'easeOut' }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.15, ease: 'easeOut' }}
                         >
                             {children}
                         </motion.div>

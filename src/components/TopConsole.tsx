@@ -554,15 +554,7 @@ export default function TopConsole() {
                                                 className="flex items-center gap-2.5 px-3 py-2.5 text-xs font-space font-medium tracking-wide rounded-lg text-parchment/60 hover:text-parchment hover:bg-white/5 transition-all no-underline"
                                             >
                                                 <Settings size={14} className="text-[#D4AF37]/60" />
-                                                Profile & Settings
-                                            </Link>
-                                            <Link
-                                                href="/import"
-                                                onClick={() => setIsUserMenuOpen(false)}
-                                                className="flex items-center gap-2.5 px-3 py-2.5 text-xs font-space font-medium tracking-wide rounded-lg text-parchment/60 hover:text-parchment hover:bg-white/5 transition-all no-underline"
-                                            >
-                                                <FileSpreadsheet size={14} className="text-[#D4AF37]/60" />
-                                                Import Spreadsheet
+                                                Settings
                                             </Link>
                                             {(session.user as any).is_admin && (
                                                 <Link

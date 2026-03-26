@@ -81,6 +81,27 @@ export default function PageTutorialOverlay({ pageId, steps = [] }: any) {
     const totalSteps = activeSteps.length;
 
     // Measure the target element
+    const updateRect = useCallback((stepIndex: number) => {
+        if (stepIndex >= totalSteps) {
+            setTargetRect(null);
+            return;
+        }
+        const step = activeSteps[stepIndex];
+        if (!step) return;
+        const el = document.getElementById(step.targetId);
+        if (el) {
+            const rect = el.getBoundingClientRect();
+            const padding = step.padding !== undefined ? step.padding : SPOTLIGHT_PADDING;
+            setTargetRect({
+                x: rect.x - padding,
+                y: rect.y - padding,
+                width: rect.width + padding * 2,
+                height: rect.height + padding * 2,
+                shape: step.shape || 'rect'
+            });
+        }
+    }, [totalSteps, activeSteps]);
+
     const measureTarget = useCallback((stepIndex: number) => {
         if (stepIndex >= totalSteps) {
             setTargetRect(null);
@@ -90,21 +111,14 @@ export default function PageTutorialOverlay({ pageId, steps = [] }: any) {
         const el = document.getElementById(step.targetId);
         if (el) {
             el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+            updateRect(stepIndex);
             setTimeout(() => {
-                const rect = el.getBoundingClientRect();
-                const padding = step.padding !== undefined ? step.padding : SPOTLIGHT_PADDING;
-                setTargetRect({
-                    x: rect.x - padding,
-                    y: rect.y - padding,
-                    width: rect.width + padding * 2,
-                    height: rect.height + padding * 2,
-                    shape: step.shape || 'rect'
-                });
+                updateRect(stepIndex);
             }, 400);
         } else {
             setTargetRect(null);
         }
-    }, [totalSteps, activeSteps]);
+    }, [totalSteps, activeSteps, updateRect]);
 
     // Re-measure on step change and on resize/scroll
     useEffect(() => {
@@ -112,14 +126,26 @@ export default function PageTutorialOverlay({ pageId, steps = [] }: any) {
         measureTarget(currentStep);
         setActionCompleted(false);
 
-        const handleResize = () => measureTarget(currentStep);
-        window.addEventListener('resize', handleResize);
-        window.addEventListener('scroll', handleResize, true);
+        const handleUpdate = () => updateRect(currentStep);
+        window.addEventListener('resize', handleUpdate);
+        window.addEventListener('scroll', handleUpdate, true);
+
+        let resizeObserver: ResizeObserver | null = null;
+        if (currentStep < activeSteps.length) {
+            const step = activeSteps[currentStep];
+            const el = document.getElementById(step.targetId);
+            if (el) {
+                resizeObserver = new ResizeObserver(() => handleUpdate());
+                resizeObserver.observe(el);
+            }
+        }
+
         return () => {
-            window.removeEventListener('resize', handleResize);
-            window.removeEventListener('scroll', handleResize, true);
+            window.removeEventListener('resize', handleUpdate);
+            window.removeEventListener('scroll', handleUpdate, true);
+            if (resizeObserver) resizeObserver.disconnect();
         };
-    }, [currentStep, measureTarget, isVisible]);
+    }, [currentStep, measureTarget, updateRect, isVisible, activeSteps]);
 
     // For action steps, observe DOM for the waitForSelector
     useEffect(() => {

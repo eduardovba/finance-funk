@@ -1,16 +1,19 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DemoPortfolioProvider } from '@/context/DemoPortfolioContext';
-import TopConsole from '@/components/TopConsole';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import BottomNav from '@/components/BottomNav';
 import DemoBanner from '@/components/ftue/DemoBanner';
-import Inspector from '@/components/Inspector';
 import useBudgetStore from '@/stores/useBudgetStore';
 import demoData from '@/lib/demoData';
+
+// Lazy-loaded heavy components (deferred from initial bundle)
+const TopConsole = dynamic(() => import('@/components/TopConsole'), { ssr: false });
+const Inspector = dynamic(() => import('@/components/Inspector'), { ssr: false });
 
 function DemoAppShellInner({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();

@@ -1,7 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { applyRateLimit } from '@/lib/rateLimit';
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
     try {
+        const limited = await applyRateLimit(request, 'marketData');
+        if (limited) return limited;
+
         const url = 'https://themovemarket.com/tools/propertyprices/flat-307-ink-court-419-wick-lane-london-e3-2pw';
         const response = await fetch(url, {
             headers: {

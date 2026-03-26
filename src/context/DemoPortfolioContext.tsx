@@ -81,7 +81,7 @@ export function DemoPortfolioProvider({ children, onSignUpPrompt }: DemoPortfoli
     const [realEstate] = useState(demoData.realEstate);
     const [historicalSnapshots] = useState(demoData.historicalSnapshots);
     const [marketData] = useState(demoData.marketData);
-    const [pensionPrices] = useState(demoData.pensionPrices);
+    const [pensionPrices] = useState(demoData.pensionPrices as any);
     const [rates] = useState(demoData.rates);
     const [ledgerData] = useState(demoData.ledgerData);
     const [fxHistory] = useState<Record<string, Record<string, number>>>(demoData.fxHistory as any);

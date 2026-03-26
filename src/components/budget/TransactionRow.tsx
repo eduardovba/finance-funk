@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Pencil } from 'lucide-react';
 import { formatCents } from '@/lib/budgetUtils';
 import { convertCurrency } from '@/lib/fxConvert';
 import useBudgetStore from '@/stores/useBudgetStore';
@@ -14,9 +14,10 @@ interface TransactionRowProps {
     isSelected: boolean;
     onToggleSelect: () => void;
     onDelete: (id: number) => void;
+    onEdit: (transaction: BudgetTransaction) => void;
 }
 
-export default function TransactionRow({ transaction, category, isSelected, onToggleSelect, onDelete }: TransactionRowProps) {
+export default function TransactionRow({ transaction, category, isSelected, onToggleSelect, onDelete, onEdit }: TransactionRowProps) {
     const [showDeleteBtn, setShowDeleteBtn] = useState(false);
     const isIncome = category?.is_income === 1;
     const { displayCurrency, fxRates } = useBudgetStore();
@@ -105,24 +106,34 @@ export default function TransactionRow({ transaction, category, isSelected, onTo
                     {isIncome ? '+' : '-'}{formatCents(displayCents, displayCurrency)}
                 </span>
 
-                {/* Desktop delete button */}
-                <AnimatedDeleteBtn show={showDeleteBtn} onClick={() => onDelete(transaction.id)} />
+                {/* Desktop action buttons */}
+                <AnimatedActionBtns show={showDeleteBtn} onEdit={() => onEdit(transaction)} onDelete={() => onDelete(transaction.id)} />
             </motion.div>
         </div>
     );
 }
 
-function AnimatedDeleteBtn({ show, onClick }: { show: boolean; onClick: () => void }) {
+function AnimatedActionBtns({ show, onEdit, onDelete }: { show: boolean; onEdit: () => void; onDelete: () => void }) {
     if (!show) return null;
     return (
-        <motion.button
+        <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            onClick={(e) => { e.stopPropagation(); onClick(); }}
-            className="hidden md:flex p-1.5 rounded-lg hover:bg-red-500/20 transition-colors"
+            className="hidden md:flex items-center gap-0.5"
         >
-            <Trash2 size={14} className="text-red-400/60 hover:text-red-400" />
-        </motion.button>
+            <button
+                onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                className="p-1.5 rounded-lg hover:bg-[#D4AF37]/20 transition-colors"
+            >
+                <Pencil size={14} className="text-[#D4AF37]/60 hover:text-[#D4AF37]" />
+            </button>
+            <button
+                onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                className="p-1.5 rounded-lg hover:bg-red-500/20 transition-colors"
+            >
+                <Trash2 size={14} className="text-red-400/60 hover:text-red-400" />
+            </button>
+        </motion.div>
     );
 }

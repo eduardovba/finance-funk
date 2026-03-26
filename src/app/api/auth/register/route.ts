@@ -3,6 +3,9 @@ import { createUser, findUserByEmail } from "@/lib/users";
 import { z } from 'zod';
 import { validateBody } from '@/lib/validation';
 import { kvSet } from '@/lib/kv';
+import { applyRateLimit } from '@/lib/rateLimit';
+import { logger } from '@/lib/logger';
+import { apiError } from '@/lib/apiError';
 
 export const RegisterSchema = z.object({
     name: z.string().min(1, 'Name is required').max(100),
@@ -20,6 +23,9 @@ export const RegisterSchema = z.object({
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
     try {
+        const limited = await applyRateLimit(request, 'auth');
+        if (limited) return limited;
+
         const body: unknown = await request.json();
         const { data, error } = validateBody(RegisterSchema, body);
         if (error) return NextResponse.json({ error }, { status: 400 });
@@ -84,7 +90,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 }, user.id);
             }
         } catch (e) {
-            console.error('Failed to initialize FTUE/currency state:', e);
+            logger.error('Register', e, { action: 'initFtueState' });
         }
 
         return NextResponse.json(
@@ -92,10 +98,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             { status: 201 }
         );
     } catch (error) {
-        console.error("Registration error:", error);
-        return NextResponse.json(
-            { error: "Something went wrong. Please try again." },
-            { status: 500 }
-        );
+        logger.error('Register', error);
+        return apiError('Something went wrong. Please try again.', 500, error);
     }
 }

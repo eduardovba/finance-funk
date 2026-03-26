@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { kvGet, kvSet } from '@/lib/kv';
 import { z } from 'zod';
 import { validateBody } from '@/lib/validation';
+import { getMarketDataProvider, type MarketDataResult } from '@/lib/marketDataProvider';
+import { applyRateLimit } from '@/lib/rateLimit';
+import { logger } from '@/lib/logger';
+import { apiError } from '@/lib/apiError';
 
 // ═══════════ CACHE CONFIG ═══════════
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
@@ -15,134 +19,61 @@ const PostMarketDataSchema = z.object({
     forceRefresh: z.boolean().optional().default(false)
 });
 
+// ═══════════ TYPES ═══════════
+interface CacheEntry {
+    data: MarketDataResult;
+    timestamp: number;
+}
+
+interface CacheInfo {
+    cached: number;
+    refreshed: number;
+    total: number;
+    lastRefreshed: string;
+    ttlMinutes: number;
+    provider: string;
+}
+
+type MarketDataCache = Record<string, CacheEntry>;
+type MarketDataResponse = Record<string, MarketDataResult | CacheInfo> & { _cacheInfo?: CacheInfo };
+
 // ═══════════ CACHE HELPERS ═══════════
-const loadCacheFromDB = async () => {
+const loadCacheFromDB = async (): Promise<MarketDataCache> => {
     try {
         const raw = await kvGet(CACHE_KEY, null);
         if (raw && typeof raw === 'object') {
-            return raw;
+            return raw as MarketDataCache;
         }
     } catch (e) {
-        console.error('[Cache] Failed to load from DB:', (e as Error).message);
+        logger.error('Cache', e, { action: 'loadFromDB' });
     }
     return {};
 };
 
-const persistCacheToDB = async (cache: Record<string, any>) => {
+const persistCacheToDB = async (cache: MarketDataCache): Promise<void> => {
     try {
         await kvSet(CACHE_KEY, cache);
     } catch (e) {
-        console.error('[Cache] Failed to persist to DB:', (e as Error).message);
+        logger.error('Cache', e, { action: 'persistToDB' });
     }
 };
 
-const isFresh = (entry: any) => {
+const isFresh = (entry: CacheEntry | undefined): boolean => {
     if (!entry || !entry.timestamp) return false;
     return Date.now() - entry.timestamp < CACHE_TTL_MS;
 };
 
-// ═══════════ GOOGLE FINANCE SCRAPER ═══════════
-const fetchGoogleFinance = async (ticker: string) => {
-    try {
-        let queries = [];
-
-        if (ticker.endsWith('.SA')) {
-            queries = [`${ticker.replace('.SA', '')}:BVMF`];
-        } else if (ticker.endsWith('.L')) {
-            queries = [`${ticker.replace('.L', '')}:LON`];
-        } else if (ticker.includes('-') || ticker.includes('/')) {
-            queries = [ticker];
-        } else {
-            queries = [`${ticker}:NASDAQ`, `${ticker}:NYSE`];
-        }
-
-        for (const query of queries) {
-            const response = await fetch(`https://www.google.com/finance/quote/${query}`, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-                }
-            });
-
-            if (!response.ok) continue;
-
-            const html = await response.text();
-
-            const ds2Match = html.match(/AF_initDataCallback\(\{key: 'ds:2'[\s\S]*?data:([\s\S]*?)(?:,\s*sideChannel:|\}\);)/);
-            const ds11Match = html.match(/AF_initDataCallback\(\{key: 'ds:11'[\s\S]*?data:([\s\S]*?)\}\);/);
-
-            let price = null;
-            let change = 0;
-            let change1M = 0;
-            let currency = null;
-
-            if (ds2Match) {
-                try {
-                    let jsonStr = ds2Match[1].trim();
-                    if (jsonStr.endsWith(',')) jsonStr = jsonStr.slice(0, -1);
-                    const ds2Data = JSON.parse(jsonStr);
-
-                    const root = ds2Data?.[0]?.[0];
-                    if (Array.isArray(root?.[0])) {
-                        const stats = root[0][5];
-                        if (stats && Array.isArray(stats)) {
-                            price = stats[0];
-                            change = stats[2];
-                            currency = root[0][4];
-                        }
-                    } else if (typeof root?.[0] === 'string') {
-                        price = root[8];
-                        currency = root[5];
-                    }
-                } catch (e) { console.error('Error parsing ds:2 for', ticker, e); }
-            }
-
-            if (ds11Match) {
-                try {
-                    const ds11Data = ds11Match[1];
-                    const pointsMatch = ds11Data.match(/\[\d+\.?\d*,\s*[-+]?\d+\.?\d*,\s*([-+]?\d+\.?\d*),\s*2,\s*2,\s*[23]\]/g);
-                    if (pointsMatch && pointsMatch.length > 0) {
-                        const lastPoint = pointsMatch[pointsMatch.length - 1];
-                        const pctMatch = lastPoint.match(/[-+]?\d+\.?\d*/g);
-                        if (pctMatch && pctMatch[2]) {
-                            change1M = parseFloat(pctMatch[2]) * 100;
-                        }
-                    }
-                } catch (e) { console.warn(`[Market] Failed to parse ds:11 for ${ticker}:`, (e as Error).message); }
-            }
-
-            if (price !== null) {
-                if (!currency) {
-                    currency = ticker.endsWith('.SA') ? 'BRL' : ticker.endsWith('.L') ? 'GBP' : 'USD';
-                }
-
-                if (currency === 'GBX' || currency === 'GBp') {
-                    price = price / 100;
-                    currency = 'GBP';
-                }
-
-                return {
-                    symbol: ticker,
-                    price: price,
-                    changePercent: change,
-                    change1M: change1M !== 0 ? change1M : change,
-                    currency: currency
-                };
-            }
-        }
-    } catch (err) {
-        console.error(`Error scraping ${ticker}:`, err);
-    }
-    return null;
-};
+// ═══════════ PROVIDER ═══════════
+const provider = getMarketDataProvider();
 
 // ═══════════ BACKGROUND REFRESH (SWR) ═══════════
-const backgroundRefresh = async (staleTickers: string[], dbCache: Record<string, any>) => {
+const backgroundRefresh = async (staleTickers: string[], dbCache: MarketDataCache): Promise<void> => {
     if (backgroundRefreshInFlight) return;
     backgroundRefreshInFlight = true;
 
     try {
-        console.log(`[Cache] Background refresh: scraping ${staleTickers.length} stale tickers`);
-        const results = await Promise.all(staleTickers.map(fetchGoogleFinance));
+        logger.info('Cache', `Background refresh: fetching ${staleTickers.length} stale tickers via ${provider.name}`);
+        const results = await Promise.all(staleTickers.map(t => provider.fetchQuote(t)));
 
         results.forEach(result => {
             if (result) {
@@ -154,9 +85,9 @@ const backgroundRefresh = async (staleTickers: string[], dbCache: Record<string,
         });
 
         await persistCacheToDB(dbCache);
-        console.log(`[Cache] Background refresh complete: updated ${results.filter(Boolean).length} tickers`);
+        logger.info('Cache', `Background refresh complete: updated ${results.filter(Boolean).length} tickers`);
     } catch (e) {
-        console.error('[Cache] Background refresh failed:', (e as Error).message);
+        logger.error('Cache', e, { action: 'backgroundRefresh' });
     } finally {
         backgroundRefreshInFlight = false;
     }
@@ -165,6 +96,9 @@ const backgroundRefresh = async (staleTickers: string[], dbCache: Record<string,
 // ═══════════ API HANDLER ═══════════
 export async function POST(request: NextRequest): Promise<NextResponse> {
     try {
+        const limited = await applyRateLimit(request, 'marketData');
+        if (limited) return limited;
+
         const body: unknown = await request.json();
         const { data, error } = validateBody(PostMarketDataSchema, body);
         if (error) return NextResponse.json({ error }, { status: 400 });
@@ -172,10 +106,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         const { tickers, forceRefresh } = data!;
 
         // Load cache from persistent DB (survives serverless cold starts)
-        const dbCache: Record<string, any> = await loadCacheFromDB() as Record<string, any>;
+        const dbCache: MarketDataCache = await loadCacheFromDB();
 
-        const marketData: Record<string, any> = {};
-        const staleTickers = [];
+        const marketData: Record<string, MarketDataResult> = {};
+        const staleTickers: string[] = [];
 
         // Phase 1: Collect cached data, identify stale tickers
         for (const ticker of tickers) {
@@ -195,9 +129,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         // Phase 2: Handle stale tickers
         if (staleTickers.length > 0 && forceRefresh) {
-            // Force refresh: scrape synchronously and wait for results
-            console.log(`[Cache] Force refresh: scraping ${staleTickers.length} tickers`);
-            const results = await Promise.all(staleTickers.map(fetchGoogleFinance));
+            // Force refresh: fetch synchronously and wait for results
+            logger.info('Cache', `Force refresh: fetching ${staleTickers.length} tickers via ${provider.name}`);
+            const results = await Promise.all(staleTickers.map(t => provider.fetchQuote(t)));
 
             results.forEach(result => {
                 if (result) {
@@ -215,17 +149,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             const hasStaleData = staleTickers.every(t => dbCache[t]?.data);
             if (hasStaleData) {
                 // All stale tickers have cached data — return immediately, refresh in background
-                console.log(`[Cache] SWR: returning stale data for ${staleTickers.length} tickers, refreshing in background`);
+                logger.info('Cache', `SWR: returning stale data for ${staleTickers.length} tickers, refreshing in background`);
                 backgroundRefresh(staleTickers, { ...dbCache });
             } else {
-                // Some tickers have no cached data at all — must scrape synchronously
+                // Some tickers have no cached data at all — must fetch synchronously
                 const missingTickers = staleTickers.filter(t => !dbCache[t]?.data);
                 const staleOnlyTickers = staleTickers.filter(t => dbCache[t]?.data);
 
-                console.log(`[Cache] Scraping ${missingTickers.length} missing tickers (${staleOnlyTickers.length} served stale)`);
+                logger.info('Cache', `Fetching ${missingTickers.length} missing tickers via ${provider.name} (${staleOnlyTickers.length} served stale)`);
 
-                // Scrape only the truly missing tickers synchronously
-                const results = await Promise.all(missingTickers.map(fetchGoogleFinance));
+                // Fetch only the truly missing tickers synchronously
+                const results = await Promise.all(missingTickers.map(t => provider.fetchQuote(t)));
                 results.forEach(result => {
                     if (result) {
                         marketData[result.symbol] = result;
@@ -244,7 +178,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 }
             }
         } else {
-            console.log(`[Cache] All ${cachedCount} tickers served from cache`);
+            logger.info('Cache', `All ${cachedCount} tickers served from cache`);
         }
 
         // Add cache metadata for transparency
@@ -252,18 +186,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             ? Math.min(...tickers.map((t: string) => dbCache[t]?.timestamp || Date.now()))
             : Date.now();
 
-        marketData._cacheInfo = {
+        const response: MarketDataResponse = { ...marketData };
+        response._cacheInfo = {
             cached: cachedCount,
             refreshed: staleTickers.length,
             total: tickers.length,
             lastRefreshed: new Date(oldestEntry).toISOString(),
-            ttlMinutes: CACHE_TTL_MS / 60000
+            ttlMinutes: CACHE_TTL_MS / 60000,
+            provider: provider.name
         };
 
-        return NextResponse.json(marketData);
+        return NextResponse.json(response);
 
     } catch (error) {
-        console.error('Market data fetch error:', error);
-        return NextResponse.json({ error: 'Failed to fetch market data' }, { status: 500 });
+        logger.error('MarketData', error);
+        return apiError('Failed to fetch market data', 500, error);
     }
 }

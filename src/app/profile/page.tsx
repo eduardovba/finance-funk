@@ -127,7 +127,15 @@ function SectionCard({ title, icon: Icon, children, className = '', variant = 'd
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className={`glass-card p-0 ${className}`}
+            className={`
+                bg-[rgba(18,20,24,0.55)] backdrop-blur-[24px] backdrop-saturate-150
+                border border-[rgba(255,255,255,0.06)] border-t-[rgba(255,255,255,0.1)]
+                rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.3)]
+                hover:border-[rgba(255,255,255,0.15)] hover:-translate-y-0.5
+                hover:shadow-[0_12px_40px_rgba(0,0,0,0.45)] hover:bg-[rgba(18,20,24,0.70)]
+                transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
+                ${className}
+            `}
         >
             <div className={`px-5 py-4 border-b ${borderColor} flex items-center gap-3`}>
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconBg}`}>

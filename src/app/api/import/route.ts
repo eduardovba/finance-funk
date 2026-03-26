@@ -3,6 +3,9 @@ import { query, run } from '@/lib/db';
 import { requireAuth } from '@/lib/authGuard';
 import { z } from 'zod';
 import { validateBody } from '@/lib/validation';
+import { applyRateLimit } from '@/lib/rateLimit';
+import { logger } from '@/lib/logger';
+import { apiError } from '@/lib/apiError';
 
 const PostImportSchema = z.object({
     assetClass: z.string().optional(),
@@ -26,6 +29,9 @@ const PostImportSchema = z.object({
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
     try {
+        const limited = await applyRateLimit(request, 'import');
+        if (limited) return limited;
+
         const user = await requireAuth();
         const body: unknown = await request.json();
         const { data, error } = validateBody(PostImportSchema, body);
@@ -104,8 +110,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     } catch (error) {
         if (error instanceof Response) return error as unknown as NextResponse;
-        console.error('Import Error:', error);
-        return NextResponse.json({ error: 'Import failed: ' + (error as Error).message }, { status: 500 });
+        logger.error('Import', error);
+        return apiError('Import failed', 500, error);
     }
 }
 

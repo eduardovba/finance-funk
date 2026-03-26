@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from 'zustand';
+import type { AssetClassesMap } from '@/types/portfolio.types';
 
 // ═══════════ TYPES ═══════════
 
@@ -14,7 +15,7 @@ export interface SettingsState {
     forecastSettings: Record<string, unknown>;       // TODO: define ForecastSettings shape
     dashboardConfig: unknown | null;                 // TODO: define DashboardConfig shape
     allocationTargets: Record<string, unknown>;      // TODO: define AllocationTargets shape
-    assetClasses: Record<string, string>;
+    assetClasses: AssetClassesMap;
 }
 
 export interface SettingsActions {
@@ -22,7 +23,7 @@ export interface SettingsActions {
     setForecastSettings: (v: Record<string, unknown>) => void;
     setDashboardConfig: (v: unknown | null) => void;
     setAllocationTargets: (v: Record<string, unknown>) => void;
-    setAssetClasses: (v: Record<string, string>) => void;
+    setAssetClasses: (v: AssetClassesMap) => void;
     handleUpdateAppSettings: (newSettings: AppSettings) => Promise<void>;
 }
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { kvGet, kvSet } from '@/lib/kv';
 import { z } from 'zod';
 import { validateBody, optionalString } from '@/lib/validation';
+import { applyRateLimit } from '@/lib/rateLimit';
 
 const MAP_KEY = 'pension_fund_map';
 const CACHE_KEY = 'pension_live_prices';
@@ -114,6 +115,9 @@ const fetchPrices = async () => {
 };
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
+    const limited = await applyRateLimit(request, 'marketData');
+    if (limited) return limited;
+
     const { searchParams } = new URL(request.url);
     const refresh = searchParams.get('refresh');
 
@@ -135,6 +139,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
     try {
+        const limited = await applyRateLimit(request, 'marketData');
+        if (limited) return limited;
+
         const body: unknown = await request.json();
         const { data, error } = validateBody(PostPensionPriceSchema, body);
         if (error) return NextResponse.json({ error }, { status: 400 });

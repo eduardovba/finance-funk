@@ -34,7 +34,7 @@ const ChartTooltip = ({ active, payload, label }: any) => {
 
 export default function ForecastChart({ forecastData, forecastPhases, target2031, secondaryCurrency, secondaryPrefix, formatK }: ForecastChartProps) {
     return (
-        <div className="glass-chart p-4 lg:p-6">
+        <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-4 lg:p-6">
             <h3 className="font-bebas text-xl tracking-widest text-[#D4AF37] m-0 mb-5">Wealth Trajectory</h3>
             <div style={{ width: '100%', height: '420px' }}>
                 <ResponsiveContainer width="100%" height="100%">

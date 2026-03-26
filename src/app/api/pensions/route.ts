@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { requireAuth } from '@/lib/authGuard';
+import { logger } from '@/lib/logger';
+import { apiError } from '@/lib/apiError';
 
 export async function GET(): Promise<NextResponse> {
     try {
@@ -82,7 +84,7 @@ export async function GET(): Promise<NextResponse> {
         return NextResponse.json(data);
     } catch (e) {
         if (e instanceof Response) return e as unknown as NextResponse;
-        console.error('Pensions API Error:', e);
-        return NextResponse.json({ error: 'Failed to fetch pensions' }, { status: 500 });
+        logger.error('Pensions', e, { action: 'GET' });
+        return apiError('Failed to fetch pension data', 500, e);
     }
 }

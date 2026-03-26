@@ -1,50 +1,118 @@
-// @ts-nocheck — To be properly typed in next sprint
-declare const window: Window & { XLSX: any };
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Spreadsheet Parser — AI-powered column detection + CSV/XLSX parsing
  * Uses SheetJS loaded from CDN for zero-dependency XLSX/CSV support
  */
 
-let XLSX: any = null;
+// ═══════════ XLSX Module Types ═══════════
+
+interface XLSXWorkbook {
+    SheetNames: string[];
+    Sheets: Record<string, XLSXSheet>;
+}
+
+interface XLSXSheet {
+    [cell: string]: unknown;
+}
+
+interface XLSXUtils {
+    sheet_to_json(sheet: XLSXSheet, opts?: { header?: number | 1; defval?: unknown }): unknown[][];
+}
+
+interface XLSXModule {
+    read(data: ArrayBuffer, opts?: { type?: string; cellDates?: boolean }): XLSXWorkbook;
+    utils: XLSXUtils;
+}
+
+declare const window: Window & { XLSX?: XLSXModule };
+
+let XLSX: XLSXModule | null = null;
+
+// ═══════════ Parsed Sheet Types ═══════════
+
+export interface ParsedSheet {
+    sheetName: string;
+    headers: string[];
+    rows: Record<string, unknown>[];
+}
+
+export interface SpreadsheetResult {
+    sheets: ParsedSheet[];
+    headers: string[];
+    rows: Record<string, unknown>[];
+    sheetNames: string[];
+}
+
+// ═══════════ Column Mapping Types ═══════════
+
+export type FieldName =
+    | 'date' | 'asset' | 'ticker' | 'quantity' | 'price'
+    | 'amount' | 'currency' | 'broker' | 'type' | 'pnl'
+    | 'notes' | 'lender' | 'assetClass' | 'ignore';
+
+export type ColumnMapping = Record<string, FieldName>;
+
+interface FieldPatternConfig {
+    headerPatterns: RegExp[];
+    fuzzyTokens?: string[];
+    dataValidator: (values: unknown[]) => number;
+}
+
+// ═══════════ Transaction Output Types ═══════════
+
+export interface TransformedTransaction {
+    _rowIndex: number;
+    date: string;
+    type: 'Buy' | 'Sell';
+    currency: string;
+    broker: string;
+    amount: number;
+    notes: string;
+    assetClass: string;
+    asset?: string;
+    ticker?: string;
+    quantity?: number;
+    price?: number;
+    pnl?: number | null;
+    [key: string]: unknown;
+}
+
+// ═══════════ loadXLSX ═══════════
 
 /** Dynamically load SheetJS from CDN (cached after first load) */
-async function loadXLSX() {
+async function loadXLSX(): Promise<XLSXModule> {
     if (XLSX) return XLSX;
-    // Load SheetJS mini build from CDN
     const script = document.createElement('script');
     script.src = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
-    await new Promise((resolve, reject) => {
-        script.onload = resolve;
+    await new Promise<void>((resolve, reject) => {
+        script.onload = () => resolve();
         script.onerror = () => reject(new Error('Failed to load SheetJS. Please check your internet connection.'));
         document.head.appendChild(script);
     });
-    XLSX = window.XLSX;
+    XLSX = window.XLSX!;
     return XLSX;
 }
 
-/**
- * Parse a single sheet into { sheetName, headers, rows }
- */
-function parseSheet(xlsx, sheet, sheetName) {
-    const jsonData = xlsx.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+// ═══════════ parseSheet ═══════════
 
-    if (jsonData.length < 2) return null; // skip empty/header-only sheets
+function parseSheet(xlsx: XLSXModule, sheet: XLSXSheet, sheetName: string): ParsedSheet | null {
+    const jsonData = xlsx.utils.sheet_to_json(sheet, { header: 1, defval: '' }) as unknown[][];
 
-    const headerRowIndex = jsonData.findIndex(row => row.some((cell: any) => cell !== ''));
+    if (jsonData.length < 2) return null;
+
+    const headerRowIndex = jsonData.findIndex(row => row.some((cell) => cell !== ''));
     if (headerRowIndex === -1) return null;
 
-    const rawHeaders = jsonData[headerRowIndex].map((h: any) => String(h || '').trim());
+    const rawHeaders = (jsonData[headerRowIndex] as unknown[]).map((h) => String(h || '').trim());
     const dataRows = jsonData.slice(headerRowIndex + 1)
-        .filter((row: any) => row.some((cell: any) => cell !== '' && cell !== null && cell !== undefined));
+        .filter((row) => (row as unknown[]).some((cell) => cell !== '' && cell !== null && cell !== undefined));
 
     if (dataRows.length === 0) return null;
 
-    const headers = rawHeaders.filter((h: any) => h !== '');
-    const rows = dataRows.map((row: any) => {
-        const obj = {};
-        rawHeaders.forEach((header: any, i: number) => {
-            if (header) obj[header] = row[i] !== undefined ? row[i] : '';
+    const headers = rawHeaders.filter((h) => h !== '');
+    const rows = dataRows.map((row) => {
+        const obj: Record<string, unknown> = {};
+        rawHeaders.forEach((header, i: number) => {
+            if (header) obj[header] = (row as unknown[])[i] !== undefined ? (row as unknown[])[i] : '';
         });
         return obj;
     });
@@ -52,23 +120,15 @@ function parseSheet(xlsx, sheet, sheetName) {
     return { sheetName, headers, rows };
 }
 
-/**
- * Parse a File object (CSV, XLSX, XLS, TSV, ODS) into sheets.
- * Returns all non-empty sheets.
- *
- * For backward compatibility, `.headers`, `.rows`, and `.sheetNames`
- * are aliased to the first sheet's data.
- *
- * @param {File} file
- * @returns {Promise<{ sheets: Array<{ sheetName, headers, rows }>, headers, rows, sheetNames }>}
- */
-export async function parseSpreadsheetFile(file) {
+// ═══════════ parseSpreadsheetFile ═══════════
+
+export async function parseSpreadsheetFile(file: File): Promise<SpreadsheetResult> {
     const xlsx = await loadXLSX();
 
     const data = await file.arrayBuffer();
     const workbook = xlsx.read(data, { type: 'array', cellDates: true });
 
-    const sheets = [];
+    const sheets: ParsedSheet[] = [];
     for (const name of workbook.SheetNames) {
         const parsed = parseSheet(xlsx, workbook.Sheets[name], name);
         if (parsed) sheets.push(parsed);
@@ -78,7 +138,6 @@ export async function parseSpreadsheetFile(file) {
         throw new Error('Spreadsheet must have at least a header row and one data row.');
     }
 
-    // Backward-compat aliases (first sheet)
     return {
         sheets,
         headers: sheets[0].headers,
@@ -89,11 +148,7 @@ export async function parseSpreadsheetFile(file) {
 
 // ─── AI-Powered Smart Column Detection ────────────────────────────────────────
 
-/**
- * Header name synonyms → Finance Funk field mapping
- * Weighted by specificity (more specific = checked first)
- */
-const FIELD_PATTERNS = {
+const FIELD_PATTERNS: Record<string, FieldPatternConfig> = {
     date: {
         headerPatterns: [
             /^date$/i, /transaction.?date/i, /trade.?date/i, /settlement/i,
@@ -103,7 +158,7 @@ const FIELD_PATTERNS = {
         ],
         fuzzyTokens: ['date', 'data', 'when', 'purchased', 'acquired'],
         dataValidator: (values) => {
-            const dateCount = values.filter((v: any) => isDateLike(v)).length;
+            const dateCount = values.filter((v) => isDateLike(v)).length;
             return dateCount / values.length;
         }
     },
@@ -116,7 +171,7 @@ const FIELD_PATTERNS = {
         ],
         fuzzyTokens: ['asset', 'name', 'stock', 'fund', 'holding', 'investment', 'company', 'product', 'ativo', 'papel'],
         dataValidator: (values) => {
-            const textCount = values.filter((v: any) => typeof v === 'string' && v.length > 1 && !/^\d+([.,]\d+)?$/.test(v)).length;
+            const textCount = values.filter((v) => typeof v === 'string' && v.length > 1 && !/^\d+([.,]\d+)?$/.test(v)).length;
             return textCount / values.length;
         }
     },
@@ -127,7 +182,7 @@ const FIELD_PATTERNS = {
         ],
         fuzzyTokens: ['ticker', 'symbol', 'isin', 'sedol', 'cusip', 'code'],
         dataValidator: (values) => {
-            const tickerCount = values.filter((v: any) => /^[A-Z0-9]{1,8}(\.[A-Z]{1,3})?$/i.test(String(v).trim())).length;
+            const tickerCount = values.filter((v) => /^[A-Z0-9]{1,8}(\.[A-Z]{1,3})?$/i.test(String(v).trim())).length;
             return tickerCount / values.length;
         }
     },
@@ -138,7 +193,7 @@ const FIELD_PATTERNS = {
         ],
         fuzzyTokens: ['quantity', 'qty', 'shares', 'units', 'qtd', 'volume'],
         dataValidator: (values) => {
-            const numCount = values.filter((v: any) => isNumericLike(v)).length;
+            const numCount = values.filter((v) => isNumericLike(v)).length;
             return numCount / values.length * 0.8;
         }
     },
@@ -148,7 +203,7 @@ const FIELD_PATTERNS = {
             /price.?per/i, /cost.?basis/i
         ],
         dataValidator: (values) => {
-            const numCount = values.filter((v: any) => isNumericLike(v)).length;
+            const numCount = values.filter((v) => isNumericLike(v)).length;
             return numCount / values.length * 0.7;
         }
     },
@@ -160,8 +215,8 @@ const FIELD_PATTERNS = {
         ],
         fuzzyTokens: ['amount', 'total', 'value', 'cost', 'invested', 'balance', 'valor', 'sum'],
         dataValidator: (values) => {
-            const numCount = values.filter((v: any) => isNumericLike(v)).length;
-            const hasCurrencySigns = values.some((v: any) => /[$£€R\$¥]/.test(String(v)));
+            const numCount = values.filter((v) => isNumericLike(v)).length;
+            const hasCurrencySigns = values.some((v) => /[$£€R\$¥]/.test(String(v)));
             return (numCount / values.length * 0.75) + (hasCurrencySigns ? 0.15 : 0);
         }
     },
@@ -170,7 +225,7 @@ const FIELD_PATTERNS = {
             /^(currency|ccy|curr|moeda|divisa)$/i
         ],
         dataValidator: (values) => {
-            const ccyCount = values.filter((v: any) => /^[A-Z]{3}$/.test(String(v).trim())).length;
+            const ccyCount = values.filter((v) => /^[A-Z]{3}$/.test(String(v).trim())).length;
             return ccyCount / values.length;
         }
     },
@@ -179,7 +234,7 @@ const FIELD_PATTERNS = {
             /^(broker|platform|exchange|account|provider|corretora|conta)$/i
         ],
         dataValidator: (values) => {
-            const textCount = values.filter((v: any) => typeof v === 'string' && v.length > 1).length;
+            const textCount = values.filter((v) => typeof v === 'string' && v.length > 1).length;
             return textCount / values.length * 0.5;
         }
     },
@@ -191,7 +246,7 @@ const FIELD_PATTERNS = {
         fuzzyTokens: ['type', 'side', 'action', 'operation', 'direction', 'tipo'],
         dataValidator: (values) => {
             const typeWords = /^(buy|sell|purchase|sale|deposit|withdrawal|investment|divestment|compra|venda)$/i;
-            const matchCount = values.filter((v: any) => typeWords.test(String(v).trim())).length;
+            const matchCount = values.filter((v) => typeWords.test(String(v).trim())).length;
             return matchCount / values.length;
         }
     },
@@ -201,8 +256,8 @@ const FIELD_PATTERNS = {
             /profit.?loss/i, /realized.?p/i
         ],
         dataValidator: (values) => {
-            const numCount = values.filter((v: any) => isNumericLike(v)).length;
-            const hasNegatives = values.some((v: any) => parseNumeric(v) < 0);
+            const numCount = values.filter((v) => isNumericLike(v)).length;
+            const hasNegatives = values.some((v) => parseNumeric(v) < 0);
             return (numCount / values.length * 0.5) + (hasNegatives ? 0.2 : 0);
         }
     },
@@ -210,14 +265,14 @@ const FIELD_PATTERNS = {
         headerPatterns: [
             /^(notes?|memo|comment|description|obs|observação|observacao)$/i
         ],
-        dataValidator: () => 0.3 // Low confidence from data alone
+        dataValidator: () => 0.3
     },
     lender: {
         headerPatterns: [
             /^(lender|creditor|bank|institution|credor)$/i
         ],
         dataValidator: (values) => {
-            const textCount = values.filter((v: any) => typeof v === 'string' && v.length > 1).length;
+            const textCount = values.filter((v) => typeof v === 'string' && v.length > 1).length;
             return textCount / values.length * 0.4;
         }
     },
@@ -227,47 +282,51 @@ const FIELD_PATTERNS = {
         ],
         dataValidator: (values) => {
             const knownClasses = /^(equity|stocks?|crypto|fixed.?income|pension|real.?estate|debt|renda.?fixa|ações|cripto)$/i;
-            const matchCount = values.filter((v: any) => knownClasses.test(String(v).trim())).length;
+            const matchCount = values.filter((v) => knownClasses.test(String(v).trim())).length;
             return matchCount / values.length;
         }
     }
 };
 
-/**
- * AI Column Mapper — combines header fuzzy matching with data content analysis
- * @param {string[]} headers - Column headers from the spreadsheet
- * @param {object[]} sampleRows - First ~20 rows of data for analysis
- * @param {string} targetAssetClass - The asset class being imported
- * @returns {object} Mapping of { headerName: ffField }
- */
-export function smartMapColumns(headers, sampleRows, targetAssetClass) {
-    const mapping = {};
-    const usedFields = new Set();
+// ═══════════ smartMapColumns ═══════════
 
-    // Score each header against each field
-    const scores = [];
+interface ColumnScore {
+    header: string;
+    field: string;
+    score: number;
+}
+
+export function smartMapColumns(
+    headers: string[],
+    sampleRows: Record<string, unknown>[],
+    targetAssetClass: string
+): ColumnMapping {
+    const mapping: ColumnMapping = {};
+    const usedFields = new Set<string>();
+
+    const scores: ColumnScore[] = [];
 
     for (const header of headers) {
         if (!header) continue;
-        const columnValues = sampleRows.map((row: any) => row[header]).filter((v: any) => v !== '' && v !== null && v !== undefined);
+        const columnValues = sampleRows.map((row) => row[header]).filter((v) => v !== '' && v !== null && v !== undefined);
 
-        for (const [field, config] of Object.entries(FIELD_PATTERNS as Record<string, any>)) {
+        for (const [field, config] of Object.entries(FIELD_PATTERNS)) {
             let score = 0;
 
             // 1. Header name matching (50% weight)
-            const headerScore = config.headerPatterns.reduce((best: number, pattern: any) => {
+            const headerScore = config.headerPatterns.reduce((best: number, pattern) => {
                 return pattern.test(header) ? Math.max(best, 1) : best;
             }, 0);
             score += headerScore * 0.5;
 
-            // 2. Fuzzy token matching (15% weight) — catches "Transaction Date", "My Shares", etc.
+            // 2. Fuzzy token matching (15% weight)
             if (!headerScore && config.fuzzyTokens) {
                 const normalizedHeader = header.toLowerCase().replace(/[^a-z0-9]/g, ' ');
-                const tokenMatch = config.fuzzyTokens.some((token: any) => normalizedHeader.includes(token));
+                const tokenMatch = config.fuzzyTokens.some((token) => normalizedHeader.includes(token));
                 if (tokenMatch) score += 0.15;
             }
 
-            // 3. Data content analysis (35% weight) — the "AI" part
+            // 3. Data content analysis (35% weight)
             if (columnValues.length > 0 && config.dataValidator) {
                 const dataScore = config.dataValidator(columnValues);
                 score += dataScore * 0.35;
@@ -284,11 +343,11 @@ export function smartMapColumns(headers, sampleRows, targetAssetClass) {
     }
 
     // Sort by score descending, then greedily assign
-    scores.sort((a: any, b: any) => b.score - a.score);
+    scores.sort((a, b) => b.score - a.score);
 
     for (const { header, field } of scores) {
         if (mapping[header] || usedFields.has(field)) continue;
-        mapping[header] = field;
+        mapping[header] = field as FieldName;
         usedFields.add(field);
     }
 
@@ -304,21 +363,22 @@ export function smartMapColumns(headers, sampleRows, targetAssetClass) {
 
 // ─── Date Parsing ─────────────────────────────────────────────────────────────
 
-const DATE_FORMATS = [
-    { regex: /^(\d{4})-(\d{1,2})-(\d{1,2})$/, parse: (m) => `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}` }, // YYYY-MM-DD
-    { regex: /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, parse: (m) => `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}` }, // DD/MM/YYYY
-    { regex: /^(\d{1,2})\/(\d{1,2})\/(\d{2})$/, parse: (m) => `20${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}` }, // DD/MM/YY
-    { regex: /^(\d{1,2})-(\w{3})-(\d{4})$/, parse: (m) => { const months = { jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06', jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12' }; return `${m[3]}-${months[m[2].toLowerCase()] || '01'}-${m[1].padStart(2, '0')}`; } },
-    { regex: /^(\d{1,2})-(\w{3})-(\d{2})$/, parse: (m) => { const months = { jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06', jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12' }; return `20${m[3]}-${months[m[2].toLowerCase()] || '01'}-${m[1].padStart(2, '0')}`; } },
+interface DateFormat {
+    regex: RegExp;
+    parse: (m: RegExpMatchArray) => string;
+}
+
+const DATE_FORMATS: DateFormat[] = [
+    { regex: /^(\d{4})-(\d{1,2})-(\d{1,2})$/, parse: (m) => `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}` },
+    { regex: /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, parse: (m) => `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}` },
+    { regex: /^(\d{1,2})\/(\d{1,2})\/(\d{2})$/, parse: (m) => `20${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}` },
+    { regex: /^(\d{1,2})-(\w{3})-(\d{4})$/, parse: (m) => { const months: Record<string, string> = { jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06', jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12' }; return `${m[3]}-${months[m[2].toLowerCase()] || '01'}-${m[1].padStart(2, '0')}`; } },
+    { regex: /^(\d{1,2})-(\w{3})-(\d{2})$/, parse: (m) => { const months: Record<string, string> = { jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06', jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12' }; return `20${m[3]}-${months[m[2].toLowerCase()] || '01'}-${m[1].padStart(2, '0')}`; } },
 ];
 
-/**
- * Normalize a date value to YYYY-MM-DD format
- */
-export function normalizeDate(value) {
+export function normalizeDate(value: unknown): string | null {
     if (!value) return null;
 
-    // Already a Date object (from SheetJS cellDates)
     if (value instanceof Date) {
         if (isNaN(value.getTime())) return null;
         return value.toISOString().split('T')[0];
@@ -326,7 +386,6 @@ export function normalizeDate(value) {
 
     const str = String(value).trim();
 
-    // ISO 8601 with time
     if (/^\d{4}-\d{2}-\d{2}T/.test(str)) {
         return str.split('T')[0];
     }
@@ -336,7 +395,6 @@ export function normalizeDate(value) {
         if (match) return fmt.parse(match);
     }
 
-    // Fallback: try native Date parsing
     const d = new Date(str);
     if (!isNaN(d.getTime())) {
         return d.toISOString().split('T')[0];
@@ -347,19 +405,19 @@ export function normalizeDate(value) {
 
 // ─── Numeric Helpers ──────────────────────────────────────────────────────────
 
-function isDateLike(value) {
+function isDateLike(value: unknown): boolean {
     if (value instanceof Date) return true;
     const s = String(value).trim();
     return /\d{4}[-\/]\d{1,2}[-\/]\d{1,2}/.test(s) || /\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}/.test(s) || /\d{1,2}-\w{3}-\d{2,4}/.test(s);
 }
 
-function isNumericLike(value) {
+function isNumericLike(value: unknown): boolean {
     if (typeof value === 'number') return true;
     const s = String(value).trim().replace(/[$£€R\$¥,\s]/g, '');
     return /^-?\d+([.,]\d+)?$/.test(s);
 }
 
-export function parseNumeric(value) {
+export function parseNumeric(value: unknown): number {
     if (typeof value === 'number') return value;
     if (value === null || value === undefined || value === '') return 0;
     const s = String(value).trim().replace(/[$£€R\$¥\s]/g, '');
@@ -371,31 +429,39 @@ export function parseNumeric(value) {
     return parseFloat(s.replace(/,/g, '')) || 0;
 }
 
-/**
- * Transform mapped rows into Finance Funk transaction format
- * @param {object[]} rows - Raw data rows
- * @param {object} mapping - Column mapping { header: ffField }
- * @param {string} assetClass - Target asset class
- * @param {string} defaultCurrency - Default currency
- * @param {string} defaultBroker - Default broker
- * @returns {object[]} Transformed transactions ready for API
- */
-export function transformRows(rows, mapping, assetClass, defaultCurrency, defaultBroker) {
-    const fieldToHeader = {};
-    for (const [header, field] of Object.entries(mapping as Record<string, any>)) {
+// ═══════════ transformRows ═══════════
+
+const ASSET_CLASS_ALIASES: Record<string, string> = {
+    'equity': 'Equity', 'stocks': 'Equity', 'stock': 'Equity', 'ações': 'Equity',
+    'crypto': 'Crypto', 'cripto': 'Crypto', 'cryptocurrency': 'Crypto',
+    'fixed income': 'Fixed Income', 'fixed-income': 'Fixed Income', 'renda fixa': 'Fixed Income', 'bonds': 'Fixed Income',
+    'pension': 'Pension', 'pensions': 'Pension', 'retirement': 'Pension',
+    'real estate': 'Real Estate', 'property': 'Real Estate', 'imóveis': 'Real Estate',
+    'debt': 'Debt', 'loan': 'Debt', 'dívida': 'Debt',
+};
+
+export function transformRows(
+    rows: Record<string, unknown>[],
+    mapping: ColumnMapping,
+    assetClass: string,
+    defaultCurrency: string,
+    defaultBroker: string
+): TransformedTransaction[] {
+    const fieldToHeader: Record<string, string> = {};
+    for (const [header, field] of Object.entries(mapping)) {
         if (field !== 'ignore') {
             fieldToHeader[field] = header;
         }
     }
 
-    const getVal = (row, field) => {
+    const getVal = (row: Record<string, unknown>, field: string): unknown => {
         const header = fieldToHeader[field];
         return header ? row[header] : undefined;
     };
 
-    return rows.map((row, idx) => {
+    return rows.map((row, idx): TransformedTransaction | null => {
         const date = normalizeDate(getVal(row, 'date'));
-        if (!date) return null; // Skip rows without valid date
+        if (!date) return null;
 
         const rawAmount = parseNumeric(getVal(row, 'amount'));
         const rawQuantity = parseNumeric(getVal(row, 'quantity'));
@@ -406,8 +472,7 @@ export function transformRows(rows, mapping, assetClass, defaultCurrency, defaul
         const pnl = parseNumeric(getVal(row, 'pnl')) || null;
         const notes = getVal(row, 'notes') || '';
 
-        // Infer type from amount/quantity sign if not explicitly provided
-        let type;
+        let type: 'Buy' | 'Sell';
         if (/^(sell|sale|venda|divestment|withdrawal)$/i.test(typeRaw)) {
             type = 'Sell';
         } else if (/^(buy|purchase|compra|investment|deposit)$/i.test(typeRaw)) {
@@ -420,19 +485,10 @@ export function transformRows(rows, mapping, assetClass, defaultCurrency, defaul
         const quantity = Math.abs(rawQuantity);
         const price = rawPrice || (quantity ? amount / quantity : 0);
 
-        // Per-row assetClass from mapped column, falling back to sheet default
         const rowAssetClassRaw = String(getVal(row, 'assetClass') || '').trim();
-        const ASSET_CLASS_ALIASES = {
-            'equity': 'Equity', 'stocks': 'Equity', 'stock': 'Equity', 'ações': 'Equity',
-            'crypto': 'Crypto', 'cripto': 'Crypto', 'cryptocurrency': 'Crypto',
-            'fixed income': 'Fixed Income', 'fixed-income': 'Fixed Income', 'renda fixa': 'Fixed Income', 'bonds': 'Fixed Income',
-            'pension': 'Pension', 'pensions': 'Pension', 'retirement': 'Pension',
-            'real estate': 'Real Estate', 'property': 'Real Estate', 'imóveis': 'Real Estate',
-            'debt': 'Debt', 'loan': 'Debt', 'dívida': 'Debt',
-        };
         const effectiveClass = ASSET_CLASS_ALIASES[rowAssetClassRaw.toLowerCase()] || (rowAssetClassRaw || assetClass);
 
-        const tx = {
+        const tx: TransformedTransaction = {
             _rowIndex: idx,
             date,
             type,
@@ -445,31 +501,30 @@ export function transformRows(rows, mapping, assetClass, defaultCurrency, defaul
 
         // Asset class specific fields
         if (effectiveClass === 'Equity' || effectiveClass === 'Crypto') {
-            tx.asset = getVal(row, 'asset') || getVal(row, 'ticker') || 'Unknown';
-            tx.ticker = getVal(row, 'ticker') || '';
+            tx.asset = String(getVal(row, 'asset') || getVal(row, 'ticker') || 'Unknown');
+            tx.ticker = String(getVal(row, 'ticker') || '');
             tx.quantity = quantity;
             tx.price = price;
             if (pnl) tx.pnl = pnl;
         } else if (effectiveClass === 'Fixed Income') {
-            tx.asset = getVal(row, 'asset') || 'Fixed Income';
+            tx.asset = String(getVal(row, 'asset') || 'Fixed Income');
         } else if (effectiveClass === 'Pension') {
-            tx.asset = getVal(row, 'asset') || 'Pension Fund';
+            tx.asset = String(getVal(row, 'asset') || 'Pension Fund');
             tx.quantity = quantity;
             tx.price = price;
         } else if (effectiveClass === 'Real Estate') {
-            tx.asset = getVal(row, 'asset') || 'Property';
+            tx.asset = String(getVal(row, 'asset') || 'Property');
         } else if (effectiveClass === 'Debt') {
-            tx.asset = getVal(row, 'lender') || getVal(row, 'asset') || 'Unknown Lender';
+            tx.asset = String(getVal(row, 'lender') || getVal(row, 'asset') || 'Unknown Lender');
         }
 
         return tx;
-    }).filter(Boolean);
+    }).filter((tx): tx is TransformedTransaction => tx !== null);
 }
 
-/**
- * Get the Finance Funk fields relevant for a given asset class
- */
-export function getFieldsForAssetClass(assetClass) {
+// ═══════════ getFieldsForAssetClass ═══════════
+
+export function getFieldsForAssetClass(assetClass: string): string[] {
     const common = ['date', 'amount', 'currency', 'broker', 'type', 'notes'];
     switch (assetClass) {
         case 'Equity': return ['date', 'asset', 'ticker', 'quantity', 'price', 'amount', 'currency', 'broker', 'type', 'pnl', 'notes'];
@@ -483,8 +538,9 @@ export function getFieldsForAssetClass(assetClass) {
     }
 }
 
-/** Human-friendly label for each field */
-export const FIELD_LABELS = {
+// ═══════════ Field Labels ═══════════
+
+export const FIELD_LABELS: Record<string, string> = {
     date: 'Date',
     asset: 'Asset Name',
     ticker: 'Ticker Symbol',

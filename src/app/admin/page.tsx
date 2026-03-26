@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { getAllUsers, getUserById } from '@/lib/users';
+import { getAllUsersEngagementStats, computeEngagementTier } from '@/lib/engagement';
 import { Users, Shield } from 'lucide-react';
 import AdminUserTable from './AdminUserTable';
 import styles from './admin.module.css';
@@ -23,10 +24,19 @@ export default async function AdminPage() {
         redirect('/dashboard');
     }
 
-    const users = await getAllUsers();
+    const [users, engagementStats] = await Promise.all([
+        getAllUsers(),
+        getAllUsersEngagementStats()
+    ]);
+
     const totalUsers = users.length;
     const adminCount = users.filter(u => u.is_admin).length;
     const isSuperAdmin = dbUser.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase();
+
+    const activeUsersCount = users.filter(u => {
+        const stats = engagementStats[u.id];
+        return computeEngagementTier(stats?.recent_tx_count || 0, u.last_accessed_at) === 'active';
+    }).length;
 
     return (
         <div className={styles.adminContainer}>
@@ -43,17 +53,18 @@ export default async function AdminPage() {
                     <div className={styles.statValue}>{totalUsers}</div>
                 </div>
                 <div className={styles.statCard}>
-                    <div className={styles.statLabel}>Admins</div>
-                    <div className={styles.statValue}>{adminCount}</div>
+                    <div className={styles.statLabel}>Active (7d)</div>
+                    <div className={styles.statValue}>{activeUsersCount}</div>
                 </div>
                 <div className={styles.statCard}>
-                    <div className={styles.statLabel}>Regular Users</div>
-                    <div className={styles.statValue}>{totalUsers - adminCount}</div>
+                    <div className={styles.statLabel}>Admins</div>
+                    <div className={styles.statValue}>{adminCount}</div>
                 </div>
             </div>
 
             <AdminUserTable
                 users={JSON.parse(JSON.stringify(users))}
+                engagementStats={engagementStats}
                 currentUserId={String(session.user.id)}
                 isSuperAdmin={isSuperAdmin}
             />

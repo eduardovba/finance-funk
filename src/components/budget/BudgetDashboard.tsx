@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import useBudgetStore from '@/stores/useBudgetStore';
 import { usePortfolio } from '@/context/PortfolioContext';
 import { getJargon, type ExperienceLevel } from '@/lib/personalization';
-import MetricCard from '@/components/MetricCard';
+import BudgetMetricCard from '@/components/budget/BudgetMetricCard';
 import MonthNavigator from '@/components/budget/MonthNavigator';
 import SavingsRateBar from '@/components/budget/SavingsRateBar';
 import SpendingDonut from '@/components/budget/SpendingDonut';
@@ -68,6 +68,14 @@ export default function BudgetDashboard() {
         return rollupHistory.find(r => r.month === prevKey) ?? null;
     }, [currentMonth, rollupHistory]);
 
+    // Two-months-ago rollup for income MoM (since Income card shows last month's income)
+    const twoMonthsAgoRollup = useMemo(() => {
+        const [y, m] = currentMonth.split('-').map(Number);
+        const d = new Date(y, m - 3, 1);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        return rollupHistory.find(r => r.month === key) ?? null;
+    }, [currentMonth, rollupHistory]);
+
     // ─── Zero-Based Budgeting Math ──────────────────────────────
     const prevIncome = prevRollup?.total_income_cents ?? 0;
     const currIncome = currentRollup?.total_income_cents ?? 0;
@@ -88,10 +96,14 @@ export default function BudgetDashboard() {
         return { pct: Math.round(pct * 10) / 10, diff: (current - previous) / 100 };
     };
 
-    const incomeDelta = calcDelta(fundingIncome, prevRollup?.total_income_cents ?? 0);
+    const incomeDelta = calcDelta(fundingIncome, twoMonthsAgoRollup?.total_income_cents ?? 0);
     const expensesDelta = calcDelta(totalExpensesCents, prevRollup?.total_expenses_cents ?? 0);
     const prevSurplus = totalBudgetedTargets - (prevRollup?.total_expenses_cents ?? 0);
     const surplusDelta = calcDelta(surplusCents, prevSurplus);
+
+    const salarySurplusCents = fundingIncome - totalExpensesCents;
+    const prevSalarySurplus = (prevRollup?.total_income_cents ?? 0) - (prevRollup?.total_expenses_cents ?? 0);
+    const salarySurplusDelta = calcDelta(salarySurplusCents, prevSalarySurplus);
 
     const handleMonthChange = (month: string) => {
         setCurrentMonth(month);
@@ -105,66 +117,63 @@ export default function BudgetDashboard() {
                 onMonthChange={handleMonthChange}
             />
 
-            {/* Hero Metric Pods (with MoM deltas) */}
+            {/* Hero Metric Pods */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                <MetricCard
+                <BudgetMetricCard
                     id="budget-income"
-                    title="Available to Budget"
+                    title="Income"
                     badge={isFundedByLastMonth ? "Funded by Last Month" : "Funded by Current Month"}
                     amount={fx(fundingIncome) / 100}
                     percentage={incomeDelta.pct}
                     diffAmount={incomeDelta.diff}
                     currency={displayCurrency}
-                    primaryCurrency={displayCurrency}
-                    secondaryCurrency={displayCurrency}
-                    rates={{ [displayCurrency]: 1 }}
                     isLoading={loading}
-                    onNavigate={undefined}
                     className="!shadow-[0_8px_32px_rgba(52,211,153,0.08)]"
                 />
-                <MetricCard
+                <BudgetMetricCard
                     id="budget-total"
                     title="Budgeted"
                     amount={fx(totalBudgetedTargets) / 100}
-                    percentage={0}
-                    diffAmount={0}
                     currency={displayCurrency}
-                    primaryCurrency={displayCurrency}
-                    secondaryCurrency={displayCurrency}
-                    rates={{ [displayCurrency]: 1 }}
                     isLoading={loading}
-                    onNavigate={undefined}
                     className="!shadow-[0_8px_32px_rgba(212,175,55,0.08)]"
                 />
-                <MetricCard
+                <BudgetMetricCard
                     id="budget-spent"
                     title={getJargon('expenses', experience)}
                     amount={fx(currentRollup?.total_expenses_cents ?? 0) / 100}
                     percentage={expensesDelta.pct}
                     diffAmount={expensesDelta.diff}
                     currency={displayCurrency}
-                    primaryCurrency={displayCurrency}
-                    secondaryCurrency={displayCurrency}
-                    rates={{ [displayCurrency]: 1 }}
                     isLoading={loading}
                     invertColor={true}
-                    onNavigate={undefined}
                 />
-                <MetricCard
-                    id="budget-surplus"
-                    title="Surplus"
-                    amount={fx(surplusCents) / 100}
-                    percentage={surplusDelta.pct}
-                    diffAmount={surplusDelta.diff}
-                    currency={displayCurrency}
-                    primaryCurrency={displayCurrency}
-                    secondaryCurrency={displayCurrency}
-                    rates={{ [displayCurrency]: 1 }}
-                    isLoading={loading}
-                    invertColor={true}
-                    onNavigate={undefined}
-                    className={surplusCents < 0 ? '!border-red-400/20' : ''}
-                />
+                {/* Stacked: Budget Remaining + Salary Surplus */}
+                <div className="flex flex-col gap-3">
+                    <BudgetMetricCard
+                        id="budget-remaining"
+                        title="Budget Remaining"
+                        amount={fx(surplusCents) / 100}
+                        percentage={surplusDelta.pct}
+                        diffAmount={surplusDelta.diff}
+                        currency={displayCurrency}
+                        isLoading={loading}
+
+                        compact={true}
+                        className={surplusCents < 0 ? '!border-red-400/20' : ''}
+                    />
+                    <BudgetMetricCard
+                        id="budget-salary-surplus"
+                        title="Salary Surplus"
+                        amount={fx(salarySurplusCents) / 100}
+                        percentage={salarySurplusDelta.pct}
+                        diffAmount={salarySurplusDelta.diff}
+                        currency={displayCurrency}
+                        isLoading={loading}
+                        compact={true}
+                        className={salarySurplusCents < 0 ? '!border-red-400/20' : ''}
+                    />
+                </div>
             </div>
 
             {/* Burn Rate Card */}

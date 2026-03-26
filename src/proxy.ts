@@ -1,7 +1,8 @@
-import { auth } from "@/auth";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-export default async function proxy(request) {
+export default async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Public routes that don't require authentication
@@ -26,7 +27,7 @@ export default async function proxy(request) {
 
             const redis = new Redis({
                 url: process.env.UPSTASH_REDIS_REST_URL,
-                token: process.env.UPSTASH_REDIS_REST_TOKEN,
+                token: process.env.UPSTASH_REDIS_REST_TOKEN!,
             });
 
             // Determine tier based on path
@@ -75,10 +76,14 @@ export default async function proxy(request) {
         }
     }
 
-    // Check session
-    const session = await auth();
+    // Check session using Edge-compatible JWT token verification
+    // (avoids importing the full auth config which pulls in Node.js-only DB modules)
+    const token = await getToken({
+        req: request,
+        secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+    });
 
-    if (!session) {
+    if (!token) {
         // For API routes, return 401 JSON response
         if (pathname.startsWith("/api/")) {
             return NextResponse.json(
@@ -93,9 +98,7 @@ export default async function proxy(request) {
         return NextResponse.redirect(loginUrl);
     }
 
-    // Add rate limit headers to successful responses
-    const response = NextResponse.next();
-    return response;
+    return NextResponse.next();
 }
 
 export const config = {

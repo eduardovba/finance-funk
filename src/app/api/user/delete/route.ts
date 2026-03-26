@@ -1,18 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/authGuard';
 import { deleteUserAndData } from '@/lib/users';
+import { z } from 'zod';
+import { validateBody } from '@/lib/validation';
+
+const DeleteAccountSchema = z.object({
+    confirmation: z.literal('DELETE'),
+});
 
 export async function DELETE(request: NextRequest): Promise<NextResponse> {
     try {
         const sessionUser = await requireAuth();
 
         const body: unknown = await request.json();
-        if ((body as any).confirmation !== 'DELETE') {
-            return NextResponse.json(
-                { error: 'You must send { "confirmation": "DELETE" } to confirm account deletion' },
-                { status: 400 }
-            );
-        }
+        const { data, error } = validateBody(DeleteAccountSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
         await deleteUserAndData(sessionUser.id);
 

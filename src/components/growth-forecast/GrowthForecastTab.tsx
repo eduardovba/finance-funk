@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { formatCurrency } from '@/lib/currency';
-import { ChevronDown, ChevronUp, MapPin } from 'lucide-react';
+import { MapPin, Loader2 } from 'lucide-react';
 import _StatusModal from '../StatusModal';
 import _GrowthWaterfall from '../GrowthWaterfall';
 import _SmartInsights from '../SmartInsights';
@@ -24,6 +24,16 @@ const FORECAST_TUTORIAL_STEPS = [
 
 export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPortfolioValueGbp, liveContributionBrl, liveContributionGbp, budgetSurplusBrl }: GrowthForecastTabProps) {
     const h = useGrowthForecast({ currentPortfolioValueBrl, currentPortfolioValueGbp, liveContributionBrl, liveContributionGbp, budgetSurplusBrl });
+
+    // Show a loading state while forecast data is being computed
+    if (!h.settingsLoaded || h.forecastData.length === 0) {
+        return (
+            <div className="w-full mx-auto pb-12 flex flex-col items-center justify-center gap-4 min-h-[400px]">
+                <Loader2 size={32} className="text-[#D4AF37] animate-spin" />
+                <span className="font-space text-data-sm text-white/40 tracking-widest uppercase">Loading projections…</span>
+            </div>
+        );
+    }
 
     return (
         <>
@@ -97,77 +107,78 @@ export default function GrowthForecastTab({ currentPortfolioValueBrl, currentPor
             </div>
 
             {/* Collapsible Ledger */}
-            <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-0 overflow-hidden">
-                <div className="flex justify-between items-center px-5 py-4">
-                    <button
-                        onClick={() => h.setLedgerOpen(!h.ledgerOpen)}
-                        className="flex items-center gap-2 text-left hover:opacity-80 transition-opacity rounded-none bg-transparent p-0"
-                    >
-                        <span className="font-bebas text-lg tracking-widest text-[#D4AF37]">Planning Ledger</span>
-                        <span className="font-space  text-data-xs text-white/30">{h.forecastData.length} rows</span>
-                        {h.ledgerOpen ? <ChevronUp size={16} className="text-white/40" /> : <ChevronDown size={16} className="text-white/40" />}
-                    </button>
-                    {h.ledgerOpen && (
-                        <button
-                            onClick={() => document.getElementById('live-row')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-                            className="flex items-center gap-1.5 bg-[#34D399]/10 border border-[#34D399]/20 rounded-lg px-3 py-1.5 text-data-xs font-space  text-[#34D399] hover:bg-[#34D399]/20 transition-colors"
-                        >
-                            <MapPin size={10} /> Jump to Live
-                        </button>
-                    )}
-                </div>
-
-                {h.ledgerOpen && (
-                    <div className="border-t border-white/5 overflow-x-auto max-h-[500px] overflow-y-auto">
-                        <table className="w-full border-collapse text-xs">
-                            <thead className="sticky top-0 z-10 bg-[#121418] shadow-md">
-                                <tr>
-                                    <th className="p-3 text-left text-white/50 font-space tabular-nums font-normal">Date</th>
-                                    <th className="p-3 text-left text-white/50 font-space tabular-nums font-normal">Type</th>
-                                    <th className="p-3 text-right text-white/50 font-space tabular-nums font-normal">Contr.</th>
-                                    <th className="p-3 text-right text-white/50 font-space tabular-nums font-normal">Total</th>
-                                    <th className="p-3 text-right text-[#D4AF37]/60 font-space tabular-nums font-normal">Target</th>
-                                    <th className="p-3 text-right text-white/50 font-space tabular-nums font-normal">Diff</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {h.reversedData.map((row, i) => {
-                                    const total = row.actual || row.forecast || 0;
-                                    const diff = row.targetBrl ? (total - row.targetBrl) : 0;
-                                    const isLive = row.type === 'live';
-                                    const isTarget = row.date === 'Dec/2026' || row.date === 'Dec/2031';
-
-                                    return (
-                                        <tr key={i} id={isLive ? 'live-row' : undefined} className={`
-                                            border-b border-white/[0.03] h-12 transition-colors hover:bg-white/[0.02]
-                                            ${isLive ? 'bg-[#34D399]/5 border-[#34D399]/20' : ''}
-                                            ${isTarget ? 'bg-[#D4AF37]/5' : ''}
-                                        `}>
-                                            <td className={`px-3 font-space tabular-nums ${isTarget ? 'text-[#D4AF37] font-bold' : 'text-white/50'}`}>{row.date}</td>
-                                            <td className="px-3">
-                                                <span className={`px-2 py-0.5 rounded text-data-xs font-space  font-semibold uppercase border
-                                                    ${row.type === 'actual' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                                        isLive ? 'bg-[#34D399]/10 text-[#34D399] border-[#34D399]/20' :
-                                                            'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/20'}
-                                                `}>
-                                                    {row.type === 'actual' ? 'ACT' : isLive ? 'LIVE' : 'EST'}
-                                                </span>
-                                            </td>
-                                            <td className="px-3 text-right text-white/50">{formatCurrency(row.contribution, 'BRL').replace('R$', '')}</td>
-                                            <td className={`px-3 text-right font-medium ${diff >= 0 ? 'text-[#34D399]' : 'text-[#ef4444]'}`}>
-                                                {formatCurrency(total, 'BRL')}
-                                            </td>
-                                            <td className="px-3 text-right text-white/30 font-space tabular-nums">{row.targetBrl ? formatCurrency(row.targetBrl, 'BRL').replace('R$', '') : '—'}</td>
-                                            <td className={`px-3 text-right font-medium ${diff >= 0 ? 'text-[#34D399]' : 'text-[#ef4444]'}`}>
-                                                {row.targetBrl ? `${diff > 0 ? '+' : ''}${formatCurrency(diff, 'BRL').replace('R$', '')}` : '—'}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+            <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden">
+                <button
+                    onClick={() => h.setLedgerOpen(!h.ledgerOpen)}
+                    className="w-full flex items-center justify-between border-none cursor-pointer" style={{ padding: '16px 20px', background: 'transparent', borderBottom: h.ledgerOpen ? '1px solid rgba(255,255,255,0.06)' : 'none', transition: 'all 0.2s ease' }}
+                >
+                    <div className="flex items-center gap-2.5">
+                        <span className="text-sm">📊</span>
+                        <span className="text-[13px] font-semibold tracking-[0.3px]" style={{ color: 'rgba(245,245,220,0.7)' }}>Planning Ledger</span>
+                        <span className="text-[11px] font-normal" style={{ color: 'rgba(245,245,220,0.3)' }}>({h.forecastData.length} rows)</span>
                     </div>
-                )}
+                    <div className="flex items-center gap-3">
+                        {h.ledgerOpen && (
+                            <span
+                                onClick={(e) => { e.stopPropagation(); document.getElementById('live-row')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}
+                                className="flex items-center gap-1.5 bg-[#34D399]/10 border border-[#34D399]/20 rounded-lg px-3 py-1.5 text-data-xs font-space text-[#34D399] hover:bg-[#34D399]/20 transition-colors cursor-pointer"
+                            >
+                                <MapPin size={10} /> Jump to Live
+                            </span>
+                        )}
+                        <span className="text-xs inline-block" style={{ color: 'rgba(245,245,220,0.35)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', transform: h.ledgerOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
+                    </div>
+                </button>
+
+                <div style={{ maxHeight: h.ledgerOpen ? 'calc(100vh - 12rem)' : '0', overflow: h.ledgerOpen ? 'auto' : 'hidden', transition: 'max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                    <table className="w-full border-collapse text-[15px]">
+                        <thead className="sticky top-0 z-10" style={{ background: '#121418', backdropFilter: 'blur(10px)' }}>
+                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                                <th className="p-3 text-left text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: 'rgba(245,245,220,0.4)' }}>Date</th>
+                                <th className="p-3 text-left text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: 'rgba(245,245,220,0.4)' }}>Type</th>
+                                <th className="p-3 text-right text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: 'rgba(245,245,220,0.4)' }}>Contr.</th>
+                                <th className="p-3 text-right text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: 'rgba(245,245,220,0.4)' }}>Total</th>
+                                <th className="p-3 text-right text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: '#D4AF37' }}>Target</th>
+                                <th className="p-3 text-right text-[11px] uppercase tracking-[1px] font-semibold" style={{ color: 'rgba(245,245,220,0.4)' }}>Diff</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {h.reversedData.map((row, i) => {
+                                const total = row.actual || row.forecast || 0;
+                                const diff = row.targetBrl ? (total - row.targetBrl) : 0;
+                                const isLive = row.type === 'live';
+                                const isTarget = row.date === 'Dec/2026' || row.date === 'Dec/2031';
+
+                                return (
+                                    <tr key={i} id={isLive ? 'live-row' : undefined} className={`
+                                        border-b border-white/[0.03] h-12 transition-colors hover:bg-white/[0.02]
+                                        ${isLive ? 'bg-[#34D399]/5 border-[#34D399]/20' : ''}
+                                        ${isTarget ? 'bg-[#D4AF37]/5' : ''}
+                                    `}>
+                                        <td className={`px-3 font-space tabular-nums ${isTarget ? 'text-[#D4AF37] font-bold' : 'text-white/50'}`}>{row.date}</td>
+                                        <td className="px-3">
+                                            <span className={`px-2 py-0.5 rounded text-data-xs font-space font-semibold uppercase border
+                                                ${row.type === 'actual' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                                                    isLive ? 'bg-[#34D399]/10 text-[#34D399] border-[#34D399]/20' :
+                                                        'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/20'}
+                                            `}>
+                                                {row.type === 'actual' ? 'ACT' : isLive ? 'LIVE' : 'EST'}
+                                            </span>
+                                        </td>
+                                        <td className="px-3 text-right text-white/50">{formatCurrency(row.contribution, 'BRL').replace('R$', '')}</td>
+                                        <td className={`px-3 text-right font-medium ${diff >= 0 ? 'text-[#34D399]' : 'text-[#ef4444]'}`}>
+                                            {formatCurrency(total, 'BRL')}
+                                        </td>
+                                        <td className="px-3 text-right text-white/30 font-space tabular-nums">{row.targetBrl ? formatCurrency(row.targetBrl, 'BRL').replace('R$', '') : '—'}</td>
+                                        <td className={`px-3 text-right font-medium ${diff >= 0 ? 'text-[#34D399]' : 'text-[#ef4444]'}`}>
+                                            {row.targetBrl ? `${diff > 0 ? '+' : ''}${formatCurrency(diff, 'BRL').replace('R$', '')}` : '—'}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <StatusModal

@@ -1,8 +1,21 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// @ts-nocheck — To be properly typed in next sprint
 import pensionMap from '../data/pension_fund_map.json';
+import type {
+    CurrencyRates,
+    AssetClassesMap,
+    MarketDataMap,
+    PensionPricesMap,
+    AssetHolding,
+    IndividualHolding,
+    TotalRow,
+    CategorySummaryResult,
+    PensionFundMapEntry,
+    RealEstateData,
+    CurrencyCode,
+} from '@/types/portfolio.types';
 
-const parseDate = (d: any): any => {
+// ═══════════ Helpers ═══════════
+
+const parseDate = (d: string | number | Date | null | undefined): Date => {
     if (!d) return new Date(0);
     if (typeof d !== 'string') return new Date(d);
     if (d.includes('/')) {
@@ -12,7 +25,7 @@ const parseDate = (d: any): any => {
     return new Date(d);
 };
 
-const BROKER_CURRENCY = {
+const BROKER_CURRENCY: Record<string, CurrencyCode> = {
     'Trading 212': 'GBP', 'XP': 'BRL', 'Amazon': 'USD', 'GGF': 'USD', 'Green Gold Farms': 'USD', 'Monzo': 'GBP', 'Fidelity': 'GBP',
     'Hargreaves Lansdown': 'GBP', 'Legal & General': 'GBP', 'OAB': 'GBP'
 };
@@ -33,25 +46,150 @@ const normalizeName = (name: string | null | undefined): string => {
     return name;
 };
 
-export const getFixedIncomeSummary = (transactions, rates, endDate = null, assetClasses = {}) => {
-    const accountMap = {};
+// ═══════════ Internal Types ═══════════
 
-    transactions.forEach((tr: any) => {
+interface FixedIncomeAccount {
+    name: string;
+    gbp: number;
+    brl: number;
+    investmentGBP: number;
+    investmentBRL: number;
+    grossInvGBP: number;
+    nativeCurrency: string;
+    syncValue: number | null;
+    interestTotal: number;
+}
+
+interface FixedIncomeTx {
+    id?: string | number;
+    date: string;
+    currency?: string;
+    investment?: number;
+    interest?: number;
+    broker?: string;
+    account?: string;
+    asset?: string;
+    notes?: string;
+    type?: string;
+}
+
+interface EquityTx {
+    id?: string | number;
+    date: string;
+    asset: string;
+    ticker?: string;
+    broker: string;
+    currency?: string;
+    quantity?: number;
+    investment: number;
+    type?: string;
+    pnl?: number;
+    isSalaryContribution?: boolean;
+}
+
+interface CryptoTx {
+    id?: string | number;
+    date: string;
+    ticker: string;
+    asset?: string;
+    currency?: string;
+    quantity?: number;
+    investment: number;
+    type?: string;
+}
+
+interface PensionTx {
+    id?: string | number;
+    date: string;
+    asset: string;
+    broker: string;
+    allocationClass?: string;
+    quantity?: number | string;
+    price?: number | string;
+    value?: number | string;
+    type?: string;
+}
+
+interface DebtTx {
+    id?: string | number;
+    date: string;
+    lender?: string;
+    value_brl?: number;
+    obs?: string;
+}
+
+interface RealEstatePropertyInput {
+    id?: string;
+    name: string;
+    status?: string;
+    investment?: number;
+    currentValue?: number;
+    taxes?: number;
+    salePrice?: number;
+    currency?: string;
+    airbnbData?: { monthlyData?: Record<string, { costs?: number; revenue?: number }> };
+    [key: string]: unknown;
+}
+
+interface EquityHoldingInternal {
+    asset: string;
+    qty: number;
+    totalCost: number;
+    broker: string;
+    currency: string;
+    ticker: string | null;
+}
+
+interface BrokerAccum {
+    cvGBP: number;
+    ppGBP: number;
+    lockedGBP?: number;
+}
+
+interface CryptoHolding {
+    ticker: string;
+    qty: number;
+    netInvestment: number;
+    name: string;
+}
+
+interface PensionHoldingInternal {
+    asset: string;
+    qty: number;
+    totalCost: number;
+    broker: string;
+}
+
+interface PensionMasterHolding {
+    asset: string;
+    qty: number;
+    broker: string;
+    allocationClass?: string;
+}
+
+// ═══════════ Currency Conversion Helpers ═══════════
+
+const toGBPSimple = (val: number, cur: string, rates: CurrencyRates): number => {
+    if (cur === 'GBP') return val;
+    if (cur === 'BRL') return val / rates.BRL;
+    if (cur === 'USD') return val / rates.USD;
+    return val;
+};
+
+// ═══════════ getFixedIncomeSummary ═══════════
+
+export const getFixedIncomeSummary = (
+    transactions: FixedIncomeTx[],
+    rates: CurrencyRates,
+    endDate: string | null = null,
+    assetClasses: AssetClassesMap = {}
+): CategorySummaryResult => {
+    const accountMap: Record<string, FixedIncomeAccount> = {};
+
+    transactions.forEach((tr) => {
         if (endDate && parseDate(tr.date) > parseDate(endDate)) return;
-        // API (fixed-income): investment is Principal (+ for Deposit). interest is Interest (+).
-        // Logic:
-        // Value = Principal + Interest.
-        // If Currency = GBP -> Value. Else -> Value / BRL.
 
-        // API returns currency.
-        const cur = tr.currency || 'BRL'; // Default BRL if missing?
-        const rate = cur === 'GBP' ? 1 : (cur === 'USD' ? rates.USD : rates.BRL); // Simplified rate lookup
-
-        // Convert to GBP logic
-        // If BRL: Amount / Rate.
-        // If USD: Amount / Rate (if Rate is USD/GBP? No, rates.USD is USD/GBP usually => 1.28. So GBP = USD / 1.28)
-        // Wait, standard rates obj: { GBP: 1, BRL: 7.10, USD: 1.28 } (1 GBP = 7.10 BRL).
-        // So BRL -> GBP is Amount / 7.10. Correct.
+        const cur = tr.currency || 'BRL';
 
         const toGBP = (val: number): number => cur === 'GBP' ? val : val / (cur === 'BRL' ? rates.BRL : rates.USD);
 
@@ -72,7 +210,6 @@ export const getFixedIncomeSummary = (transactions, rates, endDate = null, asset
         } else if (tr.type === 'Interest') {
             accountMap[name].interestTotal += (investment + interest);
         } else {
-            // For manual transactions (not sync and not pure interest updates)
             if (accountMap[name].syncValue === null) {
                 accountMap[name].investmentGBP += invGbp;
                 accountMap[name].investmentBRL += invGbp * rates.BRL;
@@ -82,22 +219,19 @@ export const getFixedIncomeSummary = (transactions, rates, endDate = null, asset
             }
         }
 
-        // Always add to base values for manual accounts or temporarily until Pass 2
         accountMap[name].gbp += gbpVal;
         accountMap[name].brl += gbpVal * rates.BRL;
     });
 
     // Pass 2 logic: override synced totals
-    Object.values(accountMap).forEach((acc: any) => {
+    Object.values(accountMap).forEach((acc) => {
         if (acc.syncValue !== null) {
-            // If synced, the true current value = syncValue + manual interest
             const finalLocalVal = acc.syncValue + acc.interestTotal;
             const toGBP = (val: number): number => acc.nativeCurrency === 'GBP' ? val : val / (acc.nativeCurrency === 'BRL' ? rates.BRL : rates.USD);
 
             acc.gbp = toGBP(finalLocalVal);
             acc.brl = acc.nativeCurrency === 'BRL' ? finalLocalVal : acc.gbp * rates.BRL;
 
-            // Reconstruct investment by stripping the interest from the syncValue
             const invLocal = acc.syncValue;
             acc.investmentGBP = toGBP(invLocal);
             acc.investmentBRL = acc.nativeCurrency === 'BRL' ? invLocal : acc.investmentGBP * rates.BRL;
@@ -105,11 +239,10 @@ export const getFixedIncomeSummary = (transactions, rates, endDate = null, asset
         }
     });
 
-    let assetList = Object.values(accountMap);
+    const assetList = Object.values(accountMap);
 
-
-    const assets = assetList
-        .map((acc: any) => {
+    const assets: AssetHolding[] = assetList
+        .map((acc) => {
             const roi = acc.investmentGBP !== 0 ? ((acc.gbp - acc.investmentGBP) / Math.abs(acc.investmentGBP)) * 100 : 0;
             const roiBRL = Math.abs(acc.investmentBRL) > 0.1 ? ((acc.brl - acc.investmentBRL) / Math.abs(acc.investmentBRL)) * 100 : 0;
             const interestBRL = acc.brl - acc.investmentBRL;
@@ -131,15 +264,15 @@ export const getFixedIncomeSummary = (transactions, rates, endDate = null, asset
             };
         })
         .filter(asset => asset.brl >= 10)
-        .sort((a: any, b: any) => b.brl - a.brl);
+        .sort((a, b) => b.brl - a.brl);
 
-    const totalGbp = assets.reduce((sum: number, a: any) => sum + a.gbp, 0);
-    const totalBrl = assets.reduce((sum: number, a: any) => sum + a.brl, 0);
-    const totalInv = assets.reduce((sum: number, a: any) => sum + a.investmentGBP, 0);
-    const totalGrossInv = assets.reduce((sum: number, a: any) => sum + a.grossInvGBP, 0);
+    const totalGbp = assets.reduce((sum, a) => sum + a.gbp, 0);
+    const totalBrl = assets.reduce((sum, a) => sum + a.brl, 0);
+    const totalInv = assets.reduce((sum, a) => sum + (a.investmentGBP || 0), 0);
+    const totalGrossInv = assets.reduce((sum, a) => sum + (a.grossInvGBP || 0), 0);
     const totalRoi = totalInv !== 0 ? ((totalGbp - totalInv) / Math.abs(totalInv)) * 100 : 0;
 
-    const individualHoldings = assets.map((a: any) => ({
+    const individualHoldings: IndividualHolding[] = assets.map((a) => ({
         name: a.name,
         brl: a.brl,
         gbp: a.gbp
@@ -155,27 +288,71 @@ export const getFixedIncomeSummary = (transactions, rates, endDate = null, asset
             investmentGBP: totalInv,
             grossInvGBP: totalGrossInv,
             roi: totalRoi,
-            isTotal: true
+            isTotal: true as const
         }
     };
 };
 
-export const getRealEstateSummary = (data = {}, marketData = {}, rates, endDate = null, assetClasses = {}) => {
-    // data structure from API: { properties: [], inkCourt: { ledger: [] }, funds: { transactions: [], holdings: [] }, airbnb: ... }
-    const { properties = [], funds = {}, airbnb = null, inkCourt = null } = data || {};
+// ═══════════ getRealEstateSummary ═══════════
+
+interface InkCourtData {
+    ledger?: Array<{ date: string; principal?: number; [key: string]: unknown }>;
+    mortgageAmount?: number;
+    propertyValue?: number;
+    [key: string]: unknown;
+}
+
+interface AirbnbMonthEntry {
+    transactions?: Array<{ type: string; amount: number }>;
+    costs?: number;
+    revenue?: number;
+}
+
+interface FundTransaction {
+    date: string;
+    fund?: string;
+    ticker?: string;
+    quantity?: number;
+    investment?: number;
+    [key: string]: unknown;
+}
+
+interface FundHolding {
+    ticker: string;
+    qty: number;
+    [key: string]: unknown;
+}
+
+interface FundsData {
+    transactions?: FundTransaction[];
+    holdings?: FundHolding[];
+}
+
+export const getRealEstateSummary = (
+    data: RealEstateData | Record<string, unknown> | null = {},
+    marketData: MarketDataMap = {},
+    rates: CurrencyRates,
+    endDate: string | null = null,
+    assetClasses: AssetClassesMap = {}
+): CategorySummaryResult => {
+    const safeData = (data || {}) as Record<string, unknown>;
+    const properties = (safeData.properties || []) as RealEstatePropertyInput[];
+    const funds = (safeData.funds || {}) as FundsData;
+    const airbnb = safeData.airbnb as { ledger?: AirbnbMonthEntry[] } | null;
+    const inkCourt = safeData.inkCourt as InkCourtData | null;
     const BRL = rates?.BRL || 7.10;
 
     // 1. Funds
-    const fundSummary = {};
+    const fundSummary: Record<string, { totalQuantity: number; totalInvestment: number }> = {};
     let fundsTotalValueBrl = 0;
     let fundsTotalInvestmentBrl = 0;
 
     if (funds && funds.transactions) {
-        funds.transactions.forEach((tr: any) => {
+        funds.transactions.forEach((tr) => {
             if (endDate && parseDate(tr.date) > parseDate(endDate)) return;
             // API returns 'fund' name e.g. "FII - HGLG11" or just "HGLG11"
-            let ticker = tr.fund;
-            if (tr.fund.includes(' - ')) {
+            let ticker = tr.fund || '';
+            if (tr.fund && tr.fund.includes(' - ')) {
                 ticker = tr.fund.split(' - ')[1];
             } else if (tr.ticker) {
                 ticker = tr.ticker;
@@ -183,17 +360,11 @@ export const getRealEstateSummary = (data = {}, marketData = {}, rates, endDate 
 
             if (!fundSummary[ticker]) fundSummary[ticker] = { totalQuantity: 0, totalInvestment: 0 };
 
-            // Quantity
             fundSummary[ticker].totalQuantity += (tr.quantity || 0);
-
-            // Investment
-            // API returns `investment` (Purchase Cost). If Buy, it's positive.
-            // If API `investment` is cost, we sum it.
             fundSummary[ticker].totalInvestment += (tr.investment || 0);
         });
 
         Object.entries(fundSummary).forEach(([ticker, summary]) => {
-            // Price lookup
             const liveData = marketData[`${ticker}.SA`] || marketData[ticker];
             const currentPrice = liveData?.price || 0;
 
@@ -203,10 +374,10 @@ export const getRealEstateSummary = (data = {}, marketData = {}, rates, endDate 
     }
 
     // 2. Properties
-    const propertyAssets = (properties || []).filter((p: any) => p.status === 'Owned').map((p: any) => {
-        let displayValue = p.currentValue;
-        let investment = p.investment;
-        let investmentGBP = p.currency === 'GBP' ? p.investment : p.investment / BRL;
+    const propertyAssets: AssetHolding[] = (properties || []).filter((p) => p.status === 'Owned').map((p) => {
+        let displayValue = p.currentValue || 0;
+        let investment = p.investment || 0;
+        let investmentGBP = p.currency === 'GBP' ? (p.investment || 0) : (p.investment || 0) / BRL;
 
         // Special cases
         if (p.id === 'andyara-2') {
@@ -218,37 +389,39 @@ export const getRealEstateSummary = (data = {}, marketData = {}, rates, endDate 
             investment = 444204;
             investmentGBP = 444204 / BRL;
         } else if (p.id === 'ink-court' && inkCourt) {
-            const filteredLedger = endDate ? inkCourt.ledger.filter((l: any) => parseDate(l.date) <= parseDate(endDate)) : inkCourt.ledger;
-            const totalPrincipalPaid = filteredLedger.reduce((sum: number, t: any) => sum + (t.principal || 0), 0);
+            const filteredLedger = endDate
+                ? (inkCourt.ledger || []).filter((l) => parseDate(l.date) <= parseDate(endDate))
+                : (inkCourt.ledger || []);
+            const totalPrincipalPaid = filteredLedger.reduce((sum, t) => sum + (t.principal || 0), 0);
             const mortgageBalance = (inkCourt.mortgageAmount || 0) - totalPrincipalPaid;
-            const currentPrice = inkCourt.propertyValue;
-            const equity = (currentPrice || 0) - mortgageBalance;
+            const currentPrice = inkCourt.propertyValue || 0;
+            const equity = currentPrice - mortgageBalance;
             displayValue = equity;
             investment = equity;
             investmentGBP = equity; // Ink Court is in GBP
         }
 
-        let brl = p.currency === 'GBP' ? displayValue * BRL : displayValue;
-        let gbp = p.currency === 'GBP' ? displayValue : displayValue / BRL;
+        const brl = p.currency === 'GBP' ? displayValue * BRL : displayValue;
+        const gbp = p.currency === 'GBP' ? displayValue : displayValue / BRL;
 
         // P&L and ROI
         let roi = 0;
 
         // Zara
         if (p.name.includes('Zara') && airbnb) {
-            const calculateMonthAggregates = (monthEntry) => {
+            const calculateMonthAggregates = (monthEntry: AirbnbMonthEntry): { costs: number; revenue: number } => {
                 if (!monthEntry.transactions || monthEntry.transactions.length === 0) {
                     return { costs: monthEntry.costs || 0, revenue: monthEntry.revenue || 0 };
                 }
                 let costs = 0; let revenue = 0;
-                monthEntry.transactions.forEach((t: any) => {
+                monthEntry.transactions.forEach((t) => {
                     if (t.type === 'Revenue') revenue += t.amount;
                     else if (t.type === 'Cost') costs += t.amount;
                 });
                 return { costs, revenue };
             };
-            const airbnbRevenue = (airbnb.ledger || []).reduce((sum: number, t: any) => sum + calculateMonthAggregates(t).revenue, 0);
-            const airbnbCosts = (airbnb.ledger || []).reduce((sum: number, t: any) => sum + calculateMonthAggregates(t).costs, 0);
+            const airbnbRevenue = (airbnb.ledger || []).reduce((sum, t) => sum + calculateMonthAggregates(t).revenue, 0);
+            const airbnbCosts = (airbnb.ledger || []).reduce((sum, t) => sum + calculateMonthAggregates(t).costs, 0);
             const profitLoss = airbnbRevenue - airbnbCosts;
             roi = (profitLoss / investment) * 100;
         } else if (p.id === 'andyara-2') {
@@ -265,7 +438,7 @@ export const getRealEstateSummary = (data = {}, marketData = {}, rates, endDate 
             brl,
             gbp,
             investmentGBP,
-            grossInvGBP: investmentGBP, // For properties, investment equals purchase price
+            grossInvGBP: investmentGBP,
             roi,
             nativeCurrency: overrideCur,
             category: overrideCat
@@ -275,7 +448,6 @@ export const getRealEstateSummary = (data = {}, marketData = {}, rates, endDate 
     // Add Funds as a single row
     if (fundsTotalValueBrl > 0 || fundsTotalInvestmentBrl > 0) {
         const fundsRoi = fundsTotalInvestmentBrl !== 0 ? ((fundsTotalValueBrl - fundsTotalInvestmentBrl) / fundsTotalInvestmentBrl * 100) : 0;
-        // FIIs (Funds) -> It might have an override for "FIIs (Funds)"
         const overrideCur = assetClasses['FIIs (Funds)']?.currency || 'BRL';
         const overrideCat = assetClasses['FIIs (Funds)']?.category || 'Real Estate';
 
@@ -292,7 +464,7 @@ export const getRealEstateSummary = (data = {}, marketData = {}, rates, endDate 
 
     // 3. Realised P&L
     let totalRealisedPnLBrl = 0;
-    (properties || []).filter((p: any) => p.status === 'Sold').forEach((p: any) => {
+    (properties || []).filter((p) => p.status === 'Sold').forEach((p) => {
         let inv = p.investment || 0;
         let tax = p.taxes || 0;
         let sale = p.salePrice || 0;
@@ -327,26 +499,25 @@ export const getRealEstateSummary = (data = {}, marketData = {}, rates, endDate 
         });
     }
 
-    propertyAssets.sort((a: any, b: any) => {
+    propertyAssets.sort((a, b) => {
         if (a.isRealisedPnL) return 1;
         if (b.isRealisedPnL) return -1;
         return b.brl - a.brl;
     });
 
-    const activeAssets = propertyAssets.filter((a: any) => !a.isRealisedPnL);
-    const totalGbp = activeAssets.reduce((sum: number, a: any) => sum + a.gbp, 0);
-    const totalBrl = activeAssets.reduce((sum: number, a: any) => sum + a.brl, 0);
-    const totalInv = activeAssets.reduce((sum: number, a: any) => sum + a.investmentGBP, 0);
-    const totalGrossInv = activeAssets.reduce((sum: number, a: any) => sum + (a.grossInvGBP || 0), 0);
+    const activeAssets = propertyAssets.filter((a) => !a.isRealisedPnL);
+    const totalGbp = activeAssets.reduce((sum, a) => sum + a.gbp, 0);
+    const totalBrl = activeAssets.reduce((sum, a) => sum + a.brl, 0);
+    const totalInv = activeAssets.reduce((sum, a) => sum + (a.investmentGBP || 0), 0);
+    const totalGrossInv = activeAssets.reduce((sum, a) => sum + (a.grossInvGBP || 0), 0);
 
     const totalRealisedPnLGbp = totalRealisedPnLBrl !== 0 ? (totalRealisedPnLBrl / BRL) : 0;
 
     // Total ROI should account for realised P&L
-    // ROI = (Current Value + Realised Gain - Total Cost) / Total Cost
     const totalPnL = (totalGbp - totalInv) + totalRealisedPnLGbp;
     const totalRoi = totalInv !== 0 ? (totalPnL / totalInv) * 100 : 0;
 
-    const individualHoldings = propertyAssets.map((a: any) => ({
+    const individualHoldings: IndividualHolding[] = propertyAssets.map((a) => ({
         name: a.name,
         brl: a.brl,
         gbp: a.gbp
@@ -362,76 +533,42 @@ export const getRealEstateSummary = (data = {}, marketData = {}, rates, endDate 
             investmentGBP: totalInv,
             grossInvGBP: totalGrossInv,
             roi: totalRoi,
-            isTotal: true
+            isTotal: true as const
         }
     };
 };
 
-export const getEquitySummary = (transactions, marketData = {}, rates, endDate = null, assetClasses = {}) => {
-    const holdings = {};
-    const lockedPnL = {};
+// ═══════════ getEquitySummary ═══════════
+
+export const getEquitySummary = (
+    transactions: EquityTx[],
+    marketData: MarketDataMap = {},
+    rates: CurrencyRates,
+    endDate: string | null = null,
+    assetClasses: AssetClassesMap = {}
+): CategorySummaryResult => {
+    const holdings: Record<string, EquityHoldingInternal> = {};
+    const lockedPnL: Record<string, number> = {};
     let totalGrossInvGBP = 0;
 
-    // Transactions array from API. 
-    // Fields: { asset, ticker, broker, currency, quantity, investment, pnl, type }
-    // API: Buy -> Investment = Negative (-Cost)? Or Positive?
-    // Let's check api/equity/route.js.
-    // "investment: -r.amount" (where buy amount < 0). So Investment IS POSITIVE cost.
-    // "type": 'Buy' / 'Sell'.
-
-    // Previous JSON logic: Buy -> Investment < 0? No, usually JSONs had Investment < 0 for Outflows (Buys).
-    // EXCEPT `equity_transactions.json` was weird.
-    // Let's rely on `tr.type`.
-
-    const sorted = [...transactions].sort((a: any, b: any) => parseDate(a.date) - parseDate(b.date));
-    sorted.forEach((tr: any) => {
+    const sorted = [...transactions].sort((a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime());
+    sorted.forEach((tr) => {
         if (endDate && parseDate(tr.date) > parseDate(endDate)) return;
         const key = `${tr.asset}|${tr.broker}`;
         if (!holdings[key]) {
-            holdings[key] = { asset: tr.asset, qty: 0, totalCost: 0, broker: tr.broker, currency: tr.currency, ticker: tr.ticker };
+            holdings[key] = { asset: tr.asset, qty: 0, totalCost: 0, broker: tr.broker, currency: tr.currency || 'GBP', ticker: tr.ticker || null };
         }
         if (tr.ticker && !holdings[key].ticker) holdings[key].ticker = tr.ticker;
         if (!lockedPnL[tr.broker]) lockedPnL[tr.broker] = 0;
 
-        // Quantity (+ for Buy, - for Sell? API returns +/?)
-        // API: quantity: r.quantity.
-        // Ledger: Buy -> Qty > 0. Sell -> Qty < 0.
-        // So API returns raw signed qty.
         holdings[key].qty += (tr.quantity || 0);
-
-        // Cost Basis
-        // If Buy: Add to Cost.
-        // If Sell: Reduce Cost (pro-rata? or just specific lot?).
-        // Simple Average Cost:
-        // We accumulate Cost on Buys.
-        // On Sell, we reduce Cost proportional to Qty sold?
-        // Or did we store "investment" as the cost effect?
-        // API "investment" = -Amount.
-        // Buy (Amt -100) -> Inv +100.
-        // Sell (Amt +120) -> Inv -120.
-        // So `totalCost` += tr.investment works?
-        // Buy: TotalCost += 100.
-        // Sell: TotalCost -= 120 (Proceeds). 
-        // Net Cost becomes -20 (Profit). 
-        // Value = 0. PnL = Value - Cost = 0 - (-20) = 20. Correct.
-        // So summing `investment` (if it represents cash flow inverted) works.
-
         holdings[key].totalCost += tr.investment;
 
-        // Gross Investment calculation (Buys only)
         if (tr.type === 'Buy') {
             const cur = tr.currency || BROKER_CURRENCY[tr.broker] || 'GBP';
-            const toGBP = (val: number): number => {
-                if (cur === 'GBP') return val;
-                if (cur === 'BRL') return val / rates.BRL;
-                if (cur === 'USD') return val / rates.USD;
-                return val;
-            };
-            totalGrossInvGBP += toGBP(Math.abs(tr.investment), cur);
+            totalGrossInvGBP += toGBPSimple(Math.abs(tr.investment), cur, rates);
         }
 
-        // Realized PnL field
-        // API returns `pnl` field (populated from `realized_pnl` column).
         if (tr.pnl) {
             lockedPnL[tr.broker] += tr.pnl;
         }
@@ -442,11 +579,10 @@ export const getEquitySummary = (transactions, marketData = {}, rates, endDate =
         }
     });
 
-    const activeHoldings = Object.values(holdings).filter((h: any) => Math.abs(h.qty) > 0.01);
+    const activeHoldings = Object.values(holdings).filter((h) => Math.abs(h.qty) > 0.01);
 
-    // Broker grouping similar to before...
-    const brokers = {};
-    activeHoldings.forEach((h: any) => {
+    const brokers: Record<string, BrokerAccum> = {};
+    activeHoldings.forEach((h) => {
         if (!brokers[h.broker]) brokers[h.broker] = { cvGBP: 0, ppGBP: 0 };
         const cur = BROKER_CURRENCY[h.broker] || 'GBP';
 
@@ -459,49 +595,32 @@ export const getEquitySummary = (transactions, marketData = {}, rates, endDate =
             rawPrice = marketData[h.ticker].price;
             assetCurrency = marketData[h.ticker].currency || 'USD';
         } else {
-            // Fallback
             rawPrice = h.qty > 0 ? h.totalCost / h.qty : 0;
         }
 
-        // Convert Price to Broker Currency
         let priceInBrokerCur = rawPrice;
-        // ... (Currency conversion logic same as before, omitted for brevity but assumed present or copied)
-        // Re-implementing simplified conversion:
         if (assetCurrency !== cur && rawPrice > 0 && rates) {
             const toUSD = (v: number, c: string): number => c === 'USD' ? v : (c === 'GBP' ? v * rates.USD : v * (rates.USD / rates.BRL));
             const fromUSD = (v: number, c: string): number => c === 'USD' ? v : (c === 'GBP' ? v / rates.USD : v * (rates.BRL / rates.USD));
-
-            // Convert to USD first
-            const valUSD = toUSD(rawPrice, assetCurrency);
-            // Convert to Target
-            priceInBrokerCur = fromUSD(valUSD, cur);
+            priceInBrokerCur = fromUSD(toUSD(rawPrice, assetCurrency), cur);
         }
 
         const cv = priceInBrokerCur * Math.abs(h.qty);
-        // Cost is `h.totalCost`.
         const pp = h.totalCost;
 
-        // Convert Totals to GBP
-        const toGBP = (val: number, currency: string): number => {
-            if (currency === 'GBP') return val;
-            if (currency === 'BRL') return val / rates.BRL;
-            if (currency === 'USD') return val / rates.USD;
-            return val;
-        };
-
-        brokers[h.broker].cvGBP += toGBP(cv, cur);
-        brokers[h.broker].ppGBP += toGBP(pp, cur);
+        brokers[h.broker].cvGBP += toGBPSimple(cv, cur, rates);
+        brokers[h.broker].ppGBP += toGBPSimple(pp, cur, rates);
     });
 
     // Add Locked PnL
-    Object.keys(lockedPnL).forEach((b: any) => {
+    Object.keys(lockedPnL).forEach((b) => {
         if (!brokers[b]) brokers[b] = { cvGBP: 0, ppGBP: 0 };
         const cur = BROKER_CURRENCY[b] || 'GBP';
         const lockedGBP = (lockedPnL[b] || 0) / (cur === 'GBP' ? 1 : (cur === 'BRL' ? rates.BRL : cur === 'USD' ? rates.USD : 1));
         brokers[b].lockedGBP = (brokers[b].lockedGBP || 0) + lockedGBP;
     });
 
-    const assets = Object.keys(brokers).map((b: any) => {
+    const assets: AssetHolding[] = Object.keys(brokers).map((b) => {
         const { cvGBP, ppGBP, lockedGBP } = brokers[b];
         const pnl = (cvGBP - ppGBP) + (lockedGBP || 0);
         const roi = ppGBP !== 0 ? (pnl / ppGBP) * 100 : 0;
@@ -517,20 +636,20 @@ export const getEquitySummary = (transactions, marketData = {}, rates, endDate =
             nativeCurrency: overrideCur,
             category: overrideCat
         };
-    }).sort((a: any, b: any) => b.brl - a.brl);
+    }).sort((a, b) => b.brl - a.brl);
 
-    const totalGbp = assets.reduce((sum: number, a: any) => sum + a.gbp, 0);
-    const totalBrl = assets.reduce((sum: number, a: any) => sum + a.brl, 0);
-    const totalInv = assets.reduce((sum: number, a: any) => sum + a.investmentGBP, 0);
+    const totalGbp = assets.reduce((sum, a) => sum + a.gbp, 0);
+    const totalBrl = assets.reduce((sum, a) => sum + a.brl, 0);
+    const totalInv = assets.reduce((sum, a) => sum + (a.investmentGBP || 0), 0);
 
     let grandTotalLockedGBP = 0;
-    Object.values(brokers).forEach((b: any) => grandTotalLockedGBP += (b.lockedGBP || 0));
+    Object.values(brokers).forEach((b) => grandTotalLockedGBP += (b.lockedGBP || 0));
 
     const totalPnL = (totalGbp - totalInv) + grandTotalLockedGBP;
     const totalRoi = totalInv !== 0 ? (totalPnL / totalInv) * 100 : 0;
     const totalGrossInv = totalGrossInvGBP;
 
-    const individualHoldings = activeHoldings.map((h: any) => {
+    const individualHoldings: IndividualHolding[] = activeHoldings.map((h) => {
         const cur = BROKER_CURRENCY[h.broker] || 'GBP';
         let rawPrice = 0;
         let assetCurrency = cur;
@@ -552,17 +671,10 @@ export const getEquitySummary = (transactions, marketData = {}, rates, endDate =
         }
 
         const cv = priceInBrokerCur * Math.abs(h.qty);
-        const toGBP = (val: number, currency: string): number => {
-            if (currency === 'GBP') return val;
-            if (currency === 'BRL') return val / rates.BRL;
-            if (currency === 'USD') return val / rates.USD;
-            return val;
-        };
-
-        const gbpVal = toGBP(cv, cur);
+        const gbpVal = toGBPSimple(cv, cur, rates);
 
         return {
-            name: h.asset || h.ticker || h.name,
+            name: h.asset || h.ticker || 'Unknown',
             brl: gbpVal * rates.BRL,
             gbp: gbpVal,
             broker: h.broker
@@ -579,26 +691,30 @@ export const getEquitySummary = (transactions, marketData = {}, rates, endDate =
             investmentGBP: totalInv,
             grossInvGBP: totalGrossInv,
             roi: totalRoi,
-            isTotal: true
+            isTotal: true as const
         }
     };
 };
 
-export const getCryptoSummary = (transactions, marketData = {}, rates, endDate = null, assetClasses = {}) => {
-    // Keep existing logic but adapt to API shape if needed
-    // API: { ticker, quantity, investment, type }
-    // Logic seems compatible if fields allow.
+// ═══════════ getCryptoSummary ═══════════
 
-    const holdings = {};
-    const sorted = [...transactions].sort((a: any, b: any) => parseDate(a.date) - parseDate(b.date));
+export const getCryptoSummary = (
+    transactions: CryptoTx[],
+    marketData: MarketDataMap = {},
+    rates: CurrencyRates,
+    endDate: string | null = null,
+    assetClasses: AssetClassesMap = {}
+): CategorySummaryResult => {
+    const holdings: Record<string, CryptoHolding> = {};
+    const sorted = [...transactions].sort((a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime());
     let totalGrossInvGBP_sum = 0;
 
-    sorted.forEach((tr: any) => {
+    sorted.forEach((tr) => {
         if (endDate && parseDate(tr.date) > parseDate(endDate)) return;
         const key = tr.ticker;
         if (!holdings[key]) holdings[key] = { ticker: key, qty: 0, netInvestment: 0, name: tr.asset || key };
         holdings[key].qty += (tr.quantity || 0);
-        holdings[key].netInvestment += tr.investment; // +Cost for Buy, -Proceeds for Sell
+        holdings[key].netInvestment += tr.investment;
 
         if (tr.type === 'Buy') {
             const currency = tr.currency || 'USD';
@@ -611,19 +727,18 @@ export const getCryptoSummary = (transactions, marketData = {}, rates, endDate =
         }
     });
 
-    const assets = Object.values(holdings)
-        .filter((h: any) => Math.abs(h.qty) > 0.000001)
-        .map((h: any) => {
+    const assets: AssetHolding[] = Object.values(holdings)
+        .filter((h) => Math.abs(h.qty) > 0.000001)
+        .map((h) => {
             const marketKey = h.ticker.endsWith('-USD') ? h.ticker : h.ticker + '-USD';
             const quote = marketData[marketKey] || marketData[h.ticker];
-            const price = quote ? quote.price : 0; // USD
+            const price = quote ? quote.price : 0;
 
             const valUSD = price * h.qty;
             const valGBP = valUSD / rates.USD;
             const valBRL = valGBP * rates.BRL;
 
             const investGBP = h.netInvestment / rates.USD;
-
             const roi = investGBP !== 0 ? ((valGBP - investGBP) / investGBP) * 100 : 0;
 
             const overrideCur = assetClasses[h.name]?.currency || 'USD';
@@ -638,62 +753,52 @@ export const getCryptoSummary = (transactions, marketData = {}, rates, endDate =
                 nativeCurrency: overrideCur,
                 category: overrideCat
             };
-        }).sort((a: any, b: any) => b.brl - a.brl);
+        }).sort((a, b) => b.brl - a.brl);
 
-    const totalGbp = assets.reduce((sum: number, a: any) => sum + a.gbp, 0);
-    const totalBrl = assets.reduce((sum: number, a: any) => sum + a.brl, 0);
-    const totalInv = assets.reduce((sum: number, a: any) => sum + a.investmentGBP, 0);
+    const totalGbp = assets.reduce((sum, a) => sum + a.gbp, 0);
+    const totalBrl = assets.reduce((sum, a) => sum + a.brl, 0);
+    const totalInv = assets.reduce((sum, a) => sum + (a.investmentGBP || 0), 0);
     const totalGrossInv = totalGrossInvGBP_sum;
     const totalRoi = totalInv !== 0 ? ((totalGbp - totalInv) / totalInv) * 100 : 0;
 
-    const individualHoldings = assets.map((a: any) => ({
-        name: a.name,
-        brl: a.brl,
-        gbp: a.gbp
+    const individualHoldings: IndividualHolding[] = assets.map((a) => ({
+        name: a.name, brl: a.brl, gbp: a.gbp
     }));
 
     return {
         assets,
         individualHoldings,
-        total: {
-            name: 'Total',
-            brl: totalBrl,
-            gbp: totalGbp,
-            investmentGBP: totalInv,
-            grossInvGBP: totalGrossInv,
-            roi: totalRoi,
-            isTotal: true
-        }
+        total: { name: 'Total', brl: totalBrl, gbp: totalGbp, investmentGBP: totalInv, grossInvGBP: totalGrossInv, roi: totalRoi, isTotal: true as const }
     };
 };
 
-export const getPensionSummary = (transactions, rates, pensionPrices = {}, marketData = {}, endDate = null, assetClasses = {}) => {
-    // API: { asset, broker, allocationClass, quantity, price, value, type }
-    // Logic:
-    // Holdings by asset|broker
-    const holdings = {};
-    const lockedPnL = {}; // if any
+// ═══════════ getPensionSummary ═══════════
+
+export const getPensionSummary = (
+    transactions: PensionTx[],
+    rates: CurrencyRates,
+    pensionPrices: PensionPricesMap = {},
+    marketData: MarketDataMap = {},
+    endDate: string | null = null,
+    assetClasses: AssetClassesMap = {}
+): CategorySummaryResult => {
+    const holdings: Record<string, PensionHoldingInternal> = {};
     let totalGrossInvGBP_pension = 0;
 
-    // transactions need to be sorted
-    const sorted = [...transactions].sort((a: any, b: any) => parseDate(a.date) - parseDate(b.date));
+    const sorted = [...transactions].sort((a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime());
 
-    sorted.forEach((tr: any) => {
+    sorted.forEach((tr) => {
         if (endDate && parseDate(tr.date) > parseDate(endDate)) return;
         const key = `${tr.asset}|${tr.broker}`;
         if (!holdings[key]) holdings[key] = { asset: tr.asset, qty: 0, totalCost: 0, broker: tr.broker };
 
-        const qty = parseFloat(tr.quantity) || 0;
-        const val = parseFloat(tr.value) || 0;
-
-        // API 'value' IS the transaction amount usually?
-        // My API returns `value: Math.abs(r.amount)`.
-        // Type: 'Buy' / 'Sell'.
+        const qty = parseFloat(String(tr.quantity)) || 0;
+        const val = parseFloat(String(tr.value)) || 0;
 
         if (tr.type === 'Buy') {
             holdings[key].qty += qty;
             holdings[key].totalCost += val;
-            totalGrossInvGBP_pension += val; // Pensions are assumed to be in GBP for this summary
+            totalGrossInvGBP_pension += val;
         } else if (tr.type === 'Sell') {
             holdings[key].qty -= qty;
             holdings[key].totalCost -= val;
@@ -707,21 +812,21 @@ export const getPensionSummary = (transactions, rates, pensionPrices = {}, marke
         }
     });
 
-    const activeHoldings = Object.values(holdings).filter((h: any) => Math.abs(h.qty) > 0.01);
+    const activeHoldings = Object.values(holdings).filter((h) => Math.abs(h.qty) > 0.01);
     const brokers_list = ['Fidelity', 'Hargreaves Lansdown', 'Legal & General', 'OAB'];
 
-    const brokerSummaries = brokers_list.map((b: any) => {
-        const items = activeHoldings.filter((h: any) => h.broker === b);
+    const brokerSummaries: AssetHolding[] = brokers_list.map((b) => {
+        const items = activeHoldings.filter((h) => h.broker === b);
         const cur = BROKER_CURRENCY[b] || 'GBP';
         let cv = 0;
         let pp = 0;
 
-        items.forEach((h: any) => {
+        items.forEach((h) => {
             let rawPrice = 0;
             let assetCurrency = cur;
-            const mapEntry = pensionMap.find((m: any) => m.asset === h.asset);
+            const mapEntry = (pensionMap as PensionFundMapEntry[]).find((m) => m.asset === h.asset);
             if (h.asset === 'Cash') rawPrice = 1.0;
-            else if (mapEntry && mapEntry.ticker && marketData[mapEntry.ticker]) {
+            else if (mapEntry?.ticker && marketData[mapEntry.ticker]) {
                 rawPrice = marketData[mapEntry.ticker].price;
                 assetCurrency = marketData[mapEntry.ticker].currency || 'USD';
             } else if (pensionPrices[h.asset]) {
@@ -731,7 +836,6 @@ export const getPensionSummary = (transactions, rates, pensionPrices = {}, marke
                 rawPrice = h.qty > 0 ? h.totalCost / h.qty : 0;
             }
 
-            // Convert
             let lp = rawPrice;
             if (assetCurrency !== cur && rawPrice > 0 && rates) {
                 if (cur === 'GBP') {
@@ -745,38 +849,32 @@ export const getPensionSummary = (transactions, rates, pensionPrices = {}, marke
 
         const pnl = cv - pp;
         const roi = pp !== 0 ? (pnl / pp) * 100 : 0;
-
         const overrideCur = assetClasses[b]?.currency || 'GBP';
-        const overrideCat = assetClasses[b]?.category || 'Equity'; // Default broker boxes safely to Equity; underneath items have precise mapping
+        const overrideCat = assetClasses[b]?.category || 'Equity';
 
         return {
-            name: b,
-            brl: cv * rates.BRL,
-            gbp: cv,
-            investmentGBP: pp,
-            roi,
-            nativeCurrency: overrideCur,
-            category: overrideCat
+            name: b, brl: cv * rates.BRL, gbp: cv, investmentGBP: pp, roi,
+            nativeCurrency: overrideCur, category: overrideCat
         };
-    }).filter(b => b.gbp > 0 || b.investmentGBP > 0);
+    }).filter(b => b.gbp > 0 || (b.investmentGBP || 0) > 0);
 
-    brokerSummaries.sort((a: any, b: any) => b.brl - a.brl);
+    brokerSummaries.sort((a, b) => b.brl - a.brl);
 
-    const totalGbp = brokerSummaries.reduce((sum: number, a: any) => sum + a.gbp, 0);
-    const totalBrl = brokerSummaries.reduce((sum: number, a: any) => sum + a.brl, 0);
-    const totalInv = brokerSummaries.reduce((sum: number, a: any) => sum + a.investmentGBP, 0);
+    const totalGbp = brokerSummaries.reduce((sum, a) => sum + a.gbp, 0);
+    const totalBrl = brokerSummaries.reduce((sum, a) => sum + a.brl, 0);
+    const totalInv = brokerSummaries.reduce((sum, a) => sum + (a.investmentGBP || 0), 0);
     const totalGrossInv = totalGrossInvGBP_pension;
     const totalPnL = totalGbp - totalInv;
     const totalRoi = totalInv !== 0 ? (totalPnL / totalInv) * 100 : 0;
 
-    const individualHoldings = activeHoldings.map((h: any) => {
-        const mapEntry = pensionMap.find((m: any) => m.asset === h.asset);
+    const individualHoldings: IndividualHolding[] = activeHoldings.map((h) => {
+        const mapEntry = (pensionMap as PensionFundMapEntry[]).find((m) => m.asset === h.asset);
         const cur = BROKER_CURRENCY[h.broker] || 'GBP';
         let rawPrice = 0;
         let assetCurrency = cur;
 
         if (h.asset === 'Cash') rawPrice = 1.0;
-        else if (mapEntry && mapEntry.ticker && marketData[mapEntry.ticker]) {
+        else if (mapEntry?.ticker && marketData[mapEntry.ticker]) {
             rawPrice = marketData[mapEntry.ticker].price;
             assetCurrency = marketData[mapEntry.ticker].currency || 'USD';
         } else if (pensionPrices[h.asset]) {
@@ -797,43 +895,34 @@ export const getPensionSummary = (transactions, rates, pensionPrices = {}, marke
         const gbp = cur === 'GBP' ? cv : (cur === 'BRL' ? cv / rates.BRL : cv / rates.USD);
         const brl = gbp * rates.BRL;
 
-        return {
-            name: h.asset,
-            brl,
-            gbp,
-            broker: h.broker
-        };
+        return { name: h.asset, brl, gbp, broker: h.broker };
     });
 
     return {
         assets: brokerSummaries,
         individualHoldings,
-        total: {
-            name: 'Total',
-            brl: totalBrl,
-            gbp: totalGbp,
-            investmentGBP: totalInv,
-            grossInvGBP: totalGrossInv,
-            roi: totalRoi,
-            isTotal: true
-        }
+        total: { name: 'Total', brl: totalBrl, gbp: totalGbp, investmentGBP: totalInv, grossInvGBP: totalGrossInv, roi: totalRoi, isTotal: true as const }
     };
 };
 
-export const getDebtSummary = (transactions, rates, endDate = null, assetClasses = {}) => {
-    // API: { lender, value_brl, obs }
-    const summary = transactions.reduce((acc, t) => {
+// ═══════════ getDebtSummary ═══════════
+
+export const getDebtSummary = (
+    transactions: DebtTx[],
+    rates: CurrencyRates,
+    endDate: string | null = null,
+    assetClasses: AssetClassesMap = {}
+): CategorySummaryResult => {
+    const summary: Record<string, { name: string; brl: number; gbp: number }> = transactions.reduce((acc, t) => {
         if (endDate && parseDate(t.date) > parseDate(endDate)) return acc;
         const lender = t.lender || 'Unknown';
         if (!acc[lender]) acc[lender] = { name: lender, brl: 0, gbp: 0 };
         acc[lender].brl += (t.value_brl || 0);
-        // Calc GBP
         acc[lender].gbp += ((t.value_brl || 0) / rates.BRL);
         return acc;
-    }, {});
+    }, {} as Record<string, { name: string; brl: number; gbp: number }>);
 
-    // ... rest same as before
-    const assets = Object.values(summary).map((a: any) => {
+    const assets: AssetHolding[] = Object.values(summary).map((a) => {
         const overrideCur = assetClasses[a.name]?.currency || 'BRL';
         const overrideCat = assetClasses[a.name]?.category || 'Fixed Income';
 
@@ -844,46 +933,44 @@ export const getDebtSummary = (transactions, rates, endDate = null, assetClasses
             nativeCurrency: overrideCur,
             category: overrideCat
         };
-    }).sort((a: any, b: any) => b.brl - a.brl);
+    }).sort((a, b) => b.brl - a.brl);
 
-    const totalBrl = assets.reduce((sum: number, a: any) => sum + a.brl, 0);
-    const totalGbp = assets.reduce((sum: number, a: any) => sum + a.gbp, 0);
+    const totalBrl = assets.reduce((sum, a) => sum + a.brl, 0);
+    const totalGbp = assets.reduce((sum, a) => sum + a.gbp, 0);
 
-    const individualHoldings = assets.map((a: any) => ({
-        name: a.name,
-        brl: a.brl,
-        gbp: a.gbp
+    const individualHoldings: IndividualHolding[] = assets.map((a) => ({
+        name: a.name, brl: a.brl, gbp: a.gbp
     }));
 
     return {
         assets,
         individualHoldings,
-        total: {
-            name: 'Total',
-            brl: totalBrl,
-            gbp: totalGbp,
-            investmentGBP: totalGbp,
-            roi: 0,
-            isTotal: true
-        }
+        total: { name: 'Total', brl: totalBrl, gbp: totalGbp, investmentGBP: totalGbp, roi: 0, isTotal: true as const }
     };
 };
 
-// Exports compatible for Dashboard
+// ═══════════ getMasterMixData ═══════════
+
+interface MasterMixResult {
+    buckets: { Equity: number; FixedIncome: number; RealEstate: number; Crypto: number; Cash: number };
+    percentages: { Equity: number; FixedIncome: number; RealEstate: number; Crypto: number; Cash: number };
+    byCurrency: { GBP: number; USD: number; BRL: number };
+    total: number;
+}
+
 export const getMasterMixData = (
-    fixedIncomeTr,
-    realEstateData,
-    equityTr,
-    cryptoTr,
-    pensionTr,
-    rates,
-    pensionMapInput,
-    marketData,
-    pensionPrices,
-    currentPrices = {},
-    assetClasses = {}
-) => {
-    // 1. Base Bucket Totals (Excluding Pensions)
+    fixedIncomeTr: FixedIncomeTx[],
+    realEstateData: RealEstateData | Record<string, unknown> | null,
+    equityTr: EquityTx[],
+    cryptoTr: CryptoTx[],
+    pensionTr: PensionTx[],
+    rates: CurrencyRates,
+    pensionMapInput: PensionFundMapEntry[],
+    marketData: MarketDataMap,
+    pensionPrices: PensionPricesMap,
+    currentPrices: Record<string, number> = {},
+    assetClasses: AssetClassesMap = {}
+): MasterMixResult => {
     const fiData = getFixedIncomeSummary(fixedIncomeTr, rates, null, assetClasses);
     let masterFI = fiData.total.gbp || 0;
 
@@ -896,91 +983,76 @@ export const getMasterMixData = (
     const equityData = getEquitySummary(equityTr, marketData, rates, null, assetClasses);
     let masterEquity = equityData.total.gbp || 0;
 
-    // Extract Cash holdings from equity transactions (e.g. Trading 212 Cash balance)
-    // getEquitySummary groups by broker and includes Cash at face value inside each broker's total.
-    // We need to pull that cash out into the masterCash bucket.
+    // Extract Cash holdings from equity
     let equityCashGBP = 0;
     if (equityTr && equityTr.length > 0) {
-        // Accumulate cash qty per broker (asset === 'Cash' or ticker === 'Cash')
-        const cashByBroker = {};
-        equityTr.forEach((tr: any) => {
+        const cashByBroker: Record<string, { qty: number; currency: string }> = {};
+        equityTr.forEach((tr) => {
             const isCash = tr.asset === 'Cash' || tr.ticker === 'Cash';
             if (!isCash) return;
             const broker = tr.broker || '__none__';
             if (!cashByBroker[broker]) cashByBroker[broker] = { qty: 0, currency: BROKER_CURRENCY[tr.broker] || 'GBP' };
-            // Raw signed quantity from DB (Buy > 0, Sell < 0 — same convention as getEquitySummary)
-            cashByBroker[broker].qty += (parseFloat(tr.quantity) || 0);
+            cashByBroker[broker].qty += (parseFloat(String(tr.quantity)) || 0);
         });
         Object.values(cashByBroker).forEach(({ qty, currency }) => {
             if (Math.abs(qty) < 0.001) return;
-            // Cash price is 1 in broker currency
-            const toGBP = (v, c) => c === 'GBP' ? v : (c === 'BRL' ? v / rates.BRL : v / rates.USD);
-            equityCashGBP += toGBP(Math.abs(qty), currency);
+            equityCashGBP += toGBPSimple(Math.abs(qty), currency, rates);
         });
     }
-    // Shift cash from equity bucket to cash bucket
     masterEquity = Math.max(0, masterEquity - equityCashGBP);
-    let masterCash = equityCashGBP; // Start with equity cash; pension cash added below
+    let masterCash = equityCashGBP;
 
     // 2. Pension Redistribution
-    const pensionHoldings = {};
-    pensionTr.forEach((tr: any) => {
+    const pensionHoldings: Record<string, PensionMasterHolding> = {};
+    pensionTr.forEach((tr) => {
         const key = tr.asset;
         if (!pensionHoldings[key]) pensionHoldings[key] = {
-            asset: tr.asset,
-            qty: 0,
-            broker: tr.broker,
-            allocationClass: tr.allocationClass // Legacy, fallback
+            asset: tr.asset, qty: 0, broker: tr.broker, allocationClass: tr.allocationClass
         };
-
-        const qty = parseFloat(tr.quantity) || 0;
+        const qty = parseFloat(String(tr.quantity)) || 0;
         if (tr.type === 'Buy') pensionHoldings[key].qty += qty;
         else if (tr.type === 'Sell') pensionHoldings[key].qty -= qty;
     });
 
-    Object.values(pensionHoldings).filter((h: any) => Math.abs(h.qty) > 0.01).forEach((h: any) => {
-        // Price Lookup
-        const mapEntry = pensionMapInput.find((m: any) => m.asset === h.asset);
+    Object.values(pensionHoldings).filter((h) => Math.abs(h.qty) > 0.01).forEach((h) => {
+        const mapEntry = pensionMapInput.find((m) => m.asset === h.asset);
         const cur = BROKER_CURRENCY[h.broker] || 'GBP';
         let rawPrice = 0;
         let assetCurrency = cur;
 
         if (h.asset === 'Cash') rawPrice = 1.0;
-        else if (mapEntry && mapEntry.ticker && marketData[mapEntry.ticker]) {
+        else if (mapEntry?.ticker && marketData[mapEntry.ticker]) {
             rawPrice = marketData[mapEntry.ticker].price;
             assetCurrency = marketData[mapEntry.ticker].currency || 'USD';
-        } else if (pensionPrices && pensionPrices[h.asset]) {
+        } else if (pensionPrices?.[h.asset]) {
             rawPrice = pensionPrices[h.asset].price;
             assetCurrency = pensionPrices[h.asset].currency;
-        } else if (currentPrices && currentPrices[h.asset]) {
+        } else if (currentPrices?.[h.asset]) {
             rawPrice = currentPrices[h.asset];
-            if (mapEntry && mapEntry.currency) assetCurrency = mapEntry.currency;
+            if (mapEntry?.currency) assetCurrency = mapEntry.currency;
         }
 
-        // Convert to GBP
         let priceInGBP = rawPrice;
         if (assetCurrency !== 'GBP' && rawPrice > 0 && rates) {
-            const toGBP = (v, c) => c === 'GBP' ? v : (c === 'BRL' ? v / rates.BRL : v / rates.USD);
-            priceInGBP = toGBP(rawPrice, assetCurrency);
+            priceInGBP = toGBPSimple(rawPrice, assetCurrency, rates);
         }
 
         const valGBP = priceInGBP * h.qty;
 
-        // Redistribute based on allocations
         if (h.asset === 'Cash') {
             masterCash += valGBP;
-        } else if (mapEntry && mapEntry.allocations) {
-            Object.entries(mapEntry.allocations).forEach(([bucket, percentage]) => {
+        } else if (mapEntry?.allocations) {
+            Object.entries(mapEntry.allocations).forEach(([bucket, pct]) => {
+                const percentage = pct ?? 0;
                 const bucketVal = valGBP * percentage;
-                if (bucket === 'Equity') masterEquity += bucketVal;
-                else if (bucket === 'Fixed Income') masterFI += bucketVal;
-                else if (bucket === 'Real Estate') masterRE += bucketVal;
-                else if (bucket === 'Crypto') masterCrypto += bucketVal;
-                else if (bucket === 'Cash') masterCash += bucketVal;
+                    if (bucket === 'Equity') masterEquity += bucketVal;
+                    else if (bucket === 'Fixed Income') masterFI += bucketVal;
+                    else if (bucket === 'Real Estate') masterRE += bucketVal;
+                    else if (bucket === 'Crypto') masterCrypto += bucketVal;
+                    else if (bucket === 'Cash') masterCash += bucketVal;
             });
         } else {
-            // Fallback to legacy single class
-            let alloc = mapEntry?.allocationClass || h.allocationClass || 'Equity';
+            const alloc = mapEntry?.allocationClass || h.allocationClass || 'Equity';
             if (alloc === 'Fixed Income') masterFI += valGBP;
             else if (alloc === 'Real Estate') masterRE += valGBP;
             else if (alloc === 'Crypto') masterCrypto += valGBP;
@@ -990,15 +1062,15 @@ export const getMasterMixData = (
 
     const totalCalculated = masterEquity + masterFI + masterRE + masterCrypto + masterCash;
 
-    // --- Currency Exposure Aggregation (in GBP equivalents) ---
+    // --- Currency Exposure Aggregation ---
     let masterGBP = 0;
     let masterUSD = 0;
     let masterBRL = 0;
 
-    const accumulateCurrency = (data) => {
+    const accumulateCurrency = (data: CategorySummaryResult | null) => {
         if (!data || !data.individualHoldings) return;
-        data.individualHoldings.forEach((h: any) => {
-            const assetCur = h.nativeCurrency || assetClasses[h.name]?.currency || 'GBP';
+        data.individualHoldings.forEach((h) => {
+            const assetCur = (h as AssetHolding).nativeCurrency || assetClasses[h.name]?.currency || 'GBP';
             if (assetCur === 'BRL') masterBRL += h.gbp;
             else if (assetCur === 'USD') masterUSD += h.gbp;
             else masterGBP += h.gbp;
@@ -1010,48 +1082,39 @@ export const getMasterMixData = (
     accumulateCurrency(cryptoData);
     accumulateCurrency(equityData);
 
-    // Pension Currency Exposure (mostly GBP or USD based on map)
-    Object.values(pensionHoldings).filter((h: any) => Math.abs(h.qty) > 0.01).forEach((h: any) => {
-        const mapEntry = pensionMapInput.find((m: any) => m.asset === h.asset);
+    // Pension Currency Exposure
+    Object.values(pensionHoldings).filter((h) => Math.abs(h.qty) > 0.01).forEach((h) => {
+        const mapEntry = pensionMapInput.find((m) => m.asset === h.asset);
         const cur = BROKER_CURRENCY[h.broker] || 'GBP';
         let assetCurrency = cur;
 
         let rawPrice = 0;
         if (h.asset === 'Cash') rawPrice = 1.0;
-        else if (mapEntry && mapEntry.ticker && marketData[mapEntry.ticker]) {
+        else if (mapEntry?.ticker && marketData[mapEntry.ticker]) {
             rawPrice = marketData[mapEntry.ticker].price;
             assetCurrency = marketData[mapEntry.ticker].currency || 'USD';
-        } else if (pensionPrices && pensionPrices[h.asset]) {
+        } else if (pensionPrices?.[h.asset]) {
             rawPrice = pensionPrices[h.asset].price;
             assetCurrency = pensionPrices[h.asset].currency;
-        } else if (currentPrices && currentPrices[h.asset]) {
+        } else if (currentPrices?.[h.asset]) {
             rawPrice = currentPrices[h.asset];
-            if (mapEntry && mapEntry.currency) assetCurrency = mapEntry.currency;
+            if (mapEntry?.currency) assetCurrency = mapEntry.currency;
         }
 
         let priceInGBP = rawPrice;
         if (assetCurrency !== 'GBP' && rawPrice > 0 && rates) {
-            const toGBP = (v, c) => c === 'GBP' ? v : (c === 'BRL' ? v / rates.BRL : v / rates.USD);
-            priceInGBP = toGBP(rawPrice, assetCurrency);
+            priceInGBP = toGBPSimple(rawPrice, assetCurrency, rates);
         }
 
         const valGBP = priceInGBP * h.qty;
-
-        // Add to exposure
         const finalCur = assetClasses[h.asset]?.currency || assetCurrency;
         if (finalCur === 'BRL') masterBRL += valGBP;
         else if (finalCur === 'USD') masterUSD += valGBP;
-        else masterGBP += valGBP; // Default GBP
+        else masterGBP += valGBP;
     });
 
     return {
-        buckets: {
-            Equity: masterEquity,
-            FixedIncome: masterFI,
-            RealEstate: masterRE,
-            Crypto: masterCrypto,
-            Cash: masterCash
-        },
+        buckets: { Equity: masterEquity, FixedIncome: masterFI, RealEstate: masterRE, Crypto: masterCrypto, Cash: masterCash },
         percentages: {
             Equity: totalCalculated > 0 ? (masterEquity / totalCalculated) * 100 : 0,
             FixedIncome: totalCalculated > 0 ? (masterFI / totalCalculated) * 100 : 0,
@@ -1059,40 +1122,39 @@ export const getMasterMixData = (
             Crypto: totalCalculated > 0 ? (masterCrypto / totalCalculated) * 100 : 0,
             Cash: totalCalculated > 0 ? (masterCash / totalCalculated) * 100 : 0,
         },
-        byCurrency: {
-            GBP: masterGBP,
-            USD: masterUSD,
-            BRL: masterBRL
-        },
+        byCurrency: { GBP: masterGBP, USD: masterUSD, BRL: masterBRL },
         total: totalCalculated
     };
 };
 
+// ═══════════ getAllocationSummary ═══════════
+
+interface AllocationResult {
+    buckets: { FixedIncome: number; Equity: number; RealEstate: number; Crypto: number };
+    total: number;
+}
+
 export const getAllocationSummary = (
-    fixedIncomeTr,
-    realEstateData,
-    equityTr,
-    cryptoTr,
-    pensionTr,
-    rates,
-    pensionMapInput,
-    marketData,
-    pensionPrices,
-    currentPrices = {}
-) => {
-    // 1. Fixed Income
+    fixedIncomeTr: FixedIncomeTx[],
+    realEstateData: RealEstateData | Record<string, unknown> | null,
+    equityTr: EquityTx[],
+    cryptoTr: CryptoTx[],
+    pensionTr: PensionTx[],
+    rates: CurrencyRates,
+    pensionMapInput: PensionFundMapEntry[],
+    marketData: MarketDataMap,
+    pensionPrices: PensionPricesMap,
+    currentPrices: Record<string, number> = {}
+): AllocationResult => {
     const fiData = getFixedIncomeSummary(fixedIncomeTr, rates);
     const fiTotal = fiData.total.gbp || 0;
 
-    // 2. Real Estate
     const reData = getRealEstateSummary(realEstateData, marketData, rates);
     const reTotal = reData.total.gbp || 0;
 
-    // 3. Crypto
     const cryptoData = getCryptoSummary(cryptoTr, marketData, rates);
     const cryptoTotal = cryptoData.total.gbp || 0;
 
-    // 4. Equity
     const equityData = getEquitySummary(equityTr, marketData, rates);
     const equityTotal = equityData.total.gbp || 0;
 
@@ -1100,53 +1162,45 @@ export const getAllocationSummary = (
     let pensionEquity = 0;
     let pensionFixedIncome = 0;
 
-    // Adapted split logic matching getPensionSummary logic somewhat
-    const pensionHoldings = {};
-    pensionTr.forEach((tr: any) => {
+    const pensionHoldings: Record<string, PensionMasterHolding> = {};
+    pensionTr.forEach((tr) => {
         const key = tr.asset;
         if (!pensionHoldings[key]) pensionHoldings[key] = {
-            asset: tr.asset,
-            qty: 0,
-            broker: tr.broker,
-            allocationClass: tr.allocationClass
+            asset: tr.asset, qty: 0, broker: tr.broker, allocationClass: tr.allocationClass
         };
 
-        const qty = parseFloat(tr.quantity) || 0;
+        const qty = parseFloat(String(tr.quantity)) || 0;
         if (tr.type === 'Buy') pensionHoldings[key].qty += qty;
         else if (tr.type === 'Sell') pensionHoldings[key].qty -= qty;
     });
 
-    Object.values(pensionHoldings).filter((h: any) => Math.abs(h.qty) > 0.01).forEach((h: any) => {
+    Object.values(pensionHoldings).filter((h) => Math.abs(h.qty) > 0.01).forEach((h) => {
         let alloc = 'Equity';
-        const mapEntry = pensionMapInput.find((m: any) => m.asset === h.asset);
-        if (mapEntry && mapEntry.allocationClass) alloc = mapEntry.allocationClass;
+        const mapEntry = pensionMapInput.find((m) => m.asset === h.asset);
+        if (mapEntry?.allocationClass) alloc = mapEntry.allocationClass;
         else if (h.allocationClass) alloc = h.allocationClass;
 
         if (alloc === 'Fixed Income') alloc = 'FixedIncome';
 
-        // Price Lookup (Duplicated from getPensionSummary for safety)
         const cur = BROKER_CURRENCY[h.broker] || 'GBP';
         let rawPrice = 0;
         let assetCurrency = cur;
 
         if (h.asset === 'Cash') rawPrice = 1.0;
-        else if (mapEntry && mapEntry.ticker && marketData[mapEntry.ticker]) {
+        else if (mapEntry?.ticker && marketData[mapEntry.ticker]) {
             rawPrice = marketData[mapEntry.ticker].price;
             assetCurrency = marketData[mapEntry.ticker].currency || 'USD';
-        } else if (pensionPrices && pensionPrices[h.asset]) {
+        } else if (pensionPrices?.[h.asset]) {
             rawPrice = pensionPrices[h.asset].price;
             assetCurrency = pensionPrices[h.asset].currency;
-        } else if (currentPrices && currentPrices[h.asset]) {
+        } else if (currentPrices?.[h.asset]) {
             rawPrice = currentPrices[h.asset];
-            if (mapEntry && mapEntry.currency) assetCurrency = mapEntry.currency;
+            if (mapEntry?.currency) assetCurrency = mapEntry.currency;
         }
 
-        // Convert to GBP
         let priceInGBP = rawPrice;
-        if (assetCurrency !== 'GBP' && rawPrice > 0 && rates) { // Fixed: was assetCurrency === 'USD'
-            // Generic convert
-            const toGBP = (v, c) => c === 'GBP' ? v : (c === 'BRL' ? v / rates.BRL : v / rates.USD); // Simplified
-            priceInGBP = toGBP(rawPrice, assetCurrency);
+        if (assetCurrency !== 'GBP' && rawPrice > 0 && rates) {
+            priceInGBP = toGBPSimple(rawPrice, assetCurrency, rates);
         }
 
         const valGBP = priceInGBP * h.qty;

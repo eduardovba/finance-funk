@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS users (
     provider TEXT DEFAULT 'credentials',
     avatar_url TEXT,
     is_admin BOOLEAN DEFAULT 0,
+    onboarding_goal TEXT,
+    onboarding_completed BOOLEAN DEFAULT 0,
     deleted_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

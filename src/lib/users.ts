@@ -72,7 +72,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
  * Get a user by their ID.
  */
 export async function getUserById(id: string | number): Promise<User | undefined> {
-    return get<User>('SELECT id, name, email, provider, avatar_url, is_admin, created_at FROM users WHERE id = ?', [id]);
+    return get<User>('SELECT id, name, email, provider, avatar_url, is_admin, last_accessed_at, created_at FROM users WHERE id = ?', [id]);
 }
 
 /**
@@ -131,7 +131,7 @@ export async function deleteUserAndData(id: string | number): Promise<{ success:
  */
 export async function getAllUsers(): Promise<User[]> {
     return query<User>(
-        'SELECT id, name, email, provider, avatar_url, is_admin, created_at, deleted_at FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC'
+        'SELECT id, name, email, provider, avatar_url, is_admin, last_accessed_at, created_at, deleted_at FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC'
     );
 }
 
@@ -153,4 +153,11 @@ export async function softDeleteUser(userId: string | number): Promise<{ success
         [userId]
     );
     return { success: true };
+}
+
+/**
+ * Update the last accessed timestamp for a user.
+ */
+export async function touchLastAccessed(userId: string | number): Promise<void> {
+    await run('UPDATE users SET last_accessed_at = CURRENT_TIMESTAMP WHERE id = ?', [userId]);
 }

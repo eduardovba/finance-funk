@@ -1,12 +1,17 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useContext } from 'react';
 import { SUPPORTED_CURRENCIES } from '@/lib/currency';
-import { usePortfolio } from '@/context/PortfolioContext';
+import { PortfolioContext } from '@/context/PortfolioContext';
 import actualsData from '../../data/forecast_actuals.json';
 import { parseDate, getMonthDiff, calculateFV, calculatePMT } from '@/lib/forecastUtils';
 import type { GrowthForecastTabProps, ForecastPhase, ForecastDataPoint, StatusModalState } from './types';
 
 export default function useGrowthForecast({ currentPortfolioValueBrl, currentPortfolioValueGbp, liveContributionBrl, liveContributionGbp, budgetSurplusBrl }: GrowthForecastTabProps) {
-    const { formatPrimary, toPrimary, primaryCurrency, ftueState, updateFtueProgress } = usePortfolio() as any;
+    const portfolio = useContext(PortfolioContext);
+    const formatPrimary = (portfolio as any)?.formatPrimary ?? ((v: number) => `R$ ${v.toFixed(2)}`);
+    const toPrimary = (portfolio as any)?.toPrimary ?? ((v: number) => v);
+    const primaryCurrency = portfolio?.primaryCurrency ?? 'BRL';
+    const ftueState = (portfolio as any)?.ftueState ?? null;
+    const updateFtueProgress = (portfolio as any)?.updateFtueProgress ?? null;
     const primaryMeta = (SUPPORTED_CURRENCIES as any)[primaryCurrency];
 
     // Mark "exploreForecast" checklist item as done on first visit
@@ -46,6 +51,7 @@ export default function useGrowthForecast({ currentPortfolioValueBrl, currentPor
     const [lockedAt, setLockedAt] = useState<string | null>(null);
     const [ledgerOpen, setLedgerOpen] = useState(false);
     const [statusModal, setStatusModal] = useState<StatusModalState>({ isOpen: false, title: '', message: '', type: 'success' });
+    const [settingsLoaded, setSettingsLoaded] = useState(false);
 
     // ═══════════ LOAD FROM API ═══════════
     useEffect(() => {
@@ -74,6 +80,8 @@ export default function useGrowthForecast({ currentPortfolioValueBrl, currentPor
                 }
             } catch (err) {
                 console.error("Failed to load forecast settings", err);
+            } finally {
+                setSettingsLoaded(true);
             }
         };
         fetchSettings();
@@ -357,6 +365,7 @@ export default function useGrowthForecast({ currentPortfolioValueBrl, currentPor
 
     return {
         // State
+        settingsLoaded,
         monthlyContribution, setMonthlyContribution,
         annualInterestRate, setAnnualInterestRate,
         target2031, setTarget2031,

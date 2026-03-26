@@ -18,7 +18,7 @@ describe('getEquitySummary', () => {
             {
                 id: '1', date: '2024-01-15', asset: 'Apple Inc', ticker: 'AAPL',
                 broker: 'Trading 212', currency: 'GBP', quantity: 10,
-                investment: 1500, type: 'Buy', pnl: null,
+                investment: 1500, type: 'Buy', pnl: undefined,
             },
         ];
         const marketData = { AAPL: { price: 180, currency: 'USD' } };
@@ -31,8 +31,8 @@ describe('getEquitySummary', () => {
 
     it('handles multiple holdings across brokers', () => {
         const transactions = [
-            { id: '1', date: '2024-01-01', asset: 'Apple', ticker: 'AAPL', broker: 'Trading 212', currency: 'GBP', quantity: 10, investment: 1500, type: 'Buy', pnl: null },
-            { id: '2', date: '2024-01-02', asset: 'PETR4', ticker: 'PETR4', broker: 'XP', currency: 'BRL', quantity: 100, investment: 3550, type: 'Buy', pnl: null },
+            { id: '1', date: '2024-01-01', asset: 'Apple', ticker: 'AAPL', broker: 'Trading 212', currency: 'GBP', quantity: 10, investment: 1500, type: 'Buy', pnl: undefined },
+            { id: '2', date: '2024-01-02', asset: 'PETR4', ticker: 'PETR4', broker: 'XP', currency: 'BRL', quantity: 100, investment: 3550, type: 'Buy', pnl: undefined },
         ];
 
         const result = getEquitySummary(transactions, {}, defaultRates);
@@ -46,7 +46,7 @@ describe('getEquitySummary', () => {
 
     it('calculates ROI correctly', () => {
         const transactions = [
-            { id: '1', date: '2024-01-01', asset: 'Cash', ticker: 'Cash', broker: 'Trading 212', currency: 'GBP', quantity: 1000, investment: 1000, type: 'Buy', pnl: null },
+            { id: '1', date: '2024-01-01', asset: 'Cash', ticker: 'Cash', broker: 'Trading 212', currency: 'GBP', quantity: 1000, investment: 1000, type: 'Buy', pnl: undefined },
         ];
         const result = getEquitySummary(transactions, {}, defaultRates);
         // Cash at price=1.0, so value = 1000, cost = 1000, ROI = 0%

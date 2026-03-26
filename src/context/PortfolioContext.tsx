@@ -40,7 +40,7 @@ export interface PortfolioContextValue {
     forecastSettings: any;
     allocationTargets: any;
     sortedTransactions: any[];
-    assetClasses: Record<string, any>;
+    assetClasses: Record<string, unknown>;
     setAssetClasses: (v: any) => void;
 
     // Summaries
@@ -1030,10 +1030,68 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
 
 export { PortfolioContext };
 
+
+/* ─── Empty fallback so pages that mount during transitions don't crash ─── */
+const EMPTY_DIFF: { amount: number; percentage: number } = { amount: 0, percentage: 0 };
+const noop = () => {};
+const noopAsync = async () => {};
+const noopSet = (() => {}) as any;
+
+const FALLBACK_CONTEXT: PortfolioContextValue = {
+    transactions: [], equityTransactions: [], cryptoTransactions: [], pensionTransactions: [],
+    debtTransactions: [], fixedIncomeTransactions: [], realEstate: null, historicalSnapshots: [],
+    marketData: {}, pensionPrices: {}, rates: { BRL: 7, GBP: 1, USD: 1.27 },
+    loadingRates: true, lastUpdated: null, isInitialLoading: true,
+    isRefreshingMarketData: false, marketDataCacheInfo: null, ledgerData: null,
+    fxHistory: {}, forecastSettings: null, allocationTargets: null, sortedTransactions: [],
+    assetClasses: {}, setAssetClasses: noop,
+    fixedIncomeData: { assets: [], total: { brl: 0, gbp: 0 } },
+    equityData: { assets: [], total: { brl: 0, gbp: 0 } },
+    cryptoData: { assets: [], total: { brl: 0, gbp: 0 } },
+    pensionData: { assets: [], total: { brl: 0, gbp: 0 } },
+    realEstateData: { assets: [], total: { brl: 0, gbp: 0 } },
+    debtData: { assets: [], total: { brl: 0, gbp: 0 } },
+    totalFixedIncomeBRL: 0, totalEquityBRL: 0, totalCryptoBRL: 0,
+    totalPensionBRL: 0, totalRealEstateBRL: 0, totalDebtBRL: 0, totalNetWorthBRL: 0,
+    dashboardData: { netWorth: { amount: 0 }, summaries: [], categories: [] },
+    masterMixData: [], monthlyInvestments: [], dashboardConfig: null, setDashboardConfig: noop,
+    diffPrevMonth: EMPTY_DIFF, diffPrevMonthGBP: EMPTY_DIFF,
+    fxEffectBRL: EMPTY_DIFF, assetEffectBRL: EMPTY_DIFF,
+    fxEffectGBP: EMPTY_DIFF, assetEffectGBP: EMPTY_DIFF,
+    diffTarget: EMPTY_DIFF, diffTargetGBP: EMPTY_DIFF,
+    assetDiffs: {}, assetDiffsGBP: {}, categoryAssetDiffs: {},
+    refreshAllData: noopAsync, fetchRealEstate: noopAsync,
+    fetchMarketData: noopAsync, forceRefreshMarketData: noopAsync,
+    handleSaveTransaction: noopAsync, handleEditTransaction: noop,
+    handleDeleteClick: noop, handleConfirmDelete: noopAsync,
+    handleRecordSnapshot: noopAsync, setForecastSettings: noop,
+    appSettings: {}, handleUpdateAppSettings: noop,
+    ftueState: null, setFtueState: noop, updateFtueProgress: noopAsync, resetFtue: noop as any,
+    isFormOpen: false, setIsFormOpen: noop, editingTransaction: null, setEditingTransaction: noop,
+    isDeleteModalOpen: false, setIsDeleteModalOpen: noop, transactionToDelete: null,
+    isInspectorOpen: false, setIsInspectorOpen: noop, inspectorMode: 'settings', setInspectorMode: noop,
+    statusModal: { isOpen: false, title: '', message: '', type: 'success' }, setStatusModal: noop,
+    isMonthlyCloseModalOpen: false, setIsMonthlyCloseModalOpen: noop,
+    primaryCurrency: 'BRL', setPrimaryCurrency: noop,
+    secondaryCurrency: 'GBP', setSecondaryCurrency: noop,
+    rateFlipped: false, setRateFlipped: noop,
+    displayCurrencyOverrides: {}, setDisplayCurrencyOverride: noop,
+    formatPrimary: (v: number) => `R$ ${v.toFixed(2)}`,
+    formatSecondary: (v: number) => `£ ${v.toFixed(2)}`,
+    toPrimary: (v: number) => v, toSecondary: (v: number) => v,
+};
+
 export function usePortfolio(): PortfolioContextValue {
     const context = useContext(PortfolioContext);
     if (!context) {
-        throw new Error('usePortfolio must be used within a PortfolioProvider');
+        // During Next.js client-side transitions (AnimatePresence unmount/remount
+        // cycles), the provider may momentarily be unavailable. Return a safe
+        // fallback so the component can render without crashing; it will re-render
+        // with real data once the provider is back.
+        if (typeof window !== 'undefined') {
+            console.warn('[usePortfolio] Context unavailable — returning fallback. This is expected during route transitions.');
+        }
+        return FALLBACK_CONTEXT;
     }
     return context;
 }

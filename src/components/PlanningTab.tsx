@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { motion } from 'framer-motion';
 import AllocationTargetsBox from './AllocationTargetsBox';
 import GrowthForecastTab from './growth-forecast';
 import RebalanceAdvisorTab from './RebalanceAdvisorTab';
 import AssetsClassificationTab from './AssetsClassificationTab';
-import { usePortfolio } from '@/context/PortfolioContext';
+import { PortfolioContext } from '@/context/PortfolioContext';
 import useBudgetStore from '@/stores/useBudgetStore';
+import { Loader2 } from 'lucide-react';
 
 export default function PlanningTab({
     activeTab = 'targets',
@@ -18,6 +19,17 @@ export default function PlanningTab({
     onTargetsSaved
 }: any) {
 
+    const portfolio = useContext(PortfolioContext);
+
+    if (!portfolio) {
+        return (
+            <div className="w-full mx-auto pb-12 flex flex-col items-center justify-center gap-4 min-h-[400px]">
+                <Loader2 size={32} className="text-[#D4AF37] animate-spin" />
+                <span className="font-space text-data-sm text-white/40 tracking-widest uppercase">Loading…</span>
+            </div>
+        );
+    }
+
     const {
         equityTransactions,
         cryptoTransactions,
@@ -28,7 +40,7 @@ export default function PlanningTab({
         assetClasses,
         setAssetClasses,
         refreshAllData
-    } = usePortfolio();
+    } = portfolio;
 
     // ─── Budget → Forecast integration ──────────────────────
     const { currentRollup, fetchRollup } = useBudgetStore();
@@ -60,7 +72,7 @@ export default function PlanningTab({
         <div className="w-full max-w-7xl mx-auto space-y-6">
 
             {/* Sub-Tab Content Rendering */}
-            <div className="relative w-full">
+            <div className="relative w-full overflow-visible">
 
                 {/* 1. Allocation Targets & Classification (Stacked Layout) */}
                 {activeTab === 'targets' && (

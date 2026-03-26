@@ -3,6 +3,8 @@ import { query, run } from '@/lib/db';
 import { requireAuth } from '@/lib/authGuard';
 import { z } from 'zod';
 import { validateBody, validateId, dateField, currencyField, optionalNumber, optionalString } from '@/lib/validation';
+import { logger } from '@/lib/logger';
+import { apiError } from '@/lib/apiError';
 
 export const PostEquitySchema = z.object({
     ticker: z.string().min(1).max(20),
@@ -97,8 +99,8 @@ export async function GET(): Promise<NextResponse> {
         return NextResponse.json(data);
     } catch (e) {
         if (e instanceof Response) return e as unknown as NextResponse;
-        console.error('Database Error:', e);
-        return NextResponse.json({ error: 'Failed to fetch equity transactions' }, { status: 500 });
+        logger.error('Equity', e, { action: 'GET' });
+        return apiError('Failed to fetch equity transactions', 500, e);
     }
 }
 
@@ -151,8 +153,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ success: true, id: res.lastID });
     } catch (error) {
         if (error instanceof Response) return error as unknown as NextResponse;
-        console.error('POST Error:', error);
-        return NextResponse.json({ error: 'Failed to add transaction' }, { status: 500 });
+        logger.error('Equity', error, { action: 'POST' });
+        return apiError('Failed to add transaction', 500, error);
     }
 }
 
@@ -174,8 +176,8 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ success: true });
     } catch (error) {
         if (error instanceof Response) return error as unknown as NextResponse;
-        console.error('PUT Error:', error);
-        return NextResponse.json({ error: 'Failed to update transaction' }, { status: 500 });
+        logger.error('Equity', error, { action: 'PUT' });
+        return apiError('Failed to update transaction', 500, error);
     }
 }
 
@@ -191,7 +193,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ success: true });
     } catch (error) {
         if (error instanceof Response) return error as unknown as NextResponse;
-        console.error('DELETE Error:', error);
-        return NextResponse.json({ error: 'Failed to delete transaction' }, { status: 500 });
+        logger.error('Equity', error, { action: 'DELETE' });
+        return apiError('Failed to delete transaction', 500, error);
     }
 }

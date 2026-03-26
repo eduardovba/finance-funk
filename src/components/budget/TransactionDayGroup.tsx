@@ -12,9 +12,10 @@ interface TransactionDayGroupProps {
     selectedTxIds: Set<number>;
     onToggleSelect: (id: number) => void;
     onDelete: (id: number) => void;
+    onEdit: (transaction: BudgetTransaction) => void;
 }
 
-export default function TransactionDayGroup({ date, transactions, categories, selectedTxIds, onToggleSelect, onDelete }: TransactionDayGroupProps) {
+export default function TransactionDayGroup({ date, transactions, categories, selectedTxIds, onToggleSelect, onDelete, onEdit }: TransactionDayGroupProps) {
     const categoryMap = new Map(categories.map(c => [c.id, c]));
 
     return (
@@ -34,6 +35,7 @@ export default function TransactionDayGroup({ date, transactions, categories, se
                         isSelected={selectedTxIds.has(tx.id)}
                         onToggleSelect={() => onToggleSelect(tx.id)}
                         onDelete={onDelete}
+                        onEdit={onEdit}
                     />
                 ))}
             </div>

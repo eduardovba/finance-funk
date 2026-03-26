@@ -368,5 +368,12 @@ function getMigrations(): Migration[] {
                 "ALTER TABLE users ADD COLUMN onboarding_goal TEXT",
             ],
         },
+        {
+            version: 15,
+            name: 'add_last_accessed',
+            sql: [
+                "ALTER TABLE users ADD COLUMN last_accessed_at DATETIME",
+            ],
+        },
     ];
 }

@@ -46,7 +46,7 @@ export default function BudgetTabs() {
     const currentCurrencyMeta = SUPPORTED_CURRENCIES[displayCurrency] ?? SUPPORTED_CURRENCIES.BRL;
 
     return (
-        <div className="rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] px-2 py-1.5 flex items-center justify-between gap-2 mb-6">
+        <div className="relative z-20 rounded-2xl bg-[#121418]/60 backdrop-blur-xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] px-2 py-1.5 flex items-center justify-between gap-2 mb-6">
             {/* Tab Pills */}
             <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
                 {TABS.map(tab => {

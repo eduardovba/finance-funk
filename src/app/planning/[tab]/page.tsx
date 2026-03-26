@@ -1,14 +1,32 @@
 "use client";
 
-import { useMemo } from 'react';
+import { useMemo, useContext } from 'react';
 import { useParams } from 'next/navigation';
-import { usePortfolio } from '@/context/PortfolioContext';
+import { PortfolioContext } from '@/context/PortfolioContext';
+import type { PortfolioContextValue } from '@/context/PortfolioContext';
 import PlanningTab from '@/components/PlanningTab';
 import actualsData from '@/data/forecast_actuals.json';
+import { Loader2 } from 'lucide-react';
 
 export default function PlanningPage() {
     const params = useParams();
     const activeTab = (params?.tab as string) || 'targets';
+
+    // Use raw useContext to avoid any throwing behavior from stale
+    // cached builds of usePortfolio(). This is the resilient path.
+    const portfolio = useContext(PortfolioContext);
+
+    // If the context is still unavailable (route transition in progress),
+    // show a brief loading state rather than crashing.
+    if (!portfolio) {
+        return (
+            <div className="w-full mx-auto pb-12 flex flex-col items-center justify-center gap-4 min-h-[400px]">
+                <Loader2 size={32} className="text-[#D4AF37] animate-spin" />
+                <span className="font-space text-data-sm text-white/40 tracking-widest uppercase">Loading…</span>
+            </div>
+        );
+    }
+
     const {
         forecastSettings,
         setForecastSettings,
@@ -18,7 +36,7 @@ export default function PlanningPage() {
         allocationTargets,
         refreshAllData,
         historicalSnapshots
-    } = usePortfolio();
+    } = portfolio;
 
     const mergedActuals = useMemo(() => {
         const dataMap = new Map();

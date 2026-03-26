@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { requireAuth } from '@/lib/authGuard';
+import { z } from 'zod';
+import { validateBody } from '@/lib/validation';
+
+const DuplicateCheckSchema = z.object({
+    transactions: z.array(z.object({
+        date: z.string().min(1),
+        asset: z.string().optional(),
+        ticker: z.string().optional(),
+        broker: z.string().optional(),
+        amount: z.number().optional(),
+        type: z.string().optional(),
+        currency: z.string().optional(),
+        assetClass: z.string().optional(),
+    }))
+});
 
 /**
  * POST /api/import/duplicate-check
@@ -14,22 +29,11 @@ import { requireAuth } from '@/lib/authGuard';
 export async function POST(request: NextRequest): Promise<NextResponse> {
     try {
         const user = await requireAuth();
-        const { transactions } = (await request.json()) as {
-            transactions: {
-                date: string;
-                asset?: string;
-                ticker?: string;
-                broker?: string;
-                amount?: number;
-                type?: string;
-                currency?: string;
-                assetClass?: string;
-            }[];
-        };
+        const body: unknown = await request.json();
+        const { data, error } = validateBody(DuplicateCheckSchema, body);
+        if (error) return NextResponse.json({ error }, { status: 400 });
 
-        if (!Array.isArray(transactions) || transactions.length === 0) {
-            return NextResponse.json({ duplicateIndices: [] });
-        }
+        const { transactions } = data!;
 
         const duplicateIndices: number[] = [];
 

@@ -9,6 +9,7 @@ export interface User {
     avatar_url?: string | null;
     is_admin: boolean;
     deleted_at?: string | null;
+    last_accessed_at?: string | null;
     created_at: string;
 }
 

@@ -8,9 +8,11 @@ import useBudgetStore from '@/stores/useBudgetStore';
 import MonthNavigator from '@/components/budget/MonthNavigator';
 import TransactionDayGroup from '@/components/budget/TransactionDayGroup';
 import QuickAddSheet from '@/components/budget/QuickAddSheet';
+import EditTransactionModal from '@/components/budget/EditTransactionModal';
 import BudgetToast from '@/components/budget/BudgetToast';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import { formatCents } from '@/lib/budgetUtils';
+import type { BudgetTransaction } from '@/types';
 
 const FloatingActionButton = _FloatingActionButton as any;
 
@@ -26,6 +28,7 @@ export default function TransactionFeed() {
         fetchCategories,
         fetchTransactions,
         addTransaction,
+        updateTransaction,
         deleteTransaction,
         bulkDeleteTransactions,
     } = useBudgetStore();
@@ -34,6 +37,7 @@ export default function TransactionFeed() {
     const [selectedTxIds, setSelectedTxIds] = useState<Set<number>>(new Set());
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+    const [editingTx, setEditingTx] = useState<BudgetTransaction | null>(null);
 
     // Clear selection when month changes
     useEffect(() => {
@@ -237,6 +241,7 @@ export default function TransactionFeed() {
                         selectedTxIds={selectedTxIds}
                         onToggleSelect={handleToggleSelect}
                         onDelete={handleSingleDelete}
+                        onEdit={setEditingTx}
                     />
                 ))
             )}
@@ -259,6 +264,18 @@ export default function TransactionFeed() {
 
             {/* Toast */}
             <BudgetToast />
+
+            {/* Edit Transaction Modal */}
+            <EditTransactionModal
+                isOpen={editingTx !== null}
+                transaction={editingTx}
+                categories={categories}
+                onClose={() => setEditingTx(null)}
+                onSave={async (body) => {
+                    await updateTransaction(body);
+                    useBudgetStore.setState({ toastError: '✅ Transaction updated.' });
+                }}
+            />
 
             {/* Bulk Delete Confirmation */}
             <ConfirmationModal

@@ -44,6 +44,7 @@ export default function StatusModal({
           variant={isSuccess ? "primary" : "danger"}
           className="w-full"
           size="lg"
+          type="button"
           onClick={onClose}
         >
           Great!

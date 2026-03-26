@@ -107,6 +107,27 @@ export default function TutorialOverlay() {
     // Show end screen only when we legitimately reach the end of the loaded step array
     const isLastTutorialStep = totalSteps > 0 && currentStep === totalSteps;
 
+    const updateRect = useCallback((stepIndex: number) => {
+        if (stepIndex >= totalSteps || activeSteps.length === 0) {
+            setTargetRect(null);
+            return;
+        }
+        const step = activeSteps[stepIndex];
+        if (!step) return;
+        const isMob = window.innerWidth < 1024;
+        const elId = (isMob && step.mobileTargetId) ? step.mobileTargetId : step.targetId;
+        const el = document.getElementById(elId);
+        if (el) {
+            const rect = el.getBoundingClientRect();
+            setTargetRect({
+                x: rect.x - SPOTLIGHT_PADDING,
+                y: rect.y - SPOTLIGHT_PADDING,
+                width: rect.width + SPOTLIGHT_PADDING * 2,
+                height: rect.height + SPOTLIGHT_PADDING * 2,
+            });
+        }
+    }, [totalSteps, activeSteps]);
+
     // Measure the target element
     const measureTarget = useCallback((stepIndex: number) => {
         if (stepIndex >= totalSteps || activeSteps.length === 0) {
@@ -120,34 +141,43 @@ export default function TutorialOverlay() {
         if (el) {
             // Scroll into view smoothly
             el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+            updateRect(stepIndex);
             // Wait for scroll to settle, then measure
             setTimeout(() => {
-                const rect = el.getBoundingClientRect();
-                setTargetRect({
-                    x: rect.x - SPOTLIGHT_PADDING,
-                    y: rect.y - SPOTLIGHT_PADDING,
-                    width: rect.width + SPOTLIGHT_PADDING * 2,
-                    height: rect.height + SPOTLIGHT_PADDING * 2,
-                });
+                updateRect(stepIndex);
             }, 400);
         } else {
             setTargetRect(null);
         }
-    }, [totalSteps, activeSteps]);
+    }, [totalSteps, activeSteps, updateRect]);
 
     useEffect(() => {
         if (mounted && ftueState?.wizardCompleted === true) {
             measureTarget(currentStep);
 
-            const handleResize = () => measureTarget(currentStep);
-            window.addEventListener('resize', handleResize);
-            window.addEventListener('scroll', handleResize, true);
+            const handleUpdate = () => updateRect(currentStep);
+            window.addEventListener('resize', handleUpdate);
+            window.addEventListener('scroll', handleUpdate, true);
+
+            let resizeObserver: ResizeObserver | null = null;
+            if (currentStep < activeSteps.length) {
+                const step = activeSteps[currentStep];
+                const isMob = window.innerWidth < 1024;
+                const elId = (isMob && step.mobileTargetId) ? step.mobileTargetId : step.targetId;
+                const el = document.getElementById(elId);
+                if (el) {
+                    resizeObserver = new ResizeObserver(() => handleUpdate());
+                    resizeObserver.observe(el);
+                }
+            }
+
             return () => {
-                window.removeEventListener('resize', handleResize);
-                window.removeEventListener('scroll', handleResize, true);
+                window.removeEventListener('resize', handleUpdate);
+                window.removeEventListener('scroll', handleUpdate, true);
+                if (resizeObserver) resizeObserver.disconnect();
             };
         }
-    }, [currentStep, measureTarget, mounted, ftueState?.wizardCompleted]);
+    }, [currentStep, measureTarget, updateRect, mounted, ftueState?.wizardCompleted, activeSteps]);
 
     const goNext = useCallback(async () => {
         setIsTransitioning(true);

@@ -49,6 +49,7 @@ export interface BudgetActions {
         date: string;
         is_recurring?: boolean;
     }) => Promise<void>;
+    updateTransaction: (body: { id: number; category_id?: number | null; amount_cents?: number; currency?: string; description?: string | null; date?: string; source?: string | null }) => Promise<void>;
     deleteTransaction: (id: number) => Promise<void>;
     bulkDeleteTransactions: (ids: number[]) => Promise<void>;
     fetchRollup: (month?: string) => Promise<void>;
@@ -330,6 +331,40 @@ const useBudgetStore = create<BudgetState & BudgetActions>((set, get) => ({
                 transactions: prevTransactions,
                 currentRollup: prevRollup,
                 toastError: 'Failed to save transaction. Please try again.',
+            });
+        }
+    },
+
+    updateTransaction: async (body) => {
+        const prevTransactions = get().transactions;
+        const prevRollup = get().currentRollup;
+
+        // Optimistic update
+        set({
+            transactions: prevTransactions.map(t =>
+                t.id === body.id ? { ...t, ...body } as BudgetTransaction : t
+            ),
+        });
+
+        try {
+            const res = await fetch('/api/budget/transactions', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            if (!res.ok) throw new Error('Failed to update transaction');
+
+            // Re-fetch for server truth
+            await Promise.all([
+                get().fetchTransactions(),
+                get().fetchRollup(),
+            ]);
+        } catch (err) {
+            console.error('updateTransaction error:', err);
+            set({
+                transactions: prevTransactions,
+                currentRollup: prevRollup,
+                toastError: 'Failed to update transaction. Please try again.',
             });
         }
     },

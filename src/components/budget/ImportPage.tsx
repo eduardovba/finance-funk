@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, FileText, Trash2, CheckCircle2, AlertTriangle, Loader2, Bookmark, EyeOff, Copy } from 'lucide-react';
+import { Upload, FileText, Trash2, CheckCircle2, AlertTriangle, Loader2, Bookmark, EyeOff, Copy, Undo2, ChevronDown } from 'lucide-react';
 import useBudgetStore from '@/stores/useBudgetStore';
 import { detectAndParse, getAdapter, BANK_ADAPTERS, type StagedTransaction, type DetectedFormat, type BankAdapter } from '@/lib/csvAdapters';
 import { findCategoryMatch, suggestRuleKey } from '@/lib/autoCategorize';
@@ -14,6 +14,8 @@ export default function ImportPage() {
 
     const [detectedAdapter, setDetectedAdapter] = useState<BankAdapter | null>(null);
     const [stagedRows, setStagedRows] = useState<StagedTransaction[]>([]);
+    const [removedRows, setRemovedRows] = useState<StagedTransaction[]>([]);
+    const [removedOpen, setRemovedOpen] = useState(false);
     const [fileLoaded, setFileLoaded] = useState(false);
     const [saving, setSaving] = useState(false);
     const [saveResult, setSaveResult] = useState<{ success: boolean; count?: number; error?: string } | null>(null);
@@ -64,11 +66,17 @@ export default function ImportPage() {
             return matchId !== null ? { ...row, category_id: matchId } : row;
         });
 
-        // Auto-filter ignored rows
-        const filtered = autoCategorized.filter(row => {
+        // Auto-filter ignored rows, capturing them for the removed section
+        const filtered: StagedTransaction[] = [];
+        const autoIgnored: StagedTransaction[] = [];
+        for (const row of autoCategorized) {
             const upper = row.description.toUpperCase();
-            return !ignoreRules.some(rule => upper.includes(rule.toUpperCase()));
-        });
+            if (ignoreRules.some(rule => upper.includes(rule.toUpperCase()))) {
+                autoIgnored.push(row);
+            } else {
+                filtered.push(row);
+            }
+        }
 
         // ─── Duplicate detection ────────────────────────────
         // Gather unique months from staged rows
@@ -100,6 +108,8 @@ export default function ImportPage() {
         setDuplicateIds(dupes);
 
         setStagedRows(filtered);
+        setRemovedRows(autoIgnored);
+        setRemovedOpen(autoIgnored.length > 0);
         setFileLoaded(true);
         setSaveResult(null);
         setLearnPrompt(null);
@@ -168,10 +178,23 @@ export default function ImportPage() {
     const handleAcceptIgnore = () => {
         if (!ignorePrompt) return;
         saveIgnoreRule(ignorePrompt.ruleKey);
-        // Remove the original row + all other rows matching the rule
-        setStagedRows(prev => prev.filter(r =>
-            !r.description.toUpperCase().includes(ignorePrompt.ruleKey.toUpperCase())
-        ));
+        // Move matching rows to removedRows instead of discarding
+        setStagedRows(prev => {
+            const kept: StagedTransaction[] = [];
+            const removed: StagedTransaction[] = [];
+            for (const r of prev) {
+                if (r.description.toUpperCase().includes(ignorePrompt.ruleKey.toUpperCase())) {
+                    removed.push(r);
+                } else {
+                    kept.push(r);
+                }
+            }
+            if (removed.length > 0) {
+                setRemovedRows(p => [...p, ...removed]);
+                setRemovedOpen(true);
+            }
+            return kept;
+        });
         setIgnorePrompt(null);
     };
 
@@ -183,7 +206,19 @@ export default function ImportPage() {
     };
 
     const handleRemoveRow = (id: string) => {
-        setStagedRows(prev => prev.filter(r => r.id !== id));
+        setStagedRows(prev => {
+            const row = prev.find(r => r.id === id);
+            if (row) setRemovedRows(p => [...p, row]);
+            return prev.filter(r => r.id !== id);
+        });
+    };
+
+    const handleRestoreRow = (id: string) => {
+        setRemovedRows(prev => {
+            const row = prev.find(r => r.id === id);
+            if (row) setStagedRows(p => [...p, row]);
+            return prev.filter(r => r.id !== id);
+        });
     };
 
     const handleSave = async () => {
@@ -226,6 +261,8 @@ export default function ImportPage() {
 
     const handleReset = () => {
         setStagedRows([]);
+        setRemovedRows([]);
+        setRemovedOpen(false);
         setFileLoaded(false);
         setSaveResult(null);
     };
@@ -547,6 +584,64 @@ export default function ImportPage() {
                             </React.Fragment>
                         ))}
                     </div>
+
+                    {/* ─── Removed / Ignored Transactions ──────────── */}
+                    {removedRows.length > 0 && (
+                        <div className="flex flex-col gap-1.5">
+                            <button
+                                onClick={() => setRemovedOpen(o => !o)}
+                                className="flex items-center gap-2 py-2 group"
+                            >
+                                <ChevronDown
+                                    size={14}
+                                    className={`text-[#F5F5DC]/25 transition-transform duration-200 ${removedOpen ? '' : '-rotate-90'}`}
+                                />
+                                <span className="text-xs font-space text-[#F5F5DC]/30 uppercase tracking-wider">
+                                    {removedRows.length} removed transaction{removedRows.length !== 1 ? 's' : ''}
+                                </span>
+                                <div className="flex-1 h-px bg-white/[0.04]" />
+                            </button>
+
+                            <AnimatePresence>
+                                {removedOpen && removedRows.map((row, i) => (
+                                    <motion.div
+                                        key={row.id}
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        transition={{ delay: Math.min(i * 0.02, 0.3) }}
+                                        className="rounded-xl border border-dashed border-white/[0.06] bg-[#121418]/40 backdrop-blur-xl px-4 py-3 flex items-center gap-3 opacity-50 hover:opacity-75 transition-opacity"
+                                    >
+                                        {/* Date */}
+                                        <span className="text-data-xs font-space text-[#F5F5DC]/20 w-20 flex-shrink-0">
+                                            {row.date}
+                                        </span>
+
+                                        {/* Description */}
+                                        <span className="text-sm font-space text-[#F5F5DC]/40 truncate min-w-0 flex-1">
+                                            {row.description}
+                                        </span>
+
+                                        {/* Amount */}
+                                        <span className={`text-data-sm font-space flex-shrink-0 ${
+                                            row.is_income ? 'text-[#34D399]/50' : 'text-[#F5F5DC]/30'
+                                        }`}>
+                                            {row.is_income ? '+' : '-'}{formatCents(row.amount_cents, row.currency)}
+                                        </span>
+
+                                        {/* Restore button */}
+                                        <button
+                                            onClick={() => handleRestoreRow(row.id)}
+                                            title="Restore this transaction"
+                                            className="p-1.5 rounded-lg hover:bg-[#34D399]/10 transition-colors group/restore"
+                                        >
+                                            <Undo2 size={14} className="text-[#F5F5DC]/20 group-hover/restore:text-[#34D399]" />
+                                        </button>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+                        </div>
+                    )}
 
                     {/* Save button */}
                     <motion.button

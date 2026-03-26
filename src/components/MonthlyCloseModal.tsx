@@ -255,8 +255,8 @@ export default function MonthlyCloseModal({
                                     <span>Market Prices Updated</span>
                                 </div>
                                 <div className="flex items-center gap-2.5" style={{ fontSize: '0.85rem' }}>
-                                    <div className="flex items-center justify-center text-[10px]" style={{ width: '18px', height: '18px', borderRadius: '50%', background: (snapshotData.income?.total > 0) ? '#10b981' : '#f59e0b', color: '#000' }}>
-                                        {(snapshotData.income?.total > 0) ? '✓' : '!'}
+                                    <div className="flex items-center justify-center text-[10px]" style={{ width: '18px', height: '18px', borderRadius: '50%', background: ((snapshotData.income?.total ?? 0) > 0) ? '#10b981' : '#f59e0b', color: '#000' }}>
+                                        {((snapshotData.income?.total ?? 0) > 0) ? '✓' : '!'}
                                     </div>
                                     <span>Income Data Registered</span>
                                 </div>
@@ -325,7 +325,7 @@ export default function MonthlyCloseModal({
                                 <div>
                                     <div className="text-[0.65rem] mb-1" style={{ color: 'var(--fg-secondary)' }}>Avg. Savings Rate</div>
                                     <div style={{ fontSize: '1.2rem', fontWeight: '600', color: '#10b981' }}>
-                                        {((snapshotData.investment?.total / Math.max(1, snapshotData.income?.total)) * 100).toFixed(1)}%
+                                        {(((snapshotData.investment?.total ?? 0) / Math.max(1, snapshotData.income?.total ?? 1)) * 100).toFixed(1)}%
                                     </div>
                                 </div>
                                 <div>
