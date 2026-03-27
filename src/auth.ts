@@ -6,12 +6,6 @@ import type { User } from "@/types";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     trustHost: true,
-    debug: true,
-    logger: {
-        error(code, ...message) { console.error(`[AUTH ERROR] ${code}:`, ...message); },
-        warn(code) { console.warn(`[AUTH WARN] ${code}`); },
-        debug(code, ...message) { console.log(`[AUTH DEBUG] ${code}:`, ...message); },
-    },
     // Explicit cookie config to avoid __Secure- prefix issues
     cookies: {
         sessionToken: {
@@ -94,7 +88,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     callbacks: {
         async signIn({ user, account }) {
-            console.log("[AUTH] signIn callback START", { provider: account?.provider, email: user.email });
             if (account?.provider === "google") {
                 try {
                     const dbUser = await findOrCreateOAuthUser({
@@ -103,16 +96,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         provider: "google",
                     });
                     if ((dbUser as User).deleted_at) {
-                        console.log("[AUTH] signIn: user is soft-deleted");
                         return false;
                     }
                     user.id = String(dbUser.id);
-                    console.log("[AUTH] signIn: mapped to DB user id", user.id);
                     if (user.image) {
                         await updateUserAvatar(dbUser.id, user.image);
                     }
                 } catch (error) {
-                    console.error("[AUTH] Error in signIn callback:", error);
+                    console.error("Error creating OAuth user:", error);
                     return false;
                 }
             }
@@ -122,11 +113,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     if ((dbUser as User)?.deleted_at) return false;
                 } catch (_e) { /* allow sign in if check fails */ }
             }
-            console.log("[AUTH] signIn returning TRUE");
             return true;
         },
-        async jwt({ token, user, trigger }) {
-            console.log("[AUTH] jwt callback", { trigger, hasUser: !!user, tokenId: token?.id });
+        async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;
                 token.picture = user.image || null;
