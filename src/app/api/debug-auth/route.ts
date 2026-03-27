@@ -1,32 +1,31 @@
 import { NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
     const checks: Record<string, string> = {};
 
-    // Check AUTH_SECRET
-    checks.AUTH_SECRET = process.env.AUTH_SECRET ? '✅ Set' : '❌ Missing';
-    checks.GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID ? '✅ Set' : '❌ Missing';
-    checks.GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET ? '✅ Set' : '❌ Missing';
-    checks.TURSO_DATABASE_URL = process.env.TURSO_DATABASE_URL ? '✅ Set' : '❌ Missing';
-    checks.TURSO_AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN ? '✅ Set' : '❌ Missing';
-    checks.NEXTAUTH_URL = process.env.NEXTAUTH_URL || process.env.AUTH_URL || 'Not set (auto-detect)';
+    checks.AUTH_SECRET = process.env.AUTH_SECRET ? 'Set' : 'MISSING';
+    checks.GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID ? 'Set' : 'MISSING';
+    checks.GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'MISSING';
+    checks.TURSO_DATABASE_URL = process.env.TURSO_DATABASE_URL ? 'Set' : 'MISSING';
+    checks.TURSO_AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN ? 'Set' : 'MISSING';
+    checks.AUTH_URL = process.env.AUTH_URL || process.env.NEXTAUTH_URL || 'not-set';
+    checks.VERCEL_URL = process.env.VERCEL_URL || 'not-set';
+    checks.NODE_ENV = process.env.NODE_ENV || 'not-set';
 
-    // Test DB connectivity
+    // Test DB connectivity without import chain
     try {
-        const result = await query<{ cnt: number }>('SELECT COUNT(*) as cnt FROM users');
-        checks.DB_CONNECTION = `✅ Connected (${result[0]?.cnt ?? '?'} users)`;
+        const { createClient } = await import('@libsql/client');
+        const client = createClient({
+            url: process.env.TURSO_DATABASE_URL!,
+            authToken: process.env.TURSO_AUTH_TOKEN,
+        });
+        const result = await client.execute('SELECT COUNT(*) as cnt FROM users');
+        checks.DB_CONNECTION = `OK (${result.rows[0]?.cnt} users)`;
     } catch (e) {
-        checks.DB_CONNECTION = `❌ Failed: ${e instanceof Error ? e.message : String(e)}`;
+        checks.DB_CONNECTION = `FAILED: ${e instanceof Error ? e.message : String(e)}`;
     }
 
-    // Test migrations table
-    try {
-        const result = await query<{ v: number }>('SELECT MAX(version) as v FROM _migrations');
-        checks.MIGRATIONS = `✅ Version ${result[0]?.v ?? 'unknown'}`;
-    } catch (e) {
-        checks.MIGRATIONS = `❌ Failed: ${e instanceof Error ? e.message : String(e)}`;
-    }
-
-    return NextResponse.json(checks, { status: 200 });
+    return NextResponse.json(checks);
 }
