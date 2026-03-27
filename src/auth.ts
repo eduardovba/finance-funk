@@ -54,6 +54,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     callbacks: {
         async signIn({ user, account }) {
+            console.log("[AUTH] signIn callback START", { provider: account?.provider, userId: user.id, email: user.email });
             // For OAuth providers, find or create the user in our DB
             if (account?.provider === "google") {
                 try {
@@ -63,14 +64,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         provider: "google",
                     });
                     // Block soft-deleted users
-                    if ((dbUser as User).deleted_at) return false;
+                    if ((dbUser as User).deleted_at) {
+                        console.log("[AUTH] signIn: user is soft-deleted, blocking");
+                        return false;
+                    }
                     user.id = String(dbUser.id);
+                    console.log("[AUTH] signIn: mapped to DB user id", user.id);
                     // Persist Google avatar to our DB
                     if (user.image) {
                         await updateUserAvatar(dbUser.id, user.image);
                     }
                 } catch (error) {
-                    console.error("[AUTH] Error creating OAuth user:", error);
+                    console.error("[AUTH] Error in signIn callback:", error);
                     console.error("[AUTH] Stack:", error instanceof Error ? error.stack : 'no stack');
                     return false;
                 }
@@ -82,12 +87,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     if ((dbUser as User)?.deleted_at) return false;
                 } catch (_e) { /* allow sign in if check fails */ }
             }
+            console.log("[AUTH] signIn returning TRUE");
             return true;
         },
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger }) {
+            console.log("[AUTH] jwt callback START", { trigger, hasUser: !!user, tokenSub: token?.sub, tokenId: token?.id });
             if (user) {
                 token.id = user.id;
                 token.picture = user.image || null;
+                console.log("[AUTH] jwt: set token.id =", token.id);
             }
             // Refresh avatar + admin flag from DB
             if (token.id) {
@@ -95,11 +103,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     const dbUser = await getUserById(token.id as string);
                     if (dbUser?.avatar_url) token.picture = dbUser.avatar_url;
                     token.is_admin = !!dbUser?.is_admin;
-                } catch (_e) { /* ignore */ }
+                    console.log("[AUTH] jwt: refreshed from DB, is_admin=", token.is_admin);
+                } catch (e) {
+                    console.error("[AUTH] jwt: getUserById failed:", e);
+                }
             }
+            console.log("[AUTH] jwt returning token with id=", token.id);
             return token;
         },
         async session({ session, token }) {
+            console.log("[AUTH] session callback START", { tokenId: token?.id });
             if (token?.id) {
                 // @ts-expect-error — NextAuth v5 beta session.user type doesn't include custom id field
                 session.user.id = token.id;
@@ -109,6 +122,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
             // @ts-expect-error — NextAuth v5 beta session.user type doesn't include is_admin
             session.user.is_admin = !!token?.is_admin;
+            console.log("[AUTH] session returning with user.id=", session.user?.id);
             return session;
         },
     },
