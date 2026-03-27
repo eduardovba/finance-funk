@@ -145,7 +145,10 @@ export default function DashboardHero(props: DashboardHeroProps) {
                 <motion.div whileTap={{ scale: 0.9 }} className="mt-0.5 relative group cursor-pointer w-16 h-16 shrink-0">
                     <div className={`absolute inset-0 rounded-full blur-md opacity-30 ${currentROI.percentage >= 0 ? 'bg-vu-green' : 'bg-red-400'}`} />
                     <div className={`relative z-10 w-full h-full rounded-full flex flex-col items-center justify-center bg-gradient-to-br from-black/80 to-[#1A0F2E]/80 border shadow-inner transition-colors duration-500 ${currentROI.percentage >= 0 ? 'border-vu-green/40 shadow-vu-green/20' : 'border-red-400/40 shadow-red-400/20'}`}>
-                        <span className="text-2xs uppercase tracking-widest text-[#F5F5DC]/50 font-space mt-px">{getJargon('roi', experience)}</span>
+                        <div className={`mb-1 ${currentROI.percentage >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.48 12H2"/></svg>
+                        </div>
+                        <span className="text-2xs uppercase tracking-widest text-[#F5F5DC]/50 font-space">{getJargon('roi', experience)}</span>
                         <span className={`text-sm font-bold font-space leading-tight ${currentROI.percentage >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
                             {currentROI.percentage >= 0 ? '+' : ''}{currentROI.percentage.toFixed(1)}%
                         </span>
@@ -164,7 +167,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                 {/* MoM Pill */}
                 <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-md bg-white/[0.03] border shadow-[0_4px_12px_rgba(0,0,0,0.2)] ${(diffPrevMonth?.amount || 0) >= 0 ? 'border-vu-green/20 shadow-vu-green/[0.05]' : 'border-red-400/20 shadow-red-400/[0.05]'}`}>
                     <div className={`flex items-center justify-center w-5 h-5 rounded-full bg-black/40 ${(diffPrevMonth?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </div>
                     <div className="flex items-baseline gap-1.5">
                         <span className="text-2xs uppercase font-space tracking-widest opacity-60 hidden min-[400px]:block">{getJargon('monthlyChange', experience)}</span>
@@ -178,7 +181,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                 {Math.abs(diffTarget?.amount || 0) > 1 && (
                     <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-md bg-white/[0.03] border shadow-[0_4px_12px_rgba(0,0,0,0.2)] ${(diffTarget?.amount || 0) >= 0 ? 'border-vu-green/20 shadow-vu-green/[0.05]' : 'border-red-400/20 shadow-red-400/[0.05]'}`}>
                         <div className={`flex items-center justify-center w-5 h-5 rounded-full bg-black/40 ${(diffTarget?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 13V2l8 4-8 4"/><path d="M20.55 10.23A9 9 0 1 1 8 4.94"/><path d="M8 10a5 5 0 1 0 8.9 2.02"/></svg>
                         </div>
                         <div className="flex items-baseline gap-1.5">
                             <span className="text-2xs uppercase font-space tracking-widest opacity-60 hidden min-[400px]:block">Target</span>
@@ -252,7 +255,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                             <div className={`flex flex-col gap-1.5 min-w-[140px] flex-1 max-w-[180px] px-4 py-3 rounded-2xl backdrop-blur-xl bg-white/[0.06] border shadow-[0_4px_16px_rgba(0,0,0,0.3)] transition-all hover:bg-white/[0.09] hover:shadow-[0_6px_20px_rgba(0,0,0,0.4)] ${currentROI.percentage >= 0 ? 'border-white/[0.10]' : 'border-white/[0.10]'}`}>
                                 <div className="flex items-center gap-2">
                                     <div className={`flex items-center justify-center w-6 h-6 rounded-full bg-black/50 ${currentROI.percentage >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d={currentROI.percentage >= 0 ? "m5 12 7-7 7 7" : "m19 12-7 7-7-7"}/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.48 12H2"/></svg>
                                     </div>
                                     <span className="text-[11px] text-[#F5F5DC]/50 uppercase tracking-widest font-space leading-none pt-0.5">ROI</span>
                                 </div>
@@ -270,7 +273,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                             <div className={`flex flex-col gap-1.5 min-w-[140px] flex-1 max-w-[180px] px-4 py-3 rounded-2xl backdrop-blur-xl bg-white/[0.06] border shadow-[0_4px_16px_rgba(0,0,0,0.3)] transition-all hover:bg-white/[0.09] hover:shadow-[0_6px_20px_rgba(0,0,0,0.4)] ${(diffPrevMonth?.amount || 0) >= 0 ? 'border-white/[0.10]' : 'border-white/[0.10]'}`}>
                                 <div className="flex items-center gap-2">
                                     <div className={`flex items-center justify-center w-6 h-6 rounded-full bg-black/50 ${(diffPrevMonth?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                                     </div>
                                     <span className="text-[11px] text-[#F5F5DC]/50 uppercase tracking-widest font-space leading-none pt-0.5">MoM</span>
                                 </div>
@@ -288,7 +291,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                             <div className={`flex flex-col gap-1.5 min-w-[140px] flex-1 max-w-[180px] px-4 py-3 rounded-2xl backdrop-blur-xl bg-white/[0.06] border shadow-[0_4px_16px_rgba(0,0,0,0.3)] transition-all hover:bg-white/[0.09] hover:shadow-[0_6px_20px_rgba(0,0,0,0.4)] ${(diffTarget?.amount || 0) >= 0 ? 'border-white/[0.10]' : 'border-white/[0.10]'}`}>
                                 <div className="flex items-center gap-2">
                                     <div className={`flex items-center justify-center w-6 h-6 rounded-full bg-black/50 ${(diffTarget?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 13V2l8 4-8 4"/><path d="M20.55 10.23A9 9 0 1 1 8 4.94"/><path d="M8 10a5 5 0 1 0 8.9 2.02"/></svg>
                                     </div>
                                     <span className="text-[11px] text-[#F5F5DC]/50 uppercase tracking-widest font-space leading-none pt-0.5">Vs Target</span>
                                 </div>
@@ -307,7 +310,7 @@ export default function DashboardHero(props: DashboardHeroProps) {
                                 <div className={`flex flex-col gap-1.5 min-w-[140px] flex-1 max-w-[180px] px-4 py-3 rounded-2xl backdrop-blur-xl bg-white/[0.06] border shadow-[0_4px_16px_rgba(0,0,0,0.3)] transition-all hover:bg-white/[0.09] hover:shadow-[0_6px_20px_rgba(0,0,0,0.4)] border-white/[0.10]`}>
                                     <div className="flex items-center gap-2">
                                         <div className={`flex items-center justify-center w-6 h-6 rounded-full bg-black/50 ${(fxEffectBRL?.amount || 0) >= 0 ? 'text-vu-green' : 'text-red-400'}`}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7.7 7.7 0 0 0-5.2-2M19 18a7.7 7.7 0 0 1-5.2 2"/></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
                                         </div>
                                         <span className="text-[11px] text-[#F5F5DC]/50 uppercase tracking-widest font-space leading-none pt-0.5">FX Impact</span>
                                     </div>
@@ -460,3 +463,4 @@ export default function DashboardHero(props: DashboardHeroProps) {
         </>
     );
 }
+
