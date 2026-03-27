@@ -6,6 +6,12 @@ import type { User } from "@/types";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     trustHost: true,
+    debug: true,
+    logger: {
+        error(code, ...message) { console.error(`[AUTH ERROR] ${code}:`, ...message); },
+        warn(code) { console.warn(`[AUTH WARN] ${code}`); },
+        debug(code, ...message) { console.log(`[AUTH DEBUG] ${code}:`, ...message); },
+    },
     providers: [
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID,
