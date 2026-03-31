@@ -317,6 +317,7 @@ export default function useEquity({ transactions = [], marketData = {}, rates, o
             currency: effectiveSellCurrency, ticker: sellData.asset === 'Cash' ? 'CASH' : sellData.ticker,
             investment: -(price * qty), quantity: -qty,
             costPerShare: price, pnl: sellData.pnl, roiPercent: sellData.roi,
+            type: 'Sell',
         };
         try {
             const res = await fetch('/api/equity-transactions', {
