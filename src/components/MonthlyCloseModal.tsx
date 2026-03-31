@@ -60,8 +60,11 @@ export default function MonthlyCloseModal({
         const re = getRealEstateSummary(rawRealEstate || {}, marketData, rates, endDate as any, assetClasses);
         const db = getDebtSummary(rawDebt, rates, endDate as any, assetClasses);
 
-        const totalPrimary = toPrimary(fi.total.gbp + eq.total.gbp + cr.total.gbp + pn.total.gbp + re.total.gbp - db.total.gbp, 'GBP');
-        const totalSecondary = toSecondary(fi.total.gbp + eq.total.gbp + cr.total.gbp + pn.total.gbp + re.total.gbp - db.total.gbp, 'GBP');
+        // Sum BRL values directly (same as dashboard) to avoid precision loss from GBP roundtrip
+        const totalBRL = fi.total.brl + eq.total.brl + cr.total.brl + pn.total.brl + re.total.brl - db.total.brl;
+        const totalGBP = fi.total.gbp + eq.total.gbp + cr.total.gbp + pn.total.gbp + re.total.gbp - db.total.gbp;
+        const totalPrimary = toPrimary(totalBRL, 'BRL');
+        const totalSecondary = toSecondary(totalGBP, 'GBP');
 
         // Income/Investments for this specific month
         const allLive = normalizeTransactions({
@@ -142,6 +145,41 @@ export default function MonthlyCloseModal({
                 'pensions': pn.individualHoldings || pn.assets.filter((a: any) => !a.isTotal).map((a: any) => ({ name: a.name, brl: a.brl, gbp: a.gbp })),
                 'debt': db.individualHoldings || db.assets.filter((a: any) => !a.isTotal).map((a: any) => ({ name: a.name, brl: a.brl, gbp: a.gbp }))
             },
+            // Per-asset MoM diffs keyed by category slug
+            assetMoMDiffs: (() => {
+                const catKeyMap: Record<string, string> = {
+                    'fixed-income': 'fixed-income', 'equity': 'equity',
+                    'real-estate': 'real-estate', 'crypto': 'crypto',
+                    'pensions': 'pensions', 'debt': 'debt'
+                };
+                const result: Record<string, { name: string; diff: number }[]> = {};
+                for (const catSlug of Object.keys(catKeyMap)) {
+                    const prevAssets: any[] = prevSnapshot?.assetDetails?.[catSlug] || [];
+                    const currentMap: Record<string, any> = {};
+                    const currentAssets = [
+                        ...(catSlug === 'fixed-income' ? (fi.individualHoldings || fi.assets.filter((a: any) => !a.isTotal)) : []),
+                        ...(catSlug === 'equity' ? (eq.individualHoldings || eq.assets.filter((a: any) => !a.isTotal)) : []),
+                        ...(catSlug === 'real-estate' ? (re.individualHoldings || re.assets.filter((a: any) => !a.isTotal)) : []),
+                        ...(catSlug === 'crypto' ? (cr.individualHoldings || cr.assets.filter((a: any) => !a.isTotal)) : []),
+                        ...(catSlug === 'pensions' ? (pn.individualHoldings || pn.assets.filter((a: any) => !a.isTotal)) : []),
+                        ...(catSlug === 'debt' ? (db.individualHoldings || db.assets.filter((a: any) => !a.isTotal)) : []),
+                    ];
+                    currentAssets.forEach((a: any) => { currentMap[a.name] = a; });
+                    const diffs: { name: string; diff: number }[] = [];
+                    currentAssets.forEach((a: any) => {
+                        const prev = prevAssets.find((p: any) => p.name === a.name);
+                        diffs.push({ name: a.name, diff: (a.brl || 0) - (prev?.brl || 0) });
+                    });
+                    // Also include assets that were in prev but no longer current (sold)
+                    prevAssets.forEach((p: any) => {
+                        if (!currentMap[p.name]) {
+                            diffs.push({ name: p.name, diff: -(p.brl || 0) });
+                        }
+                    });
+                    result[catSlug] = diffs;
+                }
+                return result;
+            })(),
             income: monthIncome,
             investment: monthInvest
         };
@@ -294,20 +332,24 @@ export default function MonthlyCloseModal({
                                     </div>
 
                                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '12px' }}>
-                                        <div className="text-[0.65rem] uppercase mb-2" style={{ color: 'var(--fg-secondary)', opacity: 0.6 }}>Top Contributors</div>
+                                        <div className="text-[0.65rem] uppercase mb-2" style={{ color: 'var(--fg-secondary)', opacity: 0.6 }}>Top Movers (MoM)</div>
                                         <div className="flex flex-col gap-2">
-                                            {((snapshotData.assetDetails as any)?.[cat.id.toLowerCase().replace('fixedincome', 'fixed-income').replace('realestate', 'real-estate')] || [])
-                                                .sort((a: any, b: any) => b.gbp - a.gbp)
-                                                .slice(0, 3)
-                                                .map((asset: any, idx: number) => (
+                                            {(() => {
+                                                const catSlug = cat.id.toLowerCase().replace('fixedincome', 'fixed-income').replace('realestate', 'real-estate');
+                                                const diffs = (snapshotData as any).assetMoMDiffs?.[catSlug] || [];
+                                                const sorted = [...diffs].sort((a: any, b: any) => Math.abs(b.diff) - Math.abs(a.diff)).slice(0, 3);
+                                                if (sorted.length === 0) return (
+                                                    <div className="text-xs opacity-50" style={{ color: 'var(--fg-secondary)', fontStyle: 'italic' }}>No assets found</div>
+                                                );
+                                                return sorted.map((asset: any, idx: number) => (
                                                     <div key={idx} className="flex justify-between" style={{ fontSize: '0.8rem' }}>
                                                         <span className="whitespace-nowrap overflow-hidden" style={{ color: 'var(--fg-primary)', opacity: 0.8, textOverflow: 'ellipsis', maxWidth: '140px' }}>{asset.name}</span>
-                                                        <span className="text-xs" style={{ color: 'var(--fg-secondary)', fontFamily: 'var(--font-space tabular-nums)' }}>{primaryMeta?.symbol}{asset.brl?.toLocaleString(primaryMeta?.locale, { maximumFractionDigits: 0 })}</span>
+                                                        <span className="text-xs" style={{ color: asset.diff >= 0 ? 'var(--vu-green)' : 'var(--error)', fontFamily: 'var(--font-space tabular-nums)' }}>
+                                                            {asset.diff >= 0 ? '+' : '-'}{primaryMeta?.symbol}{Math.abs(asset.diff).toLocaleString(primaryMeta?.locale, { maximumFractionDigits: 0 })}
+                                                        </span>
                                                     </div>
-                                                ))}
-                                            {((snapshotData.assetDetails as any)?.[cat.id.toLowerCase().replace('fixedincome', 'fixed-income')]?.length === 0) && (
-                                                <div className="text-xs opacity-50" style={{ color: 'var(--fg-secondary)', fontStyle: 'italic' }}>No assets found</div>
-                                            )}
+                                                ));
+                                            })()}
                                         </div>
                                     </div>
                                 </div>

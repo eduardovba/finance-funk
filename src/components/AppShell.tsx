@@ -204,9 +204,39 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
                     <MonthlyCloseModal
                         isOpen={isMonthlyCloseModalOpen}
                         onClose={() => setIsMonthlyCloseModalOpen(false)}
-                        onRecord={(snapshot: any) => {
-                            handleRecordSnapshot(snapshot);
+                        onRecord={async (snapshot: any) => {
+                            // Use silent mode to prevent handleRecordSnapshot from showing
+                            // its own StatusModal (which would stack behind this z-1000 modal)
+                            await handleRecordSnapshot(snapshot, { silent: true });
+
+                            // Close the review modal FIRST so the success message appears cleanly
                             setIsMonthlyCloseModalOpen(false);
+
+                            // Show success message after the review modal is gone
+                            setStatusModal({
+                                isOpen: true,
+                                title: 'Success!',
+                                message: `Snapshot for ${snapshot.month} recorded successfully!`,
+                                type: 'success'
+                            });
+
+                            // Also mark the RECORD_SNAPSHOT task as completed in the monthly close checklist
+                            try {
+                                const res = await fetch('/api/monthly-close?suggestions=false');
+                                if (res.ok) {
+                                    const { tasks } = await res.json();
+                                    const snapshotTask = tasks?.find((t: any) => t.task_type === 'RECORD_SNAPSHOT');
+                                    if (snapshotTask && !snapshotTask.is_completed) {
+                                        await fetch('/api/monthly-close', {
+                                            method: 'PATCH',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ taskId: snapshotTask.id, is_completed: true }),
+                                        });
+                                    }
+                                }
+                            } catch (e) {
+                                console.error('Failed to mark snapshot task as completed:', e);
+                            }
                         }}
                         rawTransactions={transactions}
                         rawFixedIncome={fixedIncomeTransactions}

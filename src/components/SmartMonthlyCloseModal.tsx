@@ -905,9 +905,8 @@ function SuggestionRow({
 // ─── Main Modal ──────────────────────────────────────────────────────────
 
 export default function SmartMonthlyCloseModal({ isOpen, onClose }: SmartMonthlyCloseModalProps) {
-    const { handleRecordSnapshot, refreshAllData } = usePortfolio();
+    const { setIsMonthlyCloseModalOpen, refreshAllData } = usePortfolio();
     const [data, setData] = useState<TasksResponse | null>(null);
-    const [isRecording, setIsRecording] = useState(false);
     const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(new Set());
 
     const sensors = useSensors(
@@ -975,31 +974,10 @@ export default function SmartMonthlyCloseModal({ isOpen, onClose }: SmartMonthly
         }
     }, [isOpen, fetchTasks]);
 
-    const handleRecordSnapshotClick = async () => {
-        setIsRecording(true);
-        try {
-            // Pass silent: true to prevent the StatusModal from appearing behind this modal
-            await handleRecordSnapshot(null, { silent: true });
-
-            const snapshotTask = data?.tasks.find((t) => t.task_type === 'RECORD_SNAPSHOT');
-            if (snapshotTask) {
-                await fetch('/api/monthly-close', {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ taskId: snapshotTask.id, is_completed: true }),
-                });
-            }
-
-            await refreshAllData();
-            await fetchTasks();
-
-            // Auto-close the modal after successful recording
-            onClose();
-        } catch (e) {
-            console.error('Snapshot failed:', e);
-        } finally {
-            setIsRecording(false);
-        }
+    const handleRecordSnapshotClick = () => {
+        // Close this checklist modal and open the full Monthly Close Review
+        onClose();
+        setIsMonthlyCloseModalOpen(true);
     };
 
     const handleDeleteTask = async (task: EnrichedTask) => {
@@ -1191,17 +1169,15 @@ export default function SmartMonthlyCloseModal({ isOpen, onClose }: SmartMonthly
                                     <button
                                         type="button"
                                         onClick={handleRecordSnapshotClick}
-                                        disabled={isRecording}
                                         className="shrink-0 text-xs px-3 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80"
                                         style={{
                                             background: 'linear-gradient(135deg, #CC5500, #D4AF37)',
                                             color: '#0B061A',
                                             fontFamily: 'var(--font-space)',
                                             fontWeight: 600,
-                                            opacity: isRecording ? 0.5 : 1,
                                         }}
                                     >
-                                        {isRecording ? 'Recording…' : 'Record'}
+                                        Review & Record
                                     </button>
                                 )}
                             </div>
@@ -1221,7 +1197,6 @@ export default function SmartMonthlyCloseModal({ isOpen, onClose }: SmartMonthly
                         <Button
                             variant="primary"
                             onClick={handleRecordSnapshotClick}
-                            disabled={isRecording}
                             className="flex-1 text-sm"
                             style={{
                                 background: allDone
@@ -1229,10 +1204,9 @@ export default function SmartMonthlyCloseModal({ isOpen, onClose }: SmartMonthly
                                     : 'linear-gradient(135deg, #CC5500, #D4AF37)',
                                 fontWeight: 700,
                                 padding: '12px 24px',
-                                opacity: isRecording ? 0.5 : 1,
                             }}
                         >
-                            {isRecording ? 'Recording…' : allDone ? 'Record Snapshot ✓' : 'Record Snapshot Anyway'}
+                            {allDone ? 'Review & Record ✓' : 'Review & Record'}
                         </Button>
                         <Button
                             variant="secondary"
