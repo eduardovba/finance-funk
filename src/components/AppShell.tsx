@@ -198,7 +198,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
                         title={statusModal.title}
                         message={statusModal.message}
                         type={statusModal.type as any}
-                        onClose={() => setStatusModal((prev: any) => ({ ...prev, isOpen: false }))}
+                        onClose={() => setStatusModal({ isOpen: false, title: '', message: '', type: 'success' })}
                     />
 
                     <MonthlyCloseModal

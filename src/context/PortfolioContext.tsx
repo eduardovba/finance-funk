@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useCallback, useRef } from "react";
 
 /* ─── Diff helper type ─── */
 interface DiffPair {
@@ -831,6 +831,9 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
         }
     }, [transactionToDelete, deleteTransactionMutation, fetchMarketData]);
 
+    // Ref to prevent auto-close from re-opening after a successful recording
+    const recentlyRecordedRef = useRef(false);
+
     const handleRecordSnapshot = useCallback(async (explicitSnapshot: any = null, options: { silent?: boolean } = { silent: false }) => {
         try {
             const currentMonth = new Date().toISOString().slice(0, 7);
@@ -933,6 +936,10 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
 
                 refreshAllData();
 
+                // Prevent auto-close effect from re-opening modal during refresh
+                recentlyRecordedRef.current = true;
+                setTimeout(() => { recentlyRecordedRef.current = false; }, 10000);
+
                 if (!options.silent) {
                     setStatusModal({
                         isOpen: true,
@@ -965,6 +972,8 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
     // ═══════════ AUTO MONTHLY CLOSE TRIGGER ═══════════
     useEffect(() => {
         if (!appSettings.autoMonthlyCloseEnabled || isInitialLoading) return;
+        // Don't re-open the modal if we just recorded a snapshot
+        if (recentlyRecordedRef.current) return;
 
         const today = new Date();
         const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
