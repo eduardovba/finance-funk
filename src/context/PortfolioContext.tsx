@@ -835,6 +835,36 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
         try {
             const currentMonth = new Date().toISOString().slice(0, 7);
 
+            // Compute income & investment data from live transactions for auto-built snapshots
+            let computedIncome: any = undefined;
+            let computedInvestment: any = undefined;
+            if (!explicitSnapshot) {
+                try {
+                    const allLive = normalizeTransactions({
+                        equity: equityTransactions,
+                        crypto: cryptoTransactions,
+                        pensions: pensionTransactions,
+                        debt: debtTransactions,
+                        fixedIncome: fixedIncomeTransactions,
+                        realEstate: realEstate
+                    } as any, rates as any, fxHistory as any);
+
+                    const filteredHistoricalIncome = (ledgerData?.income || []).filter((h: any) => h.month !== currentMonth);
+                    const filteredHistoricalInvestments = (ledgerData?.investments || []).filter((h: any) => h.month !== currentMonth);
+
+                    const combinedIncome = calculateMonthlyIncome(allLive, realEstate, filteredHistoricalIncome, fixedIncomeTransactions);
+                    const monthlyInv = calculateMonthlyInvestments(allLive, filteredHistoricalInvestments);
+
+                    const monthIncome = combinedIncome.find((d: any) => d.month === currentMonth);
+                    const monthInvest = monthlyInv.find((d: any) => d.month === currentMonth);
+
+                    if (monthIncome) computedIncome = monthIncome;
+                    if (monthInvest) computedInvestment = monthInvest;
+                } catch (e) {
+                    console.error('Failed to compute income/investment for snapshot:', e);
+                }
+            }
+
             const snapshot = explicitSnapshot ? {
                 ...explicitSnapshot,
                 // Ensure required fields for backend validation are present
@@ -855,6 +885,8 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
                     Pensions: totalPensionBRL,
                     Debt: totalDebtBRL
                 },
+                income: computedIncome,
+                investment: computedInvestment,
                 recordedAt: new Date().toISOString()
             };
 
@@ -926,7 +958,7 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
                 type: 'error'
             });
         }
-    }, [totalNetWorthBRL, totalPensionBRL, totalFixedIncomeBRL, totalEquityBRL, totalRealEstateBRL, totalCryptoBRL, totalDebtBRL, rates, refreshAllData]);
+    }, [totalNetWorthBRL, totalPensionBRL, totalFixedIncomeBRL, totalEquityBRL, totalRealEstateBRL, totalCryptoBRL, totalDebtBRL, rates, refreshAllData, equityTransactions, cryptoTransactions, pensionTransactions, debtTransactions, fixedIncomeTransactions, realEstate, fxHistory, ledgerData]);
 
 
 

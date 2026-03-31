@@ -978,7 +978,8 @@ export default function SmartMonthlyCloseModal({ isOpen, onClose }: SmartMonthly
     const handleRecordSnapshotClick = async () => {
         setIsRecording(true);
         try {
-            await handleRecordSnapshot();
+            // Pass silent: true to prevent the StatusModal from appearing behind this modal
+            await handleRecordSnapshot(null, { silent: true });
 
             const snapshotTask = data?.tasks.find((t) => t.task_type === 'RECORD_SNAPSHOT');
             if (snapshotTask) {
@@ -991,6 +992,9 @@ export default function SmartMonthlyCloseModal({ isOpen, onClose }: SmartMonthly
 
             await refreshAllData();
             await fetchTasks();
+
+            // Auto-close the modal after successful recording
+            onClose();
         } catch (e) {
             console.error('Snapshot failed:', e);
         } finally {
