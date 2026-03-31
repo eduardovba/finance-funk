@@ -45,8 +45,12 @@ export default function MonthlyCloseModal({
     );
 
 
-    // Get the last day of the selected month
+    // Get the last day of the selected month, or null for the current month
+    // (null matches the dashboard's computation — no date filtering)
     const endDate = useMemo(() => {
+        const now = new Date();
+        const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        if (selectedMonth === currentMonth) return null;
         const [year, month] = selectedMonth.split('-').map(Number);
         const d = new Date(year, month, 0); // Last day of month
         return d.toISOString().split('T')[0];
