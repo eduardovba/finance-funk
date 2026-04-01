@@ -157,11 +157,12 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
                 {/* ═══════════ MAIN STAGE ═══════════ */}
                 <div className="flex flex-1 overflow-hidden">
                     <main id="main-scroll" role="main" tabIndex={-1} className="flex-1 overflow-y-auto p-3 md:p-6 lg:p-8 pb-24 md:pb-8 w-full outline-none">
-                    <AnimatePresence initial={false}>
+                    <AnimatePresence mode="wait" initial={false}>
                         <motion.div
                             key={pathname}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
                             transition={{ duration: 0.15, ease: 'easeOut' }}
                         >
                             {children}
