@@ -33,7 +33,11 @@ export default function DashboardTab(props: DashboardTabProps) {
     } = props;
 
     const h = useDashboard(props);
-    const { singleCurrencyMode } = usePortfolio() as any;
+    const { singleCurrencyMode, loadingRates } = usePortfolio() as any;
+
+    // Don't show numbers until both portfolio data AND FX rates are ready.
+    // This prevents the "recalibration" jump when fallback rates get replaced by live ones.
+    const effectiveLoading = isLoading || loadingRates;
     const personalization = getPersonalization(h.ftueState || { onboardingGoal: null, onboardingExperience: 'beginner' });
     const budgetTransactions = useBudgetStore((s: any) => s.transactions);
     const [isSmartCloseOpen, setIsSmartCloseOpen] = useState(false);
@@ -44,7 +48,7 @@ export default function DashboardTab(props: DashboardTabProps) {
     const hasAnyData = hasPortfolioData || hasBudgetData;
 
     // Show unified empty state for new users with no data (not demo mode)
-    if (!hasAnyData && !isLoading && !h.ftueState?.usingDemoData) {
+    if (!hasAnyData && !effectiveLoading && !h.ftueState?.usingDemoData) {
         return (
             <div className="pb-10">
                 <FirstGrooveFlow />
@@ -76,7 +80,7 @@ export default function DashboardTab(props: DashboardTabProps) {
             <DashboardHero
                 data={data}
                 historicalSnapshots={historicalSnapshots}
-                isLoading={isLoading}
+                isLoading={effectiveLoading}
                 primaryMeta={h.primaryMeta}
                 secondaryMeta={h.secondaryMeta}
                 primaryCurrency={h.primaryCurrency}
@@ -124,7 +128,7 @@ export default function DashboardTab(props: DashboardTabProps) {
                             diffAmount={h.toPrimary(assetDiffs?.[metric.id]?.amount || 0, 'BRL')}
                             contributors={contributors}
                             invertColor={metric.id === 'debt'}
-                            isLoading={isLoading}
+                            isLoading={effectiveLoading}
                             onNavigate={onNavigate}
                             compact={true}
                             className="flex-1 rounded-xl bg-[#121418]/60 backdrop-blur-xl border-white/[0.06] shadow-[0_4px_16px_rgba(0,0,0,0.3)] transition-all duration-300"
@@ -195,7 +199,7 @@ export default function DashboardTab(props: DashboardTabProps) {
                             diffAmount={h.toPrimary(assetDiffs?.[metric.id]?.amount || 0, 'BRL')}
                             contributors={contributors}
                             invertColor={metric.id === 'debt'}
-                            isLoading={isLoading}
+                            isLoading={effectiveLoading}
                             onNavigate={onNavigate}
                         />
                     );

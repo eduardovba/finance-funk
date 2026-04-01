@@ -36,6 +36,23 @@ export interface CurrencyActions {
 
 // ═══════════ STORE ═══════════
 
+// ═══════════ CACHED RATE BOOTSTRAP ═══════════
+// On first import, try to restore last-known live rates from localStorage.
+// If found → numbers render instantly with near-accurate rates; loadingRates = false.
+// If not found (first-ever visit) → keep static fallback but loadingRates stays true
+// so the dashboard shows skeleton placeholders until the real rate arrives.
+const _cachedRates: Record<string, number> | null = (() => {
+    if (typeof window === 'undefined') return null;
+    try {
+        const raw = localStorage.getItem('ff_cachedFxRates');
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === 'object' && parsed.BRL) return parsed;
+        }
+    } catch { /* corrupt or unavailable — fall through */ }
+    return null;
+})();
+
 const useCurrencyStore = create<CurrencyState & CurrencyActions>((set, get) => ({
     // ═══════════ STATE ═══════════
     primaryCurrency: 'BRL',
@@ -43,8 +60,8 @@ const useCurrencyStore = create<CurrencyState & CurrencyActions>((set, get) => (
     singleCurrencyMode: false,
     rateFlipped: false,
     displayCurrencyOverrides: {},   // per-category map, e.g. { equity: 'USD' }
-    rates: { GBP: 1, BRL: 7.10, USD: 1.28 },
-    loadingRates: true,
+    rates: _cachedRates || { GBP: 1, BRL: 7.10, USD: 1.28 },
+    loadingRates: !_cachedRates,    // false if we restored cached rates, true otherwise (skeleton mode)
     fxHistory: {},
     currencyLoaded: false,
 
@@ -57,9 +74,19 @@ const useCurrencyStore = create<CurrencyState & CurrencyActions>((set, get) => (
         set((s) => ({ displayCurrencyOverrides: { ...s.displayCurrencyOverrides, [category]: value } })),
     setRates: (r) => {
         if (typeof r === 'function') {
-            set((s) => ({ rates: r(s.rates) }));
+            set((s) => {
+                const newRates = r(s.rates);
+                // Persist to localStorage so next page load starts with accurate rates
+                if (typeof window !== 'undefined') {
+                    try { localStorage.setItem('ff_cachedFxRates', JSON.stringify(newRates)); } catch { /* quota */ }
+                }
+                return { rates: newRates };
+            });
         } else {
             set({ rates: r });
+            if (typeof window !== 'undefined') {
+                try { localStorage.setItem('ff_cachedFxRates', JSON.stringify(r)); } catch { /* quota */ }
+            }
         }
     },
     setLoadingRates: (v) => set({ loadingRates: v }),
