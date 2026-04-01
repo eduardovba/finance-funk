@@ -15,17 +15,26 @@ function formatMonthLabel(month: string): string {
 }
 
 /**
- * Returns true if today is within 2 days before the end of the month
- * (i.e. the last 2 days of the month, or the first 5 of next month
- * for closing the previous month).
+ * Returns true if we should show the close widget for the given target month.
+ * - Past month target: always show (it's overdue / needs closing)
+ * - Current month target: only show in the last 2 days of the month
+ * - Future month: never show
  */
-function isWithinCloseWindow(): boolean {
+function shouldShowWidget(targetMonth: string): boolean {
     const now = new Date();
+    const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     const day = now.getDate();
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
 
-    // Last 2 days of the month OR first 5 days of next month
-    return day >= lastDay - 1 || day <= 5;
+    if (targetMonth < currentMonthStr) {
+        // Past month — always urgent, show the widget
+        return true;
+    } else if (targetMonth === currentMonthStr) {
+        // Current month — only show in the last 2 days
+        return day >= lastDay - 1;
+    }
+    // Future month — don't show
+    return false;
 }
 
 export default function MonthlyCloseWidget({
@@ -52,11 +61,11 @@ export default function MonthlyCloseWidget({
         fetchData();
     }, [fetchData]);
 
-    // Don't show if: not in close window, dismissed, no data, all complete, or no tasks
-    if (!isWithinCloseWindow()) return null;
+    // Don't show if: dismissed, no data, all complete, no tasks, or not in close window for the target month
     if (isDismissed) return null;
     if (!data || data.total === 0) return null;
     if (data.completed >= data.total) return null;
+    if (!shouldShowWidget(data.month)) return null;
 
     const progressPct = data.total > 0 ? (data.completed / data.total) * 100 : 0;
 

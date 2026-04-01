@@ -474,7 +474,7 @@ export default function usePensions({ transactions = [], rates, onRefresh, marke
             if (qty <= 0 || price <= 0) return;
         }
 
-        if (buyData.buyPath === 'manual' || (buyData.buyPath === 'search' && buyData.ticker)) {
+        if (buyData.buyPath === 'search' && buyData.ticker) {
             try {
                 await fetch('/api/pension-prices', {
                     method: 'POST',
@@ -483,14 +483,44 @@ export default function usePensions({ transactions = [], rates, onRefresh, marke
                         action: 'save-config',
                         asset: buyData.asset,
                         ticker: buyData.ticker,
-                        url: buyData.scraperUrl,
-                        buyPath: buyData.buyPath,
-                        type: buyData.scrapedType,
-                        selector: buyData.selector
+                        type: 'market-data',
+                        buyPath: 'search'
                     })
                 });
             } catch (e) {
                 console.error('Failed to save pension config:', e);
+            }
+        } else if (buyData.buyPath === 'url' && buyData.scraperUrl) {
+            try {
+                await fetch('/api/pension-prices', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'save-config',
+                        asset: buyData.asset,
+                        url: buyData.scraperUrl,
+                        type: buyData.scrapedType || 'fidelity',
+                        selector: buyData.selector,
+                        buyPath: 'url'
+                    })
+                });
+            } catch (e) {
+                console.error('Failed to save pension scraper config:', e);
+            }
+        } else if (buyData.buyPath === 'manual' && buyData.manualPrice) {
+            try {
+                await fetch('/api/pension-prices', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'save-config',
+                        asset: buyData.asset,
+                        type: 'manual',
+                        buyPath: 'manual'
+                    })
+                });
+            } catch (e) {
+                console.error('Failed to save pension manual config:', e);
             }
         }
 

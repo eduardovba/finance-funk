@@ -72,6 +72,7 @@ export interface BuyData {
     isSalaryContribution?: boolean;
     scrapedType?: string;
     selector?: string;
+    manualPrice?: string;
 }
 
 export interface BrokerSummary {

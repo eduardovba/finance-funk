@@ -48,6 +48,7 @@ export interface BudgetActions {
         description?: string | null;
         date: string;
         is_recurring?: boolean;
+        source?: string | null;
     }) => Promise<void>;
     updateTransaction: (body: { id: number; category_id?: number | null; amount_cents?: number; currency?: string; description?: string | null; date?: string; source?: string | null }) => Promise<void>;
     deleteTransaction: (id: number) => Promise<void>;
@@ -303,7 +304,7 @@ const useBudgetStore = create<BudgetState & BudgetActions>((set, get) => ({
             description: body.description ?? null,
             date: body.date,
             is_recurring: body.is_recurring ? 1 : 0,
-            source: 'Manual',
+            source: body.source ?? 'Manual',
         };
 
         set({

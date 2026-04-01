@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import _TransactionTimeline from '../TransactionTimeline';
 import _NumberInput from '../NumberInput';
 const TransactionTimeline = _TransactionTimeline as any;
@@ -38,6 +38,7 @@ interface REPropertyDetailsProps {
     setIsDeleteModalOpen: (v: boolean) => void;
     setSelectedAsset: (v: any) => void;
     onRefresh?: () => void;
+    successToast?: string | null;
 }
 
 export default function REPropertyDetails(props: REPropertyDetailsProps) {
@@ -50,6 +51,7 @@ export default function REPropertyDetails(props: REPropertyDetailsProps) {
         handleSavePropertyValues, handleAddMortgagePayment, handleSetupMortgage,
         handleAddRentalEntry, handleAirbnbSort, handleDeleteEntry, handleEditTransaction,
         setDeleteTarget, setIsDeleteModalOpen, setSelectedAsset, onRefresh,
+        successToast,
     } = props;
 
     const d = asset.displayData || getPropertyDisplayData(asset);
@@ -214,6 +216,24 @@ export default function REPropertyDetails(props: REPropertyDetailsProps) {
         const mortgagePayments = m.ledger.filter((l: any) => l.source === 'Mortgage');
         return (
             <>
+                {successToast && (
+                    <div
+                        style={{
+                            animation: 'toast-slide-in 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+                            marginBottom: '12px',
+                        }}
+                        className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-emerald-500/15 border border-emerald-500/25 backdrop-blur-md"
+                    >
+                        <span className="text-emerald-400 text-base leading-none">✓</span>
+                        <span className="text-sm font-medium text-emerald-300/90 flex-1">{successToast}</span>
+                    </div>
+                )}
+                <style>{`
+                    @keyframes toast-slide-in {
+                        from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+                        to   { opacity: 1; transform: translateY(0)    scale(1);    }
+                    }
+                `}</style>
                 <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
                         <span className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Original Amount</span>

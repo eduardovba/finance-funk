@@ -2,9 +2,11 @@
 
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send } from 'lucide-react';
+import { X, Send, ChevronDown } from 'lucide-react';
 import { z } from 'zod';
 import { parseToCents, todayISO } from '@/lib/budgetUtils';
+import { SUPPORTED_CURRENCIES } from '@/lib/currency';
+import useBudgetStore from '@/stores/useBudgetStore';
 import CategoryPicker from '@/components/budget/CategoryPicker';
 import type { BudgetCategory } from '@/types';
 
@@ -17,6 +19,19 @@ const QuickAddSchema = z.object({
     date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD'),
 });
 
+// ═══════════ Provider options ═══════════
+
+const PROVIDERS = [
+    { value: 'Manual', label: 'Manual', icon: '✏️' },
+    { value: 'AMEX', label: 'Amex', icon: '💳' },
+    { value: 'HSBC', label: 'HSBC', icon: '🏦' },
+    { value: 'BARCLAYS', label: 'Barclays', icon: '🏦' },
+    { value: 'LLOYDS', label: 'Lloyds', icon: '🏦' },
+    { value: 'MONZO', label: 'Monzo', icon: '📱' },
+    { value: 'SANTANDER', label: 'Santander', icon: '🏦' },
+    { value: 'NUBANK', label: 'Nubank', icon: '💜' },
+];
+
 interface QuickAddSheetProps {
     isOpen: boolean;
     onClose: () => void;
@@ -26,14 +41,18 @@ interface QuickAddSheetProps {
         amount_cents: number;
         description: string | null;
         date: string;
+        source?: string | null;
     }) => Promise<void>;
 }
 
 export default function QuickAddSheet({ isOpen, onClose, categories, onSubmit }: QuickAddSheetProps) {
+    const { displayCurrency } = useBudgetStore();
+    const currencyMeta = SUPPORTED_CURRENCIES[displayCurrency] ?? SUPPORTED_CURRENCIES.BRL;
     const [amountStr, setAmountStr] = useState('');
     const [categoryId, setCategoryId] = useState<number | null>(null);
     const [description, setDescription] = useState('');
     const [dateStr, setDateStr] = useState(todayISO());
+    const [source, setSource] = useState('Manual');
     const [errors, setErrors] = useState<string[]>([]);
     const [submitting, setSubmitting] = useState(false);
 
@@ -42,6 +61,7 @@ export default function QuickAddSheet({ isOpen, onClose, categories, onSubmit }:
         setCategoryId(null);
         setDescription('');
         setDateStr(todayISO());
+        setSource('Manual');
         setErrors([]);
     }, []);
 
@@ -51,6 +71,11 @@ export default function QuickAddSheet({ isOpen, onClose, categories, onSubmit }:
 
         // Parse amount using safe string-to-integer utility
         const cents = parseToCents(amountStr);
+
+        if (!amountStr.trim() || isNaN(cents) || cents <= 0) {
+            setErrors(['Please enter a valid amount (e.g. 45.50)']);
+            return;
+        }
 
         // Validate with Zod
         const result = QuickAddSchema.safeParse({
@@ -72,6 +97,7 @@ export default function QuickAddSheet({ isOpen, onClose, categories, onSubmit }:
                 amount_cents: result.data.amount_cents,
                 description: result.data.description ?? null,
                 date: result.data.date,
+                source,
             });
             resetForm();
             onClose();
@@ -131,7 +157,7 @@ export default function QuickAddSheet({ isOpen, onClose, categories, onSubmit }:
                             {/* Amount */}
                             <div>
                                 <label className="text-xs text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">
-                                    Amount (R$)
+                                    Amount ({currencyMeta.symbol})
                                 </label>
                                 <input
                                     type="text"
@@ -154,6 +180,34 @@ export default function QuickAddSheet({ isOpen, onClose, categories, onSubmit }:
                                     selectedId={categoryId}
                                     onSelect={setCategoryId}
                                 />
+                            </div>
+
+                            {/* Provider */}
+                            <div>
+                                <label className="text-xs text-[#F5F5DC]/40 uppercase tracking-[2px] font-space mb-2 block">
+                                    Provider
+                                </label>
+                                <div className="flex flex-wrap gap-2">
+                                    {PROVIDERS.map(p => {
+                                        const isActive = source === p.value;
+                                        return (
+                                            <button
+                                                key={p.value}
+                                                type="button"
+                                                onClick={() => setSource(p.value)}
+                                                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-space font-medium
+                                                    tracking-wider transition-all duration-200 border ${
+                                                    isActive
+                                                        ? 'bg-[#D4AF37]/15 border-[#D4AF37]/40 text-[#D4AF37] shadow-[0_0_12px_rgba(212,175,55,0.1)]'
+                                                        : 'bg-white/[0.03] border-white/[0.06] text-[#F5F5DC]/40 hover:text-[#F5F5DC]/60 hover:border-white/[0.12]'
+                                                }`}
+                                            >
+                                                <span className="text-sm">{p.icon}</span>
+                                                <span>{p.label}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
 
                             {/* Description */}

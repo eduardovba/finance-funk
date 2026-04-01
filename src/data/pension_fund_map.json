@@ -19,9 +19,8 @@
     },
     {
         "asset": "Ishares US Bonds 20+ Years",
-        "url": "https://www.fidelity.co.uk/factsheet-data/factsheet/IE00BSKRJZ44-ishares-iv-plc/key-statistics",
-        "selector": "detail_value text-grey-800 mb-8 no-wrap",
-        "type": "fidelity",
+        "ticker": "DTLA.L",
+        "type": "yahoo",
         "allocations": {
             "Fixed Income": 1.0
         }
@@ -37,9 +36,8 @@
     },
     {
         "asset": "Ishares Physical Gold",
-        "url": "https://www.fidelity.co.uk/factsheet-data/factsheet/IE00B4ND3602-ishares-physical-metals-plc/key-statistics",
-        "selector": "detail_value text-grey-800 mb-8 no-wrap",
-        "type": "fidelity",
+        "ticker": "SGLN.L",
+        "type": "yahoo",
         "allocations": {
             "Equity": 1.0
         }
@@ -55,9 +53,8 @@
     },
     {
         "asset": "HSBC FTSE All-World Index",
-        "url": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/h/hsbc-ftse-all-world-index-class-c-accumulation",
-        "selector": "bid price-divide",
-        "type": "hl",
+        "ticker": "GB00BMJJJF91.L",
+        "type": "yahoo",
         "allocations": {
             "Equity": 1.0
         }
@@ -82,38 +79,32 @@
     },
     {
         "asset": "PLC Russell 2000",
-        "url": "https://www.fidelity.co.uk/factsheet-data/factsheet/IE00BJ38QD84-ssga-spdr-etfs-europe-ii-plc/key-statistics",
-        "selector": "detail_value text-grey-800 mb-8 no-wrap",
-        "type": "fidelity",
+        "ticker": "R2US.L",
+        "type": "yahoo",
         "allocations": {
             "Equity": 1.0
         }
     },
     {
         "asset": "Fidelity Index US Fund P-Acc",
-        "url": "https://markets.ft.com/data/funds/tearsheet/summary?s=GB00BJS8SH10:GBP",
-        "selector": "mod-ui-data-list__value",
-        "type": "ft",
-        "isPence": true,
+        "ticker": "GB00BJS8SH10.L",
+        "type": "yahoo",
         "allocations": {
             "Equity": 1.0
         }
     },
     {
         "asset": "Fidelity Index Europe ex UK Fund P-Accumulation",
-        "url": "https://markets.ft.com/data/funds/tearsheet/summary?s=gb00bhzk8b07:gbx",
-        "selector": "mod-ui-data-list__value",
-        "type": "ft",
-        "isPence": true,
+        "ticker": "GB00BHZK8B07.L",
+        "type": "yahoo",
         "allocations": {
             "Equity": 1.0
         }
     },
     {
         "asset": "Fidelity Ishares Physical Silver ETC",
-        "url": "https://www.fidelity.co.uk/factsheet-data/factsheet/IE00B4NCWG09-ishares-physical-metals-plc/key-statistics",
-        "selector": "detail_value text-grey-800 mb-8 no-wrap",
-        "type": "fidelity",
+        "ticker": "SSLN.L",
+        "type": "yahoo",
         "isPence": true,
         "allocations": {
             "Equity": 1.0
@@ -121,9 +112,8 @@
     },
     {
         "asset": "HL Ishares Physical Silver ETC",
-        "url": "https://www.fidelity.co.uk/factsheet-data/factsheet/IE00B4NCWG09-ishares-physical-metals-plc/key-statistics",
-        "selector": "detail_value text-grey-800 mb-8 no-wrap",
-        "type": "fidelity",
+        "ticker": "SSLN.L",
+        "type": "yahoo",
         "isPence": true,
         "allocations": {
             "Equity": 1.0
@@ -177,9 +167,8 @@
     },
     {
         "asset": "Global X Copper Miners",
-        "url": "https://www.fidelity.co.uk/factsheet-data/factsheet/IE0003Z9E2Y3-global-x-etfs-icav/key-statistics",
-        "type": "fidelity",
-        "selector": "detail_value text-grey-800 mb-8 no-wrap",
+        "ticker": "COPX.L",
+        "type": "yahoo",
         "allocations": {
             "Equity": 1.0
         }

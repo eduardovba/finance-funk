@@ -220,12 +220,7 @@ export default function BudgetDashboard() {
                 isOpen={sheetOpen}
                 onClose={() => setSheetOpen(false)}
                 categories={categories}
-                onSubmit={async (body: {
-                    category_id: number;
-                    amount_cents: number;
-                    description: string | null;
-                    date: string;
-                }) => {
+                onSubmit={async (body) => {
                     await addTransaction({
                         ...body,
                         currency: displayCurrency,

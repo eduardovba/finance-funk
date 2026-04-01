@@ -67,6 +67,9 @@ export default function useRealEstate({ data, rates, onRefresh, marketData = {} 
     // Activity history
     const [showActivityHistory, setShowActivityHistory] = useState(false);
 
+    // Success toast
+    const [successToast, setSuccessToast] = useState<string | null>(null);
+
     // Transaction editing
     const [editingTransaction, setEditingTransaction] = useState<any>(null);
 
@@ -285,7 +288,10 @@ export default function useRealEstate({ data, rates, onRefresh, marketData = {} 
             const principalPaid = totalPayment - interestPaid;
             await fetch('/api/real-estate', { method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ section: 'mortgages', propertyName: selectedAsset?.name, transaction: { month: mortgageFormData.month, costs: totalPayment, principal: principalPaid > 0 ? principalPaid : 0, notes: mortgageFormData.notes || 'Mortgage Payment' } }) });
-            setMortgageFormData({ month: new Date().toISOString().split('T')[0], costs: '', interest: '', notes: '' }); setRightPaneMode('default'); onRefresh();
+            setMortgageFormData({ month: new Date().toISOString().split('T')[0], costs: '', interest: '', notes: '' }); setRightPaneMode('default');
+            setSuccessToast(`Mortgage payment of ${formatCurrency(totalPayment, selectedAsset?.currency || 'GBP')} recorded`);
+            setTimeout(() => setSuccessToast(null), 3500);
+            onRefresh();
         } catch (e) { console.error(e); }
     };
 
@@ -424,6 +430,7 @@ export default function useRealEstate({ data, rates, onRefresh, marketData = {} 
     return {
         // UI State
         expandedAccordions, setExpandedAccordions,
+        successToast, setSuccessToast,
         selectedAsset, setSelectedAsset,
         rightPaneMode, setRightPaneMode,
         searchTerm, setSearchTerm,

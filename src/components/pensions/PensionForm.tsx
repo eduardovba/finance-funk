@@ -47,13 +47,13 @@ export default function PensionForm({
 
                 {buyData.asset !== 'Cash' && (
                     <div className="flex bg-white/5 rounded-2xl p-1 mb-6">
-                        {(['search', 'manual'] as const).map(p => (
+                        {(['search', 'url', 'manual'] as const).map(p => (
                             <button
                                 key={p}
                                 onClick={() => setBuyData((prev: any) => ({ ...prev, buyPath: p }))}
                                 className={`flex-1 py-1.5 text-xs font-semibold rounded-xl transition-all ${buyData.buyPath === p ? 'bg-[#D4AF37] text-[#1A0F2E] shadow-sm' : 'text-white/50 hover:text-white/80'}`}
                             >
-                                {p === 'search' ? 'Search Asset' : 'URL Scraper'}
+                                {p === 'search' ? 'Search Ticker' : p === 'url' ? 'Fund URL' : 'Manual Price'}
                             </button>
                         ))}
                     </div>
@@ -87,7 +87,7 @@ export default function PensionForm({
                                     <AssetSearch onSelect={handleAssetSelect} />
                                 )}
                             </div>
-                        ) : (
+                        ) : buyData.buyPath === 'url' ? (
                             <>
                                 <div>
                                     <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Asset Name</label>
@@ -112,7 +112,23 @@ export default function PensionForm({
                                     </div>
                                 </div>
                             </>
-                        )
+                        ) : buyData.buyPath === 'manual' ? (
+                            <>
+                                <div>
+                                    <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Asset Name</label>
+                                    <input type="text" value={buyData.asset} onChange={e => setBuyData((prev: any) => ({ ...prev, asset: e.target.value }))}
+                                        placeholder="e.g. L&G Target Date Fund"
+                                        className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all" />
+                                </div>
+                                <div>
+                                    <label className="block mb-1 text-white/50 text-xs font-medium uppercase tracking-wider">Fixed Unit Price (£)</label>
+                                    <input type="number" value={buyData.manualPrice || ''} onChange={e => setBuyData((prev: any) => ({ ...prev, manualPrice: e.target.value }))}
+                                        step="any" placeholder="e.g. 18.32"
+                                        className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/50 transition-all font-space" />
+                                    <p className="text-white/30 text-xs mt-1">For unlisted funds — set a static price per unit.</p>
+                                </div>
+                            </>
+                        ) : null
                     )}
 
                     <div className="grid grid-cols-2 gap-4">

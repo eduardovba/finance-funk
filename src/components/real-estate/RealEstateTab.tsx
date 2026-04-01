@@ -142,7 +142,8 @@ export default function RealEstateTab({ data, rates, onRefresh, marketData = {} 
                                     setDeleteTarget={h.setDeleteTarget}
                                     setIsDeleteModalOpen={h.setIsDeleteModalOpen}
                                     setSelectedAsset={h.setSelectedAsset}
-                                    onRefresh={onRefresh} />;
+                                    onRefresh={onRefresh}
+                                    successToast={h.successToast} />;
                             }}
                         />
                     </div>

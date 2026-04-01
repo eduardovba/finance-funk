@@ -435,6 +435,19 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
             setLoadingRates(false);
             setIsInitialLoading(false);
 
+            // When force-refreshing, also re-scrape pension fund prices
+            if (forceRefresh) {
+                try {
+                    const ppRes = await fetch('/api/pension-prices?refresh=true');
+                    if (ppRes.ok) {
+                        const ppData = await ppRes.json();
+                        setPensionPrices(ppData);
+                    }
+                } catch (e) {
+                    console.error('Failed to refresh pension prices:', e);
+                }
+            }
+
         } catch (error) {
             console.error('Failed to fetch market data:', error);
             setLoadingRates(false);
@@ -970,35 +983,40 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
 
 
     // ═══════════ AUTO MONTHLY CLOSE TRIGGER ═══════════
+    // Uses sessionStorage to guarantee this runs ONCE per browser session,
+    // even if the PortfolioProvider remounts during navigation.
     useEffect(() => {
         if (!appSettings.autoMonthlyCloseEnabled || isInitialLoading) return;
-        // Don't re-open the modal if we just recorded a snapshot
         if (recentlyRecordedRef.current) return;
+        // Wait until snapshots have loaded from the API
+        if (historicalSnapshots.length === 0) return;
+        // Only run once per session
+        if (sessionStorage.getItem('ff_auto_close_checked')) return;
+        sessionStorage.setItem('ff_auto_close_checked', 'true');
 
         const today = new Date();
+        const day = today.getDate();
         const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
 
-        // To ensure the user gets prompted if they miss the exact final day, we check 
-        // the last 2 days of a month and the first 5 days of the next month.
-        let targetMonthStr = null;
-
-        if (today.getDate() >= lastDayOfMonth - 1) {
-            // End of current month
-            targetMonthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-        } else if (today.getDate() <= 5) {
-            // Start of new month, check if previous month was recorded
-            const prev = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-            targetMonthStr = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}`;
-        }
-
-        if (targetMonthStr) {
-            const hasSnapshot = historicalSnapshots.some(s => s.month === targetMonthStr);
+        if (day >= lastDayOfMonth - 1) {
+            const currentMonthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+            const hasSnapshot = historicalSnapshots.some(s => s.month === currentMonthStr);
             if (!hasSnapshot) {
-                console.log(`[Auto-Close] Prompting monthly close because ${targetMonthStr} is missing...`);
+                console.log(`[Auto-Close] Prompting for ${currentMonthStr} (end of month, no snapshot)`);
                 setIsMonthlyCloseModalOpen(true);
             }
+        } else if (day <= 5) {
+            const prev = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            const prevMonthStr = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}`;
+            const hasSnapshot = historicalSnapshots.some(s => s.month === prevMonthStr);
+            if (!hasSnapshot) {
+                console.log(`[Auto-Close] Prompting for ${prevMonthStr} (start of month, prev missing)`);
+                setIsMonthlyCloseModalOpen(true);
+            } else {
+                console.log(`[Auto-Close] ${prevMonthStr} already has snapshot — no prompt needed`);
+            }
         }
-    }, [appSettings.autoMonthlyCloseEnabled, isInitialLoading, historicalSnapshots]); // Removed handleRecordSnapshot as we just open the modal
+    }, [appSettings.autoMonthlyCloseEnabled, isInitialLoading, historicalSnapshots]);
 
     // ═══════════ BACKGROUND SYNC ═══════════
     useEffect(() => {

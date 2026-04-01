@@ -25,16 +25,54 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     try {
         const user = await requireAuth();
         const { searchParams } = new URL(request.url);
-        const month = searchParams.get('month') || getTargetMonth();
+        let month = searchParams.get('month') || getTargetMonth();
         const wantSuggestions = searchParams.get('suggestions') === 'true';
 
         // Always cleanup stale/invalid tasks (fast, runs every request)
         await cleanupStaleTasks(user.id);
 
+        // If targeting previous month (first 10 days), check if it's already
+        // fully closed (all tasks done + snapshot recorded). If so, advance
+        // to the current month so users get a fresh checklist.
+        const now = new Date();
+        const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        if (!searchParams.get('month') && month !== currentMonthStr) {
+            const prevTasks = await getTasksForMonth(user.id, month);
+            const allDone = prevTasks.length > 0 && prevTasks.every(t => t.is_completed);
+            if (allDone) {
+                // Check if a snapshot exists for the previous month
+                const { get: dbGet } = await import('@/lib/db');
+                const snap = await dbGet<{ month: string }>(
+                    'SELECT month FROM snapshots WHERE month = ? AND user_id = ?',
+                    [month, user.id]
+                );
+                if (snap) {
+                    // Previous month fully closed — advance to current month
+                    month = currentMonthStr;
+                }
+            }
+        }
+
         // Only generate tasks if none exist yet (so deleted tasks stay deleted)
         const existing = await getTasksForMonth(user.id, month);
         if (existing.length === 0) {
             await generateTasksForMonth(user.id, month);
+        } else if (existing.every(t => !t.is_completed)) {
+            // Self-heal: if no tasks have been touched yet AND the count differs
+            // from the previous month, the tasks were likely generated from scratch
+            // instead of cloned. Wipe and re-clone from previous month.
+            const [y, m] = month.split('-').map(Number);
+            const pd = new Date(y, m - 2, 1);
+            const pm = `${pd.getFullYear()}-${String(pd.getMonth() + 1).padStart(2, '0')}`;
+            const prevTasks = await getTasksForMonth(user.id, pm);
+            if (prevTasks.length > 0 && prevTasks.length !== existing.length) {
+                const { run: dbRun } = await import('@/lib/db');
+                await dbRun(
+                    `DELETE FROM monthly_close_tasks WHERE user_id = ? AND month = ?`,
+                    [user.id, month]
+                );
+                await generateTasksForMonth(user.id, month);
+            }
         }
 
         const tasks = await getTasksForMonth(user.id, month);

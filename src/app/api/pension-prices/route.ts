@@ -3,6 +3,7 @@ import { kvGet, kvSet } from '@/lib/kv';
 import { z } from 'zod';
 import { validateBody, optionalString } from '@/lib/validation';
 import { applyRateLimit } from '@/lib/rateLimit';
+import pensionMapJson from '@/data/pension_fund_map.json';
 
 const MAP_KEY = 'pension_fund_map';
 const CACHE_KEY = 'pension_live_prices';
@@ -25,13 +26,21 @@ const PostSaveConfigSchema = z.object({
 
 const PostPensionPriceSchema = z.union([PostTestScrapeSchema, PostSaveConfigSchema]);
 
-// Helper to read the mapping
+// Helper to read the mapping — uses the JSON file as the canonical source,
+// then merges any KV-stored entries (user-added funds) on top.
 const getMapping = async (): Promise<any[]> => {
     try {
-        return await kvGet<any[]>(MAP_KEY, []) || [];
+        const jsonEntries = [...(pensionMapJson as any[])];
+        const kvEntries = await kvGet<any[]>(MAP_KEY, []) || [];
+        // Merge: KV entries override JSON for matching asset names,
+        // and new KV entries (user-added) are appended.
+        const byAsset = new Map<string, any>();
+        jsonEntries.forEach(e => byAsset.set(e.asset, e));
+        kvEntries.forEach(e => { if (e.asset) byAsset.set(e.asset, e); });
+        return Array.from(byAsset.values());
     } catch (error) {
         console.error('Error reading pension map:', error);
-        return [];
+        return [...(pensionMapJson as any[])];
     }
 };
 
@@ -69,7 +78,35 @@ const fetchPrices = async () => {
                 return;
             }
 
-            if (item.type === 'market-data') return;
+            // Yahoo Finance API — structured JSON, most reliable for exchange-traded funds
+            if (item.type === 'yahoo' && item.ticker) {
+                try {
+                    const yahooRes = await fetch(
+                        `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(item.ticker)}?interval=1d&range=1d`,
+                        { headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36' } }
+                    );
+                    if (yahooRes.ok) {
+                        const yahooData = await yahooRes.json();
+                        const meta = yahooData?.chart?.result?.[0]?.meta;
+                        if (meta?.regularMarketPrice) {
+                            let price = meta.regularMarketPrice;
+                            let currency = meta.currency || 'GBP';
+                            // Yahoo returns GBp/GBX (pence) — convert to GBP
+                            if (currency === 'GBp' || currency === 'GBX' || currency === 'GBx') {
+                                price = price / 100;
+                                currency = 'GBP';
+                            }
+                            results[item.asset] = { price, currency, lastUpdated: new Date().toISOString() };
+                            return;
+                        }
+                    }
+                    console.warn(`[Yahoo] No price for ${item.asset} (${item.ticker})`);
+                } catch (e) {
+                    console.error(`[Yahoo] Error fetching ${item.asset}:`, e);
+                }
+                return;
+            }
+
 
             if (!item.url) return;
 

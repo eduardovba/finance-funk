@@ -3,6 +3,10 @@ const nextConfig = {
   serverExternalPackages: ["sqlite3", "sqlite"],
   experimental: {
     optimizePackageImports: ['lucide-react', 'recharts', 'framer-motion'],
+    staleTimes: {
+      dynamic: 0,   // Never serve cached RSC payload for dynamic routes
+      static: 0,    // Same for static — always re-render with current store data
+    },
   },
   images: {
     remotePatterns: [

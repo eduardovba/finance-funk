@@ -111,6 +111,42 @@ export async function generateTasksForMonth(
     month: string
 ): Promise<void> {
 
+    // ─── Try to clone from previous month first ──────────────────────────
+    // This preserves the user's curated task list (custom tasks, sort order,
+    // deletions) instead of regenerating from scratch each month.
+    const [year, mon] = month.split('-').map(Number);
+    const prevDate = new Date(year, mon - 2, 1); // mon is 1-indexed, Date month is 0-indexed
+    const prevMonth = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}`;
+
+    const prevTasks = await query<MonthlyCloseTask>(
+        `SELECT * FROM monthly_close_tasks WHERE user_id = ? AND month = ?`,
+        [userId as InValue, prevMonth]
+    );
+
+    if (prevTasks.length > 0) {
+        // Clone each task from previous month, resetting completion status
+        for (const task of prevTasks) {
+            await run(
+                `INSERT OR IGNORE INTO monthly_close_tasks
+                    (user_id, month, task_type, related_entity_id, related_entity_name, is_recurring, custom_label, sort_order)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                [
+                    userId as InValue,
+                    month,
+                    task.task_type,
+                    task.related_entity_id,
+                    task.related_entity_name,
+                    task.is_recurring,
+                    task.custom_label,
+                    (task as any).sort_order ?? 0,
+                ]
+            );
+        }
+        return;
+    }
+
+    // ─── Fallback: generate from scratch (first-ever month) ──────────────
+
     // 1. Query active assets that need MANUAL updates only
     //    Real Estate: only physical properties (broker='Manual'), not auto-fetched funds/FIIs
     const assets = await query<AssetRow>(

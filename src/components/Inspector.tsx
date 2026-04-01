@@ -260,27 +260,36 @@ export default function Inspector() {
     // ═══════════ MONTHLY CLOSE STATUS ═══════════
     const monthlyCloseStatus = useMemo(() => {
         const now = new Date();
+        const day = now.getDate();
         const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
         const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
         const prevMonthStr = `${prevMonth.getFullYear()}-${String(prevMonth.getMonth() + 1).padStart(2, '0')}`;
 
-        const currentSnapshot = historicalSnapshots.find(s => s.month === currentMonth);
-        const prevSnapshot = historicalSnapshots.find(s => s.month === prevMonthStr);
+        // Use the month from the API response if available (it already handles
+        // advancing past a fully-closed previous month). Otherwise fall back
+        // to the same heuristic as the engine.
+        const targetMonth = taskProgress?.month
+            ?? (day <= 10 ? prevMonthStr : currentMonth);
+        const targetSnapshot = historicalSnapshots.find(s => s.month === targetMonth);
 
-        // Check if we're in the close window (last 2 days of month or first 5 of next)
+        // Close window is relative to the TARGET month:
+        // - If target is a past month (e.g. March on April 1st) → always urgent
+        // - If target is the current month → only the last 2 days of the month
         const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-        const isCloseWindow = now.getDate() >= lastDayOfMonth - 1 || now.getDate() <= 5;
+        const isCloseWindow = targetMonth < currentMonth
+            ? true
+            : day >= lastDayOfMonth - 1;
 
         return {
+            targetMonth,
             currentMonth,
             prevMonthStr,
-            hasCurrentSnapshot: !!currentSnapshot,
-            hasPrevSnapshot: !!prevSnapshot,
+            hasTargetSnapshot: !!targetSnapshot,
             isCloseWindow,
-            recordedAt: currentSnapshot?.recordedAt || prevSnapshot?.recordedAt,
+            recordedAt: targetSnapshot?.recordedAt,
             totalSnapshots: historicalSnapshots.length,
         };
-    }, [historicalSnapshots]);
+    }, [historicalSnapshots, taskProgress]);
 
     // ═══════════ STALE TICKERS ═══════════
     const staleTickers = useMemo(() => {
@@ -440,8 +449,8 @@ export default function Inspector() {
                             <div>
                                 <SectionHeader title="Monthly Close" icon={Camera} />
 
-                                {/* Task progress card */}
-                                {taskProgress && taskProgress.total > 0 && (
+                                {/* Task progress card — hide when all tasks done AND snapshot already recorded */}
+                                {taskProgress && taskProgress.total > 0 && !(taskProgress.completed >= taskProgress.total && monthlyCloseStatus.hasTargetSnapshot) && (
                                     <button
                                         type="button"
                                         onClick={() => { setIsSmartCloseOpen(true); setIsInspectorOpen(false); }}
@@ -479,8 +488,8 @@ export default function Inspector() {
                                     </button>
                                 )}
 
-                                {/* Snapshot status */}
-                                {!monthlyCloseStatus.hasCurrentSnapshot && monthlyCloseStatus.isCloseWindow ? (
+                                {/* Snapshot status — check target month (prev month if day ≤ 10) */}
+                                {!monthlyCloseStatus.hasTargetSnapshot && monthlyCloseStatus.isCloseWindow ? (
                                     <motion.div
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
@@ -490,7 +499,7 @@ export default function Inspector() {
                                             <AlertTriangle size={14} className="text-amber-400 mt-0.5 shrink-0" />
                                             <div>
                                                 <p className="text-xs text-amber-200/90 font-space font-medium m-0">
-                                                    {monthlyCloseStatus.currentMonth} snapshot not recorded
+                                                    {monthlyCloseStatus.targetMonth} snapshot not recorded
                                                 </p>
                                                 <p className="text-xs text-amber-200/50 font-space m-0 mt-0.5">
                                                     Record a snapshot to lock in this month&apos;s values
@@ -510,7 +519,7 @@ export default function Inspector() {
                                         <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
                                         <div>
                                             <p className="text-xs text-emerald-200/80 font-space font-medium m-0">
-                                                {monthlyCloseStatus.hasCurrentSnapshot ? 'Current month recorded' : 'No snapshot due yet'}
+                                                {monthlyCloseStatus.hasTargetSnapshot ? 'Month closed ✓' : 'No snapshot due yet'}
                                             </p>
                                             <p className="text-xs text-parchment/30 font-space m-0 mt-0.5">
                                                 {monthlyCloseStatus.totalSnapshots} total snapshots tracked
